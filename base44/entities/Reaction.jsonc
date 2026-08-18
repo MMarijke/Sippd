@@ -1,0 +1,46 @@
+{
+  "name": "Reaction",
+  "type": "object",
+  "properties": {
+    "activity_id": {
+      "type": "string",
+      "description": "ID of the ActivityItem"
+    },
+    "reactor_email": {
+      "type": "string",
+      "description": "Email of the reacting user"
+    },
+    "reactor_name": {
+      "type": "string",
+      "description": "Display name of reactor"
+    },
+    "emoji": {
+      "type": "string",
+      "enum": [
+        "fire",
+        "star",
+        "wow"
+      ],
+      "description": "Reaction type"
+    }
+  },
+  "required": [
+    "activity_id",
+    "reactor_email",
+    "emoji"
+  ],
+  "rls": {
+    "read": {
+      "rule": "owner"
+    },
+    "create": {
+      "rule": "authenticated"
+    },
+    "update": {
+      "rule": "owner"
+    },
+    "delete": {
+      "rule": "owner"
+    }
+  }
+}

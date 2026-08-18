@@ -1,0 +1,26 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "user"
+      ],
+      "default": "user"
+    },
+    "last_active_date": {
+      "type": "string",
+      "description": "ISO date (YYYY-MM-DD) of the last day the user opened the app"
+    },
+    "current_streak": {
+      "type": "number",
+      "default": 0,
+      "description": "Consecutive days the user has opened the app"
+    }
+  },
+  "required": [
+    "last_active_date"
+  ]
+}

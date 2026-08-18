@@ -1,0 +1,107 @@
+{
+  "name": "SharedCan",
+  "type": "object",
+  "properties": {
+    "barcode": {
+      "type": "string",
+      "description": "Barcode number of the can"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the energy drink"
+    },
+    "brand": {
+      "type": "string",
+      "description": "Brand name"
+    },
+    "flavour": {
+      "type": "string",
+      "description": "Flavour of the drink"
+    },
+    "edition": {
+      "type": "string",
+      "description": "Edition or variant name"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL to can image"
+    },
+    "rarity": {
+      "type": "string",
+      "enum": [
+        "Common",
+        "Uncommon",
+        "Rare",
+        "Ultra Rare",
+        "Legendary"
+      ],
+      "default": "Common",
+      "description": "Legacy rarity field (deprecated)"
+    },
+    "contributed_by": {
+      "type": "string",
+      "description": "Display name of the user who contributed this can"
+    },
+    "common_votes": {
+      "type": "number",
+      "default": 0,
+      "description": "Vote count for Common rarity"
+    },
+    "uncommon_votes": {
+      "type": "number",
+      "default": 0,
+      "description": "Vote count for Uncommon rarity"
+    },
+    "rare_votes": {
+      "type": "number",
+      "default": 0,
+      "description": "Vote count for Rare rarity"
+    },
+    "ultra_rare_votes": {
+      "type": "number",
+      "default": 0,
+      "description": "Vote count for Ultra Rare rarity"
+    },
+    "legendary_votes": {
+      "type": "number",
+      "default": 0,
+      "description": "Vote count for Legendary rarity"
+    },
+    "total_votes": {
+      "type": "number",
+      "default": 0,
+      "description": "Total votes cast"
+    },
+    "consensus_rarity": {
+      "type": "string",
+      "enum": [
+        "Common",
+        "Uncommon",
+        "Rare",
+        "Ultra Rare",
+        "Legendary"
+      ],
+      "default": "Common",
+      "description": "Community consensus rarity (mean-based)"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "unrated",
+        "low",
+        "confirmed"
+      ],
+      "default": "unrated",
+      "description": "Confidence level: unrated <5, low 5-14, confirmed 15+"
+    },
+    "community_favourites": {
+      "type": "number",
+      "default": 0,
+      "description": "Total number of users who have favourited this can"
+    }
+  },
+  "required": [
+    "name",
+    "brand"
+  ]
+}

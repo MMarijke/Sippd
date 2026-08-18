@@ -1,0 +1,63 @@
+{
+  "name": "TradeTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Template name, e.g. 'My Red Bull swap'"
+    },
+    "traded_away_id": {
+      "type": "string",
+      "description": "UserCollection ID of the can given away"
+    },
+    "traded_away_name": {
+      "type": "string"
+    },
+    "traded_away_brand": {
+      "type": "string"
+    },
+    "traded_away_image_url": {
+      "type": "string"
+    },
+    "traded_away_rarity": {
+      "type": "string"
+    },
+    "received_id": {
+      "type": "string",
+      "description": "UserCollection ID of the can to receive"
+    },
+    "received_name": {
+      "type": "string"
+    },
+    "received_brand": {
+      "type": "string"
+    },
+    "received_image_url": {
+      "type": "string"
+    },
+    "received_rarity": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Default notes for this template"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "rule": "owner"
+    },
+    "create": {
+      "rule": "authenticated"
+    },
+    "update": {
+      "rule": "owner"
+    },
+    "delete": {
+      "rule": "owner"
+    }
+  }
+}

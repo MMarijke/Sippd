@@ -1,0 +1,91 @@
+{
+  "name": "Trade",
+  "type": "object",
+  "properties": {
+    "traded_away_id": {
+      "type": "string",
+      "description": "UserCollection ID of the can given away"
+    },
+    "traded_away_name": {
+      "type": "string",
+      "description": "Cached name of the can given away"
+    },
+    "traded_away_brand": {
+      "type": "string",
+      "description": "Cached brand of the can given away"
+    },
+    "traded_away_image_url": {
+      "type": "string",
+      "description": "Cached image of the can given away"
+    },
+    "traded_away_rarity": {
+      "type": "string",
+      "description": "Cached rarity of the can given away"
+    },
+    "received_id": {
+      "type": "string",
+      "description": "UserCollection ID of the can received"
+    },
+    "received_name": {
+      "type": "string",
+      "description": "Cached name of the can received"
+    },
+    "received_brand": {
+      "type": "string",
+      "description": "Cached brand of the can received"
+    },
+    "received_image_url": {
+      "type": "string",
+      "description": "Cached image of the can received"
+    },
+    "received_rarity": {
+      "type": "string",
+      "description": "Cached rarity of the can received"
+    },
+    "traded_with": {
+      "type": "string",
+      "description": "Display name of the person traded with"
+    },
+    "traded_with_id": {
+      "type": "string",
+      "description": "User ID of the person traded with (if a Canvolt user)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional notes about the trade"
+    },
+    "trade_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the trade occurred"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "cancelled"
+      ],
+      "default": "pending",
+      "description": "Status of the trade"
+    }
+  },
+  "required": [
+    "traded_away_name",
+    "received_name"
+  ],
+  "rls": {
+    "read": {
+      "rule": "owner"
+    },
+    "create": {
+      "rule": "authenticated"
+    },
+    "update": {
+      "rule": "owner"
+    },
+    "delete": {
+      "rule": "owner"
+    }
+  }
+}

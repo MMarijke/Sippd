@@ -1,0 +1,25 @@
+{
+  "name": "Achievement",
+  "type": "object",
+  "properties": {
+    "achievement_key": {
+      "type": "string",
+      "description": "Unique key for the achievement"
+    },
+    "title": {
+      "type": "string",
+      "description": "Display title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the achievement"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Icon identifier"
+    }
+  },
+  "required": [
+    "achievement_key"
+  ]
+}

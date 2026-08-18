@@ -1,0 +1,83 @@
+{
+  "name": "UserCollection",
+  "type": "object",
+  "properties": {
+    "can_id": {
+      "type": "string",
+      "description": "Reference to SharedCan id"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "collected",
+        "wishlist",
+        "duplicate"
+      ],
+      "default": "collected",
+      "description": "Collection status"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Personal notes about this can"
+    },
+    "can_name": {
+      "type": "string",
+      "description": "Cached name for quick display"
+    },
+    "can_brand": {
+      "type": "string",
+      "description": "Cached brand for quick display"
+    },
+    "can_image_url": {
+      "type": "string",
+      "description": "Cached image URL"
+    },
+    "can_rarity": {
+      "type": "string",
+      "enum": [
+        "Common",
+        "Uncommon",
+        "Rare",
+        "Ultra Rare",
+        "Legendary"
+      ],
+      "description": "Cached rarity"
+    },
+    "can_flavour": {
+      "type": "string",
+      "description": "Cached flavour"
+    },
+    "can_edition": {
+      "type": "string",
+      "description": "Cached edition"
+    },
+    "can_bg_color": {
+      "type": "string",
+      "description": "Background colour hex for the can card image area",
+      "default": "#0D2B2B"
+    },
+    "is_favourite": {
+      "type": "boolean",
+      "description": "Whether this can is starred as a personal favourite",
+      "default": false
+    }
+  },
+  "required": [
+    "can_id",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "rule": "owner"
+    },
+    "create": {
+      "rule": "authenticated"
+    },
+    "update": {
+      "rule": "owner"
+    },
+    "delete": {
+      "rule": "owner"
+    }
+  }
+}

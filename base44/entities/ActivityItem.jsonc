@@ -1,0 +1,82 @@
+{
+  "name": "ActivityItem",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who performed the action"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Display name of the user"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "can_added",
+        "rarity_voted",
+        "achievement_unlocked",
+        "streak_milestone"
+      ],
+      "description": "Type of activity"
+    },
+    "can_id": {
+      "type": "string",
+      "description": "Referenced SharedCan id"
+    },
+    "can_name": {
+      "type": "string",
+      "description": "Can name for display"
+    },
+    "can_image_url": {
+      "type": "string",
+      "description": "Can image URL"
+    },
+    "can_rarity": {
+      "type": "string",
+      "description": "Rarity for this action"
+    },
+    "achievement_key": {
+      "type": "string",
+      "description": "Achievement key if type=achievement_unlocked"
+    },
+    "achievement_title": {
+      "type": "string",
+      "description": "Achievement title"
+    },
+    "achievement_icon": {
+      "type": "string",
+      "description": "Achievement icon emoji"
+    },
+    "streak_days": {
+      "type": "number",
+      "description": "Streak count if type=streak_milestone"
+    },
+    "is_private_user": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user was private at time of posting"
+    },
+    "reactions_fire": {
+      "type": "number",
+      "default": 0
+    },
+    "reactions_star": {
+      "type": "number",
+      "default": 0
+    },
+    "reactions_wow": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "user_id",
+    "user_email",
+    "type"
+  ]
+}

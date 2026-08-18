@@ -1,0 +1,54 @@
+{
+  "name": "Follow",
+  "type": "object",
+  "properties": {
+    "follower_id": {
+      "type": "string",
+      "description": "User ID of the follower"
+    },
+    "follower_email": {
+      "type": "string",
+      "description": "Email of the follower"
+    },
+    "follower_name": {
+      "type": "string",
+      "description": "Display name of the follower"
+    },
+    "following_id": {
+      "type": "string",
+      "description": "User ID being followed"
+    },
+    "following_email": {
+      "type": "string",
+      "description": "Email of the account being followed"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted"
+      ],
+      "default": "accepted",
+      "description": "pending = follow request awaiting approval, accepted = active follow"
+    }
+  },
+  "required": [
+    "follower_id",
+    "following_id",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "rule": "owner"
+    },
+    "create": {
+      "rule": "authenticated"
+    },
+    "update": {
+      "rule": "owner"
+    },
+    "delete": {
+      "rule": "owner"
+    }
+  }
+}

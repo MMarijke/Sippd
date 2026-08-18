@@ -1,0 +1,316 @@
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
+import {
+  ArrowLeft, Pencil, Trash2, Calendar, Tag,
+  FileText, Users, ShieldCheck, ShieldAlert, StickyNote, Star,
+} from 'lucide-react';
+import { useFavourite } from '@/hooks/useFavourite';
+import { Button } from '@/components/ui/button';
+import { format } from 'date-fns';
+import RarityBadge from '@/components/shared/RarityBadge';
+import { getDisplayRarity, getConfidence, RARITY_ORDER, VOTE_FIELDS } from '@/lib/rarityConsensus';
+import { cn } from '@/lib/utils';
+import DeleteConfirmDialog from '@/components/candetail/DeleteConfirmDialog';
+import EditEntrySheet from '@/components/candetail/EditEntrySheet';
+import CanImageBox from '@/components/shared/CanImageBox';
+
+// Invert VOTE_FIELDS: field name → tier label
+const VOTE_LABELS = Object.fromEntries(
+  Object.entries({ Common: 'common_votes', Uncommon: 'uncommon_votes', Rare: 'rare_votes', 'Ultra Rare': 'ultra_rare_votes', Legendary: 'legendary_votes' })
+    .map(([tier, field]) => [field, tier])
+);
+
+const STATUS_CONFIG = {
+  collected: { label: 'In Vault', color: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/30' },
+  wishlist:  { label: 'Wishlist', color: 'text-blue-400',    bg: 'bg-blue-400/10 border-blue-400/30'    },
+  duplicate: { label: 'Duplicate', color: 'text-muted-foreground', bg: 'bg-secondary border-border' },
+};
+
+const RARITY_COLORS = {
+  'Common':    'text-rarity-common',
+  'Uncommon':  'text-rarity-uncommon',
+  'Rare':      'text-rarity-rare',
+  'Ultra Rare':'text-rarity-ultra',
+  'Legendary': 'text-rarity-limited',
+};
+
+export default function CanDetail() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const canId = window.location.pathname.split('/can/')[1];
+  const [showDelete, setShowDelete] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const { toggleFavourite } = useFavourite();
+
+  const { data: collectionItems = [] } = useQuery({
+    queryKey: ['user-collection'],
+    queryFn: () => base44.entities.UserCollection.list('-created_date'),
+  });
+
+  const { data: sharedCanArr } = useQuery({
+    queryKey: ['shared-can', canId],
+    queryFn: () => base44.entities.SharedCan.filter({ id: canId }),
+    enabled: !!canId,
+  });
+
+  const { data: myVote } = useQuery({
+    queryKey: ['rarity-vote', canId],
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      const votes = await base44.entities.RarityVote.filter({ can_id: canId, created_by: user.email });
+      return votes?.[0] || null;
+    },
+    enabled: !!canId,
+  });
+
+  const item = collectionItems.find(c => c.can_id === canId);
+  const can = sharedCanArr?.[0];
+
+  const deleteMutation = useMutation({
+    mutationFn: () => base44.entities.UserCollection.delete(item.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-collection'] });
+      navigate('/collection');
+    },
+  });
+
+  const name = item?.can_name || can?.name || 'Unknown';
+  const brand = item?.can_brand || can?.brand || '';
+  const imageUrl = item?.can_image_url || can?.image_url;
+  const flavour = item?.can_flavour || can?.flavour;
+  const edition = item?.can_edition || can?.edition;
+
+  const totalVotes = can?.total_votes || 0;
+  const confidence = getConfidence(totalVotes);
+  const rarity = confidence === 'unrated' ? '???' : (can ? getDisplayRarity(can) : (item?.can_rarity || 'Common'));
+
+  const rarityBreakdown = can
+    ? RARITY_ORDER
+        .map(r => {
+          const fieldKey = Object.keys(VOTE_LABELS).find(k => VOTE_LABELS[k] === r);
+          return { rarity: r, votes: can[fieldKey] || 0 };
+        })
+        .filter(b => b.votes > 0)
+        .sort((a, b) => b.votes - a.votes)
+    : [];
+
+  const status = item?.status || 'collected';
+  const statusCfg = STATUS_CONFIG[status] || STATUS_CONFIG.collected;
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Hero image */}
+      <div className="relative">
+        <div className="w-full aspect-[4/3] relative overflow-hidden max-h-[55vw] min-h-[240px]">
+          <CanImageBox
+            imageUrl={imageUrl}
+            bgColor={item?.can_bg_color}
+            alt={name}
+            className="w-full h-full"
+            iconSize="w-24 h-24"
+            objectFit="contain"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+        </div>
+
+        {/* Back */}
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-4 left-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center border border-border"
+        >
+          <ArrowLeft className="w-5 h-5 text-foreground" />
+        </button>
+
+        {/* Actions (only if user has this in their collection) */}
+        {item && (
+          <div className="absolute top-4 right-4 flex gap-2">
+            <button
+              onClick={() => toggleFavourite({ collectionItem: item, sharedCan: can })}
+              className={cn(
+                'w-10 h-10 rounded-full backdrop-blur-sm flex items-center justify-center border transition-colors',
+                item.is_favourite
+                  ? 'bg-primary/20 border-primary/40'
+                  : 'bg-background/80 border-border'
+              )}
+            >
+              <Star className={cn('w-4 h-4', item.is_favourite ? 'fill-primary text-primary' : 'text-foreground')} />
+            </button>
+            <button
+              onClick={() => setShowEdit(true)}
+              className="w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center border border-border"
+            >
+              <Pencil className="w-4 h-4 text-foreground" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="px-5 -mt-6 relative z-10 space-y-4 pb-32">
+
+        {/* Title block */}
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground leading-tight">{name}</h1>
+          <p className="text-sm font-mono text-primary mt-0.5">{brand}</p>
+        </div>
+
+        {/* Status + Rarity row */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className={cn('text-xs font-mono font-semibold px-2.5 py-1 rounded-full border', statusCfg.bg, statusCfg.color)}>
+            {statusCfg.label}
+          </span>
+          {confidence !== 'unrated' && <RarityBadge rarity={rarity} size="md" />}
+          {confidence === 'unrated' && (
+            <span className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground border border-border rounded px-1.5 py-0.5">
+              <ShieldAlert className="w-2.5 h-2.5" /> Unrated
+            </span>
+          )}
+          {confidence === 'low' && (
+            <span className="flex items-center gap-1 text-[10px] font-mono text-yellow-400 border border-yellow-400/30 rounded px-1.5 py-0.5">
+              <ShieldAlert className="w-2.5 h-2.5" /> Low Confidence
+            </span>
+          )}
+          {confidence === 'confirmed' && (
+            <span className="flex items-center gap-1 text-[10px] font-mono text-primary border border-primary/30 rounded px-1.5 py-0.5">
+              <ShieldCheck className="w-2.5 h-2.5" /> Confirmed
+            </span>
+          )}
+        </div>
+
+        {/* Rarity consensus section */}
+        <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Users className="w-3 h-3" /> Community Rarity
+            </span>
+            <span className="text-[10px] font-mono text-muted-foreground">{totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}</span>
+          </div>
+
+          {confidence === 'unrated' ? (
+            <div>
+              <p className="text-3xl font-display font-black tracking-wide text-muted-foreground">? ? ?</p>
+              <p className="text-[11px] font-mono text-muted-foreground mt-1">Not enough votes yet — need {Math.max(0, 5 - totalVotes)} more</p>
+            </div>
+          ) : (
+            <p className={cn('text-3xl font-display font-black tracking-wide', RARITY_COLORS[rarity] || 'text-foreground')}>
+              {rarity}
+            </p>
+          )}
+
+          {/* Vote breakdown */}
+          {rarityBreakdown.length > 0 ? (
+            <div className="space-y-1.5">
+              {rarityBreakdown.map(({ rarity: r, votes }) => (
+                <div key={r} className="flex items-center gap-2">
+                  <span className="text-xs font-mono text-muted-foreground w-20 flex-shrink-0">{r}</span>
+                  <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all"
+                      style={{ width: `${(votes / totalVotes) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-mono text-muted-foreground w-6 text-right tabular-nums">{votes}</span>
+                </div>
+              ))}
+              <p className="text-[10px] font-mono text-muted-foreground pt-1">
+                {rarityBreakdown.map(({ rarity: r, votes }) => `${r}: ${votes}`).join(' · ')}
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs font-mono text-muted-foreground">No votes yet</p>
+          )}
+
+          {/* User's own vote */}
+          {myVote && (
+            <div className="pt-2 border-t border-border">
+              <p className="text-[11px] font-mono text-muted-foreground">
+                Your vote:{' '}
+                <span className={cn('font-semibold', RARITY_COLORS[myVote.voted_rarity] || 'text-foreground')}>
+                  {myVote.voted_rarity}
+                </span>
+                <span className="ml-1 text-muted-foreground/60">· locked</span>
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Details grid */}
+        <div className="grid grid-cols-2 gap-3">
+          {flavour && (
+            <div className="bg-card border border-border rounded-xl p-3">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Tag className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Flavour</span>
+              </div>
+              <p className="text-sm font-semibold text-foreground">{flavour}</p>
+            </div>
+          )}
+          {edition && (
+            <div className="bg-card border border-border rounded-xl p-3">
+              <div className="flex items-center gap-1.5 mb-1">
+                <FileText className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Edition</span>
+              </div>
+              <p className="text-sm font-semibold text-foreground">{edition}</p>
+            </div>
+          )}
+          {item?.created_date && (
+            <div className="bg-card border border-border rounded-xl p-3">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Calendar className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Added</span>
+              </div>
+              <p className="text-sm font-semibold text-foreground">
+                {format(new Date(item.created_date), 'MMM d, yyyy')}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Notes */}
+        {item?.notes && (
+          <div className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center gap-1.5 mb-2">
+              <StickyNote className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Notes</span>
+            </div>
+            <p className="text-sm text-foreground leading-relaxed">{item.notes}</p>
+          </div>
+        )}
+
+        {/* Delete */}
+        {item && (
+          <Button
+            variant="outline"
+            className="w-full font-mono text-xs gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10 mt-4"
+            onClick={() => setShowDelete(true)}
+          >
+            <Trash2 className="w-4 h-4" />
+            Remove from Collection
+          </Button>
+        )}
+      </div>
+
+      {/* Delete confirmation */}
+      <DeleteConfirmDialog
+        open={showDelete}
+        onCancel={() => setShowDelete(false)}
+        onConfirm={() => { setShowDelete(false); deleteMutation.mutate(); }}
+        isPending={deleteMutation.isPending}
+        canName={name}
+      />
+
+      {/* Edit sheet */}
+      {item && (
+        <EditEntrySheet
+          open={showEdit}
+          onClose={() => setShowEdit(false)}
+          item={item}
+          myVote={myVote}
+        />
+      )}
+    </div>
+  );
+}

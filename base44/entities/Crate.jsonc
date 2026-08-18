@@ -1,0 +1,44 @@
+{
+  "name": "Crate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the crate, e.g. 'Rare Finds'"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description"
+    },
+    "emoji": {
+      "type": "string",
+      "description": "Emoji icon for the crate",
+      "default": "\ud83d\udce6"
+    },
+    "can_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of UserCollection IDs in this crate",
+      "default": []
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "rule": "owner"
+    },
+    "create": {
+      "rule": "authenticated"
+    },
+    "update": {
+      "rule": "owner"
+    },
+    "delete": {
+      "rule": "owner"
+    }
+  }
+}

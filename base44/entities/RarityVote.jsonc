@@ -1,0 +1,39 @@
+{
+  "name": "RarityVote",
+  "type": "object",
+  "properties": {
+    "can_id": {
+      "type": "string",
+      "description": "Reference to SharedCan id"
+    },
+    "voted_rarity": {
+      "type": "string",
+      "enum": [
+        "Common",
+        "Uncommon",
+        "Rare",
+        "Ultra Rare",
+        "Legendary"
+      ],
+      "description": "The rarity the user voted for"
+    }
+  },
+  "required": [
+    "can_id",
+    "voted_rarity"
+  ],
+  "rls": {
+    "read": {
+      "rule": "owner"
+    },
+    "create": {
+      "rule": "authenticated"
+    },
+    "update": {
+      "rule": "owner"
+    },
+    "delete": {
+      "rule": "owner"
+    }
+  }
+}

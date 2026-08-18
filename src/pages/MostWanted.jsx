@@ -1,0 +1,169 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
+import { Star, Flame, Package } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import RarityBadge from '@/components/shared/RarityBadge';
+import CanImageBox from '@/components/shared/CanImageBox';
+import { getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
+import { useFavourite } from '@/hooks/useFavourite';
+import { toast } from 'sonner';
+
+const MEDAL_COLORS = [
+  'text-yellow-400 border-yellow-400/40 bg-yellow-400/5',
+  'text-slate-300 border-slate-300/40 bg-slate-300/5',
+  'text-amber-600 border-amber-600/40 bg-amber-600/5',
+];
+
+export default function MostWanted() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { toggleFavourite } = useFavourite();
+
+  const { data: sharedCans = [], isLoading } = useQuery({
+    queryKey: ['shared-cans'],
+    queryFn: () => base44.entities.SharedCan.list('-community_favourites', 500),
+  });
+
+  const { data: myCollection = [] } = useQuery({
+    queryKey: ['user-collection'],
+    queryFn: () => base44.entities.UserCollection.list('-created_date'),
+  });
+
+  const myCollectionMap = Object.fromEntries(myCollection.map(c => [c.can_id, c]));
+
+  const ranked = sharedCans
+    .filter(c => (c.community_favourites || 0) >= 1)
+    .sort((a, b) => (b.community_favourites || 0) - (a.community_favourites || 0));
+
+  const addToWishlist = useMutation({
+    mutationFn: async (can) => {
+      await base44.entities.UserCollection.create({
+        can_id: can.id,
+        status: 'wishlist',
+        can_name: can.name,
+        can_brand: can.brand,
+        can_image_url: can.image_url,
+        can_rarity: can.consensus_rarity || can.rarity || 'Common',
+        can_flavour: can.flavour,
+        can_edition: can.edition,
+      });
+    },
+    onSuccess: (_, can) => {
+      queryClient.invalidateQueries({ queryKey: ['user-collection'] });
+      toast.success(`Added ${can.name} to wishlist!`);
+    },
+  });
+
+  const handleCanTap = (can) => {
+    const myItem = myCollectionMap[can.id];
+    if (myItem) {
+      navigate(`/can/${can.id}`);
+    } else {
+      addToWishlist.mutate(can);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (ranked.length === 0) {
+    return (
+      <div className="px-5 pt-4">
+        <div className="bg-card border border-border rounded-2xl p-10 flex flex-col items-center text-center">
+          <Star className="w-10 h-10 text-primary mb-3" />
+          <p className="text-sm font-display font-semibold text-foreground">No favourites yet</p>
+          <p className="text-xs font-mono text-muted-foreground mt-1">Be the first to favourite a can!</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-5 pt-4 space-y-2">
+      {ranked.map((can, i) => {
+        const myItem = myCollectionMap[can.id];
+        const isMedal = i < 3;
+        const confidence = getConfidence(can.total_votes);
+        const rarity = confidence === 'unrated' ? '???' : getDisplayRarity(can);
+        const isFav = myItem?.is_favourite || false;
+
+        return (
+          <div
+            key={can.id}
+            className={cn(
+              'flex items-center gap-3 p-3 bg-card rounded-xl border transition-all',
+              isMedal ? MEDAL_COLORS[i] : 'border-border'
+            )}
+          >
+            {/* Rank */}
+            <div className="w-7 flex-shrink-0 text-center">
+              {isMedal ? (
+                <span className={cn('text-base font-display font-bold', MEDAL_COLORS[i].split(' ')[0])}>
+                  #{i + 1}
+                </span>
+              ) : (
+                <span className="text-xs font-mono text-muted-foreground">#{i + 1}</span>
+              )}
+            </div>
+
+            {/* Image */}
+            <button
+              onClick={() => handleCanTap(can)}
+              className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0"
+            >
+              <CanImageBox
+                imageUrl={can.image_url}
+                alt={can.name}
+                className="w-full h-full"
+                iconSize="w-5 h-5"
+              />
+            </button>
+
+            {/* Info */}
+            <button
+              onClick={() => handleCanTap(can)}
+              className="flex-1 min-w-0 text-left"
+            >
+              <p className="text-sm font-semibold text-foreground truncate">{can.name}</p>
+              <p className="text-[11px] font-mono text-primary/70 truncate">{can.brand}</p>
+              <div className="mt-1">
+                <RarityBadge rarity={rarity} />
+              </div>
+            </button>
+
+            {/* Favourite count */}
+            <div className="flex flex-col items-center gap-1 flex-shrink-0">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!myItem) {
+                    toast.info('Add this can to your collection first to favourite it.');
+                    return;
+                  }
+                  toggleFavourite({ collectionItem: myItem, sharedCan: can });
+                }}
+                className={cn(
+                  'w-8 h-8 rounded-full flex items-center justify-center transition-colors',
+                  isFav
+                    ? 'bg-primary/20 text-primary'
+                    : 'bg-secondary text-muted-foreground hover:text-primary'
+                )}
+              >
+                <Star className={cn('w-4 h-4', isFav && 'fill-primary')} />
+              </button>
+              <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
+                {can.community_favourites || 0}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}

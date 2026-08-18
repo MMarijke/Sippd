@@ -1,0 +1,144 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "recipient_id": {
+      "type": "string",
+      "description": "User ID of the notification recipient"
+    },
+    "recipient_email": {
+      "type": "string",
+      "description": "Email of recipient"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "new_follower",
+        "follow_request",
+        "reaction",
+        "can_rated",
+        "can_confirmed",
+        "trade_request",
+        "trade_response",
+        "trade_status_update",
+        "rare_pull_follow"
+      ],
+      "description": "Notification type"
+    },
+    "actor_name": {
+      "type": "string",
+      "description": "Display name of the person who triggered this"
+    },
+    "actor_id": {
+      "type": "string",
+      "description": "User ID of the actor"
+    },
+    "follow_id": {
+      "type": "string",
+      "description": "Follow record ID (for follow_request type)"
+    },
+    "activity_id": {
+      "type": "string",
+      "description": "ActivityItem ID (for reaction type)"
+    },
+    "can_id": {
+      "type": "string",
+      "description": "SharedCan ID"
+    },
+    "can_name": {
+      "type": "string",
+      "description": "Can name for display"
+    },
+    "can_rarity": {
+      "type": "string",
+      "description": "Rarity string"
+    },
+    "can_brand": {
+      "type": "string",
+      "description": "Brand for rare pull notifications"
+    },
+    "can_image_url": {
+      "type": "string",
+      "description": "Image URL for rare pull notifications"
+    },
+    "emoji": {
+      "type": "string",
+      "description": "Reaction emoji if type=reaction"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false
+    },
+    "follow_status": {
+      "type": "string",
+      "description": "For follow requests: pending/accepted/denied"
+    },
+    "trade_offer_can_name": {
+      "type": "string",
+      "description": "Name of the can the requester is offering"
+    },
+    "trade_offer_can_brand": {
+      "type": "string",
+      "description": "Brand of the can the requester is offering"
+    },
+    "trade_offer_can_rarity": {
+      "type": "string",
+      "description": "Rarity of the can the requester is offering"
+    },
+    "trade_want_can_name": {
+      "type": "string",
+      "description": "Name of the can the requester wants"
+    },
+    "trade_want_can_brand": {
+      "type": "string",
+      "description": "Brand of the can the requester wants"
+    },
+    "trade_want_can_rarity": {
+      "type": "string",
+      "description": "Rarity of the can the requester wants"
+    },
+    "trade_message": {
+      "type": "string",
+      "description": "Optional message with the trade request"
+    },
+    "trade_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "declined"
+      ],
+      "description": "Status of the trade request"
+    },
+    "trade_response_text": {
+      "type": "string",
+      "description": "For trade_response: accepted or declined"
+    },
+    "trade_new_status": {
+      "type": "string",
+      "description": "For trade_status_update: the new status value"
+    },
+    "trade_id": {
+      "type": "string",
+      "description": "Trade record ID for status update notifications"
+    }
+  },
+  "required": [
+    "recipient_id",
+    "type"
+  ],
+  "rls": {
+    "read": {
+      "rule": "owner"
+    },
+    "create": {
+      "rule": "authenticated"
+    },
+    "update": {
+      "rule": "owner"
+    },
+    "delete": {
+      "rule": "owner"
+    }
+  }
+}

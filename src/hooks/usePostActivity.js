@@ -1,9 +1,8 @@
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 
 export async function postActivity({ user, type, can, achievementData, streakDays, isPrivate }) {
   const payload = {
     user_id: user.id,
-    user_email: user.email,
     user_name: user.full_name || user.email,
     type,
     is_private_user: isPrivate || false,
@@ -26,5 +25,6 @@ export async function postActivity({ user, type, can, achievementData, streakDay
     payload.streak_days = streakDays;
   }
 
-  await base44.entities.ActivityItem.create(payload);
+  const { error } = await supabase.from('activity_items').insert(payload);
+  if (error) throw error;
 }

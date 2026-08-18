@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,9 +11,8 @@ import { Loader2, Upload, Zap, Link as LinkIcon, X, Users, ShieldCheck, ShieldAl
 import { format } from 'date-fns';
 import RarityReveal from './RarityReveal';
 import { cn } from '@/lib/utils';
-import { RARITY_ORDER, VOTE_FIELDS, buildVoteUpdate, getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
+import { RARITY_ORDER, getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
 import { CAN_BG_COLORS, DEFAULT_CAN_BG } from '@/lib/canBgColors';
-import { notifyFollowersOfRarePull } from '@/lib/notifyRarePull';
 
 const RARITIES = RARITY_ORDER;
 
@@ -24,16 +24,12 @@ const STATUS_OPTIONS = [
 
 export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
   const queryClient = useQueryClient();
+  const { user: currentUser } = useAuth();
   const [showReveal, setShowReveal] = useState(false);
   const [revealRarity, setRevealRarity] = useState('');
   const [uploading, setUploading] = useState(false);
   const [imageMode, setImageMode] = useState('upload');
   const [errors, setErrors] = useState({});
-  const [currentUser, setCurrentUser] = useState(null);
-
-  useEffect(() => {
-    base44.auth.me().then(setCurrentUser);
-  }, []);
 
   const [form, setForm] = useState({
     name:       prefillData?.name    || '',
@@ -56,10 +52,18 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
 
   // Check if user already voted on this can
   const { data: existingVote } = useQuery({
-    queryKey: ['rarity-vote', prefillData?.id, currentUser?.email],
-    queryFn: () => base44.entities.RarityVote.filter({ can_id: prefillData.id, created_by: currentUser.email }),
+    queryKey: ['rarity-vote', prefillData?.id, currentUser?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('rarity_votes')
+        .select('*')
+        .eq('can_id', prefillData.id)
+        .eq('voter_id', currentUser.id)
+        .single();
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows, not an error here
+      return data ?? null;
+    },
     enabled: !!prefillData?.id && !!currentUser,
-    select: data => data?.[0] || null,
   });
 
   const alreadyVoted = !!existingVote;
@@ -79,68 +83,50 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
     mutationFn: async () => {
       let sharedCan;
 
-      if (prefillData?.id) {
-        // Existing can — submit vote if not already voted
+      if (prefillData?.id && alreadyVoted) {
+        // Already voted on this can — don't vote again, just use its current data
         sharedCan = prefillData;
-        if (!alreadyVoted) {
-          const voteUpdate = buildVoteUpdate(prefillData, form.rarity);
-          await base44.entities.SharedCan.update(prefillData.id, voteUpdate);
-          await base44.entities.RarityVote.create({ can_id: prefillData.id, voted_rarity: form.rarity });
-        }
       } else {
-        // New can — first vote
-        const voteField = VOTE_FIELDS[form.rarity];
-        sharedCan = await base44.entities.SharedCan.create({
-          name:             form.name,
-          brand:            form.brand,
-          flavour:          form.flavour,
-          edition:          form.edition,
-          rarity:           form.rarity,
-          image_url:        form.image_url,
-          barcode:          form.barcode,
-          [voteField]:      1,
-          total_votes:      1,
-          consensus_rarity: form.rarity,
-          confidence:       'unrated',
+        // Either a brand-new can (first vote) or an existing can this user hasn't voted on yet.
+        // vote_on_can() handles can creation, vote recording, and aggregate updates atomically.
+        const { data, error } = await supabase.rpc('vote_on_can', {
+          p_can_id: prefillData?.id ?? null,
+          p_rarity: form.rarity,
+          p_name: form.name || null,
+          p_brand: form.brand || null,
+          p_flavour: form.flavour || null,
+          p_edition: form.edition || null,
+          p_image_url: form.image_url || null,
+          p_barcode: form.barcode || null,
         });
-        await base44.entities.RarityVote.create({ can_id: sharedCan.id, voted_rarity: form.rarity });
+        if (error) throw error;
+        sharedCan = data;
       }
 
-      // Add to user collection
-      const displayRarity = prefillData?.id && !alreadyVoted
-        ? buildVoteUpdate(prefillData, form.rarity).consensus_rarity
-        : (sharedCan.consensus_rarity || form.rarity);
+      const displayRarity = sharedCan.consensus_rarity || form.rarity;
 
-      await base44.entities.UserCollection.create({
-        can_id:        sharedCan.id,
-        status:        form.status,
-        notes:         form.notes,
-        can_name:      form.name      || sharedCan.name,
-        can_brand:     form.brand     || sharedCan.brand,
-        can_image_url: form.image_url || sharedCan.image_url,
-        can_rarity:    displayRarity,
-        can_flavour:   form.flavour   || sharedCan.flavour,
-        can_edition:   form.edition   || sharedCan.edition,
-        can_bg_color:  form.bg_color  || DEFAULT_CAN_BG,
-        user_rarity_vote: form.rarity,
+      const { error: insertError } = await supabase.from('user_collection').insert({
+        owner_id:         currentUser.id,
+        can_id:            sharedCan.id,
+        status:            form.status,
+        notes:             form.notes,
+        can_name:          form.name      || sharedCan.name,
+        can_brand:         form.brand     || sharedCan.brand,
+        can_image_url:     form.image_url || sharedCan.image_url,
+        can_rarity:        displayRarity,
+        can_flavour:       form.flavour   || sharedCan.flavour,
+        can_edition:       form.edition   || sharedCan.edition,
+        can_bg_color:      form.bg_color  || DEFAULT_CAN_BG,
+        user_rarity_vote:  form.rarity,
       });
+      if (insertError) throw insertError;
 
       return displayRarity;
     },
     onSuccess: (displayRarity) => {
       queryClient.invalidateQueries({ queryKey: ['user-collection'] });
       queryClient.invalidateQueries({ queryKey: ['shared-cans'] });
-      // Fan-out rare pull notifications to followers who opted in
-      if (form.status === 'collected' && ['Ultra Rare', 'Legendary'].includes(displayRarity) && currentUser) {
-        notifyFollowersOfRarePull({
-          user: currentUser,
-          canName: form.name,
-          canBrand: form.brand,
-          canRarity: displayRarity,
-          canId: prefillData?.id || '',
-          canImageUrl: form.image_url,
-        });
-      }
+      // TODO: server-side rare pull notification fan-out (deferred to edge function)
       if (['Rare', 'Ultra Rare', 'Legendary'].includes(displayRarity)) {
         setRevealRarity(displayRarity);
         setShowReveal(true);
@@ -158,10 +144,8 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    update('image_url', file_url);
-    setUploading(false);
+    // TODO: replace with Supabase Storage upload (deferred to Prompt 0.6)
+    toast.error('Image upload is temporarily unavailable — paste a URL instead.');
   };
 
   if (showReveal) {
@@ -181,7 +165,6 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
   return (
     <div className="space-y-5 px-5 pb-10">
 
-      {/* Open Food Facts source banner */}
       {prefillData?._offSource && (
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 flex items-start gap-2">
           <span className="text-lg">🌍</span>
@@ -194,7 +177,6 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         </div>
       )}
 
-      {/* Community Consensus Banner (existing cans only) */}
       {prefillData?.id && (
         <div className={cn(
           'rounded-xl border p-3 flex items-start gap-3',
@@ -234,7 +216,6 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         </div>
       )}
 
-      {/* Can Name */}
       <div className="space-y-1.5">
         <Label className={cn('text-xs font-mono uppercase tracking-wider', errors.name ? 'text-destructive' : 'text-muted-foreground')}>
           Can Name {errors.name && <span className="normal-case">— required</span>}
@@ -248,7 +229,6 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         />
       </div>
 
-      {/* Brand + Flavour */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label className={cn('text-xs font-mono uppercase tracking-wider', errors.brand ? 'text-destructive' : 'text-muted-foreground')}>
@@ -274,7 +254,6 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         </div>
       </div>
 
-      {/* Edition + Date Added */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Edition</Label>
@@ -297,7 +276,6 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         </div>
       </div>
 
-      {/* Barcode */}
       {!prefillData?.id && (
         <div className="space-y-1.5">
           <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Barcode (optional)</Label>
@@ -311,7 +289,6 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         </div>
       )}
 
-      {/* Rarity Vote */}
       <div className="space-y-1.5">
         <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
           {alreadyVoted ? 'Your Vote (locked)' : prefillData?.id ? 'Cast Your Vote' : 'Your Rarity Vote'}
@@ -353,7 +330,6 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         )}
       </div>
 
-      {/* Status */}
       <div className="space-y-1.5">
         <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Status</Label>
         <div className="flex bg-secondary rounded-xl border border-border p-1 gap-1">
@@ -375,13 +351,11 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         </div>
       </div>
 
-      {/* Image */}
       {!prefillData?.id && (
         <div className="space-y-1.5">
           <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Image (optional)</Label>
           {form.image_url ? (
             <div className="space-y-3">
-              {/* Preview with selected background */}
               <div className="relative w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.bg_color }}>
                 <img src={form.image_url} alt="Can" className="w-full h-full object-contain" />
                 <button
@@ -391,7 +365,6 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
-              {/* Background colour picker */}
               <div className="space-y-1.5">
                 <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Card Background</Label>
                 <div className="flex gap-2 flex-wrap">
@@ -455,14 +428,12 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         </div>
       )}
 
-      {/* Image preview for existing cans */}
       {prefillData?.id && prefillData.image_url && (
         <div className="w-full h-40 rounded-xl overflow-hidden bg-secondary">
           <img src={prefillData.image_url} alt="Can" className="w-full h-full object-contain" />
         </div>
       )}
 
-      {/* Notes */}
       <div className="space-y-1.5">
         <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Notes (optional)</Label>
         <Textarea
@@ -473,7 +444,6 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         />
       </div>
 
-      {/* Actions */}
       <div className="flex gap-3 pt-1">
         {onCancel && (
           <Button

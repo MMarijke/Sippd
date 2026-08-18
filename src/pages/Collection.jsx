@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { Link } from 'react-router-dom';
 import { Search, ScanLine, PackageOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -20,30 +21,54 @@ export default function Collection() {
   const [viewMode, setViewMode] = useState('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({ status: 'all', rarity: 'all', favourites: false, sort: 'date_desc' });
-  const [user, setUser] = useState(null);
-  useEffect(() => { base44.auth.me().then(setUser); }, []);
+  const { user } = useAuth();
   const streak = useStreak();
 
   const { data: collection = [], isLoading } = useQuery({
     queryKey: ['user-collection', user?.id],
-    queryFn: () => base44.entities.UserCollection.list('-created_date'),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_collection')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 
   const { data: sharedCans = [] } = useQuery({
     queryKey: ['shared-cans'],
-    queryFn: () => base44.entities.SharedCan.list('-created_date', 500),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shared_cans')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
   });
 
   const { data: votes = [] } = useQuery({
     queryKey: ['my-votes', user?.id],
-    queryFn: () => base44.entities.RarityVote.list('-created_date', 500),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('rarity_votes')
+        .select('*')
+        .eq('voter_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 
   const sharedCansMap = Object.fromEntries(sharedCans.map(c => [c.id, c]));
 
-  const achievements = computeAchievements(collection, streak, votes.length, user?.created_date);
+  const achievements = computeAchievements(collection, streak, votes.length, user?.created_at);
   const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements);
 
   const getEffectiveRarity = (item) => {
@@ -67,8 +92,8 @@ export default function Collection() {
     })
     .sort((a, b) => {
       const sort = filters.sort || 'date_desc';
-      if (sort === 'date_asc') return new Date(a.created_date) - new Date(b.created_date);
-      if (sort === 'date_desc') return new Date(b.created_date) - new Date(a.created_date);
+      if (sort === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
+      if (sort === 'date_desc') return new Date(b.created_at) - new Date(a.created_at);
       if (sort === 'brand_asc') return (a.can_brand || '').localeCompare(b.can_brand || '');
       if (sort === 'brand_desc') return (b.can_brand || '').localeCompare(a.can_brand || '');
       if (sort === 'rarity_desc') return RARITY_ORDER.indexOf(getEffectiveRarity(b)) - RARITY_ORDER.indexOf(getEffectiveRarity(a));
@@ -98,7 +123,6 @@ export default function Collection() {
         }
       />
 
-      {/* Search */}
       <div className="px-5">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -118,7 +142,6 @@ export default function Collection() {
         onViewModeChange={setViewMode}
       />
 
-      {/* Results */}
       <div className="px-5">
         {isLoading ? (
           <div className="flex items-center justify-center py-16">

@@ -1,3 +1,4 @@
+// DEPRECATED: being removed as part of Base44 → Supabase migration. Do not add new imports of this file.
 import { createClient } from '@base44/sdk';
 import { appParams } from '@/lib/app-params';
 

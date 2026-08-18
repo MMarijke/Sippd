@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { Search, Package, ClipboardPaste, Loader2 } from 'lucide-react';
+import { Search, Package, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
-import { toast } from 'sonner';
 import RarityBadge from '@/components/shared/RarityBadge';
 import AddCanForm from '@/components/scan/AddCanForm';
 import BarcodeScanner from '@/components/scan/BarcodeScanner';
@@ -34,10 +33,17 @@ export default function Scan() {
 
   const { data: sharedCans = [] } = useQuery({
     queryKey: ['shared-cans'],
-    queryFn: () => base44.entities.SharedCan.list('-created_date', 500),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shared_cans')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
   });
 
-  // Handle ZXing callback: /scan?barcode=XXXXXXX
   useEffect(() => {
     if (sharedCans.length === 0) return;
     const params = new URLSearchParams(window.location.search);
@@ -125,21 +131,18 @@ export default function Scan() {
     <div className="flex flex-col gap-0 pb-8">
       <PageHeader title="Scan / Search" subtitle="Find a can or add a new one" />
 
-      {/* Scanner */}
       <BarcodeScanner />
 
-      {/* Divider */}
       <div className="flex items-center gap-3 px-5 mt-6">
         <div className="flex-1 h-px bg-border" />
         <span className="text-[11px] front-mono text-muted-foreground uppercase tracking-widest">Or search manually</span>
         <div className="flex-1 h-px bg-border" />
       </div>
 
-      {/* Search bar */}
       <div className="px-5 mt-4 space-y-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input 
+          <Input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             onKeyDown={handleSearchKeyDown}
@@ -148,7 +151,6 @@ export default function Scan() {
           />
         </div>
 
-        {/* Search results */}
         {searchQuery.length >= 2 && (
           <div className="space-y-2">
             {offLookup ? (
@@ -173,8 +175,8 @@ export default function Scan() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{can.brand}</p>
-                    <p className="text-[11px] font-mono text-muted-foreground">{can.brand}</p> 
+                    <p className="text-sm font-semibold text-foreground truncate">{can.name}</p>
+                    <p className="text-[11px] font-mono text-muted-foreground">{can.brand}</p>
                   </div>
                   <RarityBadge rarity={can.cosensus_rarity || can.rarity || 'Common'} />
                 </button>
@@ -182,7 +184,7 @@ export default function Scan() {
             ) : (
               <div className="text-center py-6 space-y-3">
                 <p className="text-sm text-muted-foreground font-mono">No cans found for "{searchQuery}"</p>
-                {/^\{6,}$/.test(searchQuery) ? (
+                {/^\d{6,}$/.test(searchQuery) ? (
                   <Button
                     variant="outline"
                     size="sm"
@@ -213,7 +215,6 @@ export default function Scan() {
         )}
       </div>
 
-      {/* Add manually */}
       <div className="text-center mt-8">
         <button
           onClick={() => { setSelectedCan(null); setMode('add'); }}
@@ -223,7 +224,6 @@ export default function Scan() {
         </button>
       </div>
 
-      {/* Credit */}
       <p className="text-center text-[10px] font-mono text-muted-foreground/40 mt-4 px-5">
         Barcode lookup powered by{' '}
         <a
@@ -235,6 +235,6 @@ export default function Scan() {
           Open Food Facts
         </a>
       </p>
-    </div> 
+    </div>
   );
 }

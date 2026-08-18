@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { X, ArrowRightLeft, User, BookmarkCheck, BookmarkPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ import TradeTemplatesSheet from './TradeTemplatesSheet';
 
 export default function TradeLogDialog({ collection, onClose }) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [tradedAwayId, setTradedAwayId] = useState('');
   const [receivedId, setReceivedId] = useState('');
   const [tradedWith, setTradedWith] = useState('');
@@ -26,29 +28,35 @@ export default function TradeLogDialog({ collection, onClose }) {
 
   const collected = collection.filter(c => c.status === 'collected');
 
-  // Load connections (people the current user follows or is followed by)
+  // RLS already scopes this to rows the current user participates in
+  // (follower or followee) — no explicit filter needed.
   const { data: follows = [] } = useQuery({
     queryKey: ['follows-for-trade'],
-    queryFn: () => base44.entities.Follow.list('-created_date', 100),
+    queryFn: async () => {
+      const { data, error } = await supabase.from('follows').select('*');
+      if (error) throw error;
+      return data;
+    },
   });
 
   const { data: allUsers = [] } = useQuery({
     queryKey: ['all-users-for-trade'],
-    queryFn: () => base44.entities.User.list(),
+    queryFn: async () => {
+      const { data, error } = await supabase.from('public_profiles').select('*');
+      if (error) throw error;
+      return data;
+    },
     enabled: follows.length > 0,
   });
 
-  // Build a searchable list of known users from follow relationships
   const connectedUserIds = new Set([
     ...follows.map(f => f.follower_id),
     ...follows.map(f => f.following_id),
   ]);
   const connectedUsers = allUsers.filter(u => connectedUserIds.has(u.id));
+  // public_profiles has no email column, so this can only match on display name now
   const filteredUsers = userSearch
-    ? connectedUsers.filter(u =>
-        u.full_name?.toLowerCase().includes(userSearch.toLowerCase()) ||
-        u.email?.toLowerCase().includes(userSearch.toLowerCase())
-      )
+    ? connectedUsers.filter(u => u.full_name?.toLowerCase().includes(userSearch.toLowerCase()))
     : connectedUsers.slice(0, 8);
 
   const filteredAway = collected.filter(c =>
@@ -62,20 +70,24 @@ export default function TradeLogDialog({ collection, onClose }) {
   const selectedReceived = collected.find(c => c.id === receivedId);
 
   const saveTemplate = useMutation({
-    mutationFn: () => base44.entities.TradeTemplate.create({
-      name: templateName.trim(),
-      traded_away_id: tradedAwayId,
-      traded_away_name: selectedAway?.can_name || '',
-      traded_away_brand: selectedAway?.can_brand || '',
-      traded_away_image_url: selectedAway?.can_image_url || '',
-      traded_away_rarity: selectedAway?.can_rarity || '',
-      received_id: receivedId,
-      received_name: selectedReceived?.can_name || '',
-      received_brand: selectedReceived?.can_brand || '',
-      received_image_url: selectedReceived?.can_image_url || '',
-      received_rarity: selectedReceived?.can_rarity || '',
-      notes: notes.trim(),
-    }),
+    mutationFn: async () => {
+      const { error } = await supabase.from('trade_templates').insert({
+        owner_id: user.id,
+        name: templateName.trim(),
+        traded_away_id: tradedAwayId,
+        traded_away_name: selectedAway?.can_name || '',
+        traded_away_brand: selectedAway?.can_brand || '',
+        traded_away_image_url: selectedAway?.can_image_url || '',
+        traded_away_rarity: selectedAway?.can_rarity || '',
+        received_id: receivedId,
+        received_name: selectedReceived?.can_name || '',
+        received_brand: selectedReceived?.can_brand || '',
+        received_image_url: selectedReceived?.can_image_url || '',
+        received_rarity: selectedReceived?.can_rarity || '',
+        notes: notes.trim(),
+      });
+      if (error) throw error;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trade-templates'] });
       toast.success('Template saved!');
@@ -91,22 +103,26 @@ export default function TradeLogDialog({ collection, onClose }) {
   };
 
   const logTrade = useMutation({
-    mutationFn: () => base44.entities.Trade.create({
-      traded_away_id: tradedAwayId,
-      traded_away_name: selectedAway?.can_name || '',
-      traded_away_brand: selectedAway?.can_brand || '',
-      traded_away_image_url: selectedAway?.can_image_url || '',
-      traded_away_rarity: selectedAway?.can_rarity || '',
-      received_id: receivedId,
-      received_name: selectedReceived?.can_name || '',
-      received_brand: selectedReceived?.can_brand || '',
-      received_image_url: selectedReceived?.can_image_url || '',
-      received_rarity: selectedReceived?.can_rarity || '',
-      traded_with: tradedWith.trim(),
-      traded_with_id: tradedWithId || undefined,
-      notes: notes.trim(),
-      trade_date: tradeDate,
-    }),
+    mutationFn: async () => {
+      const { error } = await supabase.from('trades').insert({
+        owner_id: user.id,
+        traded_away_id: tradedAwayId,
+        traded_away_name: selectedAway?.can_name || '',
+        traded_away_brand: selectedAway?.can_brand || '',
+        traded_away_image_url: selectedAway?.can_image_url || '',
+        traded_away_rarity: selectedAway?.can_rarity || '',
+        received_id: receivedId,
+        received_name: selectedReceived?.can_name || '',
+        received_brand: selectedReceived?.can_brand || '',
+        received_image_url: selectedReceived?.can_image_url || '',
+        received_rarity: selectedReceived?.can_rarity || '',
+        traded_with: tradedWith.trim(),
+        traded_with_id: tradedWithId || null,
+        notes: notes.trim(),
+        trade_date: tradeDate,
+      });
+      if (error) throw error;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trades'] });
       toast.success('Trade logged!');
@@ -123,7 +139,6 @@ export default function TradeLogDialog({ collection, onClose }) {
         style={{ maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4 flex-shrink-0">
           <div className="flex items-center gap-2">
             <ArrowRightLeft className="w-4 h-4 text-primary" />
@@ -143,7 +158,6 @@ export default function TradeLogDialog({ collection, onClose }) {
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 pb-6 space-y-5">
-          {/* Can Given Away */}
           <CanPicker
             label="Can I Gave Away"
             items={filteredAway}
@@ -158,7 +172,6 @@ export default function TradeLogDialog({ collection, onClose }) {
             <ArrowRightLeft className="w-4 h-4 text-muted-foreground" />
           </div>
 
-          {/* Can Received */}
           <CanPicker
             label="Can I Received"
             items={filteredReceived}
@@ -169,9 +182,7 @@ export default function TradeLogDialog({ collection, onClose }) {
             onClear={() => setReceivedId('')}
           />
 
-          {/* Meta fields */}
           <div className="space-y-3">
-            {/* Traded With — supports picking a Canvolt user */}
             <div>
               <label className="text-xs font-mono text-muted-foreground mb-1 block">Traded With (optional)</label>
               {tradedWithId ? (
@@ -197,7 +208,7 @@ export default function TradeLogDialog({ collection, onClose }) {
                     }}
                     onFocus={() => setShowUserList(true)}
                     onBlur={() => setTimeout(() => setShowUserList(false), 150)}
-                    placeholder="Search Canvolt users or enter a name…"
+                    placeholder="Search Sippd users or enter a name…"
                     className="bg-secondary border-border font-body text-sm"
                   />
                   {showUserList && filteredUsers.length > 0 && (
@@ -206,7 +217,7 @@ export default function TradeLogDialog({ collection, onClose }) {
                         <button
                           key={u.id}
                           onMouseDown={() => {
-                            setTradedWith(u.full_name || u.email);
+                            setTradedWith(u.full_name || 'Collector');
                             setTradedWithId(u.id);
                             setUserSearch('');
                             setShowUserList(false);
@@ -214,11 +225,10 @@ export default function TradeLogDialog({ collection, onClose }) {
                           className="w-full flex items-center gap-2 px-3 py-2 hover:bg-muted/50 text-left"
                         >
                           <div className="w-6 h-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
-                            <span className="text-[10px] font-display text-primary">{(u.full_name || u.email)?.[0]?.toUpperCase()}</span>
+                            <span className="text-[10px] font-display text-primary">{(u.full_name || 'C')?.[0]?.toUpperCase()}</span>
                           </div>
                           <div className="min-w-0">
-                            <p className="text-xs font-body text-foreground truncate">{u.full_name || u.email}</p>
-                            {u.full_name && <p className="text-[10px] font-mono text-muted-foreground truncate">{u.email}</p>}
+                            <p className="text-xs font-body text-foreground truncate">{u.full_name || 'Collector'}</p>
                           </div>
                         </button>
                       ))}
@@ -248,7 +258,6 @@ export default function TradeLogDialog({ collection, onClose }) {
             </div>
           </div>
 
-          {/* Save as Template */}
           {canSubmit && (
             <div>
               {showSaveTemplate ? (

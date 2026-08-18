@@ -1,16 +1,23 @@
-import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
-import { UserPlus, UserCheck, UserMinus, Clock } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { UserPlus, UserCheck, Clock } from 'lucide-react';
 
 export default function FollowButton({ targetUser, currentUser }) {
   const queryClient = useQueryClient();
 
   const { data: follows = [] } = useQuery({
     queryKey: ['my-follows', currentUser?.id],
-    queryFn: () => base44.entities.Follow.filter({ follower_id: currentUser.id }, '-created_date', 200),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('follows')
+        .select('*')
+        .eq('follower_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      return data;
+    },
     enabled: !!currentUser?.id,
   });
 
@@ -23,27 +30,8 @@ export default function FollowButton({ targetUser, currentUser }) {
 
   const followMutation = useMutation({
     mutationFn: async () => {
-      const isPrivate = targetUser?.is_private;
-      const status = isPrivate ? 'pending' : 'accepted';
-      const follow = await base44.entities.Follow.create({
-        follower_id: currentUser.id,
-        follower_email: currentUser.email,
-        follower_name: currentUser.full_name || currentUser.email,
-        following_id: targetUser.id,
-        following_email: targetUser.email,
-        status,
-      });
-
-      // Notify target user
-      await base44.entities.Notification.create({
-        recipient_id: targetUser.id,
-        recipient_email: targetUser.email,
-        type: isPrivate ? 'follow_request' : 'new_follower',
-        actor_name: currentUser.full_name || currentUser.email,
-        actor_id: currentUser.id,
-        follow_id: follow.id,
-        is_read: false,
-      });
+      const { error } = await supabase.rpc('request_follow', { p_target_id: targetUser.id });
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-follows'] });
@@ -52,7 +40,8 @@ export default function FollowButton({ targetUser, currentUser }) {
 
   const unfollowMutation = useMutation({
     mutationFn: async () => {
-      await base44.entities.Follow.delete(myFollow.id);
+      const { error } = await supabase.from('follows').delete().eq('id', myFollow.id);
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-follows'] });

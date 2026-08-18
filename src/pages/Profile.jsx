@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { LogOut, Zap, Star, Trophy, Settings, Medal, Pencil, Check, X, Share2, ImageDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +17,7 @@ import TradeLogDialog from '@/components/profile/TradeLogDialog';
 export default function Profile() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [user, setUser] = useState(null);
+  const { user, signOut } = useAuth();
   const [showShareCard, setShowShareCard] = useState(false);
   const [showTradeLog, setShowTradeLog] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -24,8 +25,18 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const inputRef = useRef(null);
 
+  const { data: profile } = useQuery({
+    queryKey: ['my-profile', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   const startEdit = () => {
-    setNameInput(user?.full_name || '');
+    setNameInput(profile?.full_name || '');
     setEditing(true);
     setTimeout(() => inputRef.current?.focus(), 50);
   };
@@ -35,32 +46,43 @@ export default function Profile() {
   const saveEdit = async () => {
     if (!nameInput.trim()) return;
     setSaving(true);
-    try {
-      await base44.auth.updateMe({ full_name: nameInput.trim() });
-      const updated = await base44.auth.me();
-      setUser(updated);
+    const { error } = await supabase.from('profiles').update({ full_name: nameInput.trim() }).eq('id', user.id);
+    if (error) {
+      toast.error('Failed to update name');
+    } else {
+      queryClient.invalidateQueries({ queryKey: ['my-profile', user.id] });
       queryClient.invalidateQueries({ queryKey: ['user-collection'] });
       toast.success('Display name updated!');
-    } catch (e) {
-      toast.error('Failed to update name');
     }
     setSaving(false);
     setEditing(false);
   };
 
-  useEffect(() => {
-    base44.auth.me().then(setUser);
-  }, []);
-
   const { data: collection = [] } = useQuery({
     queryKey: ['user-collection', user?.id],
-    queryFn: () => base44.entities.UserCollection.list('-created_date'),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_collection')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 
   const { data: sharedCans = [] } = useQuery({
     queryKey: ['shared-cans'],
-    queryFn: () => base44.entities.SharedCan.list('-created_date', 500),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shared_cans')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 
@@ -72,7 +94,7 @@ export default function Profile() {
 
   const collected = collection.filter(c => c.status === 'collected');
   const rarePulls = collected.filter(c =>
-    ['Rare', 'Ultra Rare', 'Limited'].includes(c.can_rarity)
+    ['Rare', 'Ultra Rare', 'Legendary'].includes(c.can_rarity)
   ).length;
   const wishlist = collection.filter(c => c.status === 'wishlist').length;
   const favourites = collection.filter(c => c.is_favourite).length;
@@ -83,11 +105,11 @@ export default function Profile() {
 
   const handleSharedCollection = () => {
     if (!user?.id) return;
-    const url = '${window.location.origin}/u/${user.id}';
+    const url = `${window.location.origin}/u/${user.id}`;
     if (navigator.share) {
       navigator.share({
-        title: 'My Canvolt Collection',
-        text: 'Check out my Canvolt collection!',
+        title: 'My Sippd Collection',
+        text: 'Check out my Sippd collection!',
         url,
       }).catch(e => {
         if (e.name !== 'AbortError') {
@@ -97,18 +119,17 @@ export default function Profile() {
     } else {
       navigator.clipboard.writeText(url).then(() => toast.success('Link copied!'));
     }
-  }; 
+  };
 
   return (
     <div className="space-y-5">
       <PageHeader title="Profile" />
 
-      {/* User Info */}
       <div className="px-5">
         <div className="bg-card border border-border rounded-2xl p-6 flex items-center gap-4">
           <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center neon-glow">
             <span className="text-2xl font-display font-bold text-primary">
-              {user?.full_name?.[0]?.toUpperCase() || '?'}
+              {profile?.full_name?.[0]?.toUpperCase() || '?'}
             </span>
           </div>
           <div className="flex-1 min-w-0">
@@ -131,7 +152,7 @@ export default function Profile() {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-display font-bold text-foreground">{user?.full_name || 'Collector'}</h2>
+                <h2 className="text-lg font-display font-bold text-foreground">{profile?.full_name || 'Collector'}</h2>
                 <button onClick={startEdit} className="text-muted-foreground hover:text-primary transition-colors">
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
@@ -142,7 +163,6 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 gap-3 px-5">
         <StatBox icon={Zap} label="Cans" value={collected.length} />
         <StatBox icon={Trophy} label="Wishlist" value={wishlist} />
@@ -150,7 +170,6 @@ export default function Profile() {
         <StatBox icon={Star} label="Favourites" value={favourites} glow />
       </div>
 
-      {/* Actions */}
       <div className="px-5 space-y-2">
         <Button
           variant="outline"
@@ -183,12 +202,11 @@ export default function Profile() {
         <Button
           variant="outline"
           className="w-full justify-start font-mono text-xs gap-2 text-destructive border-destructive/30 hover:bg-destructive/10"
-          onClick={() => base44.auth.logout()}
+          onClick={() => signOut()}
         >
           <LogOut className="w-4 h-4" /> Log Out
         </Button>
       </div>
-      {/* Trade History */}
       <TradeHistory userId={user?.id} user={user} onLogTrade={() => setShowTradeLog(true)} />
 
       {showShareCard && (

@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { ArrowLeft, ChevronRight, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,14 +48,19 @@ function SettingsRow({ label, sub, onClick, danger, right }) {
 }
 
 // ─── Edit Display Name ────────────────────────────────────────────────────────
-function EditNamePanel({ user, onDone }) {
-  const [value, setValue] = useState(user?.full_name || '');
+function EditNamePanel({ userId, initialName, onDone }) {
+  const [value, setValue] = useState(initialName || '');
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
     if (!value.trim()) return;
     setSaving(true);
-    await base44.auth.updateMe({ full_name: value.trim() });
+    const { error } = await supabase.from('profiles').update({ full_name: value.trim() }).eq('id', userId);
+    if (error) {
+      toast.error('Failed to update name');
+      setSaving(false);
+      return;
+    }
     toast.success('Display name updated');
     setSaving(false);
     onDone();
@@ -79,7 +86,7 @@ function EditNamePanel({ user, onDone }) {
 }
 
 // ─── Change Password ──────────────────────────────────────────────────────────
-function ChangePasswordPanel() {
+function ChangePasswordPanel({ user }) {
   const [form, setForm] = useState({ current: '', next: '', confirm: '' });
   const [saving, setSaving] = useState(false);
 
@@ -87,12 +94,23 @@ function ChangePasswordPanel() {
     if (form.next.length < 6) { toast.error('New password must be at least 6 characters'); return; }
     if (form.next !== form.confirm) { toast.error('Passwords do not match'); return; }
     setSaving(true);
-    try {
-      await base44.auth.changePassword({ current_password: form.current, new_password: form.next });
+    // supabase.auth.updateUser() alone doesn't verify the current password —
+    // re-authenticate first so "change password" actually requires knowing the old one.
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: form.current,
+    });
+    if (verifyError) {
+      toast.error('Current password is incorrect');
+      setSaving(false);
+      return;
+    }
+    const { error: updateError } = await supabase.auth.updateUser({ password: form.next });
+    if (updateError) {
+      toast.error('Something went wrong. Please try again.');
+    } else {
       toast.success('Password changed');
       setForm({ current: '', next: '', confirm: '' });
-    } catch {
-      toast.error('Current password is incorrect');
     }
     setSaving(false);
   };
@@ -127,50 +145,22 @@ function ChangePasswordPanel() {
   );
 }
 
-// ─── Delete Account ───────────────────────────────────────────────────────────
+// ─── Delete Account (stubbed — Prompt 0.8) ─────────────────────────────────────
 function DeleteAccountPanel() {
-  const [input, setInput] = useState('');
-  const [deleting, setDeleting] = useState(false);
-
-  const confirm = async () => {
-    if (input !== 'DELETE') return;
-    setDeleting(true);
-    try {
-      const user = await base44.auth.me();
-      const items = await base44.entities.UserCollection.list('-created_date', 2000);
-      const mine = items.filter(i => i.created_by === user.email);
-      await Promise.all(mine.map(i => base44.entities.UserCollection.delete(i.id)));
-      await base44.auth.logout();
-    } catch {
-      toast.error('Something went wrong. Please try again.');
-      setDeleting(false);
-    }
-  };
-
   return (
     <div className="space-y-4 px-5 pt-4">
       <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4">
         <p className="text-xs font-mono text-destructive leading-relaxed">
-          This will permanently delete your collection data and log you out. This cannot be undone.
+          Account deletion will be available soon.
         </p>
-      </div>
-      <div className="space-y-2">
-        <p className="text-xs font-mono text-muted-foreground">Type <span className="text-foreground font-semibold">DELETE</span> to confirm:</p>
-        <Input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          placeholder="DELETE"
-          className="bg-secondary border-destructive/30 focus-visible:ring-destructive/50 font-mono"
-        />
       </div>
       <Button
         variant="destructive"
         className="w-full font-mono text-xs gap-2"
-        disabled={input !== 'DELETE' || deleting}
-        onClick={confirm}
+        disabled
       >
         <Trash2 className="w-4 h-4" />
-        {deleting ? 'Deleting…' : 'Delete My Account'}
+        Delete My Account
       </Button>
     </div>
   );
@@ -201,11 +191,22 @@ function ChipToggle({ options, value, onChange }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Settings() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [panel, setPanel] = useState(null); // 'name' | 'password' | 'delete'
   const [prefs, setPrefs] = useState(loadPrefs);
 
-  useEffect(() => { base44.auth.me().then(setUser); }, []);
+  const { data: profile } = useQuery({
+    queryKey: ['my-profile', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const refetchProfile = () => queryClient.invalidateQueries({ queryKey: ['my-profile', user?.id] });
 
   const updatePref = (key, val) => {
     const next = { ...prefs, [key]: val };
@@ -213,12 +214,27 @@ export default function Settings() {
     savePrefs(next);
   };
 
+  const toggleNotifyRareFollows = async () => {
+    const next = !profile?.notify_rare_follows;
+    const { error } = await supabase.from('profiles').update({ notify_rare_follows: next }).eq('id', user.id);
+    if (error) { toast.error('Failed to update'); return; }
+    refetchProfile();
+    toast.success(next ? 'Rare pull alerts enabled' : 'Rare pull alerts disabled');
+  };
+
+  const togglePrivate = async () => {
+    const next = !profile?.is_private;
+    const { error } = await supabase.from('profiles').update({ is_private: next }).eq('id', user.id);
+    if (error) { toast.error('Failed to update'); return; }
+    refetchProfile();
+    toast.success(next ? 'Account set to private' : 'Account set to public');
+  };
+
   const defaultStatus = prefs.defaultStatus || 'collected';
   const defaultRarity = prefs.defaultRarity || 'Common';
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-5 pb-3 border-b border-border">
         <button
           onClick={() => navigate(-1)}
@@ -231,17 +247,16 @@ export default function Settings() {
 
       <div className="px-5 pt-4 pb-24">
 
-        {/* ACCOUNT */}
         <SectionHeader title="Account" />
         <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
           <SettingsRow
             label="Display Name"
-            sub={user?.full_name || '—'}
+            sub={profile?.full_name || '—'}
             onClick={() => setPanel(panel === 'name' ? null : 'name')}
           />
           {panel === 'name' && (
             <div className="bg-secondary/30 border-t border-border">
-              <EditNamePanel user={user} onDone={() => { setPanel(null); base44.auth.me().then(setUser); }} />
+              <EditNamePanel userId={user?.id} initialName={profile?.full_name} onDone={() => { setPanel(null); refetchProfile(); }} />
             </div>
           )}
           <SettingsRow
@@ -256,12 +271,11 @@ export default function Settings() {
           />
           {panel === 'password' && (
             <div className="bg-secondary/30">
-              <ChangePasswordPanel />
+              <ChangePasswordPanel user={user} />
             </div>
           )}
         </div>
 
-        {/* PREFERENCES */}
         <SectionHeader title="Preferences" />
         <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
           <div>
@@ -288,7 +302,6 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* NOTIFICATIONS */}
         <SectionHeader title="Notifications" />
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
           <div className="px-4 py-3.5 flex items-center justify-between">
@@ -297,27 +310,20 @@ export default function Settings() {
               <p className="text-xs font-mono text-muted-foreground mt-0.5">Notify me when someone I follow adds an Ultra Rare or Legendary can</p>
             </div>
             <button
-              onClick={async () => {
-                const next = !user?.notify_rare_follows;
-                await base44.auth.updateMe({ notify_rare_follows: next });
-                const updated = await base44.auth.me();
-                setUser(updated);
-                toast.success(next ? 'Rare pull alerts enabled' : 'Rare pull alerts disabled');
-              }}
+              onClick={toggleNotifyRareFollows}
               className={cn(
                 'relative w-11 h-6 rounded-full transition-colors flex-shrink-0',
-                user?.notify_rare_follows ? 'bg-primary' : 'bg-secondary border border-border'
+                profile?.notify_rare_follows ? 'bg-primary' : 'bg-secondary border border-border'
               )}
             >
               <div className={cn(
                 'absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all',
-                user?.notify_rare_follows ? 'left-5' : 'left-0.5'
+                profile?.notify_rare_follows ? 'left-5' : 'left-0.5'
               )} />
             </button>
           </div>
         </div>
 
-        {/* PRIVACY */}
         <SectionHeader title="Privacy" />
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
           <div className="px-4 py-3.5 flex items-center justify-between">
@@ -326,27 +332,20 @@ export default function Settings() {
               <p className="text-xs font-mono text-muted-foreground mt-0.5">Only approved followers can see your collection</p>
             </div>
             <button
-              onClick={async () => {
-                const next = !user?.is_private;
-                await base44.auth.updateMe({ is_private: next });
-                const updated = await base44.auth.me();
-                setUser(updated);
-                toast.success(next ? 'Account set to private' : 'Account set to public');
-              }}
+              onClick={togglePrivate}
               className={cn(
                 'relative w-11 h-6 rounded-full transition-colors flex-shrink-0',
-                user?.is_private ? 'bg-primary' : 'bg-secondary border border-border'
+                profile?.is_private ? 'bg-primary' : 'bg-secondary border border-border'
               )}
             >
               <div className={cn(
                 'absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all',
-                user?.is_private ? 'left-5' : 'left-0.5'
+                profile?.is_private ? 'left-5' : 'left-0.5'
               )} />
             </button>
           </div>
         </div>
 
-        {/* DANGER ZONE */}
         <SectionHeader title="Danger Zone" />
         <div className="bg-card border border-destructive/20 rounded-2xl overflow-hidden divide-y divide-border">
           <SettingsRow

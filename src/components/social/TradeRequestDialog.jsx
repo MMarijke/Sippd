@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { X, ArrowRightLeft, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,15 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
 
   const { data: myCollection = [] } = useQuery({
     queryKey: ['user-collection', currentUser?.id],
-    queryFn: () => base44.entities.UserCollection.list('-created_date'),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_collection')
+        .select('*')
+        .eq('owner_id', currentUser.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
     enabled: !!currentUser?.id,
   });
 
@@ -28,20 +36,17 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
   const selectedOffer = myCollected.find(c => c.id === offerCanId);
 
   const sendRequest = useMutation({
-    mutationFn: () => base44.entities.Notification.create({
-      recipient_id: targetUser.id,
-      recipient_email: targetUser.email,
-      type: 'trade_request',
-      actor_id: currentUser.id,
-      actor_name: currentUser.full_name || currentUser.email,
-      trade_offer_can_name: selectedOffer?.can_name || '',
-      trade_offer_can_brand: selectedOffer?.can_brand || '',
-      trade_offer_can_rarity: selectedOffer?.can_rarity || '',
-      trade_want_can_name: wantCanName.trim(),
-      trade_message: message.trim(),
-      trade_status: 'pending',
-      is_read: false,
-    }),
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('send_trade_request', {
+        p_target_id: targetUser.id,
+        p_offer_can_name: selectedOffer?.can_name || null,
+        p_offer_can_brand: selectedOffer?.can_brand || null,
+        p_offer_can_rarity: selectedOffer?.can_rarity || null,
+        p_want_can_name: wantCanName.trim(),
+        p_message: message.trim() || null,
+      });
+      if (error) throw error;
+    },
     onSuccess: () => {
       toast.success('Trade request sent!');
       onClose();
@@ -57,7 +62,6 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
         style={{ maxHeight: '88vh' }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4 flex-shrink-0">
           <div className="flex items-center gap-2">
             <ArrowRightLeft className="w-4 h-4 text-primary" />
@@ -72,7 +76,6 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 pb-6 space-y-5">
-          {/* Offer: can I'm giving */}
           <div>
             <label className="text-xs font-mono text-muted-foreground mb-1.5 block">I'm offering…</label>
             {selectedOffer ? (
@@ -128,7 +131,6 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
             )}
           </div>
 
-          {/* Want: can they're giving */}
           <div>
             <label className="text-xs font-mono text-muted-foreground mb-1.5 block">I want… (describe the can)</label>
             <Input
@@ -139,7 +141,6 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
             />
           </div>
 
-          {/* Optional message */}
           <div>
             <label className="text-xs font-mono text-muted-foreground mb-1.5 block">Message (optional)</label>
             <Input

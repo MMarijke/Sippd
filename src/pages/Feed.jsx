@@ -1,69 +1,91 @@
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Radio, RefreshCw, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
 import ActivityCard from '@/components/feed/ActivityCard';
 import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
 
 export default function Feed() {
   const [tab, setTab] = useState('global');
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  useEffect(() => { base44.auth.me().then(setUser); }, []);
-
   const { data: allActivity = [], isLoading, refetch } = useQuery({
     queryKey: ['activity-feed'],
-    queryFn: () => base44.entities.ActivityItem.list('-created_date', 50),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('activity_items')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
     refetchOnMount: true,
   });
 
   const { data: follows = [] } = useQuery({
     queryKey: ['my-follows', user?.id],
-    queryFn: () => base44.entities.Follow.filter({ follower_id: user.id }, '-created_date', 200),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('follows')
+        .select('*')
+        .eq('follower_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 
   const { data: myReactions = [] } = useQuery({
     queryKey: ['my-reactions', user?.id],
-    queryFn: () => base44.entities.Reaction.list('-created_date', 500),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('reactions')
+        .select('*')
+        .eq('reactor_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 
   const myReactionSet = new Set(myReactions.map(r => `${r.activity_id}:${r.emoji}`));
 
-  // IDs of people I follow (accepted)
   const followingIds = new Set(
     follows.filter(f => f.follower_id === user?.id && f.status === 'accepted').map(f => f.following_id)
   );
 
+  // RLS (activity_items_select_visible) already restricts allActivity to rows
+  // this user is allowed to see — private users' posts are never fetched
+  // unless we're an accepted follower or it's our own. No is_private_user
+  // check needed here anymore; the "global" tab only needs to exclude our
+  // own posts, which is a display choice, not a privacy one.
   const filtered = allActivity.filter(item => {
     if (tab === 'global') {
-      return !item.is_private_user && item.user_id !== user?.id;
+      return item.user_id !== user?.id;
     } else {
-      // following tab: my follows + my own
       return followingIds.has(item.user_id) || item.user_id === user?.id;
     }
   });
 
   const reactMutation = useMutation({
-    mutationFn: async ({ activityId, emoji, currentCount, fieldName, alreadyReacted }) => {
-      if (alreadyReacted) return; // no double react
-      await base44.entities.Reaction.create({
-        activity_id: activityId,
-        reactor_email: user.email,
-        reactor_name: user.full_name || user.email,
-        emoji,
+    mutationFn: async ({ activityId, emoji }) => {
+      const { error } = await supabase.rpc('react_to_activity', {
+        p_activity_id: activityId,
+        p_emoji: emoji,
       });
-      await base44.entities.ActivityItem.update(activityId, {
-        [fieldName]: (currentCount || 0) + 1,
-      });
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activity-feed'] });
@@ -73,10 +95,9 @@ export default function Feed() {
 
   const handleReact = (item, emoji) => {
     if (!user) return;
-    const fieldName = emoji === 'fire' ? 'reactions_fire' : emoji === 'star' ? 'reactions_star' : 'reactions_wow';
-    const currentCount = item[fieldName] || 0;
     const alreadyReacted = myReactionSet.has(`${item.id}:${emoji}`);
-    reactMutation.mutate({ activityId: item.id, emoji, currentCount, fieldName, alreadyReacted });
+    if (alreadyReacted) return; // no double react — react_to_activity() also enforces this
+    reactMutation.mutate({ activityId: item.id, emoji });
   };
 
   const isEmpty = !isLoading && filtered.length === 0;
@@ -93,7 +114,6 @@ export default function Feed() {
         }
       />
 
-      {/* Tab toggle */}
       <div className="px-5 pb-4">
         <div className="flex bg-secondary rounded-lg border border-border p-0.5">
           <button

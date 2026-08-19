@@ -10,8 +10,8 @@ const EMOJI_MAP = { fire: '🔥', star: '⭐', wow: '😮' };
 export default function ActivityCard({ item, user, myReactionSet, onReact }) {
   const navigate = useNavigate();
 
-  const timeAgo = item.created_date
-    ? formatDistanceToNow(new Date(item.created_date), { addSuffix: true })
+  const timeAgo = item.created_at
+    ? formatDistanceToNow(new Date(item.created_at), { addSuffix: true })
     : '';
 
   const openProfile = (e) => {

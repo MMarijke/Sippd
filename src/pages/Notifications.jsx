@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Bell, ArrowLeft, Check, X, CheckCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,30 +8,43 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 export default function Notifications() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  useEffect(() => { base44.auth.me().then(setUser); }, []);
-
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['my-notifications', user?.id],
-    queryFn: () => base44.entities.Notification.filter({ recipient_id: user.id }, '-created_date', 50),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('recipient_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 
   const markAllRead = useMutation({
     mutationFn: async () => {
-      const unread = notifications.filter(n => !n.is_read);
-      await Promise.all(unread.map(n => base44.entities.Notification.update(n.id, { is_read: true })));
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('recipient_id', user.id)
+        .eq('is_read', false);
+      if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['my-notifications'] }),
   });
 
   const handleFollowRequest = useMutation({
     mutationFn: async ({ notif, accept }) => {
-      await base44.entities.Follow.update(notif.follow_id, { status: accept ? 'accepted' : 'denied' });
-      await base44.entities.Notification.update(notif.id, { is_read: true, follow_status: accept ? 'accepted' : 'denied' });
+      const { error } = accept
+        ? await supabase.rpc('accept_follow_request', { p_follow_id: notif.follow_id })
+        : await supabase.rpc('deny_follow_request', { p_follow_id: notif.follow_id });
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['my-notifications'] });
@@ -41,21 +54,11 @@ export default function Notifications() {
 
   const handleTradeRequest = useMutation({
     mutationFn: async ({ notif, accept }) => {
-      await base44.entities.Notification.update(notif.id, {
-        is_read: true,
-        trade_status: accept ? 'accepted' : 'declined',
+      const { error } = await supabase.rpc('respond_to_trade_request', {
+        p_notification_id: notif.id,
+        p_accept: accept,
       });
-      // Notify the requester of the response
-      await base44.entities.Notification.create({
-        recipient_id: notif.actor_id,
-        type: 'trade_response',
-        actor_id: user.id,
-        actor_name: user.full_name || user.email,
-        trade_response_text: accept ? 'accepted' : 'declined',
-        trade_offer_can_name: notif.trade_offer_can_name,
-        trade_want_can_name: notif.trade_want_can_name,
-        is_read: false,
-      });
+      if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['my-notifications'] }),
   });
@@ -113,10 +116,9 @@ export default function Notifications() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-foreground leading-snug">{getLabel(n)}</p>
                   <p className="text-[11px] font-mono text-muted-foreground mt-1">
-                    {n.created_date ? formatDistanceToNow(new Date(n.created_date), { addSuffix: true }) : ''}
+                    {n.created_at ? formatDistanceToNow(new Date(n.created_at), { addSuffix: true }) : ''}
                   </p>
 
-                  {/* Trade request actions */}
                   {n.type === 'trade_request' && !n.trade_status && (
                     <div className="flex gap-2 mt-2">
                       <Button
@@ -143,7 +145,6 @@ export default function Notifications() {
                     </span>
                   )}
 
-                  {/* Follow request actions */}
                   {n.type === 'follow_request' && !n.follow_status && (
                     <div className="flex gap-2 mt-2">
                       <Button

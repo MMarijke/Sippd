@@ -1,54 +1,36 @@
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Trophy, Zap, Crown } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 const MEDAL_COLORS = ['text-yellow-400', 'text-slate-300', 'text-amber-600'];
-const RARE_TIERS = new Set(['Rare', 'Ultra Rare', 'Legendary']);
 
 export default function CollectorsLeaderboard() {
-  const [sortBy, setSortBy] = useState('total');
+  const [sortBy, setSortBy] = useState('total'); // 'total' | 'rare'
   const { user: currentUser } = useAuth();
 
-  const { data: allItems = [], isLoading } = useQuery({
-    queryKey: ['all-collections'],
-    queryFn: () => base44.entities.UserCollection.list('-created_date', 2000),
+  const metricColumn = sortBy === 'total' ? 'total_cans' : 'rare_pulls';
+
+  const { data: scores = [], isLoading } = useQuery({
+    queryKey: ['leaderboard-scores', sortBy],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('leaderboard_scores')
+        .select('*')
+        .order(metricColumn, { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data;
+    },
   });
 
-  const { data: users = [] } = useQuery({
-    queryKey: ['all-users'],
-    queryFn: () => base44.entities.User.list(),
-  });
-
-  const usersMap = useMemo(() =>
-    Object.fromEntries(users.map(u => [u.email, u])),
-    [users]
-  );
-
-  const ranked = useMemo(() => {
-    const stats = {};
-    for (const item of allItems) {
-      if (item.status !== 'collected') continue;
-      const email = item.created_by;
-      if (!email) continue;
-      if (!stats[email]) stats[email] = { total: 0, rare: 0 };
-      stats[email].total += 1;
-      if (RARE_TIERS.has(item.can_rarity || 'Common')) stats[email].rare += 1;
-    }
-    return Object.entries(stats)
-      .map(([email, s]) => ({
-        email,
-        name: usersMap[email]?.full_name || email.split('@')[0],
-        total: s.total,
-        rare: s.rare,
-      }))
-      .filter(u => u.total > 0)
-      .sort((a, b) => b[sortBy] - a[sortBy]);
-  }, [allItems, usersMap, sortBy]);
+  // Ordering comes from the DB query above (per active tab) — this only
+  // hides collectors with nothing in their vault yet.
+  const ranked = scores.filter(s => s.total_cans > 0);
 
   const isEmpty = !isLoading && ranked.length === 0;
 
@@ -80,13 +62,14 @@ export default function CollectorsLeaderboard() {
       ) : (
         <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
           {ranked.map((entry, i) => {
-            const isMe = entry.email === currentUser?.email;
+            const isMe = entry.user_id === currentUser?.id;
             const isMedal = i < 3;
-            const score = entry[sortBy];
-            const initial = entry.name.charAt(0).toUpperCase();
+            const score = entry[metricColumn];
+            const name = entry.full_name || 'Collector';
+            const initial = name.charAt(0).toUpperCase();
             return (
               <div
-                key={entry.email}
+                key={entry.user_id}
                 className={cn('flex items-center gap-3 px-4 py-3', isMe && 'bg-primary/5 border-l-2 border-primary')}
               >
                 <div className="w-7 flex-shrink-0 text-center">
@@ -104,7 +87,7 @@ export default function CollectorsLeaderboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className={cn('text-sm font-semibold truncate', isMe ? 'text-primary' : 'text-foreground')}>
-                    {entry.name}
+                    {name}
                     {isMe && <span className="ml-1.5 text-[10px] font-mono text-primary/70">(you)</span>}
                   </p>
                 </div>

@@ -1,46 +1,56 @@
-import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { getItemScore } from '@/lib/rarityConsensus';
 import FollowButton from '@/components/social/FollowButton';
 
 export default function FindCollectors({ query }) {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState(null);
-  useEffect(() => { base44.auth.me().then(setCurrentUser).catch(() => {}); }, []);
+  const { user: currentUser } = useAuth();
 
   const { data: users = [] } = useQuery({
-    queryKey: ['all-users'],
-    queryFn: () => base44.entities.User.list(),
+    queryKey: ['public-profiles'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('public_profiles').select('*');
+      if (error) throw error;
+      return data;
+    },
   });
 
   const { data: follows = [] } = useQuery({
     queryKey: ['my-follows', currentUser?.id],
-    queryFn: () => base44.entities.Follow.filter({ follower_id: currentUser.id }, '-created_date', 200),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('follows')
+        .select('*')
+        .eq('follower_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      return data;
+    },
     enabled: !!currentUser?.id,
   });
 
-  const { data: allItems = [] } = useQuery({
-    queryKey: ['all-collections'],
-    queryFn: () => base44.entities.UserCollection.list('-created_date', 2000),
+  const { data: scores = [] } = useQuery({
+    queryKey: ['leaderboard-scores-lookup'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('leaderboard_scores').select('user_id, score');
+      if (error) throw error;
+      return data;
+    },
   });
 
   const myFollowingIds = new Set(
     follows.filter(f => f.follower_id === currentUser?.id && f.status === 'accepted').map(f => f.following_id)
   );
 
-  const scoreByEmail = {};
-  for (const item of allItems) {
-    if (item.status !== 'collected' || !item.created_by) continue;
-    scoreByEmail[item.created_by] = (scoreByEmail[item.created_by] || 0) + getItemScore(item, null);
-  }
+  const scoreByUserId = Object.fromEntries(scores.map(s => [s.user_id, s.score]));
 
   const q = query.toLowerCase();
   const results = users.filter(u => {
     if (!u.full_name) return false;
     if (u.id === currentUser?.id) return false;
-    // Show public accounts + accounts I follow
     const accessible = !u.is_private || myFollowingIds.has(u.id);
     return accessible && u.full_name.toLowerCase().includes(q);
   }).slice(0, 8);
@@ -55,7 +65,7 @@ export default function FindCollectors({ query }) {
     <div className="mt-2 bg-card border border-border rounded-xl overflow-hidden divide-y divide-border">
       {results.map(u => {
         const initial = u.full_name?.[0]?.toUpperCase() || '?';
-        const score = scoreByEmail[u.email] || 0;
+        const score = scoreByUserId[u.id] || 0;
         return (
           <div key={u.id} className="flex items-center gap-3 px-4 py-3">
             <button

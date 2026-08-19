@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Star, Flame, Package } from 'lucide-react';
+import { Star, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import RarityBadge from '@/components/shared/RarityBadge';
 import CanImageBox from '@/components/shared/CanImageBox';
@@ -18,16 +19,33 @@ const MEDAL_COLORS = [
 export default function MostWanted() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const { toggleFavourite } = useFavourite();
 
   const { data: sharedCans = [], isLoading } = useQuery({
     queryKey: ['shared-cans'],
-    queryFn: () => base44.entities.SharedCan.list('-community_favourites', 500),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shared_cans')
+        .select('*')
+        .order('community_favourites', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
   });
 
   const { data: myCollection = [] } = useQuery({
-    queryKey: ['user-collection'],
-    queryFn: () => base44.entities.UserCollection.list('-created_date'),
+    queryKey: ['user-collection', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_collection')
+        .select('*')
+        .eq('owner_id', user.id);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
   });
 
   const myCollectionMap = Object.fromEntries(myCollection.map(c => [c.can_id, c]));
@@ -38,7 +56,8 @@ export default function MostWanted() {
 
   const addToWishlist = useMutation({
     mutationFn: async (can) => {
-      await base44.entities.UserCollection.create({
+      const { error } = await supabase.from('user_collection').insert({
+        owner_id: user.id,
         can_id: can.id,
         status: 'wishlist',
         can_name: can.name,
@@ -48,6 +67,7 @@ export default function MostWanted() {
         can_flavour: can.flavour,
         can_edition: can.edition,
       });
+      if (error) throw error;
     },
     onSuccess: (_, can) => {
       queryClient.invalidateQueries({ queryKey: ['user-collection'] });
@@ -101,7 +121,6 @@ export default function MostWanted() {
               isMedal ? MEDAL_COLORS[i] : 'border-border'
             )}
           >
-            {/* Rank */}
             <div className="w-7 flex-shrink-0 text-center">
               {isMedal ? (
                 <span className={cn('text-base font-display font-bold', MEDAL_COLORS[i].split(' ')[0])}>
@@ -112,7 +131,6 @@ export default function MostWanted() {
               )}
             </div>
 
-            {/* Image */}
             <button
               onClick={() => handleCanTap(can)}
               className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0"
@@ -125,7 +143,6 @@ export default function MostWanted() {
               />
             </button>
 
-            {/* Info */}
             <button
               onClick={() => handleCanTap(can)}
               className="flex-1 min-w-0 text-left"
@@ -137,7 +154,6 @@ export default function MostWanted() {
               </div>
             </button>
 
-            {/* Favourite count */}
             <div className="flex flex-col items-center gap-1 flex-shrink-0">
               <button
                 onClick={(e) => {

@@ -135,6 +135,9 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         onSuccess?.();
       }
     },
+    onError: (error) => {
+      toast.error('Failed to add can: ' + (error.message || 'Unknown error'));
+    },
   });
 
   const handleSubmit = () => {

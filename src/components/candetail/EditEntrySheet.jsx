@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,7 @@ const STATUS_OPTIONS = [
 
 export default function EditEntrySheet({ open, onClose, item, myVote }) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const [imageMode, setImageMode] = useState('upload');
   const [uploading, setUploading] = useState(false);
@@ -26,8 +28,22 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    // TODO: replace with Supabase Storage upload (deferred to Prompt 0.6)
-    toast.error('Image upload is temporarily unavailable — paste a URL instead.');
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const { error } = await supabase.storage
+        .from('can-images')
+        .upload(fileName, file, { upsert: false });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage
+        .from('can-images')
+        .getPublicUrl(fileName);
+      update('can_image_url', publicUrl);
+    } catch (err) {
+      toast.error('Failed to upload image');
+    }
+    setUploading(false);
   };
 
   const [form, setForm] = useState({

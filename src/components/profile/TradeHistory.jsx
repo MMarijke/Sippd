@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { ArrowRightLeft, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
@@ -29,12 +29,23 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
 
   const { data: trades = [], isLoading } = useQuery({
     queryKey: ['trades', userId],
-    queryFn: () => base44.entities.Trade.list('-created_date'),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('trades')
+        .select('*')
+        .eq('owner_id', userId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
     enabled: !!userId,
   });
 
   const deleteTrade = useMutation({
-    mutationFn: (id) => base44.entities.Trade.delete(id),
+    mutationFn: async (id) => {
+      const { error } = await supabase.from('trades').delete().eq('id', id).eq('owner_id', userId);
+      if (error) throw error;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trades'] });
       toast.success('Trade removed');
@@ -42,22 +53,14 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
   });
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status, trade }) => {
-      await base44.entities.Trade.update(id, { status });
-      // Notify the other user if they're a Canvolt user and status is meaningful
-      if (trade.traded_with_id && ['completed', 'cancelled'].includes(status) && user?.id) {
-        await base44.entities.Notification.create({
-          recipient_id: trade.traded_with_id,
-          type: 'trade_status_update',
-          actor_id: user.id,
-          actor_name: user.full_name || user.email,
-          trade_id: id,
-          trade_new_status: status,
-          trade_offer_can_name: trade.traded_away_name,
-          trade_want_can_name: trade.received_name,
-          is_read: false,
-        });
-      }
+    mutationFn: async ({ id, status }) => {
+      const { error } = await supabase
+        .from('trades')
+        .update({ status })
+        .eq('id', id)
+        .eq('owner_id', userId);
+      if (error) throw error;
+      // TODO: notify trade partner via RPC (deferred)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trades'] });
@@ -130,7 +133,7 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
           key={trade.id}
           trade={trade}
           onDelete={() => deleteTrade.mutate(trade.id)}
-          onStatusChange={(status) => updateStatus.mutate({ id: trade.id, status, trade })}
+          onStatusChange={(status) => updateStatus.mutate({ id: trade.id, status })}
         />
       ))}
     </div>

@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { Search, ScanLine, CheckCircle2, Trash2, ChevronDown, ChevronRight, Bookmark } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -14,23 +15,37 @@ import { cn } from '@/lib/utils';
 import RecommendedCans from '@/components/wishlist/RecommendedCans';
 
 export default function Wishlist() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [collectedIds, setCollectedIds] = useState(new Set());
   const [collapsedBrands, setCollapsedBrands] = useState(new Set());
   const queryClient = useQueryClient();
 
-  useEffect(() => { base44.auth.me().then(setUser); }, []);
-
   const { data: collection = [], isLoading } = useQuery({
     queryKey: ['user-collection', user?.id],
-    queryFn: () => base44.entities.UserCollection.list('-created_date'),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_collection')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 
   const { data: sharedCans = [] } = useQuery({
     queryKey: ['shared-cans'],
-    queryFn: () => base44.entities.SharedCan.list('-created_date', 500),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shared_cans')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
   });
 
   const sharedCansMap = useMemo(
@@ -78,13 +93,30 @@ export default function Wishlist() {
 
   const moveToCollection = async (item) => {
     setCollectedIds(prev => new Set(prev).add(item.id));
-    await base44.entities.UserCollection.update(item.id, { status: 'collected' });
+    const { error } = await supabase
+      .from('user_collection')
+      .update({ status: 'collected' })
+      .eq('id', item.id)
+      .eq('owner_id', user.id);
+    if (error) {
+      toast.error('Failed to move to collection');
+      setCollectedIds(prev => { const next = new Set(prev); next.delete(item.id); return next; });
+      return;
+    }
     queryClient.invalidateQueries({ queryKey: ['user-collection', user?.id] });
     toast.success(`${item.can_name} added to your collection!`);
   };
 
   const removeFromWishlist = async (item) => {
-    await base44.entities.UserCollection.delete(item.id);
+    const { error } = await supabase
+      .from('user_collection')
+      .delete()
+      .eq('id', item.id)
+      .eq('owner_id', user.id);
+    if (error) {
+      toast.error('Failed to remove from wishlist');
+      return;
+    }
     queryClient.invalidateQueries({ queryKey: ['user-collection', user?.id] });
     toast.success('Removed from wishlist');
   };

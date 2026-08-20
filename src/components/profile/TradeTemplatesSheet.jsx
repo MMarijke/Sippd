@@ -1,10 +1,9 @@
-import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { X, BookmarkCheck, Trash2, ArrowRightLeft, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
 
 const RARITY_COLORS = {
   Common: 'text-gray-400',
@@ -16,14 +15,27 @@ const RARITY_COLORS = {
 
 export default function TradeTemplatesSheet({ onClose, onUseTemplate }) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data: templates = [], isLoading } = useQuery({
-    queryKey: ['trade-templates'],
-    queryFn: () => base44.entities.TradeTemplate.list('-created_date'),
+    queryKey: ['trade-templates', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('trade_templates')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
   });
 
   const deleteTemplate = useMutation({
-    mutationFn: (id) => base44.entities.TradeTemplate.delete(id),
+    mutationFn: async (id) => {
+      const { error } = await supabase.from('trade_templates').delete().eq('id', id).eq('owner_id', user.id);
+      if (error) throw error;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trade-templates'] });
       toast.success('Template deleted');

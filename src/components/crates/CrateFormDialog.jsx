@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,11 +17,15 @@ export default function CrateFormDialog({ crate, onClose, userId }) {
   const isEdit = !!crate;
 
   const mutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       const data = { name: name.trim(), description: description.trim(), emoji };
-      return isEdit
-        ? base44.entities.Crate.update(crate.id, data)
-        : base44.entities.Crate.create({ ...data, can_ids: [] });
+      if (isEdit) {
+        const { error } = await supabase.from('crates').update(data).eq('id', crate.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('crates').insert({ ...data, owner_id: userId, can_ids: [] });
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['crates', userId] });

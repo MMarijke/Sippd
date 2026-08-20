@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, Share2, Package, Flame, Trophy, Tag, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,16 +25,34 @@ const RARITY_RANK = { Common: 1, Uncommon: 2, Rare: 3, 'Ultra Rare': 4, Legendar
 export default function MonthlyReport() {
   const navigate = useNavigate();
   const streak = useStreak();
+  const { user } = useAuth();
   const [monthDate, setMonthDate] = useState(() => startOfMonth(new Date()));
 
   const { data: collection = [] } = useQuery({
-    queryKey: ['user-collection'],
-    queryFn: () => base44.entities.UserCollection.list('-created_date'),
+    queryKey: ['user-collection', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_collection')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
   });
 
   const { data: sharedCans = [] } = useQuery({
     queryKey: ['shared-cans'],
-    queryFn: () => base44.entities.SharedCan.list('-created_date', 500),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shared_cans')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
   });
 
   const sharedCansMap = useMemo(
@@ -56,7 +75,7 @@ export default function MonthlyReport() {
   const monthItems = useMemo(() =>
     collection.filter(item => {
       try {
-        return isWithinInterval(parseISO(item.created_date), monthInterval);
+        return isWithinInterval(parseISO(item.created_at), monthInterval);
       } catch { return false; }
     }),
     [collection, monthInterval]

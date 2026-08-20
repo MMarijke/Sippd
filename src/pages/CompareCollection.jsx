@@ -1,6 +1,7 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { ArrowLeft, GitCompare, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import RarityBadge from '@/components/shared/RarityBadge';
@@ -18,27 +19,58 @@ export default function CompareCollection() {
   const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
   const friendId = urlParams.get('with');
-  const [currentUser, setCurrentUser] = useState(null);
+  const { user: currentUser } = useAuth();
   const [tab, setTab] = useState('mine');
 
-  useEffect(() => { base44.auth.me().then(setCurrentUser).catch(() => {}); }, []);
-
-  const { data: users = [] } = useQuery({
-    queryKey: ['all-users-compare'],
-    queryFn: () => base44.entities.User.list(),
+  const { data: friendUser } = useQuery({
+    queryKey: ['public-profile', friendId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('public_profiles').select('*').eq('id', friendId).single();
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
+    },
+    enabled: !!friendId,
   });
 
-  const friendUser = useMemo(() => users.find(u => u.id === friendId), [users, friendId]);
+  const { data: myItems = [], isLoading: loadingMine } = useQuery({
+    queryKey: ['user-collection-compare', currentUser?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_collection')
+        .select('*')
+        .eq('owner_id', currentUser.id)
+        .eq('status', 'collected');
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!currentUser?.id,
+  });
 
-  const { data: allItems = [], isLoading } = useQuery({
-    queryKey: ['all-collections-compare'],
-    queryFn: () => base44.entities.UserCollection.list('-created_date', 2000),
-    enabled: !!currentUser && !!friendUser,
+  const { data: friendItems = [], isLoading: loadingFriend } = useQuery({
+    queryKey: ['user-collection-compare', friendId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_collection')
+        .select('*')
+        .eq('owner_id', friendId)
+        .eq('status', 'collected');
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!friendId,
   });
 
   const { data: sharedCans = [] } = useQuery({
     queryKey: ['shared-cans-compare'],
-    queryFn: () => base44.entities.SharedCan.list('-created_date', 500),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shared_cans')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
   });
 
   const sharedCansMap = useMemo(
@@ -53,18 +85,6 @@ export default function CompareCollection() {
     return conf === 'unrated' ? null : getDisplayRarity(sc);
   };
 
-  // My collected can_ids
-  const myItems = useMemo(
-    () => allItems.filter(i => i.created_by_id === currentUser?.id && i.status === 'collected'),
-    [allItems, currentUser]
-  );
-
-  // Friend's collected can_ids
-  const friendItems = useMemo(
-    () => allItems.filter(i => i.created_by_id === friendId && i.status === 'collected'),
-    [allItems, friendId]
-  );
-
   const myCanIds = useMemo(() => new Set(myItems.map(i => i.can_id)), [myItems]);
   const friendCanIds = useMemo(() => new Set(friendItems.map(i => i.can_id)), [friendItems]);
 
@@ -75,6 +95,8 @@ export default function CompareCollection() {
 
   const tabItems = { mine: onlyMine, theirs: onlyTheirs, both: inCommon };
   const displayItems = tabItems[tab] || [];
+
+  const isLoading = loadingMine || loadingFriend;
 
   const tabColors = {
     mine: 'bg-green-500/10 border-green-500/30 text-green-400',
@@ -87,7 +109,7 @@ export default function CompareCollection() {
     both: 'bg-primary/20 border-primary/50 text-primary',
   };
 
-  const myName = currentUser?.full_name || 'Me';
+  const myName = currentUser?.user_metadata?.full_name || 'Me';
   const friendName = friendUser?.full_name || 'Friend';
 
   return (

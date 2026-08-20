@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { X, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,8 +17,8 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
   const crateCanIds = new Set(crate.can_ids || []);
 
   const applySorting = (items) => items.slice().sort((a, b) => {
-    if (sort === 'date_asc') return new Date(a.created_date) - new Date(b.created_date);
-    if (sort === 'date_desc') return new Date(b.created_date) - new Date(a.created_date);
+    if (sort === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
+    if (sort === 'date_desc') return new Date(b.created_at) - new Date(a.created_at);
     if (sort === 'brand_asc') return (a.can_brand || '').localeCompare(b.can_brand || '');
     if (sort === 'brand_desc') return (b.can_brand || '').localeCompare(a.can_brand || '');
     if (sort === 'rarity_desc') return RARITY_ORDER.indexOf(b.can_rarity || 'Common') - RARITY_ORDER.indexOf(a.can_rarity || 'Common');
@@ -33,7 +33,10 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
   );
 
   const updateCrate = useMutation({
-    mutationFn: (newIds) => base44.entities.Crate.update(crate.id, { can_ids: newIds }),
+    mutationFn: async (newIds) => {
+      const { error } = await supabase.from('crates').update({ can_ids: newIds }).eq('id', crate.id);
+      if (error) throw error;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['crates'] });
       onCrateUpdated();

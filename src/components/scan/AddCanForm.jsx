@@ -81,6 +81,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
 
   const createMutation = useMutation({
     mutationFn: async () => {
+      console.log('[vote_on_can] mutation started', { currentUser: currentUser?.id, prefillId: prefillData?.id, rarity: form.rarity });
       let sharedCan;
 
       if (prefillData?.id && alreadyVoted) {
@@ -142,7 +143,9 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
   });
 
   const handleSubmit = () => {
-    if (validate()) createMutation.mutate();
+    const ok = validate();
+    console.log('[vote_on_can] validate:', ok, { name: form.name, brand: form.brand, isPending: createMutation.isPending });
+    if (ok) createMutation.mutate();
   };
 
   const handleImageUpload = async (e) => {

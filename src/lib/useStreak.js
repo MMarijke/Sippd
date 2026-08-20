@@ -1,59 +1,25 @@
-import { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
-
-function toDateStr(date) {
-  return date.toISOString().slice(0, 10); // YYYY-MM-DD
-}
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 
 /**
- * On mount, compares today vs user.last_active_date:
- *  - Same day → streak unchanged
- *  - Yesterday → streak + 1, update last_active_date
- *  - Older / missing → reset to 1, update last_active_date
- * Returns the current streak value (number).
+ * Ticks the caller's streak server-side via tick_streak() on mount and
+ * returns the current streak value (number). All date/streak logic lives
+ * in the RPC — this hook just triggers it and reads the result.
  */
 export function useStreak() {
-  const [streak, setStreak] = useState(0);
+  const { user } = useAuth();
 
-  useEffect(() => {
-    let cancelled = false;
+  const { data } = useQuery({
+    queryKey: ['streak', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('tick_streak');
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+    staleTime: Infinity,
+  });
 
-    async function tick() {
-      const user = await base44.auth.me();
-      const today = toDateStr(new Date());
-      const last = user.last_active_date;
-      const current = user.current_streak || 0;
-
-      let newStreak = current;
-
-      if (!last) {
-        // First ever open
-        newStreak = 1;
-      } else if (last === today) {
-        // Already updated today — nothing to do
-        newStreak = current;
-      } else {
-        // Check if last was yesterday
-        const yesterday = toDateStr(new Date(Date.now() - 86400000));
-        if (last === yesterday) {
-          newStreak = current + 1;
-        } else {
-          // Missed a day — reset
-          newStreak = 1;
-        }
-      }
-
-      if (!cancelled) setStreak(newStreak);
-
-      // Persist if date changed
-      if (last !== today) {
-        await base44.auth.updateMe({ last_active_date: today, current_streak: newStreak });
-      }
-    }
-
-    tick();
-    return () => { cancelled = true; };
-  }, []);
-
-  return streak;
+  return data?.current_streak ?? 0;
 }

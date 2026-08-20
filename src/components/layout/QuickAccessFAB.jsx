@@ -2,21 +2,29 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ScanLine, ArrowLeftRight, Zap, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function QuickAccessFAB() {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState(null);
   const longPressTimer = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === '/';
-
-  useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
+  const { user } = useAuth();
 
   const { data: notifications = [] } = useQuery({
     queryKey: ['fab-trade-notifs', user?.id],
-    queryFn: () => base44.entities.Notification.filter({ recipient_id: user.id, type: 'trade_request', is_read: false }),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('recipient_id', user.id)
+        .eq('type', 'trade_request')
+        .eq('is_read', false);
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 

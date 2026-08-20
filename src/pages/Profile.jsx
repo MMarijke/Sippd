@@ -210,7 +210,7 @@ export default function Profile() {
       <TradeHistory userId={user?.id} user={user} onLogTrade={() => setShowTradeLog(true)} />
 
       {showShareCard && (
-        <ShareCardModal user={user} onClose={() => setShowShareCard(false)} />
+        <ShareCardModal user={{ ...user, ...profile }} onClose={() => setShowShareCard(false)} />
       )}
       {showTradeLog && (
         <TradeLogDialog collection={collection} onClose={() => setShowTradeLog(false)} />

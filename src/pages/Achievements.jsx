@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,23 +13,38 @@ import { useAchievementUnlock } from '@/hooks/useAchievementUnlock';
 export default function Achievements() {
   const navigate = useNavigate();
   const streak = useStreak();
-  const [user, setUser] = useState(null);
-
-  useEffect(() => { base44.auth.me().then(setUser); }, []);
+  const { user } = useAuth();
 
   const { data: collection = [], isLoading } = useQuery({
     queryKey: ['user-collection', user?.id],
-    queryFn: () => base44.entities.UserCollection.list('-created_date'),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_collection')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 
   const { data: votes = [] } = useQuery({
     queryKey: ['my-votes', user?.id],
-    queryFn: () => base44.entities.RarityVote.list('-created_date', 500),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('rarity_votes')
+        .select('*')
+        .eq('voter_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 
-  const achievements = computeAchievements(collection, streak, votes.length, user?.created_date);
+  const achievements = computeAchievements(collection, streak, votes.length, user?.created_at);
   const unlocked = achievements.filter(a => a.unlocked).length;
 
   const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements);

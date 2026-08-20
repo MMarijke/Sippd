@@ -1,7 +1,8 @@
+// TODO Phase 1: "CANVOLT" text in card template needs rebrand to "SIPPD"
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { X, ArrowLeft, Download, Share2, Loader2, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getDisplayRarity, getConfidence, getItemScore, RARITY_ORDER } from '@/lib/rarityConsensus';
@@ -91,13 +92,29 @@ export default function ShareCardModal({ user, onClose }) {
   const [cardDataUrl, setCardDataUrl] = useState(null);
 
   const { data: collection = [] } = useQuery({
-    queryKey: ['user-collection'],
-    queryFn: () => base44.entities.UserCollection.list('-created_date'),
+    queryKey: ['user-collection', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_collection')
+        .select('*')
+        .eq('owner_id', user.id);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
   });
 
   const { data: sharedCans = [] } = useQuery({
     queryKey: ['shared-cans'],
-    queryFn: () => base44.entities.SharedCan.list('-created_date', 500),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shared_cans')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
   });
 
   const sharedCansMap = useMemo(

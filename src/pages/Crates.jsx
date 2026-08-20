@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Plus, ChevronLeft, Pencil, Trash2, PackageOpen } from 'lucide-react';
+import { Plus, ChevronLeft, PackageOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CrateCard from '@/components/crates/CrateCard';
 import CrateFormDialog from '@/components/crates/CrateFormDialog';
@@ -11,27 +12,48 @@ import CrateDetailSheet from '@/components/crates/CrateDetailSheet';
 export default function Crates() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [editingCrate, setEditingCrate] = useState(null);
   const [selectedCrate, setSelectedCrate] = useState(null);
 
-  useEffect(() => { base44.auth.me().then(setUser); }, []);
-
   const { data: crates = [], isLoading } = useQuery({
     queryKey: ['crates', user?.id],
-    queryFn: () => base44.entities.Crate.list('-created_date'),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('crates')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 
   const { data: collection = [] } = useQuery({
     queryKey: ['user-collection', user?.id],
-    queryFn: () => base44.entities.UserCollection.list('-created_date'),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_collection')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Crate.delete(id),
+    mutationFn: async (id) => {
+      const { error } = await supabase
+        .from('crates')
+        .delete()
+        .eq('id', id)
+        .eq('owner_id', user.id);
+      if (error) throw error;
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['crates'] }),
   });
 

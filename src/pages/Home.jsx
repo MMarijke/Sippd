@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { ScanLine, Zap, BarChart2, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,21 +17,36 @@ import AchievementUnlockAnimation from '@/components/achievements/AchievementUnl
 import { useNotifications } from '@/hooks/useNotifications';
 
 export default function Home() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const navigate = useNavigate();
-  useEffect(() => { base44.auth.me().then(setUser); }, []);
   const { unreadCount } = useNotifications(user);
 
   const { data: collection = [], isLoading: loadingCollection } = useQuery({
     queryKey: ['user-collection', user?.id],
-    queryFn: () => base44.entities.UserCollection.list('-created_date'),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_collection')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
     refetchOnMount: true,
   });
 
   const { data: sharedCans = [], isLoading: loadingShared } = useQuery({
     queryKey: ['shared-cans'],
-    queryFn: () => base44.entities.SharedCan.list('-created_date', 500),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shared_cans')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
     refetchOnMount: true,
   });
 
@@ -40,11 +55,20 @@ export default function Home() {
 
   const { data: votes = [] } = useQuery({
     queryKey: ['my-votes', user?.id],
-    queryFn: () => base44.entities.RarityVote.list('-created_date', 500),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('rarity_votes')
+        .select('*')
+        .eq('voter_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
     enabled: !!user?.id,
   });
 
-  const achievements = computeAchievements(collection, streak, votes.length, user?.created_date);
+  const achievements = computeAchievements(collection, streak, votes.length, user?.created_at);
   const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements);
 
   const sharedCansMap = Object.fromEntries(sharedCans.map(c => [c.id, c]));

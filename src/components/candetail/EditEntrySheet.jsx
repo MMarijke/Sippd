@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,10 +26,8 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    update('can_image_url', file_url);
-    setUploading(false);
+    // TODO: replace with Supabase Storage upload (deferred to Prompt 0.6)
+    toast.error('Image upload is temporarily unavailable — paste a URL instead.');
   };
 
   const [form, setForm] = useState({
@@ -45,7 +43,10 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
   const saveMutation = useMutation({
-    mutationFn: () => base44.entities.UserCollection.update(item.id, form),
+    mutationFn: async () => {
+      const { error } = await supabase.from('user_collection').update(form).eq('id', item.id);
+      if (error) throw error;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-collection'] });
       toast.success('Entry updated');

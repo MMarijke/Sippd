@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Pencil, Trash2, Calendar, Tag,
@@ -39,37 +40,62 @@ const RARITY_COLORS = {
 export default function CanDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const canId = window.location.pathname.split('/can/')[1];
   const [showDelete, setShowDelete] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const { toggleFavourite } = useFavourite();
 
   const { data: collectionItems = [] } = useQuery({
-    queryKey: ['user-collection'],
-    queryFn: () => base44.entities.UserCollection.list('-created_date'),
-  });
-
-  const { data: sharedCanArr } = useQuery({
-    queryKey: ['shared-can', canId],
-    queryFn: () => base44.entities.SharedCan.filter({ id: canId }),
-    enabled: !!canId,
-  });
-
-  const { data: myVote } = useQuery({
-    queryKey: ['rarity-vote', canId],
+    queryKey: ['user-collection', user?.id],
     queryFn: async () => {
-      const user = await base44.auth.me();
-      const votes = await base44.entities.RarityVote.filter({ can_id: canId, created_by: user.email });
-      return votes?.[0] || null;
+      const { data, error } = await supabase
+        .from('user_collection')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: can } = useQuery({
+    queryKey: ['shared-can', canId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('shared_cans').select('*').eq('id', canId).single();
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     },
     enabled: !!canId,
   });
 
+  const { data: myVote } = useQuery({
+    queryKey: ['rarity-vote', canId, user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('rarity_votes')
+        .select('*')
+        .eq('can_id', canId)
+        .eq('voter_id', user.id)
+        .single();
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
+    },
+    enabled: !!canId && !!user?.id,
+  });
+
   const item = collectionItems.find(c => c.can_id === canId);
-  const can = sharedCanArr?.[0];
 
   const deleteMutation = useMutation({
-    mutationFn: () => base44.entities.UserCollection.delete(item.id),
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('user_collection')
+        .delete()
+        .eq('id', item.id)
+        .eq('owner_id', user.id);
+      if (error) throw error;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-collection'] });
       navigate('/collection');
@@ -256,14 +282,14 @@ export default function CanDetail() {
               <p className="text-sm font-semibold text-foreground">{edition}</p>
             </div>
           )}
-          {item?.created_date && (
+          {item?.created_at && (
             <div className="bg-card border border-border rounded-xl p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <Calendar className="w-3 h-3 text-muted-foreground" />
                 <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Added</span>
               </div>
               <p className="text-sm font-semibold text-foreground">
-                {format(new Date(item.created_date), 'MMM d, yyyy')}
+                {format(new Date(item.created_at), 'MMM d, yyyy')}
               </p>
             </div>
           )}

@@ -38,6 +38,7 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
   const sendRequest = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.rpc('send_trade_request', {
+        p_caller_id: currentUser.id,
         p_target_id: targetUser.id,
         p_offer_can_name: selectedOffer?.can_name || null,
         p_offer_can_brand: selectedOffer?.can_brand || null,

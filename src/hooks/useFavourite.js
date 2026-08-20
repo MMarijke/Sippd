@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/lib/AuthContext';
 
 /**
  * Hook to toggle a favourite on a UserCollection item.
@@ -8,10 +9,12 @@ import { supabase } from '@/lib/supabaseClient';
  */
 export function useFavourite() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { mutate: toggleFavourite, isPending } = useMutation({
     mutationFn: async ({ collectionItem }) => {
       const { data, error } = await supabase.rpc('toggle_favourite', {
+        p_caller_id: user.id,
         p_collection_id: collectionItem.id,
       });
       if (error) throw error;

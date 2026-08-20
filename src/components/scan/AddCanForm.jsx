@@ -90,6 +90,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         // Either a brand-new can (first vote) or an existing can this user hasn't voted on yet.
         // vote_on_can() handles can creation, vote recording, and aggregate updates atomically.
         const { data, error } = await supabase.rpc('vote_on_can', {
+          p_caller_id: currentUser.id,
           p_can_id: prefillData?.id ?? null,
           p_rarity: form.rarity,
           p_name: form.name || null,

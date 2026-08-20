@@ -42,8 +42,8 @@ export default function Notifications() {
   const handleFollowRequest = useMutation({
     mutationFn: async ({ notif, accept }) => {
       const { error } = accept
-        ? await supabase.rpc('accept_follow_request', { p_follow_id: notif.follow_id })
-        : await supabase.rpc('deny_follow_request', { p_follow_id: notif.follow_id });
+        ? await supabase.rpc('accept_follow_request', { p_caller_id: user.id, p_follow_id: notif.follow_id })
+        : await supabase.rpc('deny_follow_request', { p_caller_id: user.id, p_follow_id: notif.follow_id });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -55,6 +55,7 @@ export default function Notifications() {
   const handleTradeRequest = useMutation({
     mutationFn: async ({ notif, accept }) => {
       const { error } = await supabase.rpc('respond_to_trade_request', {
+        p_caller_id: user.id,
         p_notification_id: notif.id,
         p_accept: accept,
       });

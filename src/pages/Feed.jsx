@@ -82,6 +82,7 @@ export default function Feed() {
   const reactMutation = useMutation({
     mutationFn: async ({ activityId, emoji }) => {
       const { error } = await supabase.rpc('react_to_activity', {
+        p_caller_id: user.id,
         p_activity_id: activityId,
         p_emoji: emoji,
       });

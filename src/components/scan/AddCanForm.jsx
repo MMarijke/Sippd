@@ -81,6 +81,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
 
   const createMutation = useMutation({
     mutationFn: async () => {
+      console.log('[vote_on_can] mutation started', { currentUser: currentUser?.id, prefillId: prefillData?.id, rarity: form.rarity });
       let sharedCan;
 
       if (prefillData?.id && alreadyVoted) {
@@ -90,6 +91,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         // Either a brand-new can (first vote) or an existing can this user hasn't voted on yet.
         // vote_on_can() handles can creation, vote recording, and aggregate updates atomically.
         const { data, error } = await supabase.rpc('vote_on_can', {
+          p_caller_id: currentUser.id,
           p_can_id: prefillData?.id ?? null,
           p_rarity: form.rarity,
           p_name: form.name || null,
@@ -141,7 +143,9 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
   });
 
   const handleSubmit = () => {
-    if (validate()) createMutation.mutate();
+    const ok = validate();
+    console.log('[vote_on_can] validate:', ok, { name: form.name, brand: form.brand, isPending: createMutation.isPending });
+    if (ok) createMutation.mutate();
   };
 
   const handleImageUpload = async (e) => {

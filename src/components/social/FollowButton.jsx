@@ -30,7 +30,7 @@ export default function FollowButton({ targetUser, currentUser }) {
 
   const followMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc('request_follow', { p_target_id: targetUser.id });
+      const { error } = await supabase.rpc('request_follow', { p_caller_id: currentUser.id, p_target_id: targetUser.id });
       if (error) throw error;
     },
     onSuccess: () => {

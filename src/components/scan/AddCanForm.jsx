@@ -144,8 +144,22 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    // TODO: replace with Supabase Storage upload (deferred to Prompt 0.6)
-    toast.error('Image upload is temporarily unavailable — paste a URL instead.');
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
+      const { error } = await supabase.storage
+        .from('can-images')
+        .upload(fileName, file, { upsert: false });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage
+        .from('can-images')
+        .getPublicUrl(fileName);
+      update('image_url', publicUrl);
+    } catch (err) {
+      toast.error('Failed to upload image');
+    }
+    setUploading(false);
   };
 
   if (showReveal) {

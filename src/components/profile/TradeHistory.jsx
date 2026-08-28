@@ -203,7 +203,7 @@ function CanChip({ name, brand, imageUrl, rarity, label }) {
       <p className="text-[10px] font-mono text-muted-foreground mb-1">{label}</p>
       <div className="flex items-center gap-2 bg-secondary rounded-lg px-2 py-1.5">
         <div className="w-7 h-7 rounded-md overflow-hidden border border-border flex-shrink-0 bg-[#0D2B2B]">
-          {imageUrl && <img src={imageUrl} alt={name} className="w-full h-full object-contain" />}
+          {imageUrl && <img src={imageUrl} alt={name} loading="lazy" decoding="async" className="w-full h-full object-contain" />}
         </div>
         <div className="min-w-0">
           <p className="text-xs font-body font-medium text-foreground truncate leading-tight">{name}</p>

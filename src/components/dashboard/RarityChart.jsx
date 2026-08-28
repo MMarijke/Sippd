@@ -1,13 +1,5 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { getDisplayRarity } from '@/lib/rarityConsensus';
-
-const RARITY_COLORS = {
-  'Common': '#6B7280',
-  'Uncommon': '#22C55E',
-  'Rare': '#3B82F6',
-  'Ultra Rare': '#A855F7',
-  'Legendary': '#EC4899',
-};
+import { getDisplayRarity, RARITY_HEX as RARITY_COLORS } from '@/lib/rarityConsensus';
 
 export default function RarityChart({ collection, sharedCansMap = {} }) {
   const rarityCounts = {};

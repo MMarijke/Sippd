@@ -7,19 +7,11 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Share2, Package, Flame, Trophy, T
 import { Button } from '@/components/ui/button';
 import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, subMonths, addMonths } from 'date-fns';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { getDisplayRarity, getConfidence, RARITY_POINTS } from '@/lib/rarityConsensus';
+import { getDisplayRarity, getConfidence, RARITY_POINTS, RARITY_ORDER, RARITY_HEX as RARITY_COLORS } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
 import RarityBadge from '@/components/shared/RarityBadge';
 import CanImageBox from '@/components/shared/CanImageBox';
 
-const RARITY_ORDER = ['Common', 'Uncommon', 'Rare', 'Ultra Rare', 'Legendary'];
-const RARITY_COLORS = {
-  'Common': '#6B7280',
-  'Uncommon': '#22C55E',
-  'Rare': '#3B82F6',
-  'Ultra Rare': '#A855F7',
-  'Legendary': '#EC4899',
-};
 const RARITY_RANK = { Common: 1, Uncommon: 2, Rare: 3, 'Ultra Rare': 4, Legendary: 5 };
 
 export default function MonthlyReport() {

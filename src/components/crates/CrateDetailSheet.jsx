@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { X, Plus, Minus } from 'lucide-react';
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -58,22 +59,26 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div
-        className="w-full max-w-lg bg-card border-t border-border rounded-t-3xl flex flex-col"
+    <Sheet open onOpenChange={o => !o && onClose()}>
+      <SheetContent
+        side="bottom"
+        hideClose
+        className="max-w-lg mx-auto bg-card border-t border-border rounded-t-3xl flex flex-col p-0"
         style={{ maxHeight: '85vh' }}
-        onClick={e => e.stopPropagation()}
       >
+        <SheetDescription className="sr-only">Manage which cans are in the "{crate.name}" crate.</SheetDescription>
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
           <div className="flex items-center gap-3">
             <span className="text-2xl">{crate.emoji || '📦'}</span>
             <div>
-              <h2 className="text-base font-display font-bold text-foreground">{crate.name}</h2>
+              <SheetTitle asChild>
+                <h2 className="text-base font-display font-bold text-foreground">{crate.name}</h2>
+              </SheetTitle>
               {crate.description && <p className="text-[11px] font-mono text-muted-foreground">{crate.description}</p>}
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground">
+          <button onClick={onClose} className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground flex-shrink-0">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -147,8 +152,8 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
             <CanRow key={item.id} item={item} action="add" onAction={() => addCan(item.id)} />
           ))}
         </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 
@@ -160,7 +165,7 @@ function CanRow({ item, action, onAction }) {
         style={{ background: item.can_bg_color || '#0D2B2B' }}
       >
         {item.can_image_url && (
-          <img src={item.can_image_url} alt={item.can_name} className="w-full h-full object-contain" />
+          <img src={item.can_image_url} alt={item.can_name} loading="lazy" decoding="async" className="w-full h-full object-contain" />
         )}
       </div>
       <div className="flex-1 min-w-0">
@@ -169,7 +174,7 @@ function CanRow({ item, action, onAction }) {
       </div>
       <button
         onClick={onAction}
-        className={`w-7 h-7 rounded-lg flex items-center justify-center border transition-colors flex-shrink-0 ${
+        className={`w-11 h-11 rounded-lg flex items-center justify-center border transition-colors flex-shrink-0 ${
           action === 'add'
             ? 'bg-primary/10 border-primary/30 text-primary hover:bg-primary/20'
             : 'bg-destructive/10 border-destructive/30 text-destructive hover:bg-destructive/20'

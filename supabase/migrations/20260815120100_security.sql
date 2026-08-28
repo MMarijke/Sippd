@@ -3,7 +3,7 @@
 --
 -- Reviewed and approved 2026-08-15:
 --   - activity_items RLS deliberately enforces real privacy at the database
---     layer (stricter than today's Base44 app, which only hides private
+--     layer (stricter than the original app, which only hid private
 --     posts client-side while shipping the data to every browser anyway).
 --   - react_to_activity() + the reactions lockdown trigger are included
 --     (same race-condition class as vote_on_can()/toggle_favourite()).
@@ -210,7 +210,7 @@ create trigger on_auth_user_created
   for each row execute function handle_new_user();
 
 -- ── Public profile view ──────────────────────────────────────────────────────
--- Replaces every base44.entities.User.list() call site (notifyRarePull.js,
+-- Replaces every full-user-table read call site (notifyRarePull.js,
 -- TradeLogDialog.jsx, FindCollectors.jsx, CollectorsLeaderboard.jsx) with a
 -- narrow, name-only surface. Deliberately owned by the migration role (not
 -- created with security_invoker), so it runs with the view owner's privileges
@@ -688,8 +688,9 @@ create policy crates_delete_own on crates for delete to authenticated using (own
 
 alter table follows enable row level security;
 -- both sides of the relationship can read it — the followee needs to see an
--- incoming pending request, which Base44's declared owner-only (=creator-only)
--- read would not have allowed. Real behavior improvement, flagged in chat.
+-- incoming pending request, which the original app's declared owner-only
+-- (=creator-only) read would not have allowed. Real behavior improvement,
+-- flagged in chat.
 create policy follows_select_participant on follows for select to authenticated
   using (follower_id = auth.uid() or following_id = auth.uid());
 -- no insert policy: request_follow() only, so status + the matching

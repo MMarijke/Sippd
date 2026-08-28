@@ -56,11 +56,11 @@ module.exports = {
   				'5': 'hsl(var(--chart-5))'
   			},
   			rarity: {
-  				common: '#6B7280',
-  				uncommon: '#22C55E',
-  				rare: '#3B82F6',
-  				ultra: '#A855F7',
-  				limited: '#EC4899',
+  				common: 'hsl(var(--rarity-common))',
+  				uncommon: 'hsl(var(--rarity-uncommon))',
+  				rare: 'hsl(var(--rarity-rare))',
+  				ultra: 'hsl(var(--rarity-ultra))',
+  				legendary: 'hsl(var(--rarity-legendary))',
   			},
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',

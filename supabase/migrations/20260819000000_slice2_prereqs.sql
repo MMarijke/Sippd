@@ -2,8 +2,8 @@
 -- same as every other migration in this project.
 
 -- Extend public_profiles for PublicProfile.jsx (streak + join date — both
--- were already publicly visible under Base44's full User.list() read, just
--- narrower now: still no email, role, or other sensitive column).
+-- were already publicly visible under the original app's full user-table
+-- read, just narrower now: still no email, role, or other sensitive column).
 create or replace view public_profiles as
 select id, full_name, is_private, current_streak, created_at
 from profiles;

@@ -143,10 +143,10 @@ export default function Profile() {
                   className="h-8 text-sm font-display bg-secondary border-primary/30 focus-visible:ring-primary/50 px-2"
                   maxLength={40}
                 />
-                <button onClick={saveEdit} disabled={saving} className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors">
+                <button onClick={saveEdit} disabled={saving} className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors flex-shrink-0">
                   <Check className="w-3.5 h-3.5" />
                 </button>
-                <button onClick={cancelEdit} className="w-7 h-7 rounded-lg bg-muted/50 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+                <button onClick={cancelEdit} className="w-11 h-11 rounded-lg bg-muted/50 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>

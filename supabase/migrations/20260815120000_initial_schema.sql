@@ -4,14 +4,14 @@
 --
 -- NOT APPLIED ANYWHERE. Draft for review.
 --
--- Source of truth for this translation: base44/entities/*.jsonc plus the actual
--- client code that reads/writes each field (the .jsonc files under-declare some
--- fields — e.g. User.jsonc omits `is_private` and `notify_rare_follows`, which
--- only show up in Settings.jsx).
+-- Source of truth for this translation: the original app's entity/*.jsonc
+-- schema declarations plus the actual client code that reads/writes each
+-- field (the .jsonc files under-declare some fields — e.g. User.jsonc omits
+-- `is_private` and `notify_rare_follows`, which only show up in Settings.jsx).
 --
--- Deliberately omitted: the `Achievement` entity. It exists in base44/entities/
--- but is never referenced anywhere in src/ (`base44.entities.Achievement` has
--- zero call sites) — achievements are fully defined in src/lib/achievements.js
+-- Deliberately omitted: the `Achievement` entity. It existed in the original
+-- app's entity declarations but was never referenced anywhere in src/ (zero
+-- call sites) — achievements are fully defined in src/lib/achievements.js
 -- as a hardcoded list. Porting a dead table seemed worse than flagging it; say
 -- the word if you want it anyway (e.g. to make achievements admin-editable later).
 
@@ -25,9 +25,9 @@ create type collection_status as enum ('collected', 'wishlist', 'duplicate');
 
 create type user_role as enum ('admin', 'user');
 
--- Base44's Follow.jsonc only declares pending/accepted, but Notifications.jsx
--- writes status: 'denied' on decline (base44.entities.Follow.update(..., { status: 'denied' })).
--- Enum matches actual runtime behavior, not the incomplete declared schema.
+-- The original app's Follow.jsonc only declares pending/accepted, but
+-- Notifications.jsx writes status: 'denied' on decline. Enum matches actual
+-- runtime behavior, not the incomplete declared schema.
 create type follow_status as enum ('pending', 'accepted', 'denied');
 
 create type notification_type as enum (
@@ -229,7 +229,7 @@ create table reactions (
   emoji reaction_emoji not null,
   created_at timestamptz not null default now(),
   unique (activity_id, reactor_id)   -- assumption: one reaction per user per post (not stated
-                                      -- explicitly anywhere in the Base44 export) — flag if wrong
+                                      -- explicitly anywhere in the original export) — flag if wrong
 );
 
 -- ── trades (personal trade log — added per your request) ───────────────────

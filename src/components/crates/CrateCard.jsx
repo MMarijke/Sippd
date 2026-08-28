@@ -45,7 +45,7 @@ export default function CrateCard({ crate, collection, onClick, onEdit, onDelete
               style={{ background: item.can_bg_color || '#0D2B2B' }}
             >
               {item.can_image_url && (
-                <img src={item.can_image_url} alt={item.can_name} className="w-full h-full object-contain" />
+                <img src={item.can_image_url} alt={item.can_name} loading="lazy" decoding="async" className="w-full h-full object-contain" />
               )}
             </div>
           ))}

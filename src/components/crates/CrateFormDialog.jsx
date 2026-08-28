@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { X } from 'lucide-react';
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -35,14 +36,20 @@ export default function CrateFormDialog({ crate, onClose, userId }) {
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div
-        className="w-full max-w-lg bg-card border-t border-border rounded-t-3xl p-6 space-y-5"
-        onClick={e => e.stopPropagation()}
+    <Sheet open onOpenChange={o => !o && onClose()}>
+      <SheetContent
+        side="bottom"
+        hideClose
+        className="max-w-lg mx-auto bg-card border-t border-border rounded-t-3xl p-6 space-y-5"
       >
+        <SheetDescription className="sr-only">
+          {isEdit ? 'Edit the name, icon, and description of this crate.' : 'Create a new crate to organize a subset of your collection.'}
+        </SheetDescription>
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-display font-bold text-foreground">{isEdit ? 'Edit Crate' : 'New Crate'}</h2>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground">
+          <SheetTitle asChild>
+            <h2 className="text-base font-display font-bold text-foreground">{isEdit ? 'Edit Crate' : 'New Crate'}</h2>
+          </SheetTitle>
+          <button onClick={onClose} className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground flex-shrink-0">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -96,7 +103,7 @@ export default function CrateFormDialog({ crate, onClose, userId }) {
         >
           {mutation.isPending ? 'Saving...' : isEdit ? 'Save Changes' : 'Create Crate'}
         </Button>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }

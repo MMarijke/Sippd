@@ -13,6 +13,7 @@ import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
  *   style      — extra inline styles on the container
  *   iconSize   — tailwind class for Package icon size (default 'w-10 h-10')
  *   objectFit  — CSS object-fit value (default 'contain')
+ *   loading    — img loading attribute (default 'lazy'; pass 'eager' for above-the-fold hero images)
  */
 export default function CanImageBox({
   imageUrl,
@@ -22,6 +23,7 @@ export default function CanImageBox({
   style = {},
   iconSize = 'w-10 h-10',
   objectFit = 'contain',
+  loading = 'lazy',
 }) {
   const bg = bgColor || DEFAULT_CAN_BG;
 
@@ -34,6 +36,8 @@ export default function CanImageBox({
         <img
           src={imageUrl}
           alt={alt}
+          loading={loading}
+          decoding="async"
           className="w-full h-full"
           style={{ objectFit }}
         />

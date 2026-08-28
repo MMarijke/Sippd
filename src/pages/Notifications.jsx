@@ -6,6 +6,7 @@ import { Bell, ArrowLeft, Check, X, CheckCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export default function Notifications() {
   const { user } = useAuth();
@@ -37,6 +38,9 @@ export default function Notifications() {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['my-notifications'] }),
+    onError: (error) => {
+      toast.error('Failed to mark notifications read: ' + (error.message || 'Unknown error'));
+    },
   });
 
   const handleFollowRequest = useMutation({
@@ -46,9 +50,13 @@ export default function Notifications() {
         : await supabase.rpc('deny_follow_request', { p_caller_id: user.id, p_follow_id: notif.follow_id });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, { accept }) => {
       queryClient.invalidateQueries({ queryKey: ['my-notifications'] });
       queryClient.invalidateQueries({ queryKey: ['my-follows'] });
+      toast.success(accept ? 'Follow request accepted' : 'Follow request denied');
+    },
+    onError: (error) => {
+      toast.error('Failed to respond to follow request: ' + (error.message || 'Unknown error'));
     },
   });
 
@@ -61,7 +69,13 @@ export default function Notifications() {
       });
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['my-notifications'] }),
+    onSuccess: (_, { accept }) => {
+      queryClient.invalidateQueries({ queryKey: ['my-notifications'] });
+      toast.success(accept ? 'Trade accepted' : 'Trade declined');
+    },
+    onError: (error) => {
+      toast.error('Failed to respond to trade request: ' + (error.message || 'Unknown error'));
+    },
   });
 
   const getLabel = (n) => {
@@ -85,7 +99,7 @@ export default function Notifications() {
     <div className="min-h-screen bg-background pb-8">
       <div className="flex items-center justify-between px-4 pt-5 pb-3 border-b border-border">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center border border-border">
+          <button onClick={() => navigate(-1)} aria-label="Back" className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center border border-border">
             <ArrowLeft className="w-4 h-4 text-foreground" />
           </button>
           <h1 className="text-base font-display font-bold text-foreground tracking-wide">Notifications</h1>
@@ -170,7 +184,9 @@ export default function Notifications() {
                   )}
                 </div>
                 {!n.is_read && (
-                  <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />
+                  <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5" role="status">
+                    <span className="sr-only">Unread</span>
+                  </div>
                 )}
               </div>
             </div>

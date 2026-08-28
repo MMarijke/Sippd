@@ -14,8 +14,9 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
   const [tab, setTab] = useState('contents'); // 'contents' | 'add'
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('date_desc');
+  const [canIds, setCanIds] = useState(crate.can_ids || []);
 
-  const crateCanIds = new Set(crate.can_ids || []);
+  const crateCanIds = new Set(canIds);
 
   const applySorting = (items) => items.slice().sort((a, b) => {
     if (sort === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
@@ -38,24 +39,31 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
       const { error } = await supabase.from('crates').update({ can_ids: newIds }).eq('id', crate.id);
       if (error) throw error;
     },
+    onMutate: async (newIds) => {
+      const previousIds = canIds;
+      setCanIds(newIds);
+      return { previousIds };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['crates'] });
       onCrateUpdated();
     },
+    onError: (error, _newIds, context) => {
+      if (context?.previousIds) setCanIds(context.previousIds);
+      toast.error('Failed to update crate: ' + (error.message || 'Unknown error'));
+    },
   });
 
   const addCan = (canId) => {
-    const newIds = [...(crate.can_ids || []), canId];
-    crate.can_ids = newIds; // optimistic local update
-    updateCrate.mutate(newIds);
-    toast.success('Added to crate');
+    updateCrate.mutate([...canIds, canId], {
+      onSuccess: () => toast.success('Added to crate'),
+    });
   };
 
   const removeCan = (canId) => {
-    const newIds = (crate.can_ids || []).filter(id => id !== canId);
-    crate.can_ids = newIds;
-    updateCrate.mutate(newIds);
-    toast.success('Removed from crate');
+    updateCrate.mutate(canIds.filter(id => id !== canId), {
+      onSuccess: () => toast.success('Removed from crate'),
+    });
   };
 
   return (

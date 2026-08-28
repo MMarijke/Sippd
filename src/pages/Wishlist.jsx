@@ -13,12 +13,15 @@ import { getDisplayRarity } from '@/lib/rarityConsensus';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import RecommendedCans from '@/components/wishlist/RecommendedCans';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
 export default function Wishlist() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [collectedIds, setCollectedIds] = useState(new Set());
   const [collapsedBrands, setCollapsedBrands] = useState(new Set());
+  const [itemToRemove, setItemToRemove] = useState(null);
+  const [isRemoving, setIsRemoving] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: collection = [], isLoading } = useQuery({
@@ -107,18 +110,22 @@ export default function Wishlist() {
     toast.success(`${item.can_name} added to your collection!`);
   };
 
-  const removeFromWishlist = async (item) => {
+  const confirmRemoveFromWishlist = async () => {
+    if (!itemToRemove) return;
+    setIsRemoving(true);
     const { error } = await supabase
       .from('user_collection')
       .delete()
-      .eq('id', item.id)
+      .eq('id', itemToRemove.id)
       .eq('owner_id', user.id);
+    setIsRemoving(false);
     if (error) {
       toast.error('Failed to remove from wishlist');
       return;
     }
     queryClient.invalidateQueries({ queryKey: ['user-collection', user?.id] });
     toast.success('Removed from wishlist');
+    setItemToRemove(null);
   };
 
   return (
@@ -222,15 +229,15 @@ export default function Wishlist() {
                               <button
                                 onClick={() => moveToCollection(item)}
                                 disabled={justCollected}
-                                title="Move to collection"
-                                className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors disabled:opacity-40"
+                                aria-label="Move to collection"
+                                className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors disabled:opacity-40"
                               >
                                 <CheckCircle2 className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => removeFromWishlist(item)}
-                                title="Remove"
-                                className="w-8 h-8 rounded-lg bg-muted/50 border border-border flex items-center justify-center text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors"
+                                onClick={() => setItemToRemove(item)}
+                                aria-label="Remove from wishlist"
+                                className="w-11 h-11 rounded-lg bg-muted/50 border border-border flex items-center justify-center text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -246,6 +253,19 @@ export default function Wishlist() {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={!!itemToRemove}
+        onCancel={() => setItemToRemove(null)}
+        onConfirm={confirmRemoveFromWishlist}
+        isPending={isRemoving}
+        title="Remove from Wishlist?"
+        description={
+          <>
+            <span className="text-foreground font-semibold">{itemToRemove?.can_name}</span> will be removed from your wishlist. This cannot be undone.
+          </>
+        }
+      />
     </div>
   );
 }

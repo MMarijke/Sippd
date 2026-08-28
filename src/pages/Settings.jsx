@@ -29,6 +29,24 @@ function SectionHeader({ title }) {
 }
 
 function SettingsRow({ label, sub, onClick, danger, right }) {
+  const content = (
+    <>
+      <div>
+        <p className="text-sm font-medium">{label}</p>
+        {sub && <p className="text-xs font-mono text-muted-foreground mt-0.5">{sub}</p>}
+      </div>
+      {right !== undefined ? right : onClick && <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />}
+    </>
+  );
+
+  if (!onClick) {
+    return (
+      <div className={cn('w-full flex items-center justify-between px-4 py-3.5', danger ? 'text-destructive' : 'text-foreground')}>
+        {content}
+      </div>
+    );
+  }
+
   return (
     <button
       onClick={onClick}
@@ -38,11 +56,7 @@ function SettingsRow({ label, sub, onClick, danger, right }) {
         'hover:bg-secondary/50 transition-colors'
       )}
     >
-      <div>
-        <p className="text-sm font-medium">{label}</p>
-        {sub && <p className="text-xs font-mono text-muted-foreground mt-0.5">{sub}</p>}
-      </div>
-      {right !== undefined ? right : <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />}
+      {content}
     </button>
   );
 }
@@ -145,22 +159,63 @@ function ChangePasswordPanel({ user }) {
   );
 }
 
-// ─── Delete Account (stubbed — Prompt 0.8) ─────────────────────────────────────
+// ─── Delete Account ─────────────────────────────────────────────────────────
 function DeleteAccountPanel() {
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
+  const [confirmText, setConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const canConfirm = confirmText.trim().toUpperCase() === 'DELETE';
+
+  const handleDelete = async () => {
+    if (!canConfirm || deleting) return;
+    setDeleting(true);
+    const { data, error } = await supabase.functions.invoke('delete-account');
+    if (error || data?.error) {
+      toast.error('Failed to delete account: ' + (data?.error || error?.message || 'Unknown error'));
+      setDeleting(false);
+      return;
+    }
+    await signOut();
+    navigate('/login');
+    toast.success('Your account has been deleted.');
+  };
+
   return (
     <div className="space-y-4 px-5 pt-4">
-      <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4">
-        <p className="text-xs font-mono text-destructive leading-relaxed">
-          Account deletion will be available soon.
+      <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4 space-y-2">
+        <p className="text-xs font-mono text-destructive leading-relaxed font-semibold">
+          This permanently deletes your account. This cannot be undone.
+        </p>
+        <p className="text-xs font-mono text-muted-foreground leading-relaxed">
+          Removed: your collection, crates, trades, trade templates, rarity votes,
+          follows, notifications, and leaderboard score. Community cans you
+          contributed to stay in the shared database, but your individual votes
+          and favourites are removed from their counts.
         </p>
       </div>
+
+      <div className="space-y-1.5">
+        <p className="text-xs font-mono text-muted-foreground">
+          Type <span className="text-destructive font-semibold">DELETE</span> to confirm
+        </p>
+        <Input
+          value={confirmText}
+          onChange={e => setConfirmText(e.target.value)}
+          placeholder="DELETE"
+          className="bg-secondary border-destructive/30 font-mono"
+          autoComplete="off"
+        />
+      </div>
+
       <Button
         variant="destructive"
         className="w-full font-mono text-xs gap-2"
-        disabled
+        disabled={!canConfirm || deleting}
+        onClick={handleDelete}
       >
         <Trash2 className="w-4 h-4" />
-        Delete My Account
+        {deleting ? 'Deleting…' : 'Permanently Delete My Account'}
       </Button>
     </div>
   );
@@ -174,6 +229,7 @@ function ChipToggle({ options, value, onChange }) {
         <button
           key={opt}
           onClick={() => onChange(opt)}
+          aria-pressed={value === opt}
           className={cn(
             'px-3 py-1 rounded-full text-xs font-mono border transition-colors',
             value === opt
@@ -238,7 +294,8 @@ export default function Settings() {
       <div className="flex items-center gap-3 px-4 pt-5 pb-3 border-b border-border">
         <button
           onClick={() => navigate(-1)}
-          className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center border border-border"
+          aria-label="Back"
+          className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center border border-border"
         >
           <ArrowLeft className="w-4 h-4 text-foreground" />
         </button>
@@ -262,7 +319,6 @@ export default function Settings() {
           <SettingsRow
             label="Email"
             sub={user?.email || '—'}
-            onClick={() => {}}
             right={<span className="text-[10px] font-mono text-muted-foreground">read-only</span>}
           />
           <SettingsRow
@@ -311,6 +367,9 @@ export default function Settings() {
             </div>
             <button
               onClick={toggleNotifyRareFollows}
+              role="switch"
+              aria-checked={!!profile?.notify_rare_follows}
+              aria-label="Rare Pull Alerts"
               className={cn(
                 'relative w-11 h-6 rounded-full transition-colors flex-shrink-0',
                 profile?.notify_rare_follows ? 'bg-primary' : 'bg-secondary border border-border'
@@ -333,6 +392,9 @@ export default function Settings() {
             </div>
             <button
               onClick={togglePrivate}
+              role="switch"
+              aria-checked={!!profile?.is_private}
+              aria-label="Private Account"
               className={cn(
                 'relative w-11 h-6 rounded-full transition-colors flex-shrink-0',
                 profile?.is_private ? 'bg-primary' : 'bg-secondary border border-border'

@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { Trophy, Zap, Crown } from 'lucide-react';
+import { Trophy, Zap, Crown, Info } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
@@ -34,24 +35,65 @@ export default function CollectorsLeaderboard() {
 
   const isEmpty = !isLoading && ranked.length === 0;
 
+  const myEntry = scores.find(s => s.user_id === currentUser?.id);
+  const myMetric = myEntry?.[metricColumn] ?? 0;
+
+  const { data: myRank } = useQuery({
+    queryKey: ['my-rank', sortBy, currentUser?.id, myMetric],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('leaderboard_scores')
+        .select('*', { count: 'exact', head: true })
+        .gt(metricColumn, myMetric);
+      if (error) throw error;
+      return (count || 0) + 1;
+    },
+    enabled: !!currentUser?.id && myMetric > 0,
+  });
+
   return (
     <div className="px-5">
-      <div className="flex bg-secondary rounded-lg border border-border p-0.5 mb-4">
-        <Button
-          variant="ghost"
-          className={cn('flex-1 h-8 font-mono text-xs', sortBy === 'total' ? 'bg-card text-primary' : 'text-muted-foreground')}
-          onClick={() => setSortBy('total')}
-        >
-          <Zap className="w-3.5 h-3.5 mr-1.5" /> Total Cans
-        </Button>
-        <Button
-          variant="ghost"
-          className={cn('flex-1 h-8 font-mono text-xs', sortBy === 'rare' ? 'bg-card text-primary' : 'text-muted-foreground')}
-          onClick={() => setSortBy('rare')}
-        >
-          <Trophy className="w-3.5 h-3.5 mr-1.5" /> Rare Pulls
-        </Button>
+      <div className="flex items-center gap-1.5 mb-3">
+        <div className="flex flex-1 bg-secondary rounded-lg border border-border p-0.5">
+          <Button
+            variant="ghost"
+            className={cn('flex-1 h-8 font-mono text-xs', sortBy === 'total' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            onClick={() => setSortBy('total')}
+          >
+            <Zap className="w-3.5 h-3.5 mr-1.5" /> Total Cans
+          </Button>
+          <Button
+            variant="ghost"
+            className={cn('flex-1 h-8 font-mono text-xs', sortBy === 'rare' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            onClick={() => setSortBy('rare')}
+          >
+            <Trophy className="w-3.5 h-3.5 mr-1.5" /> Rare Pulls
+          </Button>
+        </div>
+        <Popover>
+          <PopoverTrigger
+            className="w-11 h-11 flex items-center justify-center text-muted-foreground/60 hover:text-muted-foreground transition-colors flex-shrink-0"
+            aria-label="How ranking works"
+          >
+            <Info className="w-4 h-4" />
+          </PopoverTrigger>
+          <PopoverContent className="w-64 text-xs font-mono leading-relaxed" side="bottom" align="end">
+            <p className="font-semibold text-foreground mb-1">How ranking works</p>
+            <p className="text-muted-foreground">
+              Total Cans ranks by raw can count. Rare Pulls ranks by how many Rare, Ultra Rare, and Legendary cans you've logged. Your Collection Score (on your profile) weights rarity into one number, but isn't a ranking tab here.
+            </p>
+          </PopoverContent>
+        </Popover>
       </div>
+
+      {currentUser && (
+        <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-between">
+          <span className="text-xs font-mono text-muted-foreground">Your Rank</span>
+          <span className={cn('text-sm font-display font-bold', sortBy === 'rare' ? 'text-rarity-ultra' : 'text-primary')}>
+            {myMetric > 0 ? (myRank ? `#${myRank}` : '…') : 'Not ranked yet'}
+          </span>
+        </div>
+      )}
 
       {isEmpty ? (
         <div className="bg-card border border-border rounded-2xl p-8 flex flex-col items-center text-center">
@@ -92,7 +134,10 @@ export default function CollectorsLeaderboard() {
                   </p>
                 </div>
                 <div className="flex-shrink-0 text-right">
-                  <p className={cn('text-sm font-display font-bold tabular-nums', isMe ? 'text-primary' : 'text-foreground')}>
+                  <p className={cn(
+                    'text-sm font-display font-bold tabular-nums',
+                    sortBy === 'rare' ? 'text-rarity-ultra' : isMe ? 'text-primary' : 'text-foreground'
+                  )}>
                     {score}
                   </p>
                   <p className="text-[10px] font-mono text-muted-foreground">

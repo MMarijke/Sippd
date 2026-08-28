@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { Zap, Star, Flame, Package, Lock, ArrowRightLeft, GitCompare } from 'lucide-react';
+import { Zap, Star, Flame, Package, Lock, ArrowRightLeft, GitCompare, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import RarityBadge from '@/components/shared/RarityBadge';
@@ -22,7 +22,7 @@ export default function PublicProfile() {
 
   // Narrow public view — id, full_name, is_private, current_streak, created_at only.
   // No email, no role, no raw profiles table read for another user.
-  const { data: profileUser, isLoading: loadingProfile } = useQuery({
+  const { data: profileUser, isLoading: loadingProfile, isError: profileError } = useQuery({
     queryKey: ['public-profile', userId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -140,19 +140,36 @@ export default function PublicProfile() {
   const initial = profileUser?.full_name?.[0]?.toUpperCase() || '?';
   const displayName = profileUser?.full_name || 'Collector';
 
+  if (!isLoading && profileError) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3 px-5">
+        <Package className="w-14 h-14 text-muted-foreground/20" />
+        <p className="text-sm font-mono text-muted-foreground">Something went wrong loading this profile</p>
+        <button onClick={() => navigate(-1)} className="text-xs font-mono text-primary underline">Go Back</button>
+      </div>
+    );
+  }
+
   if (!isLoading && !profileUser) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3 px-5">
         <Package className="w-14 h-14 text-muted-foreground/20" />
         <p className="text-sm font-mono text-muted-foreground">Profile not found</p>
-        <a href="/" className="text-xs font-mono text-primary underline">Go to Sippd</a>
+        <button onClick={() => navigate(-1)} className="text-xs font-mono text-primary underline">Go Back</button>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="px-5 pt-6 pb-4 border-b border-border">
+      <div className="px-5 pt-6 pb-4 border-b border-border flex items-center gap-3">
+        <button
+          onClick={() => navigate(-1)}
+          aria-label="Back"
+          className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
         <div className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-primary" />
           <div>

@@ -17,7 +17,6 @@ import Achievements from './pages/Achievements';
 import Settings from './pages/Settings';
 import MonthlyReport from './pages/MonthlyReport';
 import PublicProfile from './pages/PublicProfile';
-import MostWanted from './pages/MostWanted';
 import Feed from './pages/Feed';
 import Notifications from './pages/Notifications';
 import Crates from './pages/Crates';
@@ -46,7 +45,6 @@ function App() {
               <Route path="/can/*" element={<CanDetail />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/monthly-report" element={<MonthlyReport />} />
-              <Route path="/most-wanted" element={<MostWanted />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/crates" element={<Crates />} />
               <Route path="/u/:userId" element={<PublicProfile />} />

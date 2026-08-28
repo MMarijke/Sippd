@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { LogOut, Zap, Star, Trophy, Settings, Medal, Pencil, Check, X, Share2, ImageDown } from 'lucide-react';
+import { LogOut, Zap, Star, Trophy, Settings, Medal, Pencil, Check, X, Share2, ImageDown, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import PageHeader from '@/components/shared/PageHeader';
 import StatBox from '@/components/shared/StatBox';
 import { useNavigate } from 'react-router-dom';
@@ -158,7 +159,20 @@ export default function Profile() {
                 </button>
               </div>
             )}
-            <p className="text-xs font-mono text-primary mt-0.5">Score: {score}</p>
+            <p className="text-xs font-mono text-primary mt-0.5 flex items-center gap-1">
+              Score: {score}
+              <Popover>
+                <PopoverTrigger className="p-1.5 -m-1.5 text-primary/60 hover:text-primary transition-colors" aria-label="How Score works">
+                  <Info className="w-3 h-3" />
+                </PopoverTrigger>
+                <PopoverContent className="w-64 text-xs font-mono leading-relaxed" side="bottom" align="start">
+                  <p className="font-semibold text-foreground mb-1">How Score works</p>
+                  <p className="text-muted-foreground">
+                    Score weights your collection by rarity — Common counts as 1 point, Legendary as 5. It's not currently a Ranks leaderboard tab; Ranks compares by Total Cans or Rare Pulls instead.
+                  </p>
+                </PopoverContent>
+              </Popover>
+            </p>
           </div>
         </div>
       </div>

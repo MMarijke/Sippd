@@ -15,16 +15,18 @@ export default function CrateCard({ crate, collection, onClick, onEdit, onDelete
       className="relative bg-card border border-border rounded-2xl p-4 cursor-pointer hover:border-primary/30 hover:bg-card/80 transition-all active:scale-[0.98]"
     >
       {/* Action buttons */}
-      <div className="absolute top-2 right-2 flex gap-1">
+      <div className="absolute top-1 right-1 flex">
         <button
           onClick={onEdit}
-          className="w-6 h-6 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Edit crate"
+          className="w-9 h-9 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
         >
           <Pencil className="w-3 h-3" />
         </button>
         <button
           onClick={onDelete}
-          className="w-6 h-6 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
+          aria-label="Delete crate"
+          className="w-9 h-9 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
         >
           <Trash2 className="w-3 h-3" />
         </button>
@@ -32,7 +34,7 @@ export default function CrateCard({ crate, collection, onClick, onEdit, onDelete
 
       {/* Emoji + name */}
       <div className="text-2xl mb-2">{crate.emoji || '📦'}</div>
-      <p className="text-sm font-display font-semibold text-foreground leading-tight pr-8 truncate">{crate.name}</p>
+      <p className="text-sm font-display font-semibold text-foreground leading-tight pr-10 truncate">{crate.name}</p>
       <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{canCount} can{canCount !== 1 ? 's' : ''}</p>
 
       {/* Mini preview images */}

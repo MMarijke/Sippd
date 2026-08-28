@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
 const RARITY_COLORS = {
   Common: 'text-gray-400',
@@ -26,6 +27,7 @@ const FILTER_OPTIONS = ['all', 'pending', 'completed', 'cancelled'];
 export default function TradeHistory({ userId, user, onLogTrade }) {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState('all');
+  const [tradeToDelete, setTradeToDelete] = useState(null);
 
   const { data: trades = [], isLoading } = useQuery({
     queryKey: ['trades', userId],
@@ -49,6 +51,10 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trades'] });
       toast.success('Trade removed');
+      setTradeToDelete(null);
+    },
+    onError: (error) => {
+      toast.error('Failed to remove trade: ' + (error.message || 'Unknown error'));
     },
   });
 
@@ -65,6 +71,9 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trades'] });
       toast.success('Trade status updated');
+    },
+    onError: (error) => {
+      toast.error('Failed to update trade status: ' + (error.message || 'Unknown error'));
     },
   });
 
@@ -132,10 +141,19 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
         <TradeCard
           key={trade.id}
           trade={trade}
-          onDelete={() => deleteTrade.mutate(trade.id)}
+          onDelete={() => setTradeToDelete(trade)}
           onStatusChange={(status) => updateStatus.mutate({ id: trade.id, status })}
         />
       ))}
+
+      <ConfirmDialog
+        open={!!tradeToDelete}
+        onCancel={() => setTradeToDelete(null)}
+        onConfirm={() => deleteTrade.mutate(tradeToDelete.id)}
+        isPending={deleteTrade.isPending}
+        title="Remove Trade?"
+        description="This trade record will be permanently removed from your history. This cannot be undone."
+      />
     </div>
   );
 }

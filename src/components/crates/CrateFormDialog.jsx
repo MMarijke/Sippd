@@ -33,6 +33,9 @@ export default function CrateFormDialog({ crate, onClose, userId }) {
       toast.success(isEdit ? 'Crate updated!' : 'Crate created!');
       onClose();
     },
+    onError: (error) => {
+      toast.error(`Failed to ${isEdit ? 'update' : 'create'} crate: ` + (error.message || 'Unknown error'));
+    },
   });
 
   return (

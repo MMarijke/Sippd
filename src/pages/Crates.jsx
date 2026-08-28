@@ -5,9 +5,11 @@ import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Plus, ChevronLeft, PackageOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import CrateCard from '@/components/crates/CrateCard';
 import CrateFormDialog from '@/components/crates/CrateFormDialog';
 import CrateDetailSheet from '@/components/crates/CrateDetailSheet';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
 export default function Crates() {
   const navigate = useNavigate();
@@ -16,6 +18,7 @@ export default function Crates() {
   const [showForm, setShowForm] = useState(false);
   const [editingCrate, setEditingCrate] = useState(null);
   const [selectedCrate, setSelectedCrate] = useState(null);
+  const [crateToDelete, setCrateToDelete] = useState(null);
 
   const { data: crates = [], isLoading } = useQuery({
     queryKey: ['crates', user?.id],
@@ -54,7 +57,14 @@ export default function Crates() {
         .eq('owner_id', user.id);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['crates'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['crates'] });
+      toast.success('Crate deleted');
+      setCrateToDelete(null);
+    },
+    onError: (error) => {
+      toast.error('Failed to delete crate: ' + (error.message || 'Unknown error'));
+    },
   });
 
   const openEdit = (crate, e) => {
@@ -117,7 +127,7 @@ export default function Crates() {
               collection={collection}
               onClick={() => setSelectedCrate(crate)}
               onEdit={(e) => openEdit(crate, e)}
-              onDelete={(e) => { e.stopPropagation(); deleteMutation.mutate(crate.id); }}
+              onDelete={(e) => { e.stopPropagation(); setCrateToDelete(crate); }}
             />
           ))}
         </div>
@@ -142,6 +152,19 @@ export default function Crates() {
           }}
         />
       )}
+
+      <ConfirmDialog
+        open={!!crateToDelete}
+        onCancel={() => setCrateToDelete(null)}
+        onConfirm={() => deleteMutation.mutate(crateToDelete.id)}
+        isPending={deleteMutation.isPending}
+        title="Delete Crate?"
+        description={
+          <>
+            <span className="text-foreground font-semibold">{crateToDelete?.name}</span> will be deleted. The cans inside stay in your collection — only the crate organization is removed. This cannot be undone.
+          </>
+        }
+      />
     </div>
   );
 }

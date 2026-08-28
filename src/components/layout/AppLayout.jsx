@@ -1,6 +1,5 @@
 import { Outlet } from 'react-router-dom';
 import BottomNav from './BottomNav';
-import QuickAccessFAB from './QuickAccessFAB';
 
 export default function AppLayout() {
   return (
@@ -8,7 +7,6 @@ export default function AppLayout() {
       <main className="pb-24 max-w-lg mx-auto">
         <Outlet />
       </main>
-      <QuickAccessFAB />
       <BottomNav />
     </div>
   );

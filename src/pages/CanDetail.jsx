@@ -5,8 +5,9 @@ import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Pencil, Trash2, Calendar, Tag,
-  FileText, Users, ShieldCheck, ShieldAlert, StickyNote, Star,
+  FileText, Users, ShieldCheck, ShieldAlert, StickyNote, Star, Info,
 } from 'lucide-react';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { useFavourite } from '@/hooks/useFavourite';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
@@ -211,6 +212,20 @@ export default function CanDetail() {
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               <Users className="w-3 h-3" /> Community Rarity
+              <Popover>
+                <PopoverTrigger
+                  className="p-2 -m-2 normal-case tracking-normal text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                  aria-label="How Community Rarity works"
+                >
+                  <Info className="w-3 h-3" />
+                </PopoverTrigger>
+                <PopoverContent className="w-64 text-xs font-mono leading-relaxed normal-case tracking-normal" side="top" align="start">
+                  <p className="font-semibold text-foreground mb-1">How Community Rarity works</p>
+                  <p className="text-muted-foreground">
+                    Collectors vote on each can's rarity. A tier shows once 5+ votes come in (low confidence), and locks in as confirmed at 15+. Your vote can't be changed once cast — that keeps the count trustworthy.
+                  </p>
+                </PopoverContent>
+              </Popover>
             </span>
             <span className="text-[10px] font-mono text-muted-foreground">{totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}</span>
           </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
@@ -44,27 +44,19 @@ export default function Scan() {
     },
   });
 
-  useEffect(() => {
-    if (sharedCans.length === 0) return;
-    const params = new URLSearchParams(window.location.search);
-    const barcode = params.get('barcode');
-    if (!barcode) return;
-
-    window.history.replaceState({}, '', '/scan');
-
+  const handleBarcodeLookup = async (barcode) => {
     const match = sharedCans.find(c => c.barcode === barcode);
     if (match) {
       setSelectedCan(match);
       setMode('add');
-    } else {
-      setOffLookup(true);
-      lookupOpenFoodFacts(barcode).then(result => {
-        setOffLookup(false);
-        setSelectedCan(result || { barcode });
-        setMode('add');
-      });
+      return;
     }
-  }, [sharedCans]);
+    setOffLookup(true);
+    const result = await lookupOpenFoodFacts(barcode);
+    setOffLookup(false);
+    setSelectedCan(result || { barcode });
+    setMode('add');
+  };
 
   const filtered = searchQuery.length >= 2
     ? sharedCans.filter(c =>
@@ -80,18 +72,7 @@ export default function Scan() {
     if (!q) return;
 
     if (/^\d{6,}$/.test(q)) {
-      const match = sharedCans.find(c => c.barcode === q);
-      if (match) {
-        setSelectedCan(match);
-        setMode('add');
-        return;
-      }
-
-      setOffLookup(true);
-      const result = await lookupOpenFoodFacts(q);
-      setOffLookup(false);
-      setSelectedCan(result || { barcode: q });
-      setMode('add');
+      await handleBarcodeLookup(q);
       return;
     }
 
@@ -131,11 +112,11 @@ export default function Scan() {
     <div className="flex flex-col gap-0 pb-8">
       <PageHeader title="Scan / Search" subtitle="Find a can or add a new one" />
 
-      <BarcodeScanner />
+      <BarcodeScanner onDetected={handleBarcodeLookup} />
 
       <div className="flex items-center gap-3 px-5 mt-6">
         <div className="flex-1 h-px bg-border" />
-        <span className="text-[11px] front-mono text-muted-foreground uppercase tracking-widest">Or search manually</span>
+        <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest">Or search manually</span>
         <div className="flex-1 h-px bg-border" />
       </div>
 
@@ -170,7 +151,7 @@ export default function Scan() {
                       <img src={can.image_url} alt={can.name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Package className="w-4 h4 text-muted-foreground/30" />
+                        <Package className="w-4 h-4 text-muted-foreground/30" />
                       </div>
                     )}
                   </div>
@@ -189,13 +170,7 @@ export default function Scan() {
                     variant="outline"
                     size="sm"
                     className="font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
-                    onClick={async () => {
-                      setOffLookup(true);
-                      const result = await lookupOpenFoodFacts(searchQuery);
-                      setOffLookup(false);
-                      setSelectedCan(result || { barcode: searchQuery });
-                      setMode('add');
-                    }}
+                    onClick={() => handleBarcodeLookup(searchQuery)}
                   >
                     <Search className="w-3.5 h-3.5" /> Look up on Open Food Facts
                   </Button>
@@ -218,7 +193,7 @@ export default function Scan() {
       <div className="text-center mt-8">
         <button
           onClick={() => { setSelectedCan(null); setMode('add'); }}
-          className="text-[11px] font-mono text-muted-foregroumd/60 hover:text-muted-foreground underline underline-offset-2 transition-colors"
+          className="text-[11px] font-mono text-muted-foreground/60 hover:text-muted-foreground underline underline-offset-2 transition-colors"
         >
           + Add can manually
         </button>
@@ -230,7 +205,7 @@ export default function Scan() {
           href="https://world.openfoodfacts.org"
           target="_blank"
           rel="noopener noreferrer"
-          className="underline hover:text-muted-forground/60"
+          className="underline hover:text-muted-foreground/60"
         >
           Open Food Facts
         </a>

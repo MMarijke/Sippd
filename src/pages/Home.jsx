@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
-import { ScanLine, Zap, BarChart2, Bell } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ScanLine, Zap, BarChart2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
 import StatsRow from '@/components/dashboard/StatsRow';
@@ -14,12 +14,9 @@ import { format } from 'date-fns';
 import { computeAchievements } from '@/lib/achievements';
 import { useAchievementUnlock } from '@/hooks/useAchievementUnlock';
 import AchievementUnlockAnimation from '@/components/achievements/AchievementUnlockAnimation';
-import { useNotifications } from '@/hooks/useNotifications';
 
 export default function Home() {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const { unreadCount } = useNotifications(user);
 
   const { data: collection = [], isLoading: loadingCollection } = useQuery({
     queryKey: ['user-collection', user?.id],
@@ -90,31 +87,20 @@ export default function Home() {
     return acc + getItemScore(c, sharedCansMap[c.can_id]);
   }, 0);
 
+  const wishlistCount = collection.filter(c => c.status === 'wishlist').length;
+
   return (
     <div className="space-y-5">
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
       <PageHeader
-        title="CANVOLT"
+        title="SIPPD"
         subtitle="Your Energy Drink Vault"
         action={
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/notifications')}
-              className="relative w-8 h-8 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Bell className="w-4 h-4" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive rounded-full flex items-center justify-center text-[9px] font-mono font-bold text-white">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </button>
-            <Link to="/scan">
-              <Button size="sm" className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
-                <ScanLine className="w-4 h-4" /> Scan
-              </Button>
-            </Link>
-          </div>
+          <Link to="/scan">
+            <Button size="sm" className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+              <ScanLine className="w-4 h-4" /> Scan
+            </Button>
+          </Link>
         }
       />
 
@@ -139,7 +125,7 @@ export default function Home() {
         totalCans={isLoading ? '—' : totalCans}
         rarePulls={isLoading ? '—' : rarePulls}
         streak={streak}
-        score={isLoading ? '—' : score}
+        wishlistCount={isLoading ? '—' : wishlistCount}
       />
 
       <div className="px-5 space-y-4">

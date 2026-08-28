@@ -147,7 +147,7 @@ export default function CompareCollection() {
         </div>
         <Popover>
           <PopoverTrigger
-            className="w-11 h-11 flex items-center justify-center text-muted-foreground/60 hover:text-muted-foreground transition-colors flex-shrink-0"
+            className="w-11 h-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
             aria-label="What this screen shows"
           >
             <Info className="w-4 h-4" />

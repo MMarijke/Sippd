@@ -89,7 +89,7 @@ export default function CrateFormDialog({ crate, onClose, userId }) {
 
         {/* Description */}
         <div>
-          <p className="text-xs font-mono text-muted-foreground mb-1.5">Description <span className="text-muted-foreground/50">(optional)</span></p>
+          <p className="text-xs font-mono text-muted-foreground mb-1.5">Description <span className="text-muted-foreground">(optional)</span></p>
           <Input
             value={description}
             onChange={e => setDescription(e.target.value)}

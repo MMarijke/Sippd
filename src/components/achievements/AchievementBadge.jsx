@@ -35,10 +35,10 @@ export default function AchievementBadge({ achievement }) {
         </div>
       )}
 
-      <p className={cn('text-xs font-display font-bold leading-tight mb-1 tracking-wide', unlocked ? 'text-foreground' : 'text-muted-foreground/50')}>
+      <p className={cn('text-xs font-display font-bold leading-tight mb-1 tracking-wide', unlocked ? 'text-foreground' : 'text-muted-foreground')}>
         {title}
       </p>
-      <p className={cn('text-[10px] font-mono leading-tight', unlocked ? 'text-muted-foreground' : 'text-muted-foreground/30')}>
+      <p className={cn('text-[10px] font-mono leading-tight', 'text-muted-foreground')}>
         {description}
       </p>
 
@@ -46,10 +46,10 @@ export default function AchievementBadge({ achievement }) {
       {showProgress && (
         <div className="w-full mt-2.5 space-y-1">
           <div className="flex justify-between items-center">
-            <span className="text-[9px] font-mono text-muted-foreground/50 truncate">
+            <span className="text-[9px] font-mono text-muted-foreground truncate">
               {progress.current} / {progress.goal} {progress.label}
             </span>
-            <span className="text-[9px] font-mono text-primary/50">{Math.round(pct)}%</span>
+            <span className="text-[9px] font-mono text-primary/70">{Math.round(pct)}%</span>
           </div>
           <div className="h-1 bg-border/40 rounded-full overflow-hidden">
             <div

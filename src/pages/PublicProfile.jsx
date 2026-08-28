@@ -7,19 +7,11 @@ import { Button } from '@/components/ui/button';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import RarityBadge from '@/components/shared/RarityBadge';
 import CanImageBox from '@/components/shared/CanImageBox';
-import { getDisplayRarity, getConfidence, getItemScore, RARITY_ORDER } from '@/lib/rarityConsensus';
+import { getDisplayRarity, getConfidence, getItemScore, RARITY_ORDER, RARITY_HEX as RARITY_COLORS } from '@/lib/rarityConsensus';
 import { computeAchievements } from '@/lib/achievements';
 import FollowButton from '@/components/social/FollowButton';
 import TradeRequestDialog from '@/components/social/TradeRequestDialog';
 import { useNavigate } from 'react-router-dom';
-
-const RARITY_COLORS = {
-  'Common': '#6B7280',
-  'Uncommon': '#22C55E',
-  'Rare': '#3B82F6',
-  'Ultra Rare': '#A855F7',
-  'Legendary': '#EC4899',
-};
 
 export default function PublicProfile() {
   const urlParts = window.location.pathname.split('/u/');

@@ -1,6 +1,17 @@
 // Rarity tiers in ascending order (index 0 = lowest)
 export const RARITY_ORDER = ['Common', 'Uncommon', 'Rare', 'Ultra Rare', 'Legendary'];
 
+// Hex values for contexts that can't consume CSS custom properties directly
+// (canvas/html2canvas capture, SVG chart fills, inline styles). Kept in sync
+// with the --rarity-* tokens in index.css by hand — same colors, two forms.
+export const RARITY_HEX = {
+  Common: '#6B7280',
+  Uncommon: '#22C55E',
+  Rare: '#3B82F6',
+  'Ultra Rare': '#A855F7',
+  Legendary: '#EC4899',
+};
+
 // Numeric value per tier for mean-based scoring
 export const RARITY_VALUES = {
   Common: 1,

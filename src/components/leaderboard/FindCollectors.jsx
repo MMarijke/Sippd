@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import FollowButton from '@/components/social/FollowButton';
 
 export default function FindCollectors({ query }) {
@@ -74,10 +74,10 @@ export default function FindCollectors({ query }) {
             >
               {initial}
             </button>
-            <div className="flex-1 min-w-0" onClick={() => navigate(`/u/${u.id}`)} style={{ cursor: 'pointer' }}>
+            <Link to={`/u/${u.id}`} className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground truncate">{u.full_name}</p>
               <p className="text-[11px] font-mono text-muted-foreground">{score} pts</p>
-            </div>
+            </Link>
             <FollowButton targetUser={u} currentUser={currentUser} />
           </div>
         );

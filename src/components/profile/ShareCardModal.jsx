@@ -1,24 +1,16 @@
-// TODO Phase 1: "CANVOLT" text in card template needs rebrand to "SIPPD"
 import { useRef, useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { X, ArrowLeft, Download, Share2, Loader2, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getDisplayRarity, getConfidence, getItemScore, RARITY_ORDER } from '@/lib/rarityConsensus';
+import { getDisplayRarity, getConfidence, getItemScore, RARITY_ORDER, RARITY_HEX as RARITY_COLORS_HEX } from '@/lib/rarityConsensus';
 import { computeAchievements } from '@/lib/achievements';
 import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 const RARITY_RANK = { Common: 1, Uncommon: 2, Rare: 3, 'Ultra Rare': 4, Legendary: 5 };
-const RARITY_COLORS_HEX = {
-  Common: '#6B7280',
-  Uncommon: '#22C55E',
-  Rare: '#3B82F6',
-  'Ultra Rare': '#A855F7',
-  Legendary: '#EC4899',
-};
 const RARITY_BG = {
   Common: 'rgba(107,114,128,0.15)',
   Uncommon: 'rgba(34,197,94,0.15)',
@@ -221,7 +213,7 @@ export default function ShareCardModal({ user, onClose }) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `canvolt-${(user?.full_name || 'collection').replace(/\s+/g, '-')}.png`;
+      a.download = `sippd-${(user?.full_name || 'collection').replace(/\s+/g, '-')}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -242,9 +234,9 @@ export default function ShareCardModal({ user, onClose }) {
 
       // Try Web Share API with files (works on mobile Safari/Chrome)
       if (navigator.canShare && navigator.share) {
-        const file = new File([blob], 'canvolt-collection.png', { type: 'image/png' });
+        const file = new File([blob], 'sippd-collection.png', { type: 'image/png' });
         if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: 'My Canvolt Collection' });
+          await navigator.share({ files: [file], title: 'My Sippd Collection' });
           setSaving(false);
           return;
         }
@@ -254,7 +246,7 @@ export default function ShareCardModal({ user, onClose }) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'canvolt-collection.png';
+      a.download = 'sippd-collection.png';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -271,11 +263,11 @@ export default function ShareCardModal({ user, onClose }) {
 
   const handleShare = async () => {
     const profileUrl = `${window.location.origin}/u/${user?.id}`;
-    const shareText = `Check out my Canvolt collection — ${user?.full_name || 'Collector'} · Score: ${score} · ${collected.length} cans · ${rarePulls} rare pulls`;
+    const shareText = `Check out my Sippd collection — ${user?.full_name || 'Collector'} · Score: ${score} · ${collected.length} cans · ${rarePulls} rare pulls`;
 
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'My Canvolt Collection', text: shareText, url: profileUrl });
+        await navigator.share({ title: 'My Sippd Collection', text: shareText, url: profileUrl });
         return;
       }
     } catch (e) {
@@ -300,7 +292,7 @@ export default function ShareCardModal({ user, onClose }) {
           <span className="text-xs font-mono">Back</span>
         </Button>
         <h2 className="text-sm font-display font-bold text-foreground tracking-wide">Share Card</h2>
-        <Button size="icon" variant="ghost" className="w-8 h-8 text-muted-foreground hover:text-foreground" onClick={onClose}>
+        <Button size="icon" variant="ghost" className="w-11 h-11 text-muted-foreground hover:text-foreground" onClick={onClose}>
           <X className="w-4 h-4" />
         </Button>
       </div>
@@ -316,7 +308,7 @@ export default function ShareCardModal({ user, onClose }) {
             background: 'linear-gradient(160deg, #0D1320 0%, #080C14 60%, #0A1018 100%)',
             borderRadius: 20,
             overflow: 'hidden',
-            fontFamily: "'Inter', sans-serif",
+            fontFamily: "'Exo 2', sans-serif",
             position: 'relative',
             flexShrink: 0,
           }}
@@ -333,7 +325,7 @@ export default function ShareCardModal({ user, onClose }) {
                 <span style={{ color: '#00E5FF', fontSize: 14 }}>⚡</span>
               </div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 900, color: '#00E5FF', letterSpacing: '0.15em', lineHeight: 1 }}>CANVOLT</div>
+                <div style={{ fontSize: 13, fontWeight: 900, color: '#00E5FF', letterSpacing: '0.15em', lineHeight: 1 }}>SIPPD</div>
                 <div style={{ fontSize: 8, color: 'rgba(0,229,255,0.5)', letterSpacing: '0.05em', marginTop: 1 }}>ENERGY DRINK VAULT</div>
               </div>
             </div>

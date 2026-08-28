@@ -22,7 +22,7 @@ export default function RecentPulls({ recentItems }) {
           >
             <div className="w-10 h-10 rounded-lg bg-secondary overflow-hidden flex-shrink-0">
               {item.can_image_url ? (
-                <img src={item.can_image_url} alt={item.can_name} className="w-full h-full object-cover" />
+                <img src={item.can_image_url} alt={item.can_name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <Package className="w-4 h-4 text-muted-foreground/30" />

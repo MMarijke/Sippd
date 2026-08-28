@@ -68,7 +68,7 @@ export default function ActivityCard({ item, user, myReactionSet, onReact }) {
         {/* Can thumbnail */}
         {(item.type === 'can_added' || item.type === 'rarity_voted') && item.can_image_url && (
           <div className="w-10 h-10 rounded-lg bg-secondary overflow-hidden flex-shrink-0">
-            <img src={item.can_image_url} alt={item.can_name} className="w-full h-full object-cover" />
+            <img src={item.can_image_url} alt={item.can_name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
           </div>
         )}
         {(item.type === 'can_added' || item.type === 'rarity_voted') && !item.can_image_url && (

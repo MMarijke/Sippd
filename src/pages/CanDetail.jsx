@@ -34,7 +34,7 @@ const RARITY_COLORS = {
   'Uncommon':  'text-rarity-uncommon',
   'Rare':      'text-rarity-rare',
   'Ultra Rare':'text-rarity-ultra',
-  'Legendary': 'text-rarity-limited',
+  'Legendary': 'text-rarity-legendary',
 };
 
 export default function CanDetail() {
@@ -137,6 +137,7 @@ export default function CanDetail() {
             className="w-full h-full"
             iconSize="w-24 h-24"
             objectFit="contain"
+            loading="eager"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         </div>

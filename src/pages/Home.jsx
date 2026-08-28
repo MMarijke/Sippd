@@ -90,11 +90,13 @@ export default function Home() {
     return acc + getItemScore(c, sharedCansMap[c.can_id]);
   }, 0);
 
+  const wishlistCount = collection.filter(c => c.status === 'wishlist').length;
+
   return (
     <div className="space-y-5">
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
       <PageHeader
-        title="CANVOLT"
+        title="SIPPD"
         subtitle="Your Energy Drink Vault"
         action={
           <div className="flex items-center gap-2">
@@ -139,7 +141,7 @@ export default function Home() {
         totalCans={isLoading ? '—' : totalCans}
         rarePulls={isLoading ? '—' : rarePulls}
         streak={streak}
-        score={isLoading ? '—' : score}
+        wishlistCount={isLoading ? '—' : wishlistCount}
       />
 
       <div className="px-5 space-y-4">

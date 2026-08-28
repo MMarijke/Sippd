@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Loader2, Upload, Zap, Link as LinkIcon, X, Users, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { Loader2, Upload, Zap, Link as LinkIcon, X, Users, ShieldCheck, ShieldAlert, Info } from 'lucide-react';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import RarityReveal from './RarityReveal';
 import { cn } from '@/lib/utils';
@@ -206,6 +207,21 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-mono text-muted-foreground">Community says:</span>
+              <Popover>
+                <PopoverTrigger
+                  onClick={e => e.stopPropagation()}
+                  className="p-2 -m-2 text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                  aria-label="How Community Rarity works"
+                >
+                  <Info className="w-3.5 h-3.5" />
+                </PopoverTrigger>
+                <PopoverContent className="w-64 text-xs font-mono leading-relaxed" side="top">
+                  <p className="font-semibold text-foreground mb-1">How Community Rarity works</p>
+                  <p className="text-muted-foreground">
+                    Collectors vote on each can's rarity. A tier shows once 5+ votes come in (low confidence), and locks in as confirmed at 15+. Your vote can't be changed once cast — that keeps the count trustworthy.
+                  </p>
+                </PopoverContent>
+              </Popover>
               {confidence === 'unrated' ? (
                 <span className="text-xs font-mono text-muted-foreground italic">Not enough votes yet</span>
               ) : (

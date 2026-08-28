@@ -121,9 +121,9 @@ export default function MonthlyReport() {
 
   const handleShare = () => {
     const bestName = bestPull ? `${bestPull.can_brand || ''} ${bestPull.can_name || ''}`.trim() : 'None';
-    const text = `My ${monthLabel} Canvolt Report: ${collected.length} cans added · Best pull: ${bestName} ${bestPullRarity || ''} · Score: +${monthScore} · Streak: ${streak ?? 0}d`;
+    const text = `My ${monthLabel} Sippd Report: ${collected.length} cans added · Best pull: ${bestName} ${bestPullRarity || ''} · Score: +${monthScore} · Streak: ${streak ?? 0}d`;
     if (navigator.share) {
-      navigator.share({ title: `Canvolt ${monthLabel} Report`, text });
+      navigator.share({ title: `Sippd ${monthLabel} Report`, text });
     } else {
       navigator.clipboard.writeText(text);
       alert('Report copied to clipboard!');

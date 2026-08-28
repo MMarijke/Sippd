@@ -30,7 +30,7 @@ export const ACHIEVEMENT_DEFINITIONS = [
     getDate: ({ favourites }) => favourites[0]?.created_at,
   },
   {
-    key: 'early_adopter', title: 'Early Adopter', description: 'Join Canvolt in its first year', icon: '🚀',
+    key: 'early_adopter', title: 'Early Adopter', description: 'Join Sippd in its first year', icon: '🚀',
     incremental: false,
     check: ({ userCreatedDate }) => { if (!userCreatedDate) return false; return new Date(userCreatedDate) < new Date('2027-05-14'); },
     getDate: ({ userCreatedDate }) => userCreatedDate,

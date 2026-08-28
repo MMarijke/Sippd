@@ -159,22 +159,63 @@ function ChangePasswordPanel({ user }) {
   );
 }
 
-// ─── Delete Account (stubbed — Prompt 0.8) ─────────────────────────────────────
+// ─── Delete Account ─────────────────────────────────────────────────────────
 function DeleteAccountPanel() {
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
+  const [confirmText, setConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const canConfirm = confirmText.trim().toUpperCase() === 'DELETE';
+
+  const handleDelete = async () => {
+    if (!canConfirm || deleting) return;
+    setDeleting(true);
+    const { data, error } = await supabase.functions.invoke('delete-account');
+    if (error || data?.error) {
+      toast.error('Failed to delete account: ' + (data?.error || error?.message || 'Unknown error'));
+      setDeleting(false);
+      return;
+    }
+    await signOut();
+    navigate('/login');
+    toast.success('Your account has been deleted.');
+  };
+
   return (
     <div className="space-y-4 px-5 pt-4">
-      <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4">
-        <p className="text-xs font-mono text-destructive leading-relaxed">
-          Account deletion will be available soon.
+      <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4 space-y-2">
+        <p className="text-xs font-mono text-destructive leading-relaxed font-semibold">
+          This permanently deletes your account. This cannot be undone.
+        </p>
+        <p className="text-xs font-mono text-muted-foreground leading-relaxed">
+          Removed: your collection, crates, trades, trade templates, rarity votes,
+          follows, notifications, and leaderboard score. Community cans you
+          contributed to stay in the shared database, but your individual votes
+          and favourites are removed from their counts.
         </p>
       </div>
+
+      <div className="space-y-1.5">
+        <p className="text-xs font-mono text-muted-foreground">
+          Type <span className="text-destructive font-semibold">DELETE</span> to confirm
+        </p>
+        <Input
+          value={confirmText}
+          onChange={e => setConfirmText(e.target.value)}
+          placeholder="DELETE"
+          className="bg-secondary border-destructive/30 font-mono"
+          autoComplete="off"
+        />
+      </div>
+
       <Button
         variant="destructive"
         className="w-full font-mono text-xs gap-2"
-        disabled
+        disabled={!canConfirm || deleting}
+        onClick={handleDelete}
       >
         <Trash2 className="w-4 h-4" />
-        Delete My Account
+        {deleting ? 'Deleting…' : 'Permanently Delete My Account'}
       </Button>
     </div>
   );

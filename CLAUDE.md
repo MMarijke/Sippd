@@ -4,15 +4,11 @@ Project-specific notes for Claude Code. See the shared `../CLAUDE.md` for
 Seedstack-wide conventions (stack, RLS patterns, compliance, etc.) — this
 file only holds Sippd-specific operational state.
 
-## Migration reconciliation needed
+## Migration state
 
-These migrations were applied via Dashboard SQL Editor (CLI crashed) and
-are NOT recorded in the `supabase_migrations.schema_migrations` tracking
-table:
-- `20260819120000_grant_sippd_rpc_table_access.sql`
-- `20260820000000_leaderboard_scores.sql`
-
-When CLI is working again, run:
-
-    supabase migration repair --status applied 20260819120000
-    supabase migration repair --status applied 20260820000000
+CLI is linked and working (`supabase migration list --linked` confirmed
+2026-08-28) — the earlier "CLI crashed, apply via Dashboard" reconciliation
+issue is resolved. All migrations through `20260820000003_fix_rpc_caller_id.sql`
+are recorded as applied on both local and remote. `supabase db push` /
+`supabase migration list --linked` work normally now; no manual
+`migration repair` step is outstanding.

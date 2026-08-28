@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -17,12 +17,22 @@ import { useAchievementUnlock } from '@/hooks/useAchievementUnlock';
 import AchievementUnlockAnimation from '@/components/achievements/AchievementUnlockAnimation';
 import { useStreak } from '@/lib/useStreak';
 
+const PAGE_SIZE = 60;
+
 export default function Collection() {
   const [viewMode, setViewMode] = useState('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({ status: 'all', rarity: 'all', favourites: false, sort: 'date_desc' });
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const { user } = useAuth();
   const streak = useStreak();
+
+  // Reset to the first page whenever the filtered set's criteria change —
+  // otherwise switching filters could leave a large stale render count
+  // pointed at a now-different, possibly much smaller result set.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [filters, searchQuery]);
 
   const { data: collection = [], isLoading } = useQuery({
     queryKey: ['user-collection', user?.id],
@@ -161,24 +171,40 @@ export default function Collection() {
               )
             }
           />
-        ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-2 gap-3">
-            {filtered.map(item => (
-              <Link key={item.id} to={`/can/${item.can_id}`}>
-                <CanCard
-                  can={item}
-                  showStatus
-                  sharedCan={sharedCansMap[item.can_id]}
-                />
-              </Link>
-            ))}
-          </div>
         ) : (
-          <div className="space-y-2">
-            {filtered.map(item => (
-              <CanListItem key={item.id} item={item} sharedCan={sharedCansMap[item.can_id]} />
-            ))}
-          </div>
+          <>
+            {viewMode === 'grid' ? (
+              <div className="grid grid-cols-2 gap-3">
+                {filtered.slice(0, visibleCount).map(item => (
+                  <Link key={item.id} to={`/can/${item.can_id}`}>
+                    <CanCard
+                      can={item}
+                      showStatus
+                      sharedCan={sharedCansMap[item.can_id]}
+                    />
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filtered.slice(0, visibleCount).map(item => (
+                  <CanListItem key={item.id} item={item} sharedCan={sharedCansMap[item.can_id]} />
+                ))}
+              </div>
+            )}
+
+            {filtered.length > visibleCount && (
+              <div className="flex justify-center pt-4">
+                <Button
+                  variant="outline"
+                  className="font-mono text-xs border-primary/30 text-primary hover:bg-primary/10"
+                  onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+                >
+                  Load More ({filtered.length - visibleCount} remaining)
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

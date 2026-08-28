@@ -9,11 +9,11 @@ import { cn } from '@/lib/utils';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
 const RARITY_COLORS = {
-  Common: 'text-gray-400',
-  Uncommon: 'text-green-400',
-  Rare: 'text-blue-400',
-  'Ultra Rare': 'text-purple-400',
-  Legendary: 'text-yellow-400',
+  Common: 'text-rarity-common',
+  Uncommon: 'text-rarity-uncommon',
+  Rare: 'text-rarity-rare',
+  'Ultra Rare': 'text-rarity-ultra',
+  Legendary: 'text-rarity-legendary',
 };
 
 const STATUS_STYLES = {
@@ -202,7 +202,8 @@ function TradeCard({ trade, onDelete, onStatusChange }) {
         </div>
         <button
           onClick={onDelete}
-          className="w-6 h-6 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
+          aria-label="Delete trade"
+          className="w-11 h-11 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>

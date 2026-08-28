@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -5,18 +6,20 @@ import { X, BookmarkCheck, Trash2, ArrowRightLeft, Plus } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
 const RARITY_COLORS = {
-  Common: 'text-gray-400',
-  Uncommon: 'text-green-400',
-  Rare: 'text-blue-400',
-  'Ultra Rare': 'text-purple-400',
-  Legendary: 'text-yellow-400',
+  Common: 'text-rarity-common',
+  Uncommon: 'text-rarity-uncommon',
+  Rare: 'text-rarity-rare',
+  'Ultra Rare': 'text-rarity-ultra',
+  Legendary: 'text-rarity-legendary',
 };
 
 export default function TradeTemplatesSheet({ onClose, onUseTemplate }) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const [templateToDelete, setTemplateToDelete] = useState(null);
 
   const { data: templates = [], isLoading } = useQuery({
     queryKey: ['trade-templates', user?.id],
@@ -40,6 +43,10 @@ export default function TradeTemplatesSheet({ onClose, onUseTemplate }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trade-templates'] });
       toast.success('Template deleted');
+      setTemplateToDelete(null);
+    },
+    onError: (error) => {
+      toast.error('Failed to delete template: ' + (error.message || 'Unknown error'));
     },
   });
 
@@ -88,8 +95,9 @@ export default function TradeTemplatesSheet({ onClose, onUseTemplate }) {
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-display font-semibold text-foreground truncate">{tpl.name}</p>
                 <button
-                  onClick={() => deleteTemplate.mutate(tpl.id)}
-                  className="w-6 h-6 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
+                  onClick={() => setTemplateToDelete(tpl)}
+                  aria-label="Delete template"
+                  className="w-11 h-11 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -118,6 +126,19 @@ export default function TradeTemplatesSheet({ onClose, onUseTemplate }) {
           ))}
         </div>
       </SheetContent>
+
+      <ConfirmDialog
+        open={!!templateToDelete}
+        onCancel={() => setTemplateToDelete(null)}
+        onConfirm={() => deleteTemplate.mutate(templateToDelete.id)}
+        isPending={deleteTemplate.isPending}
+        title="Delete Template?"
+        description={
+          <>
+            <span className="text-foreground font-semibold">{templateToDelete?.name}</span> will be deleted. This cannot be undone.
+          </>
+        }
+      />
     </Sheet>
   );
 }

@@ -9,6 +9,7 @@ import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, subMonths
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { getDisplayRarity, getConfidence, RARITY_POINTS, RARITY_ORDER, RARITY_HEX as RARITY_COLORS } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
+import { toast } from 'sonner';
 import RarityBadge from '@/components/shared/RarityBadge';
 import CanImageBox from '@/components/shared/CanImageBox';
 
@@ -126,7 +127,7 @@ export default function MonthlyReport() {
       navigator.share({ title: `Sippd ${monthLabel} Report`, text });
     } else {
       navigator.clipboard.writeText(text);
-      alert('Report copied to clipboard!');
+      toast.success('Report copied to clipboard!');
     }
   };
 
@@ -138,7 +139,8 @@ export default function MonthlyReport() {
       <div className="flex items-center gap-3 px-4 pt-5 pb-4 border-b border-border sticky top-0 bg-background/95 backdrop-blur-sm z-10">
         <button
           onClick={() => navigate(-1)}
-          className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center border border-border flex-shrink-0"
+          aria-label="Back"
+          className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center border border-border flex-shrink-0"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>

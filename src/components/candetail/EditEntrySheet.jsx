@@ -180,7 +180,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
           {/* Rarity vote — read only */}
           <div className="space-y-1.5">
             <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-              Your Rarity Vote <span className="normal-case text-muted-foreground/60">(locked)</span>
+              Your Rarity Vote <span className="normal-case text-muted-foreground">(locked)</span>
             </Label>
             <div className="flex gap-2 flex-wrap opacity-60 pointer-events-none">
               {RARITY_ORDER.map(r => (

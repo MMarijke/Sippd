@@ -214,7 +214,7 @@ export default function CanDetail() {
               <Users className="w-3 h-3" /> Community Rarity
               <Popover>
                 <PopoverTrigger
-                  className="p-2 -m-2 normal-case tracking-normal text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                  className="p-2 -m-2 normal-case tracking-normal text-muted-foreground hover:text-foreground transition-colors"
                   aria-label="How Community Rarity works"
                 >
                   <Info className="w-3 h-3" />
@@ -272,7 +272,7 @@ export default function CanDetail() {
                 <span className={cn('font-semibold', RARITY_COLORS[myVote.voted_rarity] || 'text-foreground')}>
                   {myVote.voted_rarity}
                 </span>
-                <span className="ml-1 text-muted-foreground/60">· locked</span>
+                <span className="ml-1 text-muted-foreground">· locked</span>
               </p>
             </div>
           )}

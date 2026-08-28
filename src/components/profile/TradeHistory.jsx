@@ -184,7 +184,7 @@ function TradeCard({ trade, onDelete, onStatusChange }) {
                   'px-2 py-0.5 rounded-md border text-[10px] font-mono transition-colors capitalize',
                   status === s
                     ? STATUS_STYLES[s].class
-                    : 'bg-transparent border-border text-muted-foreground/50 hover:text-muted-foreground'
+                    : 'bg-transparent border-border text-muted-foreground hover:text-foreground'
                 )}
               >
                 {STATUS_STYLES[s].label}

@@ -193,19 +193,19 @@ export default function Scan() {
       <div className="text-center mt-8">
         <button
           onClick={() => { setSelectedCan(null); setMode('add'); }}
-          className="text-[11px] font-mono text-muted-foreground/60 hover:text-muted-foreground underline underline-offset-2 transition-colors"
+          className="text-[11px] font-mono text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
         >
           + Add can manually
         </button>
       </div>
 
-      <p className="text-center text-[10px] font-mono text-muted-foreground/40 mt-4 px-5">
+      <p className="text-center text-[10px] font-mono text-muted-foreground mt-4 px-5">
         Barcode lookup powered by{' '}
         <a
           href="https://world.openfoodfacts.org"
           target="_blank"
           rel="noopener noreferrer"
-          className="underline hover:text-muted-foreground/60"
+          className="underline hover:text-foreground"
         >
           Open Food Facts
         </a>

@@ -79,7 +79,7 @@ export default function TradeTemplatesSheet({ onClose, onUseTemplate }) {
             <div className="text-center py-10">
               <BookmarkCheck className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" />
               <p className="text-sm font-mono text-muted-foreground">No templates saved yet.</p>
-              <p className="text-xs font-mono text-muted-foreground/60 mt-1">Save a template while logging a trade.</p>
+              <p className="text-xs font-mono text-muted-foreground mt-1">Save a template while logging a trade.</p>
             </div>
           )}
 

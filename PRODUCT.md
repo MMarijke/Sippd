@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Migrating off the current Base44 implementation (React + Vite + `@base44/sdk`) to a production-grade stack matching the sibling project Strk:
+Migrated off the original Base44 implementation (React + Vite + `@base44/sdk`) to a production-grade stack matching the sibling project Strk:
 
 - Frontend: React + Vite + Tailwind CSS + shadcn/ui
 - Backend: Supabase (Postgres + RLS + Auth + Realtime + Edge Functions)
@@ -52,8 +52,8 @@ Mobile-first, in-the-moment usage — the Scan flow implies logging a can at the
 
 ## Capabilities and Constraints
 
-- Currently built on Base44 (SDK-backed); migrating to the Supabase/Paddle/Vercel/Sentry/Upstash stack above, matching the architecture already proven in Strk.
-- Non-negotiable architectural constraints carried over from Strk (not product facts, but bind every feature built during the migration):
+- Migration off Base44 to the Supabase/Paddle/Vercel/Sentry/Upstash stack above is complete — no `@base44/*` packages, SDK calls, or build-time dependency remain in the codebase.
+- Non-negotiable architectural constraints carried over from Strk (not product facts, but bind every feature built going forward):
   - RLS is the real security boundary; test with a genuinely different non-owner session.
   - Paid-feature/role-gating columns need `BEFORE UPDATE` triggers, `SECURITY INVOKER`, rejecting client writes to those columns.
   - `SECURITY DEFINER` is reserved for RPCs that must bypass RLS, owned by a dedicated `NOLOGIN` role; column-lockdown triggers stay `SECURITY INVOKER`.
@@ -66,11 +66,11 @@ Mobile-first, in-the-moment usage — the Scan flow implies logging a can at the
 
 ## Brand Commitments
 
-Product name is **Sippd**. Note: `index.html` currently still has the title "Canvolt — Energy Drink Collection Tracker" and a Base44-hosted favicon — this appears to be a stale, pre-rename artifact from the Base44 build. Do not treat "Canvolt" as the confirmed name; flag it for the user to resolve before it ships.
+Product name is **Sippd**. The stale pre-rename "Canvolt" title and Base44-hosted favicon in `index.html` have been fixed — the title now reads "Sippd — Energy Drink Collection Tracker" with a self-contained inline favicon.
 
 ## Evidence on Hand
 
-Existing Base44-era codebase at the project root with working routes/components for every feature listed under Operating Context (`src/pages/*`, `src/components/{achievements,candetail,collection,crates,dashboard,feed,layout,leaderboard,profile,scan,shared,social,wishlist,ui}`). No `public/` directory or `manifest.json` currently exists in the repo despite being referenced by `index.html` — do not fabricate logo/icon/PWA assets; treat them as missing.
+Codebase at the project root with working routes/components for every feature listed under Operating Context (`src/pages/*`, `src/components/{achievements,candetail,collection,crates,dashboard,feed,layout,leaderboard,profile,scan,shared,social,wishlist,ui}`), now running fully on Supabase. No `public/` directory or `manifest.json` currently exists in the repo despite being referenced by `index.html` — do not fabricate logo/icon/PWA assets; treat them as missing.
 
 ## Product Principles
 
@@ -78,4 +78,4 @@ Existing Base44-era codebase at the project root with working routes/components 
 2. Security boundaries are real, not decorative — RLS plus column-level triggers protect collection data and paid-tier state from client tampering, matching Strk's proven pattern.
 3. Cross-user features must be server-synced — leaderboards, feeds, and collection comparisons reflect true shared state, never client-only stubs.
 4. Free core, paid extras — scanning, logging, and collecting stay free; monetization sits on top via clearly separated premium features (specifics still open).
-5. The migration preserves product behavior — moving Base44 → Supabase/Paddle/Vercel changes infrastructure, not the feature set or workflows already shipped.
+5. The migration preserved product behavior — moving Base44 → Supabase/Paddle/Vercel changed infrastructure, not the feature set or workflows already shipped.

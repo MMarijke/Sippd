@@ -1,39 +1,50 @@
-**Welcome to your Base44 project** 
+# Sippd
 
-**About**
+Mobile-first energy drink can collection tracker — log, catalog, and show off
+your collection, with a social/competitive layer (leaderboards, feed,
+achievements) on top.
 
-View and Edit  your app on [Base44.com](http://Base44.com) 
+## Stack
 
-This project contains everything you need to run your app locally.
+- Frontend: React + Vite + Tailwind CSS + shadcn/ui
+- Backend: Supabase (Postgres + RLS + Auth + Realtime + Storage + Edge Functions)
+- Payments: Paddle (Merchant of Record)
+- Hosting: Vercel
+- Error monitoring: Sentry (PII-scrubbed)
+- Rate limiting: Upstash Redis
 
-**Edit the code in your local development environment**
+## Getting started
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+1. Clone the repo and install dependencies:
 
-**Prerequisites:** 
+   ```
+   npm install
+   ```
 
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
+2. Copy `.env.example` to `.env.local` and fill in the values (Supabase
+   project URL/anon key at minimum — Paddle/Sentry/Upstash vars are only
+   needed once those integrations are wired up):
 
-```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
+   ```
+   cp .env.example .env.local
+   ```
 
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
-```
+3. Run the app locally:
 
-Run the app: `npm run dev`
+   ```
+   npm run dev
+   ```
 
-**Publish your changes**
+## Scripts
 
-Open [Base44.com](http://Base44.com) and click on Publish.
+- `npm run dev` — start the Vite dev server
+- `npm run build` — production build
+- `npm run preview` — preview the production build locally
+- `npm run lint` / `npm run lint:fix` — ESLint
+- `npm run typecheck` — TypeScript checking via `jsconfig.json`
 
-**Docs & Support**
+## Database
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
-
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+Schema and RLS policies live in `supabase/migrations/`. See
+`supabase/migrations/` for the migration history and `CLAUDE.md` for the
+project's RLS/security conventions.

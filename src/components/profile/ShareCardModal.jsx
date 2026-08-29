@@ -109,6 +109,21 @@ export default function ShareCardModal({ user, onClose }) {
     },
   });
 
+  const { data: votes = [] } = useQuery({
+    queryKey: ['my-votes', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('rarity_votes')
+        .select('*')
+        .eq('voter_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   const sharedCansMap = useMemo(
     () => Object.fromEntries(sharedCans.map(c => [c.id, c])),
     [sharedCans]
@@ -150,11 +165,11 @@ export default function ShareCardModal({ user, onClose }) {
 
   // Latest achievement (sorted by most recently unlocked with a date)
   const latestAchievement = useMemo(() => {
-    const all = computeAchievements(collection, 0);
+    const all = computeAchievements(collection, streak, votes.length, user?.created_at);
     const unlocked = all.filter(a => a.unlocked);
     const withDate = unlocked.filter(a => a.unlockedAt).sort((a, b) => new Date(b.unlockedAt) - new Date(a.unlockedAt));
     return withDate[0] || unlocked[unlocked.length - 1] || null;
-  }, [collection]);
+  }, [collection, streak, votes.length, user?.created_at]);
 
   const [saving, setSaving] = useState(false);
 

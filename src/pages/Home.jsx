@@ -95,7 +95,7 @@ export default function Home() {
   const brands = ['All', ...new Set(collected.map(c => c.can_brand).filter(Boolean))].slice(0, 9);
 
   return (
-    <div className="space-y-5">
+    <div>
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
       <PageHeader
         title="SIPPD"
@@ -110,7 +110,7 @@ export default function Home() {
       />
 
       {/* Hero Stat */}
-      <div className="px-5 relative">
+      <div className="px-5 relative mt-5">
         <div className="relative w-full min-h-[160px] rounded-2xl bg-gradient-to-br from-[#0D2B2B] to-[#080C14] border border-primary/30 p-6">
           {/* Left column: text */}
           <div>
@@ -141,15 +141,17 @@ export default function Home() {
         </div>
       </div>
 
-      <StatsRow
-        totalCans={isLoading ? '—' : totalCans}
-        rarePulls={isLoading ? '—' : rarePulls}
-        streak={streak}
-        wishlistCount={isLoading ? '—' : wishlistCount}
-      />
+      <div className="mt-5">
+        <StatsRow
+          totalCans={isLoading ? '—' : totalCans}
+          rarePulls={isLoading ? '—' : rarePulls}
+          streak={streak}
+          wishlistCount={isLoading ? '—' : wishlistCount}
+        />
+      </div>
 
       {!isLoading && collected.length > 0 && brands.length > 1 && (
-        <div>
+        <div className="mt-5">
           <p className="px-5 mb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
             Browse by Brand
           </p>
@@ -172,45 +174,49 @@ export default function Home() {
         </div>
       )}
 
-      <div className="px-5 space-y-4">
-        {!isLoading && <RarityChart collection={collected} sharedCansMap={sharedCansMap} />}
-
-        {/* Feed CTA — Feed has no BottomNav entry, this is its primary discovery path */}
-        <Link to="/feed">
-          <div className="flex items-center gap-4 bg-card border border-primary/20 rounded-xl p-4 hover:border-primary/40 transition-colors cursor-pointer">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Rss className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-display font-semibold text-foreground tracking-wide">Activity Feed</p>
-              <p className="text-[11px] font-mono text-muted-foreground mt-0.5">See what other collectors are pulling</p>
-            </div>
-            <span className="text-xs font-mono text-primary">→</span>
-          </div>
-        </Link>
-
-        {/* Monthly Report CTA */}
-        <Link to="/monthly-report">
-          <div className="flex items-center gap-4 bg-card border border-primary/20 rounded-xl p-4 hover:border-primary/40 transition-colors cursor-pointer">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <BarChart2 className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-display font-semibold text-foreground tracking-wide">Monthly Report</p>
-              <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{format(new Date(), 'MMMM yyyy')} · Tap to view</p>
-            </div>
-            <span className="text-xs font-mono text-primary">→</span>
-          </div>
-        </Link>
-
-        {!isLoading && (
+      {!isLoading && (
+        <div className="mt-5">
           <SpotlightCarousel
             collected={collected}
             sharedCansMap={sharedCansMap}
             selectedBrand={selectedBrand}
           />
-        )}
-      </div>
+        </div>
+      )}
+
+      {!isLoading && (
+        <div className="px-5 mt-5">
+          <RarityChart collection={collected} sharedCansMap={sharedCansMap} />
+        </div>
+      )}
+
+      {/* Monthly Report CTA */}
+      <Link to="/monthly-report" className="block px-5 mt-5">
+        <div className="flex items-center gap-4 bg-card border border-primary/20 rounded-xl p-4 hover:border-primary/40 transition-colors cursor-pointer">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <BarChart2 className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-display font-semibold text-foreground tracking-wide">Monthly Report</p>
+            <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{format(new Date(), 'MMMM yyyy')} · Tap to view</p>
+          </div>
+          <span className="text-xs font-mono text-primary">→</span>
+        </div>
+      </Link>
+
+      {/* Feed CTA — Feed has no BottomNav entry, this is its primary discovery path */}
+      <Link to="/feed" className="block px-5 mt-5">
+        <div className="flex items-center gap-4 bg-card border border-primary/20 rounded-xl p-4 hover:border-primary/40 transition-colors cursor-pointer">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Rss className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-display font-semibold text-foreground tracking-wide">Activity Feed</p>
+            <p className="text-[11px] font-mono text-muted-foreground mt-0.5">See what other collectors are pulling</p>
+          </div>
+          <span className="text-xs font-mono text-primary">→</span>
+        </div>
+      </Link>
     </div>
   );
 }

@@ -12,7 +12,7 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between px-5 mb-3">
         <h3 className="text-base font-display font-bold text-foreground">Recent Pulls</h3>
         {items.length > 0 && (
           <span className="text-[11px] font-mono text-muted-foreground">Swipe →</span>

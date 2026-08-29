@@ -20,15 +20,6 @@ export function useAuth() {
       if (cancelled) return;
       setSession(session);
       setIsLoading(false);
-
-      // TEMPORARY DIAGNOSTIC — remove once the sippd_rpc auth.uid() question
-      // is resolved. Confirms whether auth.uid() resolves correctly inside a
-      // SECURITY DEFINER function owned by sippd_rpc.
-      if (session) {
-        supabase.rpc('debug_auth_context').then(({ data, error }) => {
-          console.log('[debug_auth_context] data:', JSON.stringify(data), 'error:', JSON.stringify(error));
-        });
-      }
     });
 
     return () => {

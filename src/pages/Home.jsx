@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -7,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
 import StatsRow from '@/components/dashboard/StatsRow';
 import RarityChart from '@/components/dashboard/RarityChart';
-import RecentPulls from '@/components/dashboard/RecentPulls';
+import SpotlightCarousel from '@/components/dashboard/SpotlightCarousel';
 import { getItemScore, getDisplayRarity } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
 import { format } from 'date-fns';
@@ -17,6 +18,7 @@ import AchievementUnlockAnimation from '@/components/achievements/AchievementUnl
 
 export default function Home() {
   const { user } = useAuth();
+  const [selectedBrand, setSelectedBrand] = useState('All');
 
   const { data: collection = [], isLoading: loadingCollection } = useQuery({
     queryKey: ['user-collection', user?.id],
@@ -174,7 +176,13 @@ export default function Home() {
           </div>
         </Link>
 
-        {!isLoading && <RecentPulls recentItems={collected.slice(0, 5)} />}
+        {!isLoading && (
+          <SpotlightCarousel
+            collected={collected}
+            sharedCansMap={sharedCansMap}
+            selectedBrand={selectedBrand}
+          />
+        )}
       </div>
     </div>
   );

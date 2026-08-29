@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabaseClient';
 export async function postActivity({ user, type, can, achievementData, streakDays, isPrivate }) {
   const payload = {
     user_id: user.id,
-    user_name: user.full_name || user.email,
+    user_name: user.full_name || 'Collector',
     type,
     is_private_user: isPrivate || false,
   };

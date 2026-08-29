@@ -13,7 +13,7 @@ export default function RegionalLeaderboard() {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
 
-  const { data: profile } = useQuery({
+  const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ['my-profile', currentUser?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
@@ -38,7 +38,7 @@ export default function RegionalLeaderboard() {
     enabled: !!profile?.region,
   });
 
-  if (!profile?.region) {
+  if (!isLoadingProfile && !profile?.region) {
     return (
       <div className="px-5">
         <div className="bg-card border border-border rounded-2xl p-8 flex flex-col items-center text-center">
@@ -60,7 +60,13 @@ export default function RegionalLeaderboard() {
 
   return (
     <div className="px-5">
-      {isEmpty ? (
+      {isLoadingProfile || isLoading ? (
+        <>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-16 rounded-xl bg-card/40 border border-border/30 animate-pulse mb-2" />
+          ))}
+        </>
+      ) : isEmpty ? (
         <div className="bg-card border border-border rounded-2xl p-8 flex flex-col items-center text-center">
           <Crown className="w-10 h-10 text-primary mb-3" />
           <p className="text-sm font-display font-semibold text-foreground">You're the first Sippd collector in your area! 🎉</p>

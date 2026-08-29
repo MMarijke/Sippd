@@ -129,7 +129,7 @@ export default function Home() {
       />
 
       <div className="px-5 space-y-4">
-        <RarityChart collection={collected} sharedCansMap={sharedCansMap} />
+        {!isLoading && <RarityChart collection={collected} sharedCansMap={sharedCansMap} />}
 
         {/* Feed CTA — Feed has no BottomNav entry, this is its primary discovery path */}
         <Link to="/feed">
@@ -159,7 +159,7 @@ export default function Home() {
           </div>
         </Link>
 
-        <RecentPulls recentItems={collected.slice(0, 5)} />
+        {!isLoading && <RecentPulls recentItems={collected.slice(0, 5)} />}
       </div>
     </div>
   );

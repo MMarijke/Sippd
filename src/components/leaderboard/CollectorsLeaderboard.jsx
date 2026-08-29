@@ -95,7 +95,13 @@ export default function CollectorsLeaderboard() {
         </div>
       )}
 
-      {isEmpty ? (
+      {isLoading ? (
+        <>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-16 rounded-xl bg-card/40 border border-border/30 animate-pulse mb-2" />
+          ))}
+        </>
+      ) : isEmpty ? (
         <div className="bg-card border border-border rounded-2xl p-8 flex flex-col items-center text-center">
           <Crown className="w-10 h-10 text-primary mb-3" />
           <p className="text-sm font-display font-semibold text-foreground">Be the first to claim #1</p>

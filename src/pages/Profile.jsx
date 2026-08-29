@@ -26,7 +26,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const inputRef = useRef(null);
 
-  const { data: profile } = useQuery({
+  const { data: profile, isLoading } = useQuery({
     queryKey: ['my-profile', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
@@ -127,6 +127,15 @@ export default function Profile() {
       <PageHeader title="Profile" />
 
       <div className="px-5">
+        {isLoading ? (
+          <div className="bg-card border border-border rounded-2xl p-6 flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-card/40 animate-pulse flex-shrink-0" />
+            <div className="flex-1 min-w-0 space-y-2">
+              <div className="h-5 w-32 bg-card/40 animate-pulse rounded-lg" />
+              <div className="h-4 w-20 bg-card/40 animate-pulse rounded-lg" />
+            </div>
+          </div>
+        ) : (
         <div className="bg-card border border-border rounded-2xl p-6 flex items-center gap-4">
           <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center neon-glow">
             <span className="text-2xl font-display font-bold text-primary">
@@ -180,14 +189,23 @@ export default function Profile() {
             </p>
           </div>
         </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 px-5">
-        <StatBox icon={Zap} label="Cans" value={collected.length} />
-        <StatBox icon={Trophy} label="Wishlist" value={wishlist} />
-        <StatBox icon={Star} label="Rare" value={rarePulls} />
-        <StatBox icon={Star} label="Favourites" value={favourites} glow />
-      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-2 gap-3 px-5">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-24 rounded-2xl bg-card/40 border border-border/30 animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 px-5">
+          <StatBox icon={Zap} label="Cans" value={collected.length} />
+          <StatBox icon={Trophy} label="Wishlist" value={wishlist} />
+          <StatBox icon={Star} label="Rare" value={rarePulls} />
+          <StatBox icon={Star} label="Favourites" value={favourites} glow />
+        </div>
+      )}
 
       <div className="px-5 space-y-2">
         <Button

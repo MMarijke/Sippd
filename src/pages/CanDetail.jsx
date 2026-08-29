@@ -61,7 +61,7 @@ export default function CanDetail() {
     enabled: !!user?.id,
   });
 
-  const { data: can } = useQuery({
+  const { data: can, isLoading } = useQuery({
     queryKey: ['shared-can', canId],
     queryFn: async () => {
       const { data, error } = await supabase.from('shared_cans').select('*').eq('id', canId).single();
@@ -125,6 +125,20 @@ export default function CanDetail() {
 
   const status = item?.status || 'collected';
   const statusCfg = STATUS_CONFIG[status] || STATUS_CONFIG.collected;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="w-full aspect-square bg-card/40 animate-pulse rounded-none" />
+        <div className="h-8 w-48 bg-card/40 animate-pulse rounded-xl mx-5 mt-4" />
+        <div className="h-6 w-24 bg-card/40 animate-pulse rounded-full mx-5 mt-2" />
+        <div className="grid grid-cols-2 gap-3 px-5 mt-4">
+          <div className="h-20 bg-card/40 animate-pulse rounded-2xl" />
+          <div className="h-20 bg-card/40 animate-pulse rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Link } from 'react-router-dom';
-import { ScanLine, Zap, BarChart2, Rss } from 'lucide-react';
+import { ScanLine, BarChart2, Rss } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
 import StatsRow from '@/components/dashboard/StatsRow';
@@ -105,19 +105,34 @@ export default function Home() {
       />
 
       {/* Hero Stat */}
-      <div className="px-5">
-        <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-card to-card border border-primary/20 rounded-2xl p-6 neon-border">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
-          <div className="flex items-center gap-3 mb-1">
-            <Zap className="w-5 h-5 text-primary" />
-            <span className="text-xs font-mono text-primary uppercase tracking-widest">Collection Score</span>
+      <div className="px-5 relative">
+        <div className="relative w-full min-h-[160px] rounded-2xl bg-gradient-to-br from-[#0D2B2B] to-[#080C14] border border-primary/30 p-6">
+          {/* Left column: text */}
+          <div>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">
+              COLLECTION SCORE
+            </p>
+            <p className="text-5xl font-mono font-black text-foreground">
+              {isLoading ? '—' : score}
+            </p>
+            <p className="text-xs font-mono text-muted-foreground">
+              Your Energy Drink Vault
+            </p>
+            <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-mono text-primary">
+              {isLoading ? '—' : `${totalCans} cans`}
+            </div>
           </div>
-          <p className="text-5xl font-mono font-black text-foreground neon-text">
-            {isLoading ? '—' : score}
-          </p>
-          <p className="text-xs font-mono text-muted-foreground mt-2">
-            {isLoading ? '…' : `${totalCans} cans in your vault`}
-          </p>
+
+          {/* Right column: floating image */}
+          {collected.length === 0 || !collected[0]?.can_image_url ? (
+            <span className="absolute right-4 -top-6 w-28 h-28 flex items-center justify-center text-6xl opacity-20">⚡</span>
+          ) : (
+            <img
+              src={collected[0].can_image_url}
+              alt={collected[0].can_name}
+              className="absolute right-4 -top-6 w-28 h-28 object-contain drop-shadow-2xl"
+            />
+          )}
         </div>
       </div>
 

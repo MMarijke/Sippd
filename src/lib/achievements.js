@@ -85,6 +85,11 @@ export const ACHIEVEMENT_DEFINITIONS = [
     getProgress: ({ voteCount }) => ({ current: Math.min(voteCount, 20), goal: 20, label: 'votes' }),
     check: ({ voteCount }) => voteCount >= 20, getDate: () => null,
   },
+  {
+    key: 'vault_hunter', title: 'Vault Hunter', description: 'Push 5 cans from Unrated to Low Confidence by voting', icon: '🔍', incremental: true, goal: 5,
+    getProgress: ({ voteCount }) => ({ current: Math.min(voteCount, 5), goal: 5, label: 'cans rated' }),
+    check: ({ voteCount }) => voteCount >= 5, getDate: () => null,
+  },
 ];
 
 export function computeAchievements(collection, streak = 0, voteCount = 0, userCreatedDate = null) {

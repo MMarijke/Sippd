@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Link } from 'react-router-dom';
 import { ScanLine, BarChart2, Rss } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import PageHeader from '@/components/shared/PageHeader';
 import StatsRow from '@/components/dashboard/StatsRow';
 import RarityChart from '@/components/dashboard/RarityChart';
@@ -91,6 +92,8 @@ export default function Home() {
 
   const wishlistCount = collection.filter(c => c.status === 'wishlist').length;
 
+  const brands = ['All', ...new Set(collected.map(c => c.can_brand).filter(Boolean))].slice(0, 9);
+
   return (
     <div className="space-y-5">
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
@@ -144,6 +147,30 @@ export default function Home() {
         streak={streak}
         wishlistCount={isLoading ? '—' : wishlistCount}
       />
+
+      {!isLoading && collected.length > 0 && brands.length > 1 && (
+        <div>
+          <p className="px-5 mb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+            Browse by Brand
+          </p>
+          <div className="flex gap-2 overflow-x-auto px-5 pb-1 scrollbar-none">
+            {brands.map(brand => (
+              <button
+                key={brand}
+                onClick={() => setSelectedBrand(brand)}
+                className={cn(
+                  'flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-mono font-semibold transition-all',
+                  selectedBrand === brand
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary border border-border text-muted-foreground hover:border-primary/30'
+                )}
+              >
+                {brand}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="px-5 space-y-4">
         {!isLoading && <RarityChart collection={collected} sharedCansMap={sharedCansMap} />}

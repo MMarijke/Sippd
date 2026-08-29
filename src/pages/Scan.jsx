@@ -54,7 +54,7 @@ export default function Scan() {
     setOffLookup(true);
     const result = await lookupOpenFoodFacts(barcode);
     setOffLookup(false);
-    setSelectedCan(result || { barcode });
+    setSelectedCan(result || { barcode, _offMiss: true });
     setMode('add');
   };
 
@@ -184,9 +184,9 @@ export default function Scan() {
                     variant="outline"
                     size="sm"
                     className="font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
-                    onClick={() => {setSelectedCan(null); setMode('add'); }}
+                    onClick={() => { setSelectedCan({ name: searchQuery }); setMode('add'); }}
                   >
-                    + Add "{searchQuery}" manually
+                    + Add "{searchQuery}" as new can
                   </Button>
                 )}
               </div>

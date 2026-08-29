@@ -101,6 +101,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
           p_image_url: form.image_url || null,
           p_barcode: form.barcode || null,
         });
+        console.log('[vote_on_can] rpc result:', JSON.stringify(data), JSON.stringify(error));
         if (error) throw error;
         sharedCan = data;
       }
@@ -138,7 +139,8 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
       }
     },
     onError: (error) => {
-      toast.error('Failed to add can: ' + (error.message || 'Unknown error'));
+      console.error('[vote_on_can] onError:', JSON.stringify(error));
+      toast.error('Failed: ' + (error?.message || error?.code || JSON.stringify(error)));
     },
   });
 

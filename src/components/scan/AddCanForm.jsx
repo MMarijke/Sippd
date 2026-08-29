@@ -138,7 +138,12 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
       }
     },
     onError: (error) => {
-      toast.error('Failed to add can: ' + (error.message || 'Unknown error'));
+      if (error?.message?.includes('already_collected')) {
+        toast('You already have this can in your vault');
+        onSuccess?.();
+      } else {
+        toast.error('Failed to add can: ' + (error?.message || 'Unknown error'));
+      }
     },
   });
 

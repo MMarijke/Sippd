@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Star } from 'lucide-react';
+import { Star, CheckCircle } from 'lucide-react';
 import RarityBadge from './RarityBadge';
 import CanImageBox from './CanImageBox';
 import { getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
@@ -78,6 +78,12 @@ export default function CanCard({ can, onClick, showStatus, sharedCan, onFavouri
             }`}>
               {can.status === 'collected' ? '✓ Vault' : can.status === 'wishlist' ? '★ Want' : '⊕ Dupe'}
             </span>
+          </div>
+        )}
+
+        {sharedCan?.verified && (
+          <div className="absolute bottom-2 left-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+            <CheckCircle className="w-3 h-3 text-primary-foreground" />
           </div>
         )}
       </div>

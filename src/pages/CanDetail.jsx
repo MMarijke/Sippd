@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Pencil, Trash2, Calendar, Tag,
-  FileText, Users, ShieldCheck, ShieldAlert, StickyNote, Star, Info,
+  FileText, Users, ShieldCheck, ShieldAlert, StickyNote, Star, Info, CheckCircle,
 } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { useFavourite } from '@/hooks/useFavourite';
@@ -174,6 +174,15 @@ export default function CanDetail() {
           </div>
         )}
       </div>
+
+      {can?.verified && can?.verified_by && (
+        <div className="mx-5 mt-3 flex items-center gap-2 px-3 py-2 rounded-xl border border-primary/30 bg-primary/5">
+          <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+          <p className="text-xs font-mono text-primary">
+            Verified by {can?.verified_by}
+          </p>
+        </div>
+      )}
 
       {/* Content */}
       <div className="px-5 -mt-6 relative z-10 space-y-4 pb-32">

@@ -156,7 +156,12 @@ export default function Scan() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{can.name}</p>
+                    <p className="text-sm font-semibold text-foreground truncate">
+                      {can.name}
+                      {can.verified && (
+                        <span className="text-primary text-xs font-mono ml-1">✓</span>
+                      )}
+                    </p>
                     <p className="text-[11px] font-mono text-muted-foreground">{can.brand}</p>
                   </div>
                   <RarityBadge rarity={can.cosensus_rarity || can.rarity || 'Common'} />

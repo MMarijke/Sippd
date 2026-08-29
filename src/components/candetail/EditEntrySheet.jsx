@@ -11,6 +11,7 @@ import { Loader2, Save, Upload, Link as LinkIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { RARITY_ORDER } from '@/lib/rarityConsensus';
+import { CAN_BG_COLORS, DEFAULT_CAN_BG } from '@/lib/canBgColors';
 
 const STATUS_OPTIONS = [
   { value: 'collected', label: 'Collected' },
@@ -54,6 +55,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
     can_flavour:  item?.can_flavour  || '',
     can_edition:  item?.can_edition  || '',
     can_image_url: item?.can_image_url || '',
+    can_bg_color: item?.can_bg_color || DEFAULT_CAN_BG,
   });
 
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
@@ -126,14 +128,35 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
           <div className="space-y-1.5">
             <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Image</Label>
             {form.can_image_url ? (
-              <div className="relative w-full h-40 rounded-xl overflow-hidden bg-secondary">
-                <img src={form.can_image_url} alt="Can" className="w-full h-full object-contain" />
-                <button
-                  onClick={() => update('can_image_url', '')}
-                  className="absolute top-2 right-2 w-7 h-7 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-border hover:bg-background"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
+              <div className="space-y-3">
+                <div className="relative w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.can_bg_color }}>
+                  <img src={form.can_image_url} alt="Can" className="w-full h-full object-contain" />
+                  <button
+                    onClick={() => update('can_image_url', '')}
+                    className="absolute top-2 right-2 w-7 h-7 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-border hover:bg-background"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Card Background</Label>
+                  <div className="flex gap-2 flex-wrap">
+                    {CAN_BG_COLORS.map(({ label, hex }) => (
+                      <button
+                        key={hex}
+                        type="button"
+                        title={label}
+                        onClick={() => update('can_bg_color', hex)}
+                        className="w-8 h-8 rounded-lg border-2 transition-all"
+                        style={{
+                          backgroundColor: hex,
+                          borderColor: form.can_bg_color === hex ? '#00E5FF' : 'rgba(255,255,255,0.1)',
+                          boxShadow: form.can_bg_color === hex ? '0 0 0 2px rgba(0,229,255,0.3)' : 'none',
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="space-y-2">

@@ -81,7 +81,6 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      console.log('[vote_on_can] mutation started', { currentUser: currentUser?.id, prefillId: prefillData?.id, rarity: form.rarity });
       let sharedCan;
 
       if (prefillData?.id && alreadyVoted) {
@@ -101,7 +100,6 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
           p_image_url: form.image_url || null,
           p_barcode: form.barcode || null,
         });
-        console.log('[vote_on_can] rpc result:', JSON.stringify(data), JSON.stringify(error));
         if (error) throw error;
         sharedCan = data;
       }
@@ -139,15 +137,12 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
       }
     },
     onError: (error) => {
-      console.error('[vote_on_can] onError:', JSON.stringify(error));
-      toast.error('Failed: ' + (error?.message || error?.code || JSON.stringify(error)));
+      toast.error('Failed to add can: ' + (error.message || 'Unknown error'));
     },
   });
 
   const handleSubmit = () => {
-    const ok = validate();
-    console.log('[vote_on_can] validate:', ok, { name: form.name, brand: form.brand, isPending: createMutation.isPending });
-    if (ok) createMutation.mutate();
+    if (validate()) createMutation.mutate();
   };
 
   const handleImageUpload = async (e) => {

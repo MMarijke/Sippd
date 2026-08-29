@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Trophy, Star, Search } from 'lucide-react';
+import { Trophy, Star, Search, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PageHeader from '@/components/shared/PageHeader';
 import CollectorsLeaderboard from '@/components/leaderboard/CollectorsLeaderboard';
 import MostWanted from './MostWanted';
+import RegionalLeaderboard from '@/components/leaderboard/RegionalLeaderboard';
 import FindCollectors from '@/components/leaderboard/FindCollectors';
 
 export default function Leaderboard() {
@@ -14,7 +15,11 @@ export default function Leaderboard() {
 
   return (
     <div className="space-y-0">
-      <PageHeader title="Ranks" subtitle={tab === 'collectors' ? 'Global Collector Leaderboard' : 'Community Most Wanted'} />
+      <PageHeader title="Ranks" subtitle={
+        tab === 'collectors' ? 'Global Collector Leaderboard' :
+        tab === 'regional' ? 'Regional Leaderboard' :
+        'Community Most Wanted'
+      } />
 
       {/* Find Collectors search */}
       <div className="px-5 pb-3">
@@ -47,10 +52,17 @@ export default function Leaderboard() {
           >
             <Star className="w-3.5 h-3.5" /> Most Wanted
           </Button>
+          <Button
+            variant="ghost"
+            className={cn('flex-1 h-8 font-mono text-xs gap-1.5', tab === 'regional' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            onClick={() => setTab('regional')}
+          >
+            <MapPin className="w-3.5 h-3.5" /> Regional
+          </Button>
         </div>
       </div>
 
-      {tab === 'collectors' ? <CollectorsLeaderboard /> : <MostWanted />}
+      {tab === 'collectors' ? <CollectorsLeaderboard /> : tab === 'regional' ? <RegionalLeaderboard /> : <MostWanted />}
     </div>
   );
 }

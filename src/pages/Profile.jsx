@@ -159,6 +159,11 @@ export default function Profile() {
                 </button>
               </div>
             )}
+            {profile?.region && (
+              <p className="text-xs font-mono text-muted-foreground mt-0.5">
+                📍 {profile.region}
+              </p>
+            )}
             <p className="text-xs font-mono text-primary mt-0.5 flex items-center gap-1">
               Score: {score}
               <Popover>

@@ -99,6 +99,43 @@ function EditNamePanel({ userId, initialName, onDone }) {
   );
 }
 
+// ─── Edit Region ──────────────────────────────────────────────────────────────
+function EditRegionPanel({ userId, initialRegion, onDone }) {
+  const [value, setValue] = useState(initialRegion || '');
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    setSaving(true);
+    const { error } = await supabase.from('profiles').update({ region: value.trim() || null }).eq('id', userId);
+    if (error) {
+      toast.error('Failed to update region');
+      setSaving(false);
+      return;
+    }
+    toast.success('Region updated');
+    setSaving(false);
+    onDone();
+  };
+
+  return (
+    <div className="space-y-4 px-5 pt-4">
+      <p className="text-xs font-mono text-muted-foreground">Your city or country (shown on leaderboard)</p>
+      <Input
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter') save(); }}
+        maxLength={40}
+        className="bg-secondary border-primary/30 focus-visible:ring-primary/50"
+        placeholder="e.g. Cape Town, South Africa"
+        autoFocus
+      />
+      <Button className="w-full font-mono text-xs" onClick={save} disabled={saving}>
+        {saving ? 'Saving…' : 'Save Region'}
+      </Button>
+    </div>
+  );
+}
+
 // ─── Change Password ──────────────────────────────────────────────────────────
 function ChangePasswordPanel({ user }) {
   const [form, setForm] = useState({ current: '', next: '', confirm: '' });
@@ -249,7 +286,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const [panel, setPanel] = useState(null); // 'name' | 'password' | 'delete'
+  const [panel, setPanel] = useState(null); // 'name' | 'region' | 'password' | 'delete'
   const [prefs, setPrefs] = useState(loadPrefs);
 
   const { data: profile } = useQuery({
@@ -314,6 +351,16 @@ export default function Settings() {
           {panel === 'name' && (
             <div className="bg-secondary/30 border-t border-border">
               <EditNamePanel userId={user?.id} initialName={profile?.full_name} onDone={() => { setPanel(null); refetchProfile(); }} />
+            </div>
+          )}
+          <SettingsRow
+            label="Region"
+            sub={profile?.region || '—'}
+            onClick={() => setPanel(panel === 'region' ? null : 'region')}
+          />
+          {panel === 'region' && (
+            <div className="bg-secondary/30 border-t border-border">
+              <EditRegionPanel userId={user?.id} initialRegion={profile?.region} onDone={() => { setPanel(null); refetchProfile(); }} />
             </div>
           )}
           <SettingsRow

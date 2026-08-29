@@ -102,6 +102,7 @@ export default function Feed() {
   };
 
   const isEmpty = !isLoading && filtered.length === 0;
+  const followsNobody = followingIds.size === 0;
 
   return (
     <div className="space-y-0 pb-24">
@@ -141,27 +142,37 @@ export default function Feed() {
           <div className="w-7 h-7 border-4 border-border border-t-primary rounded-full animate-spin" />
         </div>
       ) : isEmpty ? (
-        <div className="flex flex-col items-center gap-4 py-20 px-8 text-center">
-          {tab === 'following' ? (
-            <>
-              <Users className="w-12 h-12 text-muted-foreground/20" />
-              <p className="text-sm font-mono text-muted-foreground">Follow other collectors to see their activity here</p>
+        tab === 'following' ? (
+          followsNobody ? (
+            <div className="flex flex-col items-center gap-3 py-16 px-8 text-center">
+              <span className="text-4xl">👥</span>
+              <p className="text-sm font-display font-semibold text-foreground">
+                No one to follow yet
+              </p>
+              <p className="text-xs font-mono text-muted-foreground">
+                Find collectors on the Ranks page and follow them to see
+                their hauls here
+              </p>
               <Button
                 size="sm"
-                variant="outline"
-                className="font-mono text-xs border-primary/30 text-primary hover:bg-primary/10"
                 onClick={() => navigate('/leaderboard')}
+                className="font-mono text-xs bg-primary text-primary-foreground"
               >
                 Find Collectors
               </Button>
-            </>
+            </div>
           ) : (
-            <>
-              <Radio className="w-12 h-12 text-muted-foreground/20" />
-              <p className="text-sm font-mono text-muted-foreground">No activity yet — be the first to scan a can!</p>
-            </>
-          )}
-        </div>
+            <div className="flex flex-col items-center gap-4 py-20 px-8 text-center">
+              <Users className="w-12 h-12 text-muted-foreground/20" />
+              <p className="text-sm font-mono text-muted-foreground">No activity from your collectors yet — check back soon!</p>
+            </div>
+          )
+        ) : (
+          <div className="flex flex-col items-center gap-4 py-20 px-8 text-center">
+            <Radio className="w-12 h-12 text-muted-foreground/20" />
+            <p className="text-sm font-mono text-muted-foreground">No activity yet — be the first to scan a can!</p>
+          </div>
+        )
       ) : (
         <div className="px-5 space-y-3">
           {filtered.map(item => (

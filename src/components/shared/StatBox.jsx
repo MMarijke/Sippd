@@ -9,7 +9,7 @@ export default function StatBox({ icon, label, value, className, glow }) {
       className
     )}>
       {Icon && <Icon className="w-5 h-5 text-primary mb-1" />}
-      <span className="text-2xl font-body font-bold text-foreground tabular-nums">
+      <span className="text-2xl font-mono font-bold text-foreground tabular-nums">
         {value != null ? `${value}` : '0'}
       </span>
       <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">{label}</span>

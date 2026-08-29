@@ -112,7 +112,7 @@ export default function Home() {
             <Zap className="w-5 h-5 text-primary" />
             <span className="text-xs font-mono text-primary uppercase tracking-widest">Collection Score</span>
           </div>
-          <p className="text-5xl font-body font-black text-foreground neon-text">
+          <p className="text-5xl font-mono font-black text-foreground neon-text">
             {isLoading ? '—' : score}
           </p>
           <p className="text-xs font-mono text-muted-foreground mt-2">

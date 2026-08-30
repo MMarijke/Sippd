@@ -10,6 +10,16 @@ import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
+function proxyImageUrl(url) {
+  if (!url) return null;
+  // Supabase Storage URLs already have CORS — don't proxy them
+  if (url.includes(SUPABASE_URL) || url.includes('supabase.co')) return url;
+  // Proxy all other external URLs
+  return `${SUPABASE_URL}/functions/v1/image-proxy?url=${encodeURIComponent(url)}`;
+}
+
 const RARITY_RANK = { Common: 1, Uncommon: 2, Rare: 3, 'Ultra Rare': 4, Legendary: 5 };
 const RARITY_BG = {
   Common: 'rgba(107,114,128,0.15)',
@@ -39,7 +49,7 @@ function CanCell({ item, sharedCan }) {
       <div style={{ width: '100%', aspectRatio: '1', background: item.can_bg_color || '#0D2B2B', position: 'relative', overflow: 'hidden' }}>
         {imageUrl ? (
           <img
-            src={imageUrl}
+            src={proxyImageUrl(imageUrl)}
             alt={item.can_name}
             crossOrigin="anonymous"
             style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}

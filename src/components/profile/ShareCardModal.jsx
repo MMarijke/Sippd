@@ -181,7 +181,7 @@ export default function ShareCardModal({ user, onClose }) {
       const canvas = await html2canvas(cardRef.current, {
         scale: 2,
         useCORS: true,
-        allowTaint: true,
+        allowTaint: false,
         backgroundColor: '#080C14',
         logging: false,
       });
@@ -341,7 +341,7 @@ export default function ShareCardModal({ user, onClose }) {
               </div>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 900, color: '#00E5FF', letterSpacing: '0.15em', lineHeight: 1 }}>SIPPD</div>
-                <div style={{ fontSize: 8, color: 'rgba(0,229,255,0.5)', letterSpacing: '0.05em', marginTop: 1 }}>ENERGY DRINK VAULT</div>
+                <div style={{ fontSize: 8, color: 'rgba(0,229,255,0.5)', letterSpacing: '0.05em', marginTop: 1 }}>ENERGY DRINK TRACKER</div>
               </div>
             </div>
             {/* User info */}

@@ -14,6 +14,7 @@ export function useStreak() {
     queryKey: ['streak', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('tick_streak', { p_caller_id: user.id });
+      console.log('[tick_streak] data:', data, 'error:', error);
       if (error) throw error;
       return data;
     },

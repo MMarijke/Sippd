@@ -123,7 +123,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 pb-24">
       <PageHeader title="Profile" />
 
       <div className="px-5">

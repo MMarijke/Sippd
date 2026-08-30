@@ -93,6 +93,7 @@ export default function Home() {
   const wishlistCount = collection.filter(c => c.status === 'wishlist').length;
 
   const brands = ['All', ...new Set(collected.map(c => c.can_brand).filter(Boolean))].slice(0, 9);
+  console.log('[Home] brands:', brands, 'collected:', collected.length, 'isLoading:', isLoading);
 
   return (
     <div>

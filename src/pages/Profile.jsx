@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { LogOut, Zap, Star, Bookmark, Heart, Settings, Medal, Pencil, Check, X, Share2, ImageDown, Info } from 'lucide-react';
+import { LogOut, Zap, Star, Bookmark, Heart, Settings, Medal, Pencil, Check, X, Share2, ImageDown, Info, ScanLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -327,6 +327,24 @@ export default function Profile() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-24 rounded-2xl bg-card/40 border border-border/30 animate-pulse" />
           ))}
+        </div>
+      ) : collected.length === 0 ? (
+        <div className="px-5">
+          <div className="rounded-2xl bg-gradient-to-br from-[#0D2B2B] to-[#080C14] border border-primary/30 p-6 flex flex-col items-center text-center">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-3">
+              <ScanLine className="w-6 h-6 text-primary" />
+            </div>
+            <p className="text-sm font-display font-bold text-foreground">No cans yet</p>
+            <p className="text-xs font-mono text-muted-foreground mt-1 max-w-[240px]">
+              Scan your first can to start tracking your score, rare pulls, and collection stats.
+            </p>
+            <Button
+              className="mt-4 font-mono text-xs gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => navigate('/scan')}
+            >
+              <ScanLine className="w-4 h-4" /> Scan Your First Can
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 px-5">

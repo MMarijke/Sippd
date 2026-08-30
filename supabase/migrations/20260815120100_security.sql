@@ -79,7 +79,7 @@ language plpgsql
 security invoker
 as $$
 begin
-  if auth.role() is distinct from 'service_role' and current_user is distinct from 'sippd_rpc' then
+  if current_user is distinct from 'sippd_rpc' and current_user is distinct from 'postgres' then
     if new.role is distinct from old.role then
       raise exception 'role is not client-writable';
     end if;
@@ -104,7 +104,7 @@ language plpgsql
 security invoker
 as $$
 begin
-  if auth.role() is distinct from 'service_role' and current_user is distinct from 'sippd_rpc' then
+  if current_user is distinct from 'sippd_rpc' and current_user is distinct from 'postgres' then
     if new.common_votes is distinct from old.common_votes
       or new.uncommon_votes is distinct from old.uncommon_votes
       or new.rare_votes is distinct from old.rare_votes
@@ -132,7 +132,7 @@ language plpgsql
 security invoker
 as $$
 begin
-  if auth.role() is distinct from 'service_role' and current_user is distinct from 'sippd_rpc' then
+  if current_user is distinct from 'sippd_rpc' and current_user is distinct from 'postgres' then
     if new.is_favourite is distinct from old.is_favourite then
       raise exception 'is_favourite is not client-writable — use toggle_favourite()';
     end if;
@@ -151,7 +151,7 @@ language plpgsql
 security invoker
 as $$
 begin
-  if auth.role() is distinct from 'service_role' and current_user is distinct from 'sippd_rpc' then
+  if current_user is distinct from 'sippd_rpc' and current_user is distinct from 'postgres' then
     if new.trade_status is distinct from old.trade_status then
       raise exception 'trade_status is not client-writable — use respond_to_trade_request()';
     end if;
@@ -174,7 +174,7 @@ language plpgsql
 security invoker
 as $$
 begin
-  if auth.role() is distinct from 'service_role' and current_user is distinct from 'sippd_rpc' then
+  if current_user is distinct from 'sippd_rpc' and current_user is distinct from 'postgres' then
     if new.reactions_fire is distinct from old.reactions_fire
       or new.reactions_star is distinct from old.reactions_star
       or new.reactions_wow is distinct from old.reactions_wow

@@ -13,7 +13,7 @@ language plpgsql
 security invoker
 as $$
 begin
-  if auth.role() is distinct from 'service_role' and current_user is distinct from 'sippd_rpc' then
+  if current_user is distinct from 'sippd_rpc' and current_user is distinct from 'postgres' then
     if new.common_votes is distinct from old.common_votes
       or new.uncommon_votes is distinct from old.uncommon_votes
       or new.rare_votes is distinct from old.rare_votes

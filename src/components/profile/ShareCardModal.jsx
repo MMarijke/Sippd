@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
-import { X, ArrowLeft, Download, Share2, Loader2, Instagram } from 'lucide-react';
+import { X, ArrowLeft, Download, Loader2, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getDisplayRarity, getConfidence, getItemScore, RARITY_HEX as RARITY_COLORS_HEX } from '@/lib/rarityConsensus';
 import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
@@ -258,28 +258,6 @@ export default function ShareCardModal({ user, onClose }) {
     setSaving(false);
   };
 
-  const handleShare = async () => {
-    const profileUrl = `${window.location.origin}/u/${user?.id}`;
-    const shareText = `Check out my Sippd collection — ${user?.full_name || 'Collector'} · Score: ${score} · ${collected.length} cans · ${rarePulls} rare pulls`;
-
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: 'My Sippd Collection', text: shareText, url: profileUrl });
-        return;
-      }
-    } catch (e) {
-      if (e.name === 'AbortError') return;
-    }
-
-    // Fallback: copy URL to clipboard
-    try {
-      await navigator.clipboard.writeText(profileUrl);
-      toast.success('Link copied to clipboard!');
-    } catch {
-      toast.error('Could not share');
-    }
-  };
-
   const content = (
     <div className="fixed inset-0 z-[100] flex flex-col bg-background overflow-y-auto">
       {/* Top bar */}
@@ -442,25 +420,15 @@ export default function ShareCardModal({ user, onClose }) {
           </div>
         )}
 
-        {/* Action buttons */}
-        <div className="flex gap-3 w-full max-w-[360px]">
-          <Button
-            className="flex-1 font-mono text-xs gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-            onClick={handleShare}
-            disabled={generating}
-          >
-            <Share2 className="w-4 h-4" /> Share
-          </Button>
-          <Button
-            variant="outline"
-            className="flex-1 font-mono text-xs gap-2 border-primary/30 text-primary hover:bg-primary/10"
-            onClick={handleSave}
-            disabled={!cardDataUrl || generating || saving}
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            {saving ? 'Saving…' : 'Save'}
-          </Button>
-        </div>
+        {/* Action button */}
+        <Button
+          className="w-full max-w-[360px] font-mono text-xs gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+          onClick={handleSave}
+          disabled={!cardDataUrl || generating || saving}
+        >
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          {saving ? 'Saving…' : 'Save'}
+        </Button>
 
         {/* Instagram share button */}
         <Button

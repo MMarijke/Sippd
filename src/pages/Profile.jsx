@@ -151,7 +151,7 @@ export default function Profile() {
     enabled: !!user?.id && score > 0,
   });
 
-  const handleSharedCollection = () => {
+  const handleShareProfileLink = () => {
     if (!user?.id) return;
     const url = `${window.location.origin}/u/${user.id}`;
     if (navigator.share) {
@@ -344,7 +344,7 @@ export default function Profile() {
             className="w-full justify-start font-mono text-xs gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
             onClick={() => setShowShareCard(true)}
           >
-            <ImageDown className="w-4 h-4" /> Generate Share Card / Instagram
+            <ImageDown className="w-4 h-4" /> Create Share Card
           </Button>
           <Button
             variant="outline"
@@ -356,9 +356,9 @@ export default function Profile() {
           <Button
             variant="outline"
             className="w-full justify-start font-mono text-xs gap-2 border-primary/30 text-primary hover:bg-primary/10"
-            onClick={handleSharedCollection}
+            onClick={handleShareProfileLink}
           >
-            <Share2 className="w-4 h-4" /> Share My Collection
+            <Share2 className="w-4 h-4" /> Share Profile Link
           </Button>
         </div>
 

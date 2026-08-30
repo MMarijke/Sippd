@@ -4,8 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { X, ArrowLeft, Download, Share2, Loader2, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getDisplayRarity, getConfidence, getItemScore, RARITY_ORDER, RARITY_HEX as RARITY_COLORS_HEX } from '@/lib/rarityConsensus';
-import { computeAchievements } from '@/lib/achievements';
+import { getDisplayRarity, getConfidence, getItemScore, RARITY_HEX as RARITY_COLORS_HEX } from '@/lib/rarityConsensus';
+import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
 import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -20,7 +20,6 @@ function proxyImageUrl(url) {
   return `${SUPABASE_URL}/functions/v1/image-proxy?url=${encodeURIComponent(url)}`;
 }
 
-const RARITY_RANK = { Common: 1, Uncommon: 2, Rare: 3, 'Ultra Rare': 4, Legendary: 5 };
 const RARITY_BG = {
   Common: 'rgba(107,114,128,0.15)',
   Uncommon: 'rgba(34,197,94,0.15)',
@@ -139,47 +138,20 @@ export default function ShareCardModal({ user, onClose }) {
     [sharedCans]
   );
 
-  const collected = collection.filter(c => c.status === 'collected');
+  const streak = user?.current_streak || 0;
 
-  const getEffectiveRarity = (item) => {
-    const sc = sharedCansMap[item.can_id];
-    if (!sc) return item.can_rarity || 'Common';
-    const conf = getConfidence(sc.total_votes);
-    return conf === 'unrated' ? (item.can_rarity || 'Common') : getDisplayRarity(sc);
-  };
+  const { collected, getEffectiveRarity, top6, rarityBreakdown, latestAchievement } = useCollectionHighlights({
+    collection,
+    sharedCansMap,
+    streak,
+    voteCount: votes.length,
+    userCreatedDate: user?.created_at,
+  });
 
   const score = collected.reduce((acc, item) => acc + getItemScore(item, sharedCansMap[item.can_id]), 0);
   const rarePulls = collected.filter(i => ['Rare', 'Ultra Rare', 'Legendary'].includes(getEffectiveRarity(i))).length;
-  const streak = user?.current_streak || 0;
-
-  // Top 6 by rarity rank
-  const top6 = useMemo(() => {
-    return [...collected]
-      .sort((a, b) => (RARITY_RANK[getEffectiveRarity(b)] || 0) - (RARITY_RANK[getEffectiveRarity(a)] || 0))
-      .slice(0, 6);
-  }, [collected, sharedCansMap]);
-
-  // Rarity breakdown percentages
-  const rarityBreakdown = useMemo(() => {
-    const counts = {};
-    collected.forEach(item => {
-      const r = getEffectiveRarity(item);
-      counts[r] = (counts[r] || 0) + 1;
-    });
-    return RARITY_ORDER
-      .filter(r => counts[r])
-      .map(r => ({ rarity: r, count: counts[r], pct: (counts[r] / collected.length) * 100 }));
-  }, [collected, sharedCansMap]);
 
   const appUrl = window.location.origin;
-
-  // Latest achievement (sorted by most recently unlocked with a date)
-  const latestAchievement = useMemo(() => {
-    const all = computeAchievements(collection, streak, votes.length, user?.created_at);
-    const unlocked = all.filter(a => a.unlocked);
-    const withDate = unlocked.filter(a => a.unlockedAt).sort((a, b) => new Date(b.unlockedAt) - new Date(a.unlockedAt));
-    return withDate[0] || unlocked[unlocked.length - 1] || null;
-  }, [collection, streak, votes.length, user?.created_at]);
 
   const [saving, setSaving] = useState(false);
 

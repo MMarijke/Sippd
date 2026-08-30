@@ -38,7 +38,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const inputRef = useRef(null);
 
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, isError: profileError } = useQuery({
     queryKey: ['my-profile', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
@@ -47,6 +47,10 @@ export default function Profile() {
     },
     enabled: !!user?.id,
   });
+
+  useEffect(() => {
+    if (profileError) toast.error('Could not load your profile');
+  }, [profileError]);
 
   const startEdit = () => {
     setNameInput(profile?.full_name || '');
@@ -200,7 +204,7 @@ export default function Profile() {
                   className="h-8 text-sm font-display bg-secondary border-primary/30 focus-visible:ring-primary/50 px-2"
                   maxLength={40}
                 />
-                <button onClick={saveEdit} disabled={saving} aria-label="Save name" className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors flex-shrink-0">
+                <button onClick={saveEdit} disabled={saving || !nameInput.trim()} aria-label="Save name" className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors flex-shrink-0 disabled:opacity-40 disabled:pointer-events-none">
                   <Check className="w-3.5 h-3.5" />
                 </button>
                 <button onClick={cancelEdit} aria-label="Cancel" className="w-11 h-11 rounded-lg bg-muted/50 border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
@@ -216,7 +220,7 @@ export default function Profile() {
               </div>
             )}
             {profile?.region && (
-              <p className="text-xs font-mono text-muted-foreground mt-0.5">
+              <p className="text-xs font-mono text-muted-foreground mt-0.5 truncate">
                 📍 {profile.region}
               </p>
             )}

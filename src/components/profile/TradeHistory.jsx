@@ -7,14 +7,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
-
-const RARITY_COLORS = {
-  Common: 'text-rarity-common',
-  Uncommon: 'text-rarity-uncommon',
-  Rare: 'text-rarity-rare',
-  'Ultra Rare': 'text-rarity-ultra',
-  Legendary: 'text-rarity-legendary',
-};
+import { RARITY_TEXT_CLASS } from '@/lib/rarityConsensus';
 
 const STATUS_STYLES = {
   pending:   { label: 'Pending',   class: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
@@ -227,7 +220,7 @@ function CanChip({ name, brand, imageUrl, rarity, label }) {
         <div className="min-w-0">
           <p className="text-xs font-body font-medium text-foreground truncate leading-tight">{name}</p>
           {rarity && (
-            <p className={`text-[10px] font-mono leading-tight ${RARITY_COLORS[rarity] || 'text-muted-foreground'}`}>{rarity}</p>
+            <p className={`text-[10px] font-mono leading-tight ${RARITY_TEXT_CLASS[rarity] || 'text-muted-foreground'}`}>{rarity}</p>
           )}
         </div>
       </div>

@@ -12,19 +12,12 @@ import RarityBadge from '@/components/shared/RarityBadge';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import ShareCardModal from '@/components/profile/ShareCardModal';
-import { getItemScore } from '@/lib/rarityConsensus';
+import { getItemScore, RARITY_BG_CLASS } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
 import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
 import TradeHistory from '@/components/profile/TradeHistory';
 import TradeLogDialog from '@/components/profile/TradeLogDialog';
-
-const RARITY_BAR_CLASS = {
-  Common: 'bg-rarity-common',
-  Uncommon: 'bg-rarity-uncommon',
-  Rare: 'bg-rarity-rare',
-  'Ultra Rare': 'bg-rarity-ultra',
-  Legendary: 'bg-rarity-legendary',
-};
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -33,6 +26,7 @@ export default function Profile() {
   const streak = useStreak();
   const [showShareCard, setShowShareCard] = useState(false);
   const [showTradeLog, setShowTradeLog] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [editing, setEditing] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [saving, setSaving] = useState(false);
@@ -310,7 +304,7 @@ export default function Profile() {
                 <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60 mb-2">Rarity Breakdown</p>
                 <div className="flex h-1.5 rounded-full overflow-hidden gap-px">
                   {rarityBreakdown.map(({ rarity, pct }) => (
-                    <div key={rarity} className={`h-full ${RARITY_BAR_CLASS[rarity]}`} style={{ width: `${pct}%` }} />
+                    <div key={rarity} className={`h-full ${RARITY_BG_CLASS[rarity]}`} style={{ width: `${pct}%` }} />
                   ))}
                 </div>
                 <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
@@ -359,32 +353,34 @@ export default function Profile() {
         </div>
       )}
 
-      <div className="px-5 space-y-4">
-        {/* Primary tier: showcase & share */}
-        <div className="space-y-2">
-          <Button
-            className="w-full justify-start font-mono text-xs gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-            onClick={() => setShowShareCard(true)}
-          >
-            <ImageDown className="w-4 h-4" /> Create Share Card
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full justify-start font-mono text-xs gap-2 border-primary/30 text-primary hover:bg-primary/10"
-            onClick={() => navigate('/achievements')}
-          >
-            <Medal className="w-4 h-4" /> Achievements
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full justify-start font-mono text-xs gap-2 border-primary/30 text-primary hover:bg-primary/10"
-            onClick={handleShareProfileLink}
-          >
-            <Share2 className="w-4 h-4" /> Share Profile Link
-          </Button>
-        </div>
+      {/* Primary tier: showcase & share — keeps the scroll on the page's peak content */}
+      <div className="px-5 space-y-2">
+        <Button
+          className="w-full justify-start font-mono text-xs gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+          onClick={() => setShowShareCard(true)}
+        >
+          <ImageDown className="w-4 h-4" /> Create Share Card
+        </Button>
+        <Button
+          variant="outline"
+          className="w-full justify-start font-mono text-xs gap-2 border-primary/30 text-primary hover:bg-primary/10"
+          onClick={() => navigate('/achievements')}
+        >
+          <Medal className="w-4 h-4" /> Achievements
+        </Button>
+        <Button
+          variant="outline"
+          className="w-full justify-start font-mono text-xs gap-2 border-primary/30 text-primary hover:bg-primary/10"
+          onClick={handleShareProfileLink}
+        >
+          <Share2 className="w-4 h-4" /> Share Profile Link
+        </Button>
+      </div>
 
-        {/* Secondary tier: settings */}
+      <TradeHistory userId={user?.id} user={user} onLogTrade={() => setShowTradeLog(true)} />
+
+      {/* Utility tier: settings & log out — stays last, the standard trailing position */}
+      <div className="px-5 space-y-1">
         <Button
           variant="ghost"
           className="w-full justify-start font-mono text-xs gap-2 text-muted-foreground hover:text-foreground"
@@ -392,17 +388,23 @@ export default function Profile() {
         >
           <Settings className="w-4 h-4" /> Settings
         </Button>
-
-        {/* Destructive tier: log out */}
         <Button
           variant="ghost"
           className="w-full justify-start font-mono text-xs gap-2 text-destructive hover:bg-destructive/10"
-          onClick={() => signOut()}
+          onClick={() => setShowLogoutConfirm(true)}
         >
           <LogOut className="w-4 h-4" /> Log Out
         </Button>
       </div>
-      <TradeHistory userId={user?.id} user={user} onLogTrade={() => setShowTradeLog(true)} />
+
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={() => signOut()}
+        title="Log Out?"
+        description="You'll need to sign back in to view your collection and stats."
+        confirmLabel="Log Out"
+      />
 
       {showShareCard && (
         <ShareCardModal user={{ ...user, ...profile }} onClose={() => setShowShareCard(false)} />

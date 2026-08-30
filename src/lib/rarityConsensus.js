@@ -12,6 +12,36 @@ export const RARITY_HEX = {
   Legendary: '#EC4899',
 };
 
+// Tailwind background token per tier, for contexts using CSS custom properties
+export const RARITY_BG_CLASS = {
+  Common: 'bg-rarity-common',
+  Uncommon: 'bg-rarity-uncommon',
+  Rare: 'bg-rarity-rare',
+  'Ultra Rare': 'bg-rarity-ultra',
+  Legendary: 'bg-rarity-legendary',
+};
+
+// Tailwind text token per tier, for contexts using CSS custom properties
+export const RARITY_TEXT_CLASS = {
+  Common: 'text-rarity-common',
+  Uncommon: 'text-rarity-uncommon',
+  Rare: 'text-rarity-rare',
+  'Ultra Rare': 'text-rarity-ultra',
+  Legendary: 'text-rarity-legendary',
+};
+
+/**
+ * Derive a tinted rgba background from RARITY_HEX so canvas-context tints
+ * (which can't consume CSS custom properties) can't silently drift from it.
+ */
+export function rarityHexToRgba(rarity, alpha = 0.15) {
+  const hex = RARITY_HEX[rarity] || RARITY_HEX.Common;
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
 // Numeric value per tier for mean-based scoring
 export const RARITY_VALUES = {
   Common: 1,

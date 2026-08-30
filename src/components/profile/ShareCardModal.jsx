@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { X, ArrowLeft, Download, Loader2, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getDisplayRarity, getConfidence, getItemScore, RARITY_HEX as RARITY_COLORS_HEX } from '@/lib/rarityConsensus';
+import { getDisplayRarity, getConfidence, getItemScore, RARITY_HEX as RARITY_COLORS_HEX, rarityHexToRgba } from '@/lib/rarityConsensus';
 import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
 import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
@@ -20,20 +20,12 @@ function proxyImageUrl(url) {
   return `${SUPABASE_URL}/functions/v1/image-proxy?url=${encodeURIComponent(url)}`;
 }
 
-const RARITY_BG = {
-  Common: 'rgba(107,114,128,0.15)',
-  Uncommon: 'rgba(34,197,94,0.15)',
-  Rare: 'rgba(59,130,246,0.15)',
-  'Ultra Rare': 'rgba(168,85,247,0.15)',
-  Legendary: 'rgba(236,72,153,0.15)',
-};
-
 function CanCell({ item, sharedCan }) {
   const conf = sharedCan ? getConfidence(sharedCan.total_votes) : 'unrated';
   const rarity = conf === 'unrated' ? null : getDisplayRarity(sharedCan || item);
   const imageUrl = item.can_image_url || sharedCan?.image_url;
   const color = rarity ? RARITY_COLORS_HEX[rarity] : '#6B7280';
-  const bg = rarity ? RARITY_BG[rarity] : 'rgba(107,114,128,0.1)';
+  const bg = rarity ? rarityHexToRgba(rarity, 0.15) : rarityHexToRgba('Common', 0.1);
 
   return (
     <div style={{
@@ -267,7 +259,7 @@ export default function ShareCardModal({ user, onClose }) {
           <span className="text-xs font-mono">Back</span>
         </Button>
         <h2 className="text-sm font-display font-bold text-foreground tracking-wide">Share Card</h2>
-        <Button size="icon" variant="ghost" className="w-11 h-11 text-muted-foreground hover:text-foreground" onClick={onClose}>
+        <Button size="icon" variant="ghost" className="w-11 h-11 text-muted-foreground hover:text-foreground" onClick={onClose} aria-label="Close">
           <X className="w-4 h-4" />
         </Button>
       </div>

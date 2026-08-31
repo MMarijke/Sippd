@@ -16,6 +16,7 @@ import { getItemScore, RARITY_BG_CLASS } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
 import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
 import { useTogglePin, MAX_PINS } from '@/hooks/useTogglePin';
+import { useShare } from '@/hooks/useShare';
 import TradeHistory from '@/components/profile/TradeHistory';
 import TradeLogDialog from '@/components/profile/TradeLogDialog';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
@@ -153,22 +154,12 @@ export default function Profile() {
     enabled: !!user?.id && score > 0,
   });
 
+  const { shareText } = useShare();
+
   const handleShareProfileLink = () => {
     if (!user?.id) return;
     const url = `${window.location.origin}/u/${user.id}`;
-    if (navigator.share) {
-      navigator.share({
-        title: 'My Sippd Collection',
-        text: 'Check out my Sippd collection!',
-        url,
-      }).catch(e => {
-        if (e.name !== 'AbortError') {
-          navigator.clipboard.writeText(url).then(() => toast.success('Link copied!'));
-        }
-      });
-    } else {
-      navigator.clipboard.writeText(url).then(() => toast.success('Link copied!'));
-    }
+    shareText({ title: 'My Sippd Collection', text: 'Check out my Sippd collection!', url, successMessage: 'Link copied!' });
   };
 
   return (

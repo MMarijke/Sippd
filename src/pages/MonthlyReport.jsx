@@ -9,9 +9,9 @@ import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, subMonths
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { getDisplayRarity, getConfidence, RARITY_POINTS, RARITY_ORDER, RARITY_HEX as RARITY_COLORS } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
-import { toast } from 'sonner';
 import RarityBadge from '@/components/shared/RarityBadge';
 import CanImageBox from '@/components/shared/CanImageBox';
+import ShareCardModal from '@/components/profile/ShareCardModal';
 
 const RARITY_RANK = { Common: 1, Uncommon: 2, Rare: 3, 'Ultra Rare': 4, Legendary: 5 };
 
@@ -20,6 +20,7 @@ export default function MonthlyReport() {
   const streak = useStreak();
   const { user } = useAuth();
   const [monthDate, setMonthDate] = useState(() => startOfMonth(new Date()));
+  const [showShareCard, setShowShareCard] = useState(false);
 
   const { data: collection = [] } = useQuery({
     queryKey: ['user-collection', user?.id],
@@ -120,16 +121,20 @@ export default function MonthlyReport() {
   const monthLabel = format(monthDate, 'MMMM yyyy');
   const isCurrentMonth = format(monthDate, 'yyyy-MM') === format(new Date(), 'yyyy-MM');
 
-  const handleShare = () => {
-    const bestName = bestPull ? `${bestPull.can_brand || ''} ${bestPull.can_name || ''}`.trim() : 'None';
-    const text = `My ${monthLabel} Sippd Report: ${collected.length} cans added · Best pull: ${bestName} ${bestPullRarity || ''} · Score: +${monthScore} · Streak: ${streak ?? 0}d`;
-    if (navigator.share) {
-      navigator.share({ title: `Sippd ${monthLabel} Report`, text });
-    } else {
-      navigator.clipboard.writeText(text);
-      toast.success('Report copied to clipboard!');
-    }
-  };
+  const monthlyData = useMemo(() => ({
+    monthLabel,
+    cansAdded: collected.length,
+    monthScore,
+    streak: streak ?? 0,
+    bestPull,
+    bestPullImage,
+    bestPullRarity,
+    rarityBreakdown: rarityChartData.map(({ name, value }) => ({
+      rarity: name,
+      count: value,
+      pct: collected.length ? (value / collected.length) * 100 : 0,
+    })),
+  }), [monthLabel, collected.length, monthScore, streak, bestPull, bestPullImage, bestPullRarity, rarityChartData]);
 
   const hasActivity = collected.length > 0 || wishlistCount > 0;
 
@@ -294,13 +299,17 @@ export default function MonthlyReport() {
       {hasActivity && (
         <div className="fixed bottom-6 left-0 right-0 px-5">
           <Button
-            onClick={handleShare}
+            onClick={() => setShowShareCard(true)}
             className="w-full font-mono text-xs gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-12"
           >
             <Share2 className="w-4 h-4" />
             Share Report
           </Button>
         </div>
+      )}
+
+      {showShareCard && (
+        <ShareCardModal user={user} onClose={() => setShowShareCard(false)} variant="monthly" monthlyData={monthlyData} />
       )}
     </div>
   );

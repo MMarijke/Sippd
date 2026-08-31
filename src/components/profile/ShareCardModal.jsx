@@ -6,6 +6,7 @@ import { X, ArrowLeft, Download, Loader2, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getDisplayRarity, getConfidence, getItemScore, RARITY_HEX as RARITY_COLORS_HEX, rarityHexToRgba } from '@/lib/rarityConsensus';
 import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
+import { useShare } from '@/hooks/useShare';
 import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -79,11 +80,14 @@ function CanCell({ item, sharedCan }) {
   );
 }
 
-export default function ShareCardModal({ user, onClose }) {
+export default function ShareCardModal({ user, onClose, variant = 'profile', monthlyData }) {
   const cardRef = useRef(null);
   const [generating, setGenerating] = useState(false);
   const [cardDataUrl, setCardDataUrl] = useState(null);
 
+  // The monthly variant receives its content as props (MonthlyReport
+  // already computes it, month-scoped) — these queries only run for the
+  // profile variant, which needs the whole collection.
   const { data: collection = [] } = useQuery({
     queryKey: ['user-collection', user?.id],
     queryFn: async () => {
@@ -94,7 +98,7 @@ export default function ShareCardModal({ user, onClose }) {
       if (error) throw error;
       return data;
     },
-    enabled: !!user?.id,
+    enabled: variant === 'profile' && !!user?.id,
   });
 
   const { data: sharedCans = [] } = useQuery({
@@ -108,6 +112,7 @@ export default function ShareCardModal({ user, onClose }) {
       if (error) throw error;
       return data;
     },
+    enabled: variant === 'profile',
   });
 
   const { data: votes = [] } = useQuery({
@@ -122,7 +127,7 @@ export default function ShareCardModal({ user, onClose }) {
       if (error) throw error;
       return data;
     },
-    enabled: !!user?.id,
+    enabled: variant === 'profile' && !!user?.id,
   });
 
   const sharedCansMap = useMemo(
@@ -146,6 +151,60 @@ export default function ShareCardModal({ user, onClose }) {
   const appUrl = window.location.origin;
 
   const [saving, setSaving] = useState(false);
+  const { shareFile } = useShare();
+
+  // Unifies what the two variants render: the monthly variant's content
+  // arrives fully computed via props; the profile variant computes its
+  // own from the queries above. Everything downstream (JSX, signature)
+  // reads from this instead of branching on `variant` repeatedly.
+  const cardData = useMemo(() => {
+    if (variant === 'monthly' && monthlyData) {
+      return {
+        kind: 'monthly',
+        monthLabel: monthlyData.monthLabel,
+        stats: [
+          { label: 'CANS', value: monthlyData.cansAdded },
+          { label: 'SCORE', value: `+${monthlyData.monthScore}` },
+          { label: 'STREAK', value: `${monthlyData.streak}d` },
+        ],
+        bestPull: monthlyData.bestPull,
+        bestPullImage: monthlyData.bestPullImage,
+        bestPullRarity: monthlyData.bestPullRarity,
+        rarityBreakdown: monthlyData.rarityBreakdown,
+      };
+    }
+    return {
+      kind: 'profile',
+      stats: [
+        { label: 'CANS', value: collected.length },
+        { label: 'RARE', value: rarePulls },
+        { label: 'STREAK', value: `${streak}d` },
+      ],
+      top6,
+      rarityBreakdown,
+      latestAchievement,
+    };
+  }, [variant, monthlyData, collected.length, rarePulls, streak, top6, rarityBreakdown, latestAchievement]);
+
+  // Everything that actually appears on the rendered card, condensed into
+  // one comparable value — watching this instead of raw array lengths
+  // means a rarity-vote update, pin toggle, or streak change (any of
+  // which can leave collected.length/sharedCans.length unchanged) still
+  // triggers a regeneration instead of leaving a stale card on screen.
+  const cardSignature = useMemo(() => {
+    if (cardData.kind === 'monthly') {
+      return JSON.stringify({
+        monthLabel: cardData.monthLabel,
+        stats: cardData.stats,
+        bestPullId: cardData.bestPull?.id || null,
+        bestPullRarity: cardData.bestPullRarity,
+        rarityBreakdown: cardData.rarityBreakdown,
+      });
+    }
+    const cans = cardData.top6.map(item => `${item.id}:${getEffectiveRarity(item)}:${item.pinned_at || ''}`).join('|');
+    const breakdown = cardData.rarityBreakdown.map(r => `${r.rarity}:${r.count}`).join(',');
+    return `${cans}__${breakdown}__${cardData.latestAchievement?.title || ''}__${streak}__${score}`;
+  }, [cardData, streak, score]);
 
   const generateCard = async () => {
     if (!cardRef.current) return;
@@ -166,11 +225,11 @@ export default function ShareCardModal({ user, onClose }) {
     setGenerating(false);
   };
 
-  // Auto-generate on open
+  // Auto-generate on open, and whenever the card's actual content changes
   useEffect(() => {
     const t = setTimeout(generateCard, 300);
     return () => clearTimeout(t);
-  }, [collected.length, sharedCans.length]);
+  }, [cardSignature]);
 
   // Hardware back button (Android)
   useEffect(() => {
@@ -202,7 +261,9 @@ export default function ShareCardModal({ user, onClose }) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `sippd-${(user?.full_name || 'collection').replace(/\s+/g, '-')}.png`;
+      a.download = cardData.kind === 'monthly'
+        ? `sippd-recap-${cardData.monthLabel.replace(/\s+/g, '-')}.png`
+        : `sippd-${(user?.full_name || 'collection').replace(/\s+/g, '-')}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -218,24 +279,24 @@ export default function ShareCardModal({ user, onClose }) {
     if (!cardDataUrl) return;
     setSaving(true);
     try {
-      // Save the image first
       const blob = dataUrlToBlob(cardDataUrl);
+      const filename = cardData.kind === 'monthly'
+        ? `sippd-recap-${cardData.monthLabel.replace(/\s+/g, '-')}.png`
+        : 'sippd-collection.png';
 
       // Try Web Share API with files (works on mobile Safari/Chrome)
-      if (navigator.canShare && navigator.share) {
-        const file = new File([blob], 'sippd-collection.png', { type: 'image/png' });
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: 'My Sippd Collection' });
-          setSaving(false);
-          return;
-        }
+      const result = await shareFile({ blob, filename, title: cardData.kind === 'monthly' ? `My ${cardData.monthLabel} Sippd Recap` : 'My Sippd Collection' });
+      if (result.supported) {
+        if (result.error) toast.error('Could not share to Instagram');
+        setSaving(false);
+        return;
       }
 
       // Fallback: download image + open Instagram
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'sippd-collection.png';
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -258,7 +319,7 @@ export default function ShareCardModal({ user, onClose }) {
           <ArrowLeft className="w-4 h-4" />
           <span className="text-xs font-mono">Back</span>
         </Button>
-        <h2 className="text-sm font-display font-bold text-foreground tracking-wide">Share Card</h2>
+        <h2 className="text-sm font-display font-bold text-foreground tracking-wide">{cardData.kind === 'monthly' ? 'Recap Card' : 'Share Card'}</h2>
         <Button size="icon" variant="ghost" className="w-11 h-11 text-muted-foreground hover:text-foreground" onClick={onClose} aria-label="Close">
           <X className="w-4 h-4" />
         </Button>
@@ -299,7 +360,9 @@ export default function ShareCardModal({ user, onClose }) {
             {/* User info */}
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: 15, fontWeight: 800, color: '#F0F4F8', lineHeight: 1.2 }}>{user?.full_name || 'Collector'}</div>
-              <div style={{ fontSize: 11, color: '#00E5FF', fontFamily: 'monospace', marginTop: 2 }}>Score: {score}</div>
+              <div style={{ fontSize: 11, color: '#00E5FF', fontFamily: 'monospace', marginTop: 2 }}>
+                {cardData.kind === 'monthly' ? `${cardData.monthLabel} Recap` : `Score: ${score}`}
+              </div>
             </div>
           </div>
 
@@ -308,11 +371,7 @@ export default function ShareCardModal({ user, onClose }) {
 
           {/* Stats row */}
           <div style={{ display: 'flex', justifyContent: 'space-around', padding: '14px 24px' }}>
-            {[
-              { label: 'CANS', value: collected.length },
-              { label: 'RARE', value: rarePulls },
-              { label: 'STREAK', value: `${streak}d` },
-            ].map(({ label, value }) => (
+            {cardData.stats.map(({ label, value }) => (
               <div key={label} style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 22, fontWeight: 900, color: '#F0F4F8', lineHeight: 1 }}>{value}</div>
                 <div style={{ fontSize: 8, color: 'rgba(240,244,248,0.4)', letterSpacing: '0.1em', marginTop: 3 }}>{label}</div>
@@ -320,45 +379,89 @@ export default function ShareCardModal({ user, onClose }) {
             ))}
           </div>
 
-          {/* Top 6 grid */}
-          <div style={{ padding: '0 20px' }}>
-            <div style={{ fontSize: 9, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 10 }}>
-              TOP PULLS
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-              {(top6.length > 0 ? top6 : Array(6).fill(null)).map((item, i) => (
-                item ? (
-                  <CanCell key={item.id} item={item} sharedCan={sharedCansMap[item.can_id]} />
-                ) : (
-                  <div key={i} style={{
-                    background: 'rgba(255,255,255,0.02)',
-                    border: '1px dashed rgba(255,255,255,0.08)',
-                    borderRadius: 12,
-                    aspectRatio: '3/4',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                    <span style={{ opacity: 0.15, fontSize: 20 }}>🥤</span>
+          {cardData.kind === 'monthly' ? (
+            /* Best Pull of the Month */
+            <div style={{ padding: '0 20px' }}>
+              <div style={{ fontSize: 9, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 10 }}>
+                Best Pull of the Month
+              </div>
+              {cardData.bestPull ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.04)', border: `1px solid ${(RARITY_COLORS_HEX[cardData.bestPullRarity] || '#6B7280')}33`, borderRadius: 14, padding: 12 }}>
+                  <div style={{ width: 72, height: 72, borderRadius: 12, overflow: 'hidden', background: cardData.bestPull.can_bg_color || '#0D2B2B', flexShrink: 0 }}>
+                    {cardData.bestPullImage ? (
+                      <img
+                        src={proxyImageUrl(cardData.bestPullImage)}
+                        alt={cardData.bestPull.can_name}
+                        crossOrigin="anonymous"
+                        style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                      />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: 24, opacity: 0.2 }}>🥤</span>
+                      </div>
+                    )}
                   </div>
-                )
-              ))}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 10, color: '#00E5FF', fontFamily: 'monospace', opacity: 0.7, textTransform: 'uppercase', marginBottom: 2 }}>{cardData.bestPull.can_brand}</div>
+                    <div style={{ fontSize: 15, color: '#F0F4F8', fontWeight: 800, lineHeight: 1.2, marginBottom: 6 }}>{cardData.bestPull.can_name}</div>
+                    <div style={{
+                      display: 'inline-block', fontSize: 9, fontFamily: 'monospace', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
+                      color: RARITY_COLORS_HEX[cardData.bestPullRarity] || '#6B7280',
+                      background: rarityHexToRgba(cardData.bestPullRarity || 'Common', 0.15),
+                      border: `1px solid ${(RARITY_COLORS_HEX[cardData.bestPullRarity] || '#6B7280')}55`,
+                      borderRadius: 4, padding: '3px 7px',
+                    }}>
+                      {cardData.bestPullRarity || '???'}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ padding: '20px 0', textAlign: 'center' }}>
+                  <span style={{ fontSize: 11, color: 'rgba(240,244,248,0.3)', fontFamily: 'monospace' }}>No pulls yet this month</span>
+                </div>
+              )}
             </div>
-          </div>
+          ) : (
+            /* Top 6 grid */
+            <div style={{ padding: '0 20px' }}>
+              <div style={{ fontSize: 9, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 10 }}>
+                TOP PULLS
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                {(cardData.top6.length > 0 ? cardData.top6 : Array(6).fill(null)).map((item, i) => (
+                  item ? (
+                    <CanCell key={item.id} item={item} sharedCan={sharedCansMap[item.can_id]} />
+                  ) : (
+                    <div key={i} style={{
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px dashed rgba(255,255,255,0.08)',
+                      borderRadius: 12,
+                      aspectRatio: '3/4',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <span style={{ opacity: 0.15, fontSize: 20 }}>🥤</span>
+                    </div>
+                  )
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Rarity bar */}
-          {rarityBreakdown.length > 0 && (
+          {cardData.rarityBreakdown.length > 0 && (
             <div style={{ padding: '16px 20px 12px' }}>
               <div style={{ fontSize: 9, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>
                 RARITY BREAKDOWN
               </div>
               <div style={{ display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden', gap: 1 }}>
-                {rarityBreakdown.map(({ rarity, pct }) => (
+                {cardData.rarityBreakdown.map(({ rarity, pct }) => (
                   <div key={rarity} style={{ width: `${pct}%`, background: RARITY_COLORS_HEX[rarity] || '#6B7280', borderRadius: 2 }} />
                 ))}
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', marginTop: 8 }}>
-                {rarityBreakdown.map(({ rarity, count }) => (
+                {cardData.rarityBreakdown.map(({ rarity, count }) => (
                   <div key={rarity} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <div style={{ width: 6, height: 6, borderRadius: '50%', background: RARITY_COLORS_HEX[rarity] }} />
                     <span style={{ fontSize: 9, color: 'rgba(240,244,248,0.5)', fontFamily: 'monospace' }}>{rarity} {count}</span>
@@ -368,19 +471,19 @@ export default function ShareCardModal({ user, onClose }) {
             </div>
           )}
 
-          {/* Latest Achievement */}
-          {latestAchievement && (
+          {/* Latest Achievement — profile variant only */}
+          {cardData.kind === 'profile' && cardData.latestAchievement && (
             <div style={{ padding: '0 20px 16px' }}>
               <div style={{ fontSize: 9, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>
                 Latest Achievement
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,215,0,0.06)', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 10, padding: '8px 12px' }}>
-                <span style={{ fontSize: 22 }}>{latestAchievement.icon}</span>
+                <span style={{ fontSize: 22 }}>{cardData.latestAchievement.icon}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#FFD700', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{latestAchievement.title}</div>
-                  {latestAchievement.unlockedAt && (
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#FFD700', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{cardData.latestAchievement.title}</div>
+                  {cardData.latestAchievement.unlockedAt && (
                     <div style={{ fontSize: 9, color: 'rgba(240,244,248,0.4)', fontFamily: 'monospace', marginTop: 2 }}>
-                      {format(new Date(latestAchievement.unlockedAt), 'MMM d, yyyy')}
+                      {format(new Date(cardData.latestAchievement.unlockedAt), 'MMM d, yyyy')}
                     </div>
                   )}
                 </div>

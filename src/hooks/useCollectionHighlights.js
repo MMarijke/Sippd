@@ -23,9 +23,14 @@ export function useCollectionHighlights({ collection, sharedCansMap, streak = 0,
   };
 
   const top6 = useMemo(() => {
-    return [...collected]
-      .sort((a, b) => (RARITY_RANK[getEffectiveRarity(b)] || 0) - (RARITY_RANK[getEffectiveRarity(a)] || 0))
-      .slice(0, 6);
+    const pinned = collected
+      .filter(c => c.pinned_at)
+      .sort((a, b) => new Date(a.pinned_at) - new Date(b.pinned_at));
+    const pinnedIds = new Set(pinned.map(c => c.id));
+    const rest = collected
+      .filter(c => !pinnedIds.has(c.id))
+      .sort((a, b) => (RARITY_RANK[getEffectiveRarity(b)] || 0) - (RARITY_RANK[getEffectiveRarity(a)] || 0));
+    return [...pinned, ...rest].slice(0, 6);
   }, [collected, sharedCansMap]);
 
   const rarityBreakdown = useMemo(() => {

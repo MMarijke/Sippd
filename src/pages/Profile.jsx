@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { LogOut, Zap, Star, Bookmark, Heart, Settings, Medal, Pencil, Check, X, Share2, ImageDown, Info, ScanLine } from 'lucide-react';
+import { LogOut, Zap, Star, Bookmark, Heart, Settings, Medal, Pencil, Check, X, Share2, ImageDown, Info, ScanLine, Pin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -15,6 +15,7 @@ import ShareCardModal from '@/components/profile/ShareCardModal';
 import { getItemScore, RARITY_BG_CLASS } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
 import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
+import { useTogglePin, MAX_PINS } from '@/hooks/useTogglePin';
 import TradeHistory from '@/components/profile/TradeHistory';
 import TradeLogDialog from '@/components/profile/TradeLogDialog';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
@@ -135,6 +136,9 @@ export default function Profile() {
     voteCount: votes.length,
     userCreatedDate: user?.created_at,
   });
+
+  const { togglePin, isPending: pinPending } = useTogglePin();
+  const pinnedCount = collected.filter(c => c.pinned_at).length;
 
   const { data: rank } = useQuery({
     queryKey: ['my-rank', user?.id, score],
@@ -271,33 +275,47 @@ export default function Profile() {
 
             <div className="grid grid-cols-3 gap-2">
               {top6.map(item => (
-                <Link
+                <div
                   key={item.id}
-                  to={`/can/${item.can_id}`}
-                  className="block rounded-xl overflow-hidden border border-primary/20 bg-black/20 hover:border-primary/40 transition-colors"
+                  className="relative rounded-xl overflow-hidden border border-primary/20 bg-black/20 hover:border-primary/40 transition-colors"
                 >
-                  <div className="aspect-square" style={{ backgroundColor: item.can_bg_color || '#0D2B2B' }}>
-                    {item.can_image_url ? (
-                      <img
-                        src={item.can_image_url}
-                        alt={item.can_name}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-lg opacity-20">🥤</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-1.5 space-y-0.5">
-                    <p className="text-[10px] font-semibold text-foreground truncate">{item.can_name}</p>
-                    <RarityBadge rarity={getEffectiveRarity(item)} size="sm" />
-                  </div>
-                </Link>
+                  <Link to={`/can/${item.can_id}`} className="block">
+                    <div className="aspect-square" style={{ backgroundColor: item.can_bg_color || '#0D2B2B' }}>
+                      {item.can_image_url ? (
+                        <img
+                          src={item.can_image_url}
+                          alt={item.can_name}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-lg opacity-20">🥤</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-1.5 space-y-0.5">
+                      <p className="text-[10px] font-semibold text-foreground truncate">{item.can_name}</p>
+                      <RarityBadge rarity={getEffectiveRarity(item)} size="sm" />
+                    </div>
+                  </Link>
+                  <button
+                    onClick={() => togglePin({ collectionItem: item, pinnedCount })}
+                    disabled={pinPending}
+                    aria-label={item.pinned_at ? 'Unpin from showcase' : 'Pin to showcase'}
+                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center transition-colors hover:bg-background/90"
+                  >
+                    <Pin className={`w-3 h-3 transition-colors ${item.pinned_at ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                  </button>
+                </div>
               ))}
             </div>
+            {pinnedCount > 0 && (
+              <p className="text-[10px] font-mono text-muted-foreground mt-2">
+                {pinnedCount}/{MAX_PINS} pinned
+              </p>
+            )}
 
             {rarityBreakdown.length > 0 && (
               <div className="mt-4">

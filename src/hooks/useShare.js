@@ -17,7 +17,21 @@ export function useShare() {
       await navigator.clipboard.writeText(text);
       toast.success(successMessage);
     } catch {
-      toast.error('Could not copy link');
+      // Fallback for browsers that block clipboard API
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        toast.success(successMessage);
+      } catch {
+        toast.error('Could not copy link — copy it manually: ' + text);
+      }
     }
   };
 

@@ -152,6 +152,7 @@ export default function MonthlyReport() {
         <div className="flex-1 flex items-center justify-center gap-3">
           <button
             onClick={() => setMonthDate(d => startOfMonth(subMonths(d, 1)))}
+            aria-label="Previous month"
             className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center border border-border"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -162,6 +163,7 @@ export default function MonthlyReport() {
           <button
             onClick={() => setMonthDate(d => startOfMonth(addMonths(d, 1)))}
             disabled={isCurrentMonth}
+            aria-label="Next month"
             className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center border border-border disabled:opacity-30"
           >
             <ChevronRight className="w-4 h-4" />

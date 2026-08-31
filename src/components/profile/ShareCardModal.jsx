@@ -243,6 +243,16 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
     };
   }, []);
 
+  // Escape to close (keyboard-only users have no other way out besides
+  // tabbing to one of the two close buttons)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   // Convert data URL to Blob without fetch (works everywhere)
   const dataUrlToBlob = (dataUrl) => {
     const [header, base64] = dataUrl.split(',');
@@ -311,14 +321,14 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
   };
 
   const content = (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-background overflow-y-auto">
+    <div role="dialog" aria-modal="true" aria-labelledby="share-card-title" className="fixed inset-0 z-[100] flex flex-col bg-background overflow-y-auto">
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-border flex-shrink-0">
         <Button size="sm" variant="ghost" className="gap-1.5 text-muted-foreground hover:text-foreground" onClick={onClose}>
           <ArrowLeft className="w-4 h-4" />
           <span className="text-xs font-mono">Back</span>
         </Button>
-        <h2 className="text-sm font-display font-bold text-foreground tracking-wide">{cardData.kind === 'monthly' ? 'Recap Card' : 'Share Card'}</h2>
+        <h2 id="share-card-title" className="text-sm font-display font-bold text-foreground tracking-wide">{cardData.kind === 'monthly' ? 'Recap Card' : 'Share Card'}</h2>
         <Button size="icon" variant="ghost" className="w-11 h-11 text-muted-foreground hover:text-foreground" onClick={onClose} aria-label="Close">
           <X className="w-4 h-4" />
         </Button>

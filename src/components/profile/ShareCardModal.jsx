@@ -313,9 +313,11 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
       a.click();
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      toast.success('Image saved! Share it wherever you’d like.', { duration: 4000 });
+      toast.success("Image saved! Share it wherever you'd like.", { duration: 4000 });
     } catch (e) {
-      if (e.name !== 'AbortError') toast.error('Could not share image');
+      // shareFile already handles its own AbortError internally, so any
+      // error reaching here is from the download fallback above.
+      toast.error('Could not share image');
     }
     setSaving(false);
   };
@@ -520,7 +522,7 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
         {cardDataUrl && !generating && (
           <div className="w-full max-w-[360px]">
             <p className="text-[10px] font-mono text-muted-foreground text-center mb-2">Long-press the image to save</p>
-            <img src={cardDataUrl} alt="Share card" className="w-full rounded-2xl border border-border" />
+            <img src={cardDataUrl} alt={cardData.kind === 'monthly' ? 'Recap card' : 'Share card'} className="w-full rounded-2xl border border-border" />
           </div>
         )}
 

@@ -221,7 +221,7 @@ export default function Profile() {
       {/* Score hero — matches Home.jsx's dashboard hero card treatment, pushed further with rank */}
       {!isLoading && (
         <div className="px-5">
-          <div className="relative rounded-2xl bg-gradient-to-br from-[#0D2B2B] to-[#080C14] border border-primary/30 p-6">
+          <div className="relative rounded-2xl hero-card p-6">
             <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">
               Collection Score
             </p>
@@ -254,7 +254,7 @@ export default function Profile() {
       {/* Top Pulls hero — live version of the share card's showcase grid */}
       {!isLoading && top6.length > 0 && (
         <div className="px-5">
-          <div className="rounded-2xl bg-gradient-to-br from-[#0D2B2B] to-[#080C14] border border-primary/30 p-5">
+          <div className="bg-card border border-border rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
               <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">Top Pulls</p>
               {latestAchievement && (
@@ -337,7 +337,7 @@ export default function Profile() {
         </div>
       ) : collected.length === 0 ? (
         <div className="px-5">
-          <div className="rounded-2xl bg-gradient-to-br from-[#0D2B2B] to-[#080C14] border border-primary/30 p-6 flex flex-col items-center text-center">
+          <div className="bg-card border border-border rounded-2xl p-6 flex flex-col items-center text-center">
             <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-3">
               <ScanLine className="w-6 h-6 text-primary" />
             </div>

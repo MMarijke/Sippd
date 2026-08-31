@@ -111,7 +111,7 @@ export default function Home() {
 
       {/* Hero Stat */}
       <div className="px-5 relative mt-5">
-        <div className="relative w-full min-h-[160px] rounded-2xl bg-gradient-to-br from-[#0D2B2B] to-[#080C14] border border-primary/30 p-6">
+        <div className="relative w-full min-h-[160px] rounded-2xl hero-card p-6">
           {/* Left column: text */}
           <div>
             <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">

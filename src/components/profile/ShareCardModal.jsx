@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
-import { X, ArrowLeft, Download, Loader2, Instagram } from 'lucide-react';
+import { X, ArrowLeft, Download, Loader2, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getDisplayRarity, getConfidence, getItemScore, RARITY_HEX as RARITY_COLORS_HEX, rarityHexToRgba } from '@/lib/rarityConsensus';
 import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
@@ -275,7 +275,7 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
     setSaving(false);
   };
 
-  const handleInstagram = async () => {
+  const handleShareImage = async () => {
     if (!cardDataUrl) return;
     setSaving(true);
     try {
@@ -284,15 +284,17 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
         ? `sippd-recap-${cardData.monthLabel.replace(/\s+/g, '-')}.png`
         : 'sippd-collection.png';
 
-      // Try Web Share API with files (works on mobile Safari/Chrome)
+      // Try the native share sheet — whatever apps the OS offers (works on mobile Safari/Chrome)
       const result = await shareFile({ blob, filename, title: cardData.kind === 'monthly' ? `My ${cardData.monthLabel} Sippd Recap` : 'My Sippd Collection' });
       if (result.supported) {
-        if (result.error) toast.error('Could not share to Instagram');
+        if (result.error) toast.error('Could not share image');
         setSaving(false);
         return;
       }
 
-      // Fallback: download image + open Instagram
+      // No share sheet available (typically desktop) — just download it.
+      // No app deep-link here: a custom URL scheme like instagram://app
+      // has no handler on desktop and silently does nothing.
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -301,12 +303,9 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
       a.click();
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      toast.success('Image saved! Open Instagram and post it to your feed.', { duration: 4000 });
-      setTimeout(() => {
-        window.open('instagram://app', '_blank');
-      }, 800);
+      toast.success('Image saved! Share it wherever you’d like.', { duration: 4000 });
     } catch (e) {
-      if (e.name !== 'AbortError') toast.error('Could not share to Instagram');
+      if (e.name !== 'AbortError') toast.error('Could not share image');
     }
     setSaving(false);
   };
@@ -525,15 +524,15 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
           {saving ? 'Saving…' : 'Save'}
         </Button>
 
-        {/* Instagram share button */}
+        {/* Share button — hands the image to the OS share sheet */}
         <Button
-          className="w-full max-w-[360px] font-mono text-xs gap-2"
-          style={{ background: 'linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)', color: '#fff', border: 'none' }}
-          onClick={handleInstagram}
+          variant="outline"
+          className="w-full max-w-[360px] font-mono text-xs gap-2 border-primary/30 text-primary hover:bg-primary/10"
+          onClick={handleShareImage}
           disabled={!cardDataUrl || generating || saving}
         >
-          <Instagram className="w-4 h-4" />
-          Share to Instagram
+          <Share2 className="w-4 h-4" />
+          Share Image
         </Button>
 
         <Button

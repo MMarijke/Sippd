@@ -21,17 +21,19 @@ function proxyImageUrl(url) {
   return `${SUPABASE_URL}/functions/v1/image-proxy?url=${encodeURIComponent(url)}`;
 }
 
+// Mirrors Profile.jsx's live Top Pulls card exactly (border-primary/20
+// bg-black/20 rounded-xl, name + RarityBadge only, no brand line) so the
+// exported card matches what the user already sees in the app.
 function CanCell({ item, sharedCan }) {
   const conf = sharedCan ? getConfidence(sharedCan.total_votes) : 'unrated';
   const rarity = conf === 'unrated' ? null : getDisplayRarity(sharedCan || item);
   const imageUrl = item.can_image_url || sharedCan?.image_url;
   const color = rarity ? RARITY_COLORS_HEX[rarity] : '#6B7280';
-  const bg = rarity ? rarityHexToRgba(rarity, 0.15) : rarityHexToRgba('Common', 0.1);
 
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.04)',
-      border: `1px solid ${color}33`,
+      background: 'rgba(0,0,0,0.2)',
+      border: '1px solid rgba(0,229,255,0.2)',
       borderRadius: 12,
       overflow: 'hidden',
       display: 'flex',
@@ -52,28 +54,26 @@ function CanCell({ item, sharedCan }) {
           </div>
         )}
       </div>
-      {/* Info */}
-      <div style={{ padding: '6px 8px 8px' }}>
-        <div style={{ fontSize: 9, color: '#00E5FF', fontFamily: 'monospace', opacity: 0.7, marginBottom: 2, textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {item.can_brand}
-        </div>
-        <div style={{ fontSize: 10, color: '#F0F4F8', fontWeight: 700, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 4 }}>
+      {/* Info — matches RarityBadge's rendering exactly */}
+      <div style={{ padding: 6, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: '#F0F4F8', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {item.can_name || 'Unknown'}
         </div>
         <div style={{
-          display: 'inline-block',
-          fontSize: 8,
+          display: 'inline-flex',
+          alignSelf: 'flex-start',
+          fontSize: 10,
           fontFamily: 'monospace',
-          fontWeight: 700,
+          fontWeight: 600,
           letterSpacing: '0.05em',
           textTransform: 'uppercase',
           color: color,
-          background: bg,
-          border: `1px solid ${color}55`,
-          borderRadius: 4,
-          padding: '2px 5px',
+          background: rarityHexToRgba(rarity || 'Common', 0.1),
+          border: `1px solid ${rarityHexToRgba(rarity || 'Common', 0.3)}`,
+          borderRadius: 6,
+          padding: '2px 8px',
         }}>
-          {rarity || '? ? ?'}
+          {rarity || '???'}
         </div>
       </div>
     </div>
@@ -344,7 +344,11 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
           style={{
             width: 360,
             minHeight: 640,
-            background: 'linear-gradient(160deg, #0D1320 0%, #080C14 60%, #0A1018 100%)',
+            // Same hero-card gradient/border as the live Top Pulls block
+            // on Profile.jsx (bg-gradient-to-br from-[#0D2B2B] to-[#080C14]
+            // border-primary/30), so the exported card matches the app.
+            background: 'linear-gradient(135deg, #0D2B2B 0%, #080C14 100%)',
+            border: '1px solid rgba(0,229,255,0.3)',
             borderRadius: 20,
             overflow: 'hidden',
             fontFamily: "'Exo 2', sans-serif",
@@ -435,8 +439,8 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
           ) : (
             /* Top 6 grid */
             <div style={{ padding: '0 20px' }}>
-              <div style={{ fontSize: 9, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 10 }}>
-                TOP PULLS
+              <div style={{ fontSize: 10, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 10 }}>
+                Top Pulls
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                 {(cardData.top6.length > 0 ? cardData.top6 : Array(6).fill(null)).map((item, i) => (
@@ -463,20 +467,19 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
           {/* Rarity bar */}
           {cardData.rarityBreakdown.length > 0 && (
             <div style={{ padding: '16px 20px 12px' }}>
-              <div style={{ fontSize: 9, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>
-                RARITY BREAKDOWN
+              <div style={{ fontSize: 10, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>
+                Rarity Breakdown
               </div>
-              <div style={{ display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden', gap: 1 }}>
+              <div style={{ display: 'flex', height: 6, borderRadius: 9999, overflow: 'hidden', gap: 1 }}>
                 {cardData.rarityBreakdown.map(({ rarity, pct }) => (
-                  <div key={rarity} style={{ width: `${pct}%`, background: RARITY_COLORS_HEX[rarity] || '#6B7280', borderRadius: 2 }} />
+                  <div key={rarity} style={{ width: `${pct}%`, height: '100%', background: RARITY_COLORS_HEX[rarity] || '#6B7280' }} />
                 ))}
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', marginTop: 8 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: 12, rowGap: 4, marginTop: 8 }}>
                 {cardData.rarityBreakdown.map(({ rarity, count }) => (
-                  <div key={rarity} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: RARITY_COLORS_HEX[rarity] }} />
-                    <span style={{ fontSize: 9, color: 'rgba(240,244,248,0.5)', fontFamily: 'monospace' }}>{rarity} {count}</span>
-                  </div>
+                  <span key={rarity} style={{ fontSize: 10, fontFamily: 'monospace', color: 'rgba(240,244,248,0.5)' }}>
+                    {rarity} <span style={{ color: '#F0F4F8' }}>{count}</span>
+                  </span>
                 ))}
               </div>
             </div>

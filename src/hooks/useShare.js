@@ -1,34 +1,23 @@
 import { toast } from 'sonner';
 
 /**
- * Shared sharing logic for Sippd's share surfaces (Profile's link share,
- * MonthlyReport's recap share, ShareCardModal's image share) — previously
- * each hand-rolled its own Web Share/clipboard logic and had silently
- * drifted in error handling (e.g. one caught AbortError and the other
- * didn't, one confirmed the clipboard write before toasting and the
- * other didn't).
+ * Shared sharing logic for Sippd's share surfaces (Profile's link copy,
+ * ShareCardModal's image share).
  */
 export function useShare() {
   /**
-   * Share a link or plain text via the Web Share API, falling back to
-   * copying to the clipboard. Copies `url` when given (a link is more
-   * useful on the clipboard than accompanying text), otherwise `text`.
+   * Always copy to the clipboard and confirm it — for actions where a
+   * predictable "copied" outcome matters more than routing through
+   * whatever the OS share sheet happens to offer (which varies by
+   * platform and doesn't always even have a copy option, so the user
+   * can't tell whether anything happened).
    */
-  const shareText = async ({ title, text, url, successMessage = 'Copied to clipboard!' }) => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title, text, url });
-        return;
-      } catch (e) {
-        if (e.name === 'AbortError') return;
-        // any other share failure falls through to the clipboard fallback
-      }
-    }
+  const copyLink = async (text, successMessage = 'Copied to clipboard!') => {
     try {
-      await navigator.clipboard.writeText(url || text);
+      await navigator.clipboard.writeText(text);
       toast.success(successMessage);
     } catch {
-      toast.error('Could not share');
+      toast.error('Could not copy link');
     }
   };
 
@@ -50,5 +39,5 @@ export function useShare() {
     }
   };
 
-  return { shareText, shareFile };
+  return { copyLink, shareFile };
 }

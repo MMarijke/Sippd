@@ -154,12 +154,12 @@ export default function Profile() {
     enabled: !!user?.id && score > 0,
   });
 
-  const { shareText } = useShare();
+  const { copyLink } = useShare();
 
   const handleShareProfileLink = () => {
     if (!user?.id) return;
     const url = `${window.location.origin}/u/${user.id}`;
-    shareText({ title: 'My Sippd Collection', text: 'Check out my Sippd collection!', url, successMessage: 'Link copied!' });
+    copyLink(url, 'Link copied!');
   };
 
   return (

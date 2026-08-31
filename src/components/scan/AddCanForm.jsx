@@ -141,6 +141,8 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
       if (error?.message?.includes('already_collected')) {
         toast('You already have this can in your vault');
         onSuccess?.();
+      } else if (error?.message?.includes('rate_limit_exceeded')) {
+        toast.error('You are adding cans too quickly — try again in an hour');
       } else {
         toast.error('Failed to add can: ' + (error?.message || 'Unknown error'));
       }

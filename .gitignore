@@ -20,6 +20,10 @@ dist-ssr
 graphify-out/
 supabase/.temp/
 
+# Capacitor native platforms — generated, not committed
+android/
+ios/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

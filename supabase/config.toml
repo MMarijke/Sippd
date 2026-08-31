@@ -4,6 +4,14 @@
 # working directory name when running `supabase init`.
 project_id = "Sippd"
 
+[functions.image-proxy]
+# Called from a plain <img src> tag (html2canvas's CORS-safe capture path),
+# which cannot attach an Authorization header — JWT verification must be
+# off or every externally-hosted can image 401s and is silently missing
+# from the generated share card. Safe to leave open: read-only, fetches
+# only http(s) URLs, and only relays actual image/* responses.
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.

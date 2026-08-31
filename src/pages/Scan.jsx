@@ -203,18 +203,6 @@ export default function Scan() {
           + Add can manually
         </button>
       </div>
-
-      <p className="text-center text-[10px] font-mono text-muted-foreground mt-4 px-5">
-        Barcode lookup powered by{' '}
-        <a
-          href="https://world.openfoodfacts.org"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:text-foreground"
-        >
-          Open Food Facts
-        </a>
-      </p>
     </div>
   );
 }

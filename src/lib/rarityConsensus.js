@@ -140,6 +140,19 @@ export function getDisplayRarity(can) {
 }
 
 /**
+ * Effective rarity for a collection item: the community consensus once
+ * enough votes exist on its shared can, falling back to the item's own
+ * cached rarity before that (unrated) or when the can isn't in the
+ * shared registry at all.
+ */
+export function getEffectiveRarity(item, sharedCansMap) {
+  const sc = sharedCansMap[item.can_id];
+  if (!sc) return item.can_rarity || 'Common';
+  const conf = getConfidence(sc.total_votes);
+  return conf === 'unrated' ? (item.can_rarity || 'Common') : getDisplayRarity(sc);
+}
+
+/**
  * Returns true if the can has enough votes to show a consensus tier.
  * Replaces old `verified` boolean.
  */

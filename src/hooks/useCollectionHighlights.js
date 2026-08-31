@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { getDisplayRarity, getConfidence, RARITY_ORDER } from '@/lib/rarityConsensus';
+import { RARITY_ORDER, getEffectiveRarity as getEffectiveRarityBase } from '@/lib/rarityConsensus';
 import { computeAchievements } from '@/lib/achievements';
 
 const RARITY_RANK = { Common: 1, Uncommon: 2, Rare: 3, 'Ultra Rare': 4, Legendary: 5 };
@@ -15,12 +15,7 @@ export function useCollectionHighlights({ collection, sharedCansMap, streak = 0,
     [collection]
   );
 
-  const getEffectiveRarity = (item) => {
-    const sc = sharedCansMap[item.can_id];
-    if (!sc) return item.can_rarity || 'Common';
-    const conf = getConfidence(sc.total_votes);
-    return conf === 'unrated' ? (item.can_rarity || 'Common') : getDisplayRarity(sc);
-  };
+  const getEffectiveRarity = (item) => getEffectiveRarityBase(item, sharedCansMap);
 
   const top6 = useMemo(() => {
     const pinned = collected

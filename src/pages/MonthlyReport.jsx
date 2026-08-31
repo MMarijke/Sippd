@@ -7,7 +7,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Share2, Package, Flame, Trophy, T
 import { Button } from '@/components/ui/button';
 import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, subMonths, addMonths } from 'date-fns';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { getDisplayRarity, getConfidence, RARITY_POINTS, RARITY_ORDER, RARITY_HEX as RARITY_COLORS } from '@/lib/rarityConsensus';
+import { RARITY_POINTS, RARITY_ORDER, RARITY_HEX as RARITY_COLORS, getEffectiveRarity as getEffectiveRarityBase } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
 import RarityBadge from '@/components/shared/RarityBadge';
 import CanImageBox from '@/components/shared/CanImageBox';
@@ -54,12 +54,7 @@ export default function MonthlyReport() {
     [sharedCans]
   );
 
-  const getEffectiveRarity = (item) => {
-    const sc = sharedCansMap[item.can_id];
-    if (!sc) return item.can_rarity || 'Common';
-    const conf = getConfidence(sc.total_votes);
-    return conf === 'unrated' ? (item.can_rarity || 'Common') : getDisplayRarity(sc);
-  };
+  const getEffectiveRarity = (item) => getEffectiveRarityBase(item, sharedCansMap);
 
   const monthInterval = useMemo(() => ({
     start: startOfMonth(monthDate),

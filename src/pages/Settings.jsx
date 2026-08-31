@@ -3,11 +3,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { ArrowLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
 const STATUSES = ['collected', 'wishlist'];
 const RARITIES = ['Common', 'Uncommon', 'Rare', 'Ultra Rare', 'Legendary'];
@@ -196,68 +197,6 @@ function ChangePasswordPanel({ user }) {
   );
 }
 
-// ─── Delete Account ─────────────────────────────────────────────────────────
-function DeleteAccountPanel() {
-  const navigate = useNavigate();
-  const { signOut } = useAuth();
-  const [confirmText, setConfirmText] = useState('');
-  const [deleting, setDeleting] = useState(false);
-  const canConfirm = confirmText.trim().toUpperCase() === 'DELETE';
-
-  const handleDelete = async () => {
-    if (!canConfirm || deleting) return;
-    setDeleting(true);
-    const { data, error } = await supabase.functions.invoke('delete-account');
-    if (error || data?.error) {
-      toast.error('Failed to delete account: ' + (data?.error || error?.message || 'Unknown error'));
-      setDeleting(false);
-      return;
-    }
-    await signOut();
-    navigate('/login');
-    toast.success('Your account has been deleted.');
-  };
-
-  return (
-    <div className="space-y-4 px-5 pt-4">
-      <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4 space-y-2">
-        <p className="text-xs font-mono text-destructive leading-relaxed font-semibold">
-          This permanently deletes your account. This cannot be undone.
-        </p>
-        <p className="text-xs font-mono text-muted-foreground leading-relaxed">
-          Removed: your collection, crates, trades, trade templates, rarity votes,
-          follows, notifications, and leaderboard score. Community cans you
-          contributed to stay in the shared database, but your individual votes
-          and favourites are removed from their counts.
-        </p>
-      </div>
-
-      <div className="space-y-1.5">
-        <p className="text-xs font-mono text-muted-foreground">
-          Type <span className="text-destructive font-semibold">DELETE</span> to confirm
-        </p>
-        <Input
-          value={confirmText}
-          onChange={e => setConfirmText(e.target.value)}
-          placeholder="DELETE"
-          className="bg-secondary border-destructive/30 font-mono"
-          autoComplete="off"
-        />
-      </div>
-
-      <Button
-        variant="destructive"
-        className="w-full font-mono text-xs gap-2"
-        disabled={!canConfirm || deleting}
-        onClick={handleDelete}
-      >
-        <Trash2 className="w-4 h-4" />
-        {deleting ? 'Deleting…' : 'Permanently Delete My Account'}
-      </Button>
-    </div>
-  );
-}
-
 // ─── Chip Toggle ─────────────────────────────────────────────────────────────
 function ChipToggle({ options, value, onChange }) {
   return (
@@ -285,9 +224,11 @@ function ChipToggle({ options, value, onChange }) {
 export default function Settings() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
-  const [panel, setPanel] = useState(null); // 'name' | 'region' | 'password' | 'delete'
+  const { user, signOut } = useAuth();
+  const [panel, setPanel] = useState(null); // 'name' | 'region' | 'password'
   const [prefs, setPrefs] = useState(loadPrefs);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   const { data: profile } = useQuery({
     queryKey: ['my-profile', user?.id],
@@ -325,6 +266,18 @@ export default function Settings() {
 
   const defaultStatus = prefs.defaultStatus || 'collected';
   const defaultRarity = prefs.defaultRarity || 'Common';
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    const { data, error } = await supabase.functions.invoke('delete-account');
+    if (error || data?.error) {
+      toast.error('Failed to delete account: ' + (data?.error || error?.message || 'Unknown error'));
+      setDeletingAccount(false);
+      return;
+    }
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -461,15 +414,20 @@ export default function Settings() {
             label="Delete Account"
             sub="Permanently remove all your data"
             danger
-            onClick={() => setPanel(panel === 'delete' ? null : 'delete')}
+            onClick={() => setShowDeleteConfirm(true)}
           />
-          {panel === 'delete' && (
-            <div className="bg-destructive/5">
-              <DeleteAccountPanel />
-            </div>
-          )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeleteAccount}
+        isPending={deletingAccount}
+        title="Delete Account?"
+        description="This will permanently delete your account and all your data. This cannot be undone."
+        confirmLabel="Delete My Account"
+      />
     </div>
   );
 }

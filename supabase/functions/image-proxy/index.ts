@@ -1,13 +1,19 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { Ratelimit } from 'npm:@upstash/ratelimit@2.0.8'
+import { Redis } from 'npm:@upstash/redis@1.38.3'
 
 // Anonymous by design: called from a plain <img src> tag as part of
 // html2canvas's CORS-safe capture path (see ShareCardModal.jsx), which
 // cannot attach an Authorization header — verify_jwt is off for this
 // function in supabase/config.toml. That removes the auth boundary
-// Supabase would otherwise enforce, so the hostname allowlist and
-// private-IP block below ARE the security controls for this function,
-// not defense-in-depth on top of one — treat edits to either as a
-// security change, not routine maintenance.
+// Supabase would otherwise enforce, so the hostname allowlist, private-IP
+// block, and per-IP rate limit below ARE the security controls for this
+// function, not defense-in-depth on top of one — treat edits to any of
+// them as a security change, not routine maintenance.
+//
+// Upstash imports use Deno's native npm: specifier, not an esm.sh/Skypack
+// CDN proxy — matches Supabase's own official example for this exact
+// use case.
 
 const ALLOWED_HOSTS = new Set([
   'world.openfoodfacts.org',
@@ -15,6 +21,16 @@ const ALLOWED_HOSTS = new Set([
   'static.openfoodfacts.org',
   'aejgztuwixlqexmkbznz.supabase.co',
 ])
+
+const redis = new Redis({
+  url: Deno.env.get('UPSTASH_REDIS_REST_URL')!,
+  token: Deno.env.get('UPSTASH_REDIS_REST_TOKEN')!,
+})
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(60, '1 h'),
+  analytics: false,
+})
 
 function isBlockedIp(ip: string): boolean {
   const v4 = ip.split('.').map(Number)
@@ -55,6 +71,18 @@ async function hasBlockedIp(hostname: string): Promise<boolean> {
 }
 
 serve(async (req) => {
+  // Rate limit first, before any other work — this is what actually
+  // bounds the denial-of-wallet exposure from an unauthenticated function.
+  const forwardedFor = req.headers.get('x-forwarded-for')
+  const ip = (forwardedFor ? forwardedFor.split(',')[0].trim() : null)
+    || req.headers.get('x-real-ip')
+    || 'unknown'
+
+  const { success } = await ratelimit.limit(ip)
+  if (!success) {
+    return new Response('Rate limit exceeded', { status: 429 })
+  }
+
   const url = new URL(req.url)
   const imageUrl = url.searchParams.get('url')
 

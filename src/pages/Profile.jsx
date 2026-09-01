@@ -255,13 +255,22 @@ export default function Profile() {
       {!isLoading && top6.length > 0 && (
         <div className="px-5">
           <div className="bg-card border border-border rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3 gap-2">
               <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">Top Pulls</p>
-              {latestAchievement && (
-                <span className="flex items-center gap-1.5 text-[10px] font-mono text-[#FFD700]">
-                  <span>{latestAchievement.icon}</span> {latestAchievement.title}
-                </span>
-              )}
+              <div className="flex items-center gap-2 min-w-0">
+                {latestAchievement && (
+                  <span className="flex items-center gap-1.5 text-[10px] font-mono text-[#FFD700] truncate">
+                    <span>{latestAchievement.icon}</span> {latestAchievement.title}
+                  </span>
+                )}
+                <button
+                  onClick={() => setShowShareCard(true)}
+                  aria-label="Create share card"
+                  className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
+                >
+                  <ImageDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-3 gap-2">
@@ -362,14 +371,10 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Primary tier: showcase & share — keeps the scroll on the page's peak content */}
+      {/* Primary tier: keeps the scroll on the page's peak content. Share
+          Card creation lives on the Top Pulls card itself now, next to the
+          content it captures, instead of as a disconnected button here. */}
       <div className="px-5 space-y-2">
-        <Button
-          className="w-full justify-start font-mono text-xs gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-          onClick={() => setShowShareCard(true)}
-        >
-          <ImageDown className="w-4 h-4" /> Create Share Card
-        </Button>
         <Button
           variant="outline"
           className="w-full justify-start font-mono text-xs gap-2 border-primary/30 text-primary hover:bg-primary/10"

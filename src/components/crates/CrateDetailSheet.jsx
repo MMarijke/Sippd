@@ -8,15 +8,21 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { RARITY_ORDER } from '@/lib/rarityConsensus';
+import { useSubscription } from '@/hooks/useSubscription';
+import ProGate from '@/components/shared/ProGate';
+
+const FREE_CRATE_CAN_LIMIT = 10;
 
 export default function CrateDetailSheet({ crate, collection, onClose, onCrateUpdated }) {
   const queryClient = useQueryClient();
+  const { isPro } = useSubscription();
   const [tab, setTab] = useState('contents'); // 'contents' | 'add'
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('date_desc');
   const [canIds, setCanIds] = useState(crate.can_ids || []);
 
   const crateCanIds = new Set(canIds);
+  const atCanLimit = canIds.length >= FREE_CRATE_CAN_LIMIT && !isPro;
 
   const applySorting = (items) => items.slice().sort((a, b) => {
     if (sort === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
@@ -137,6 +143,10 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
             />
           )}
 
+          {tab === 'add' && atCanLimit && (
+            <ProGate reason="Upgrade to add more than 10 cans per crate">{null}</ProGate>
+          )}
+
           {tab === 'contents' && contents.length === 0 && (
             <div className="text-center py-12">
               <p className="text-sm font-mono text-muted-foreground">This crate is empty.</p>
@@ -157,7 +167,7 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
           )}
 
           {tab === 'add' && filteredAvailable.map(item => (
-            <CanRow key={item.id} item={item} action="add" onAction={() => addCan(item.id)} />
+            <CanRow key={item.id} item={item} action="add" onAction={() => addCan(item.id)} disabled={atCanLimit} />
           ))}
         </div>
       </SheetContent>
@@ -165,7 +175,7 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
   );
 }
 
-function CanRow({ item, action, onAction }) {
+function CanRow({ item, action, onAction, disabled }) {
   return (
     <div className="flex items-center gap-3 bg-secondary/40 border border-border rounded-xl px-3 py-2.5">
       <div
@@ -182,11 +192,12 @@ function CanRow({ item, action, onAction }) {
       </div>
       <button
         onClick={onAction}
+        disabled={disabled}
         className={`w-11 h-11 rounded-lg flex items-center justify-center border transition-colors flex-shrink-0 ${
           action === 'add'
             ? 'bg-primary/10 border-primary/30 text-primary hover:bg-primary/20'
             : 'bg-destructive/10 border-destructive/30 text-destructive hover:bg-destructive/20'
-        }`}
+        } ${disabled ? 'opacity-40 pointer-events-none' : ''}`}
       >
         {action === 'add' ? <Plus className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
       </button>

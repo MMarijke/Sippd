@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ const STATUS_OPTIONS = [
 ];
 
 export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user: currentUser } = useAuth();
   const [showReveal, setShowReveal] = useState(false);
@@ -145,6 +147,10 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         onSuccess?.();
       } else if (error?.message?.includes('rate_limit_exceeded')) {
         toast.error('You are adding cans too quickly — try again in an hour');
+      } else if (error?.message?.includes('daily_scan_limit_reached')) {
+        toast.error('Daily scan limit reached — upgrade to Pro for unlimited scans', {
+          action: { label: 'Upgrade', onClick: () => navigate('/pro') },
+        });
       } else {
         toast.error('Failed to add can: ' + (error?.message || 'Unknown error'));
       }

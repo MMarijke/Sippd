@@ -22,6 +22,7 @@ import Notifications from './pages/Notifications';
 import Crates from './pages/Crates';
 import CompareCollection from './pages/CompareCollection';
 import Wishlist from './pages/Wishlist';
+import Pro from './pages/Pro';
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
               <Route path="/monthly-report" element={<MonthlyReport />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/crates" element={<Crates />} />
+              <Route path="/pro" element={<Pro />} />
               <Route path="/u/:userId" element={<PublicProfile />} />
               <Route path="/compare" element={<CompareCollection />} />
             </Route>

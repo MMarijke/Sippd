@@ -12,6 +12,12 @@ project_id = "Sippd"
 # only http(s) URLs, and only relays actual image/* responses.
 verify_jwt = false
 
+[functions.paddle-webhook]
+# Called by Paddle's webhook delivery, not an authenticated app user, so it
+# can't present a Supabase JWT — verifies its own caller via the
+# Paddle-Signature HMAC instead. Disabling Supabase's JWT check here is safe.
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.

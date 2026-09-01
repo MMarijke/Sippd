@@ -24,3 +24,5 @@ merging code that adds or changes a function, deploy it explicitly:
 
 Deployed functions:
   - image-proxy
+  - delete-account
+  - paddle-webhook

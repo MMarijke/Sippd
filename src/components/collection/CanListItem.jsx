@@ -1,11 +1,18 @@
 import { Link } from 'react-router-dom';
 import RarityBadge from '../shared/RarityBadge';
-import { Package, ChevronRight } from 'lucide-react';
+import { Package, PackagePlus, ChevronRight } from 'lucide-react';
 import { getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
 
-export default function CanListItem({ item, sharedCan }) {
+export default function CanListItem({ item, sharedCan, onAddToCrate }) {
   const confidence = sharedCan ? getConfidence(sharedCan.total_votes) : 'confirmed';
   const rarity = confidence === 'unrated' ? '???' : (sharedCan ? getDisplayRarity(sharedCan) : (item.can_rarity || 'Common'));
+
+  const handleAddToCrate = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAddToCrate?.();
+  };
+
   return (
     <Link
       to={`/can/${item.can_id}`}
@@ -46,7 +53,16 @@ export default function CanListItem({ item, sharedCan }) {
           </span>
         )}
       </div>
-      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+      {onAddToCrate && (
+        <button
+          onClick={handleAddToCrate}
+          aria-label="Add to crate"
+          className="w-9 h-9 rounded-lg bg-secondary/60 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors flex-shrink-0"
+        >
+          <PackagePlus className="w-3.5 h-3.5" />
+        </button>
+      )}
+      <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
     </Link>
   );
 }

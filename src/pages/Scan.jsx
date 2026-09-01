@@ -96,11 +96,11 @@ export default function Scan() {
         />
         <AddCanForm
           prefillData={selectedCan?.id ? selectedCan : (selectedCan?.barcode ? { barcode: selectedCan.barcode, ...selectedCan } : null)}
-          onSuccess={() => {
+          onSuccess={(addedCan) => {
             setMode('search');
             setSelectedCan(null);
             setSearchQuery('');
-            navigate('/collection');
+            navigate('/collection', addedCan ? { state: { addedCan } } : undefined);
           }}
           onCancel={() => { setMode('search'); setSelectedCan(null); }}
         />

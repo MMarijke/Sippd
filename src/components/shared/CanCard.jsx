@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
-import { Star, CheckCircle } from 'lucide-react';
+import { Star, CheckCircle, PackagePlus } from 'lucide-react';
 import RarityBadge from './RarityBadge';
 import CanImageBox from './CanImageBox';
 import { getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
 import { useFavourite } from '@/hooks/useFavourite';
 import { cn } from '@/lib/utils';
 
-export default function CanCard({ can, onClick, showStatus, sharedCan, onFavouriteToggle }) {
+export default function CanCard({ can, onClick, showStatus, sharedCan, onFavouriteToggle, onAddToCrate }) {
   const name = can.can_name || can.name;
   const brand = can.can_brand || can.brand;
   const imageUrl = can.can_image_url || can.image_url || sharedCan?.image_url;
@@ -23,6 +23,12 @@ export default function CanCard({ can, onClick, showStatus, sharedCan, onFavouri
     if (!can.id) return;
     toggleFavourite({ collectionItem: can, sharedCan });
     onFavouriteToggle?.();
+  };
+
+  const handleAddToCrate = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAddToCrate?.();
   };
 
   return (
@@ -87,11 +93,22 @@ export default function CanCard({ can, onClick, showStatus, sharedCan, onFavouri
           </div>
         )}
       </div>
-      <div className="p-3">
-        <p className="text-[11px] font-mono text-primary/70 uppercase tracking-wider truncate">{brand}</p>
-        <h3 className="text-sm font-semibold text-foreground truncate mt-0.5">{name}</h3>
-        {flavour && (
-          <p className="text-xs text-muted-foreground truncate mt-0.5">{flavour}</p>
+      <div className="p-3 flex items-end justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[11px] font-mono text-primary/70 uppercase tracking-wider truncate">{brand}</p>
+          <h3 className="text-sm font-semibold text-foreground truncate mt-0.5">{name}</h3>
+          {flavour && (
+            <p className="text-xs text-muted-foreground truncate mt-0.5">{flavour}</p>
+          )}
+        </div>
+        {onAddToCrate && can.id && (
+          <button
+            onClick={handleAddToCrate}
+            aria-label="Add to crate"
+            className="w-8 h-8 rounded-lg bg-secondary/60 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors flex-shrink-0"
+          >
+            <PackagePlus className="w-3.5 h-3.5" />
+          </button>
         )}
       </div>
     </motion.div>

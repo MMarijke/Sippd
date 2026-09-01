@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, ScanLine, PackageOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import FilterBar from '@/components/collection/FilterBar';
 import CanCard from '@/components/shared/CanCard';
 import CanListItem from '@/components/collection/CanListItem';
 import EmptyState from '@/components/shared/EmptyState';
+import AddToCrateSheet from '@/components/crates/AddToCrateSheet';
 import { getDisplayRarity, RARITY_ORDER } from '@/lib/rarityConsensus';
 import { computeAchievements } from '@/lib/achievements';
 import { useAchievementUnlock } from '@/hooks/useAchievementUnlock';
@@ -24,8 +25,11 @@ export default function Collection() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({ status: 'all', rarity: 'all', favourites: false, sort: 'date_desc' });
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [crateTarget, setCrateTarget] = useState(null);
   const { user } = useAuth();
   const streak = useStreak();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // Reset to the first page whenever the filtered set's criteria change —
   // otherwise switching filters could leave a large stale render count
@@ -33,6 +37,15 @@ export default function Collection() {
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
   }, [filters, searchQuery]);
+
+  // AddCanForm can hand off the can it just created via navigation state so
+  // the "add to a crate?" offer survives the redirect to this page.
+  useEffect(() => {
+    if (location.state?.addedCan) {
+      setCrateTarget(location.state.addedCan);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state]);
 
   const { data: collection = [], isLoading } = useQuery({
     queryKey: ['user-collection', user?.id],
@@ -181,6 +194,7 @@ export default function Collection() {
                       can={item}
                       showStatus
                       sharedCan={sharedCansMap[item.can_id]}
+                      onAddToCrate={() => setCrateTarget(item)}
                     />
                   </Link>
                 ))}
@@ -188,7 +202,12 @@ export default function Collection() {
             ) : (
               <div className="space-y-2">
                 {filtered.slice(0, visibleCount).map(item => (
-                  <CanListItem key={item.id} item={item} sharedCan={sharedCansMap[item.can_id]} />
+                  <CanListItem
+                    key={item.id}
+                    item={item}
+                    sharedCan={sharedCansMap[item.can_id]}
+                    onAddToCrate={() => setCrateTarget(item)}
+                  />
                 ))}
               </div>
             )}
@@ -207,6 +226,10 @@ export default function Collection() {
           </>
         )}
       </div>
+
+      {crateTarget && (
+        <AddToCrateSheet can={crateTarget} onClose={() => setCrateTarget(null)} />
+      )}
     </div>
   );
 }

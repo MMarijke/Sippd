@@ -28,6 +28,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
   const { user: currentUser } = useAuth();
   const [showReveal, setShowReveal] = useState(false);
   const [revealRarity, setRevealRarity] = useState('');
+  const [pendingCan, setPendingCan] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [imageMode, setImageMode] = useState('upload');
   const [errors, setErrors] = useState({});
@@ -107,7 +108,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
 
       const displayRarity = sharedCan.consensus_rarity || form.rarity;
 
-      const { error: insertError } = await supabase.from('user_collection').insert({
+      const { data: insertedRow, error: insertError } = await supabase.from('user_collection').insert({
         owner_id:         currentUser.id,
         can_id:            sharedCan.id,
         status:            form.status,
@@ -120,21 +121,22 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         can_edition:       form.edition   || sharedCan.edition,
         can_bg_color:      form.bg_color  || DEFAULT_CAN_BG,
         user_rarity_vote:  form.rarity,
-      });
+      }).select().single();
       if (insertError) throw insertError;
 
-      return displayRarity;
+      return { displayRarity, insertedRow };
     },
-    onSuccess: (displayRarity) => {
+    onSuccess: ({ displayRarity, insertedRow }) => {
       queryClient.invalidateQueries({ queryKey: ['user-collection'] });
       queryClient.invalidateQueries({ queryKey: ['shared-cans'] });
       // TODO: server-side rare pull notification fan-out (deferred to edge function)
       if (['Rare', 'Ultra Rare', 'Legendary'].includes(displayRarity)) {
         setRevealRarity(displayRarity);
+        setPendingCan(insertedRow);
         setShowReveal(true);
       } else {
         toast.success('Can added to your vault!');
-        onSuccess?.();
+        onSuccess?.(insertedRow);
       }
     },
     onError: (error) => {
@@ -182,7 +184,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         onComplete={() => {
           setShowReveal(false);
           toast.success('Rare pull added to your vault!');
-          onSuccess?.();
+          onSuccess?.(pendingCan);
         }}
       />
     );

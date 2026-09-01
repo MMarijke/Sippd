@@ -10,11 +10,16 @@ import CrateCard from '@/components/crates/CrateCard';
 import CrateFormDialog from '@/components/crates/CrateFormDialog';
 import CrateDetailSheet from '@/components/crates/CrateDetailSheet';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import ProGate from '@/components/shared/ProGate';
+import { useSubscription } from '@/hooks/useSubscription';
+
+const FREE_CRATE_LIMIT = 5;
 
 export default function Crates() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { isPro } = useSubscription();
   const [showForm, setShowForm] = useState(false);
   const [editingCrate, setEditingCrate] = useState(null);
   const [selectedCrate, setSelectedCrate] = useState(null);
@@ -47,6 +52,8 @@ export default function Crates() {
     },
     enabled: !!user?.id,
   });
+
+  const atCrateLimit = crates.length >= FREE_CRATE_LIMIT && !isPro;
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
@@ -91,14 +98,22 @@ export default function Crates() {
             <p className="text-[11px] font-mono text-muted-foreground">{crates.length} crate{crates.length !== 1 ? 's' : ''}</p>
           </div>
         </div>
-        <Button
-          size="sm"
-          className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
-          onClick={() => setShowForm(true)}
-        >
-          <Plus className="w-3.5 h-3.5" /> New Crate
-        </Button>
+        {!atCrateLimit && (
+          <Button
+            size="sm"
+            className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+            onClick={() => setShowForm(true)}
+          >
+            <Plus className="w-3.5 h-3.5" /> New Crate
+          </Button>
+        )}
       </div>
+
+      {atCrateLimit && (
+        <div className="px-4 pt-4">
+          <ProGate reason="Upgrade to create unlimited crates">{null}</ProGate>
+        </div>
+      )}
 
       {/* Content */}
       {isLoading ? (

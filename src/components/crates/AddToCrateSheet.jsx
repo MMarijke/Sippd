@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 import { X, Plus, Minus, PackageOpen } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -10,6 +12,8 @@ import CrateFormDialog from '@/components/crates/CrateFormDialog';
 
 export default function AddToCrateSheet({ can, onClose }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { isPro } = useSubscription();
   const queryClient = useQueryClient();
   const [showCreateCrate, setShowCreateCrate] = useState(false);
 
@@ -57,6 +61,15 @@ export default function AddToCrateSheet({ can, onClose }) {
       queryClient.invalidateQueries({ queryKey: ['crates', user?.id] });
     },
   });
+
+  const handleToggle = (crate, adding) => {
+    if (adding && !isPro && (crate.can_ids || []).length >= 10) {
+      toast.error('Free accounts are limited to 10 cans per crate — upgrade to Pro for unlimited');
+      navigate('/pro');
+      return;
+    }
+    toggleMutation.mutate({ crate, adding });
+  };
 
   return (
     <Sheet open onOpenChange={o => !o && onClose()}>
@@ -119,7 +132,7 @@ export default function AddToCrateSheet({ can, onClose }) {
                     <p className="text-[11px] font-mono text-muted-foreground">{(crate.can_ids || []).length} can{(crate.can_ids || []).length !== 1 ? 's' : ''}</p>
                   </div>
                   <button
-                    onClick={() => toggleMutation.mutate({ crate, adding: !inCrate })}
+                    onClick={() => handleToggle(crate, !inCrate)}
                     disabled={toggleMutation.isPending}
                     aria-label={inCrate ? `Remove from ${crate.name}` : `Add to ${crate.name}`}
                     className={`w-11 h-11 rounded-lg flex items-center justify-center border transition-colors flex-shrink-0 ${

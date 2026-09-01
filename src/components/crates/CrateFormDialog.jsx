@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 const EMOJIS = ['📦', '🔥', '⭐', '💎', '🏆', '🌊', '🎯', '🍋', '🧊', '🌈', '🎃', '🚀'];
 
 export default function CrateFormDialog({ crate, onClose, userId }) {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [name, setName] = useState(crate?.name || '');
   const [description, setDescription] = useState(crate?.description || '');
@@ -34,7 +36,13 @@ export default function CrateFormDialog({ crate, onClose, userId }) {
       onClose();
     },
     onError: (error) => {
-      toast.error(`Failed to ${isEdit ? 'update' : 'create'} crate: ` + (error.message || 'Unknown error'));
+      if (error?.message?.includes('crate_limit_reached')) {
+        toast.error('Free plan is limited to 5 crates — upgrade to Pro for unlimited crates');
+        onClose();
+        navigate('/pro');
+      } else {
+        toast.error(`Failed to ${isEdit ? 'update' : 'create'} crate: ` + (error.message || 'Unknown error'));
+      }
     },
   });
 

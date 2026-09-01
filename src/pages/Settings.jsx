@@ -3,10 +3,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
@@ -225,6 +227,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user, signOut } = useAuth();
+  const { isPro } = useSubscription();
   const [panel, setPanel] = useState(null); // 'name' | 'region' | 'password'
   const [prefs, setPrefs] = useState(loadPrefs);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -241,6 +244,25 @@ export default function Settings() {
   });
 
   const refetchProfile = () => queryClient.invalidateQueries({ queryKey: ['my-profile', user?.id] });
+
+  const { data: subscriptionDetails, isLoading: subscriptionLoading } = useQuery({
+    queryKey: ['subscription-status', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('get-subscription-status');
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    enabled: !!user?.id && isPro,
+  });
+
+  const handleManageSubscription = () => {
+    if (!subscriptionDetails?.manage_url) {
+      toast.error('Could not load subscription management link');
+      return;
+    }
+    window.open(subscriptionDetails.manage_url, '_blank', 'noopener,noreferrer');
+  };
 
   const updatePref = (key, val) => {
     const next = { ...prefs, [key]: val };
@@ -329,6 +351,40 @@ export default function Settings() {
             <div className="bg-secondary/30">
               <ChangePasswordPanel user={user} />
             </div>
+          )}
+        </div>
+
+        <SectionHeader title="Subscription" />
+        <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
+          {isPro ? (
+            <>
+              <SettingsRow
+                label="Status"
+                right={<span className="text-xs font-mono font-semibold text-primary">Pro — active</span>}
+              />
+              <SettingsRow
+                label="Next Billing Date"
+                sub={
+                  subscriptionLoading
+                    ? 'Loading…'
+                    : subscriptionDetails?.cancel_at
+                      ? `Cancels ${format(new Date(subscriptionDetails.cancel_at), 'MMM d, yyyy')}`
+                      : subscriptionDetails?.next_billing_date
+                        ? format(new Date(subscriptionDetails.next_billing_date), 'MMM d, yyyy')
+                        : '—'
+                }
+              />
+              <SettingsRow
+                label="Manage Subscription"
+                onClick={handleManageSubscription}
+              />
+            </>
+          ) : (
+            <SettingsRow
+              label="Upgrade to Pro"
+              sub="Unlimited crates, scans, and more"
+              onClick={() => navigate('/pro')}
+            />
           )}
         </div>
 

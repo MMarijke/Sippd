@@ -129,9 +129,7 @@ export default function Home() {
           </div>
 
           {/* Right column: floating image */}
-          {collected.length === 0 || !collected[0]?.can_image_url ? (
-            <span className="absolute right-4 -top-6 w-28 h-28 flex items-center justify-center text-6xl opacity-20">⚡</span>
-          ) : (
+          {collected[0]?.can_image_url && (
             <img
               src={collected[0].can_image_url}
               alt={collected[0].can_name}

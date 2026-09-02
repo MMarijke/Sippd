@@ -2,21 +2,21 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { LogOut, Zap, Star, Bookmark, Heart, Settings, Medal, Pencil, Check, X, Share2, ImageDown, Info, ScanLine, Pin } from 'lucide-react';
+import { LogOut, Zap, Star, Bookmark, Heart, Settings, Medal, Pencil, Check, X, Share2, Download, Info, ScanLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import PageHeader from '@/components/shared/PageHeader';
 import StatBox from '@/components/shared/StatBox';
-import RarityBadge from '@/components/shared/RarityBadge';
-import { useNavigate, Link } from 'react-router-dom';
+import TopPullsCard from '@/components/profile/TopPullsCard';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import ShareCardModal from '@/components/profile/ShareCardModal';
-import { getItemScore, RARITY_BG_CLASS } from '@/lib/rarityConsensus';
+import { getItemScore } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
 import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
-import { useTogglePin, MAX_PINS } from '@/hooks/useTogglePin';
+import { useTogglePin } from '@/hooks/useTogglePin';
 import { useShare } from '@/hooks/useShare';
+import { useCardCapture } from '@/hooks/useCardCapture';
 import TradeHistory from '@/components/profile/TradeHistory';
 import TradeLogDialog from '@/components/profile/TradeLogDialog';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
@@ -26,7 +26,6 @@ export default function Profile() {
   const queryClient = useQueryClient();
   const { user, signOut } = useAuth();
   const streak = useStreak();
-  const [showShareCard, setShowShareCard] = useState(false);
   const [showTradeLog, setShowTradeLog] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -141,6 +140,24 @@ export default function Profile() {
   const { togglePin, isPending: pinPending } = useTogglePin();
   const pinnedCount = collected.filter(c => c.pinned_at).length;
 
+  const [showShareCard, setShowShareCard] = useState(false);
+  const captureRef = useRef(null);
+
+  const cardSignature = useMemo(() => {
+    const cans = top6.map(item => `${item.id}:${getEffectiveRarity(item)}:${item.pinned_at || ''}`).join('|');
+    const breakdown = rarityBreakdown.map(r => `${r.rarity}:${r.count}`).join(',');
+    return `${cans}__${breakdown}__${latestAchievement?.title || ''}__${streak}__${score}`;
+  }, [top6, rarityBreakdown, latestAchievement, streak, score, getEffectiveRarity]);
+
+  const { generating, cardDataUrl, saving: cardSaving, generateCard, handleSave, handleShareImage } = useCardCapture(captureRef, cardSignature);
+
+  // The card only mounts (and its ref attaches) once showShareCard flips
+  // true — useCardCapture's own effect only regenerates on signature
+  // changes, so opening needs its own explicit first-generate call.
+  useEffect(() => {
+    if (showShareCard) generateCard();
+  }, [showShareCard]);
+
   const { data: rank } = useQuery({
     queryKey: ['my-rank', user?.id, score],
     queryFn: async () => {
@@ -251,90 +268,85 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Top Pulls hero — live version of the share card's showcase grid */}
+      {/* Top Pulls — this card is the share card. Tapping the share icon
+          expands the same card into a Save/Share preview inline, instead of
+          opening a separate full-screen surface. */}
       {!isLoading && top6.length > 0 && (
-        <div className="px-5">
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-3 gap-2">
-              <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">Top Pulls</p>
-              <div className="flex items-center gap-2 min-w-0">
-                {latestAchievement && (
-                  <span className="flex items-center gap-1.5 text-[10px] font-mono text-[#FFD700] truncate">
-                    <span>{latestAchievement.icon}</span> {latestAchievement.title}
-                  </span>
-                )}
-                <button
-                  onClick={() => setShowShareCard(true)}
-                  aria-label="Create share card"
-                  className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
-                >
-                  <ImageDown className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
+        <div className="px-5 space-y-3">
+          <TopPullsCard
+            mode="live"
+            top6={top6}
+            rarityBreakdown={rarityBreakdown}
+            latestAchievement={latestAchievement}
+            getEffectiveRarity={getEffectiveRarity}
+            pinnedCount={pinnedCount}
+            onTogglePin={item => togglePin({ collectionItem: item, pinnedCount })}
+            pinPending={pinPending}
+            sharing={showShareCard}
+            onShare={() => setShowShareCard(v => !v)}
+          />
 
-            <div className="grid grid-cols-3 gap-2">
-              {top6.map(item => (
-                <div
-                  key={item.id}
-                  className="relative rounded-xl overflow-hidden border border-primary/20 bg-black/20 hover:border-primary/40 transition-colors"
-                >
-                  <Link to={`/can/${item.can_id}`} className="block">
-                    <div className="aspect-square" style={{ backgroundColor: item.can_bg_color || '#0D2B2B' }}>
-                      {item.can_image_url ? (
-                        <img
-                          src={item.can_image_url}
-                          alt={item.can_name}
-                          loading="lazy"
-                          decoding="async"
-                          className="w-full h-full object-contain"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-lg opacity-20">🥤</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-1.5 space-y-0.5">
-                      <p className="text-[10px] font-semibold text-foreground truncate">{item.can_name}</p>
-                      <RarityBadge rarity={getEffectiveRarity(item)} size="sm" />
-                    </div>
-                  </Link>
-                  <button
-                    onClick={() => togglePin({ collectionItem: item, pinnedCount })}
-                    disabled={pinPending}
-                    aria-label={item.pinned_at ? 'Unpin from showcase' : 'Pin to showcase'}
-                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center transition-colors hover:bg-background/90"
-                  >
-                    <Pin className={`w-3 h-3 transition-colors ${item.pinned_at ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
-                  </button>
-                </div>
-              ))}
-            </div>
-            {pinnedCount > 0 && (
-              <p className="text-[10px] font-mono text-muted-foreground mt-2">
-                {pinnedCount}/{MAX_PINS} pinned
-              </p>
-            )}
-
-            {rarityBreakdown.length > 0 && (
-              <div className="mt-4">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60 mb-2">Rarity Breakdown</p>
-                <div className="flex h-1.5 rounded-full overflow-hidden gap-px">
-                  {rarityBreakdown.map(({ rarity, pct }) => (
-                    <div key={rarity} className={`h-full ${RARITY_BG_CLASS[rarity]}`} style={{ width: `${pct}%` }} />
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
-                  {rarityBreakdown.map(({ rarity, count }) => (
-                    <span key={rarity} className="text-[10px] font-mono text-muted-foreground">
-                      {rarity} <span className="text-foreground">{count}</span>
-                    </span>
-                  ))}
-                </div>
+          {showShareCard && (
+            <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+              {/* Hidden capture-mode card for html2canvas — not visible to user */}
+              <div style={{ position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' }}>
+                <TopPullsCard
+                  ref={captureRef}
+                  mode="capture"
+                  top6={top6}
+                  rarityBreakdown={rarityBreakdown}
+                  latestAchievement={latestAchievement}
+                  sharedCansMap={sharedCansMap}
+                  userName={profile?.full_name}
+                  score={score}
+                  totalCans={collected.length}
+                  rarePulls={rarePulls}
+                  streak={streak}
+                />
               </div>
-            )}
-          </div>
+
+              {generating && (
+                <div className="flex flex-col items-center gap-2 py-4">
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <p className="text-xs font-mono text-muted-foreground">Generating card…</p>
+                </div>
+              )}
+
+              {cardDataUrl && !generating && (
+                <img src={cardDataUrl} alt="Share card" className="w-full rounded-2xl border border-border" />
+              )}
+
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+                  onClick={() => handleSave('sippd-top-pulls.png')}
+                  disabled={!cardDataUrl || generating || cardSaving}
+                >
+                  <Download className="w-4 h-4" />
+                  {cardSaving ? 'Saving…' : 'Save'}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                  onClick={() => handleShareImage('sippd-top-pulls.png', 'My Sippd Top Pulls')}
+                  disabled={!cardDataUrl || generating || cardSaving}
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </Button>
+              </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full font-mono text-xs text-muted-foreground gap-2"
+                onClick={generateCard}
+                disabled={generating}
+              >
+                {generating ? '…' : '↻'} Regenerate
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
@@ -420,9 +432,6 @@ export default function Profile() {
         confirmLabel="Log Out"
       />
 
-      {showShareCard && (
-        <ShareCardModal user={{ ...user, ...profile }} onClose={() => setShowShareCard(false)} />
-      )}
       {showTradeLog && (
         <TradeLogDialog collection={collection} onClose={() => setShowTradeLog(false)} />
       )}

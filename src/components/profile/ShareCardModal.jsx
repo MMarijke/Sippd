@@ -1,235 +1,43 @@
-import { useRef, useState, useEffect, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabaseClient';
 import { X, ArrowLeft, Download, Loader2, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getDisplayRarity, getConfidence, getItemScore, RARITY_HEX as RARITY_COLORS_HEX, rarityHexToRgba } from '@/lib/rarityConsensus';
-import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
-import { useShare } from '@/hooks/useShare';
-import html2canvas from 'html2canvas';
-import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { RARITY_HEX as RARITY_COLORS_HEX, rarityHexToRgba } from '@/lib/rarityConsensus';
+import { proxyImageUrl } from '@/lib/cardCapture';
+import { useCardCapture } from '@/hooks/useCardCapture';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-
-function proxyImageUrl(url) {
-  if (!url) return null;
-  // Supabase Storage URLs already have CORS — don't proxy them
-  if (url.includes(SUPABASE_URL) || url.includes('supabase.co')) return url;
-  // Proxy all other external URLs
-  return `${SUPABASE_URL}/functions/v1/image-proxy?url=${encodeURIComponent(url)}`;
-}
-
-// Mirrors Profile.jsx's live Top Pulls card exactly (border-primary/20
-// bg-black/20 rounded-xl, name + RarityBadge only, no brand line) so the
-// exported card matches what the user already sees in the app.
-function CanCell({ item, sharedCan }) {
-  const conf = sharedCan ? getConfidence(sharedCan.total_votes) : 'unrated';
-  const rarity = conf === 'unrated' ? null : getDisplayRarity(sharedCan || item);
-  const imageUrl = item.can_image_url || sharedCan?.image_url;
-  const color = rarity ? RARITY_COLORS_HEX[rarity] : '#6B7280';
-
-  return (
-    <div style={{
-      background: 'rgba(0,0,0,0.2)',
-      border: '1px solid rgba(0,229,255,0.2)',
-      borderRadius: 12,
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
-      {/* Image */}
-      <div style={{ width: '100%', aspectRatio: '1', background: item.can_bg_color || '#0D2B2B', position: 'relative', overflow: 'hidden' }}>
-        {imageUrl ? (
-          <img
-            src={proxyImageUrl(imageUrl)}
-            alt={item.can_name}
-            crossOrigin="anonymous"
-            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-          />
-        ) : (
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: 28, opacity: 0.2 }}>🥤</span>
-          </div>
-        )}
-      </div>
-      {/* Info — matches RarityBadge's rendering exactly */}
-      <div style={{ padding: 6, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <div style={{ fontSize: 10, fontWeight: 600, color: '#F0F4F8', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {item.can_name || 'Unknown'}
-        </div>
-        <div style={{
-          display: 'inline-flex',
-          alignSelf: 'flex-start',
-          fontSize: 10,
-          fontFamily: 'monospace',
-          fontWeight: 600,
-          letterSpacing: '0.05em',
-          textTransform: 'uppercase',
-          color: color,
-          background: rarityHexToRgba(rarity || 'Common', 0.1),
-          border: `1px solid ${rarityHexToRgba(rarity || 'Common', 0.3)}`,
-          borderRadius: 6,
-          padding: '2px 8px',
-        }}>
-          {rarity || '???'}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function ShareCardModal({ user, onClose, variant = 'profile', monthlyData }) {
+// Recap card for MonthlyReport.jsx. This used to also serve Profile.jsx's
+// Top Pulls export (a `variant="profile"` path) — that now lives in
+// TopPullsCard's own capture mode plus Profile.jsx's inline share flow,
+// both built on the same useCardCapture hook this file uses. This file only
+// ever renders the monthly recap shape now.
+export default function ShareCardModal({ user, onClose, monthlyData }) {
   const cardRef = useRef(null);
-  const [generating, setGenerating] = useState(false);
-  const [cardDataUrl, setCardDataUrl] = useState(null);
 
-  // The monthly variant receives its content as props (MonthlyReport
-  // already computes it, month-scoped) — these queries only run for the
-  // profile variant, which needs the whole collection.
-  const { data: collection = [] } = useQuery({
-    queryKey: ['user-collection', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_collection')
-        .select('*')
-        .eq('owner_id', user.id);
-      if (error) throw error;
-      return data;
-    },
-    enabled: variant === 'profile' && !!user?.id,
-  });
+  const cardData = useMemo(() => ({
+    monthLabel: monthlyData.monthLabel,
+    stats: [
+      { label: 'CANS', value: monthlyData.cansAdded },
+      { label: 'SCORE', value: `+${monthlyData.monthScore}` },
+      { label: 'STREAK', value: `${monthlyData.streak}d` },
+    ],
+    bestPull: monthlyData.bestPull,
+    bestPullImage: monthlyData.bestPullImage,
+    bestPullRarity: monthlyData.bestPullRarity,
+    rarityBreakdown: monthlyData.rarityBreakdown,
+  }), [monthlyData]);
 
-  const { data: sharedCans = [] } = useQuery({
-    queryKey: ['shared-cans'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('shared_cans')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return data;
-    },
-    enabled: variant === 'profile',
-  });
+  const cardSignature = useMemo(() => JSON.stringify({
+    monthLabel: cardData.monthLabel,
+    stats: cardData.stats,
+    bestPullId: cardData.bestPull?.id || null,
+    bestPullRarity: cardData.bestPullRarity,
+    rarityBreakdown: cardData.rarityBreakdown,
+  }), [cardData]);
 
-  const { data: votes = [] } = useQuery({
-    queryKey: ['my-votes', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('rarity_votes')
-        .select('*')
-        .eq('voter_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return data;
-    },
-    enabled: variant === 'profile' && !!user?.id,
-  });
+  const { generating, cardDataUrl, saving, generateCard, handleSave, handleShareImage } = useCardCapture(cardRef, cardSignature);
 
-  const sharedCansMap = useMemo(
-    () => Object.fromEntries(sharedCans.map(c => [c.id, c])),
-    [sharedCans]
-  );
-
-  const streak = user?.current_streak || 0;
-
-  const { collected, getEffectiveRarity, top6, rarityBreakdown, latestAchievement } = useCollectionHighlights({
-    collection,
-    sharedCansMap,
-    streak,
-    voteCount: votes.length,
-    userCreatedDate: user?.created_at,
-  });
-
-  const score = collected.reduce((acc, item) => acc + getItemScore(item, sharedCansMap[item.can_id]), 0);
-  const rarePulls = collected.filter(i => ['Rare', 'Ultra Rare', 'Legendary'].includes(getEffectiveRarity(i))).length;
-
-  const appUrl = window.location.origin;
-
-  const [saving, setSaving] = useState(false);
-  const { shareFile } = useShare();
-
-  // Unifies what the two variants render: the monthly variant's content
-  // arrives fully computed via props; the profile variant computes its
-  // own from the queries above. Everything downstream (JSX, signature)
-  // reads from this instead of branching on `variant` repeatedly.
-  const cardData = useMemo(() => {
-    if (variant === 'monthly' && monthlyData) {
-      return {
-        kind: 'monthly',
-        monthLabel: monthlyData.monthLabel,
-        stats: [
-          { label: 'CANS', value: monthlyData.cansAdded },
-          { label: 'SCORE', value: `+${monthlyData.monthScore}` },
-          { label: 'STREAK', value: `${monthlyData.streak}d` },
-        ],
-        bestPull: monthlyData.bestPull,
-        bestPullImage: monthlyData.bestPullImage,
-        bestPullRarity: monthlyData.bestPullRarity,
-        rarityBreakdown: monthlyData.rarityBreakdown,
-      };
-    }
-    return {
-      kind: 'profile',
-      stats: [
-        { label: 'CANS', value: collected.length },
-        { label: 'RARE', value: rarePulls },
-        { label: 'STREAK', value: `${streak}d` },
-      ],
-      top6,
-      rarityBreakdown,
-      latestAchievement,
-    };
-  }, [variant, monthlyData, collected.length, rarePulls, streak, top6, rarityBreakdown, latestAchievement]);
-
-  // Everything that actually appears on the rendered card, condensed into
-  // one comparable value — watching this instead of raw array lengths
-  // means a rarity-vote update, pin toggle, or streak change (any of
-  // which can leave collected.length/sharedCans.length unchanged) still
-  // triggers a regeneration instead of leaving a stale card on screen.
-  const cardSignature = useMemo(() => {
-    if (cardData.kind === 'monthly') {
-      return JSON.stringify({
-        monthLabel: cardData.monthLabel,
-        stats: cardData.stats,
-        bestPullId: cardData.bestPull?.id || null,
-        bestPullRarity: cardData.bestPullRarity,
-        rarityBreakdown: cardData.rarityBreakdown,
-      });
-    }
-    const cans = cardData.top6.map(item => `${item.id}:${getEffectiveRarity(item)}:${item.pinned_at || ''}`).join('|');
-    const breakdown = cardData.rarityBreakdown.map(r => `${r.rarity}:${r.count}`).join(',');
-    return `${cans}__${breakdown}__${cardData.latestAchievement?.title || ''}__${streak}__${score}`;
-  }, [cardData, streak, score]);
-
-  const generateCard = async () => {
-    if (!cardRef.current) return;
-    setGenerating(true);
-    setCardDataUrl(null);
-    try {
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: '#080C14',
-        logging: false,
-      });
-      setCardDataUrl(canvas.toDataURL('image/png'));
-    } catch (e) {
-      toast.error('Failed to generate card');
-    }
-    setGenerating(false);
-  };
-
-  // Auto-generate on open, and whenever the card's actual content changes
-  useEffect(() => {
-    const t = setTimeout(generateCard, 300);
-    return () => clearTimeout(t);
-  }, [cardSignature]);
+  const filename = `sippd-recap-${cardData.monthLabel.replace(/\s+/g, '-')}.png`;
 
   // Hardware back button (Android)
   useEffect(() => {
@@ -253,75 +61,6 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  // Convert data URL to Blob without fetch (works everywhere)
-  const dataUrlToBlob = (dataUrl) => {
-    const [header, base64] = dataUrl.split(',');
-    const mime = header.match(/:(.*?);/)[1];
-    const binary = atob(base64);
-    const arr = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
-    return new Blob([arr], { type: mime });
-  };
-
-  const handleSave = async () => {
-    if (!cardDataUrl) return;
-    setSaving(true);
-    try {
-      const blob = dataUrlToBlob(cardDataUrl);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = cardData.kind === 'monthly'
-        ? `sippd-recap-${cardData.monthLabel.replace(/\s+/g, '-')}.png`
-        : `sippd-${(user?.full_name || 'collection').replace(/\s+/g, '-')}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      toast.success('Saved!');
-    } catch (e) {
-      toast.error('Failed to save');
-    }
-    setSaving(false);
-  };
-
-  const handleShareImage = async () => {
-    if (!cardDataUrl) return;
-    setSaving(true);
-    try {
-      const blob = dataUrlToBlob(cardDataUrl);
-      const filename = cardData.kind === 'monthly'
-        ? `sippd-recap-${cardData.monthLabel.replace(/\s+/g, '-')}.png`
-        : 'sippd-collection.png';
-
-      // Try the native share sheet — whatever apps the OS offers (works on mobile Safari/Chrome)
-      const result = await shareFile({ blob, filename, title: cardData.kind === 'monthly' ? `My ${cardData.monthLabel} Sippd Recap` : 'My Sippd Collection' });
-      if (result.supported) {
-        if (result.error) toast.error('Could not share image');
-        setSaving(false);
-        return;
-      }
-
-      // No share sheet available (typically desktop) — just download it.
-      // No app deep-link here: a custom URL scheme like instagram://app
-      // has no handler on desktop and silently does nothing.
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      toast.success("Image saved! Share it wherever you'd like.", { duration: 4000 });
-    } catch (e) {
-      // shareFile already handles its own AbortError internally, so any
-      // error reaching here is from the download fallback above.
-      toast.error('Could not share image');
-    }
-    setSaving(false);
-  };
-
   const content = (
     <div role="dialog" aria-modal="true" aria-labelledby="share-card-title" className="fixed inset-0 z-[100] flex flex-col bg-background overflow-y-auto">
       {/* Top bar */}
@@ -330,7 +69,7 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
           <ArrowLeft className="w-4 h-4" />
           <span className="text-xs font-mono">Back</span>
         </Button>
-        <h2 id="share-card-title" className="text-sm font-display font-bold text-foreground tracking-wide">{cardData.kind === 'monthly' ? 'Recap Card' : 'Share Card'}</h2>
+        <h2 id="share-card-title" className="text-sm font-display font-bold text-foreground tracking-wide">Recap Card</h2>
         <Button size="icon" variant="ghost" className="w-11 h-11 text-muted-foreground hover:text-foreground" onClick={onClose} aria-label="Close">
           <X className="w-4 h-4" />
         </Button>
@@ -344,9 +83,6 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
           style={{
             width: 360,
             minHeight: 640,
-            // Same hero-card gradient/border as the live Top Pulls block
-            // on Profile.jsx (bg-gradient-to-br from-[#0D2B2B] to-[#080C14]
-            // border-primary/30), so the exported card matches the app.
             background: 'linear-gradient(135deg, #0D2B2B 0%, #080C14 100%)',
             border: '1px solid rgba(0,229,255,0.3)',
             borderRadius: 20,
@@ -362,7 +98,6 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
 
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '24px 24px 16px' }}>
-            {/* Logo */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(0,229,255,0.15)', border: '1px solid rgba(0,229,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <span style={{ color: '#00E5FF', fontSize: 14 }}>⚡</span>
@@ -372,11 +107,10 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
                 <div style={{ fontSize: 8, color: 'rgba(0,229,255,0.5)', letterSpacing: '0.05em', marginTop: 1 }}>ENERGY DRINK TRACKER</div>
               </div>
             </div>
-            {/* User info */}
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: 15, fontWeight: 800, color: '#F0F4F8', lineHeight: 1.2 }}>{user?.full_name || 'Collector'}</div>
               <div style={{ fontSize: 11, color: '#00E5FF', fontFamily: 'monospace', marginTop: 2 }}>
-                {cardData.kind === 'monthly' ? `${cardData.monthLabel} Recap` : `Score: ${score}`}
+                {cardData.monthLabel} Recap
               </div>
             </div>
           </div>
@@ -394,75 +128,47 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
             ))}
           </div>
 
-          {cardData.kind === 'monthly' ? (
-            /* Best Pull of the Month */
-            <div style={{ padding: '0 20px' }}>
-              <div style={{ fontSize: 9, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 10 }}>
-                Best Pull of the Month
-              </div>
-              {cardData.bestPull ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.04)', border: `1px solid ${(RARITY_COLORS_HEX[cardData.bestPullRarity] || '#6B7280')}33`, borderRadius: 14, padding: 12 }}>
-                  <div style={{ width: 72, height: 72, borderRadius: 12, overflow: 'hidden', background: cardData.bestPull.can_bg_color || '#0D2B2B', flexShrink: 0 }}>
-                    {cardData.bestPullImage ? (
-                      <img
-                        src={proxyImageUrl(cardData.bestPullImage)}
-                        alt={cardData.bestPull.can_name}
-                        crossOrigin="anonymous"
-                        style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-                      />
-                    ) : (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontSize: 24, opacity: 0.2 }}>🥤</span>
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 10, color: '#00E5FF', fontFamily: 'monospace', opacity: 0.7, textTransform: 'uppercase', marginBottom: 2 }}>{cardData.bestPull.can_brand}</div>
-                    <div style={{ fontSize: 15, color: '#F0F4F8', fontWeight: 800, lineHeight: 1.2, marginBottom: 6 }}>{cardData.bestPull.can_name}</div>
-                    <div style={{
-                      display: 'inline-block', fontSize: 9, fontFamily: 'monospace', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
-                      color: RARITY_COLORS_HEX[cardData.bestPullRarity] || '#6B7280',
-                      background: rarityHexToRgba(cardData.bestPullRarity || 'Common', 0.15),
-                      border: `1px solid ${(RARITY_COLORS_HEX[cardData.bestPullRarity] || '#6B7280')}55`,
-                      borderRadius: 4, padding: '3px 7px',
-                    }}>
-                      {cardData.bestPullRarity || '???'}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div style={{ padding: '20px 0', textAlign: 'center' }}>
-                  <span style={{ fontSize: 11, color: 'rgba(240,244,248,0.3)', fontFamily: 'monospace' }}>No pulls yet this month</span>
-                </div>
-              )}
+          {/* Best Pull of the Month */}
+          <div style={{ padding: '0 20px' }}>
+            <div style={{ fontSize: 9, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 10 }}>
+              Best Pull of the Month
             </div>
-          ) : (
-            /* Top 6 grid */
-            <div style={{ padding: '0 20px' }}>
-              <div style={{ fontSize: 10, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 10 }}>
-                Top Pulls
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-                {(cardData.top6.length > 0 ? cardData.top6 : Array(6).fill(null)).map((item, i) => (
-                  item ? (
-                    <CanCell key={item.id} item={item} sharedCan={sharedCansMap[item.can_id]} />
+            {cardData.bestPull ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.04)', border: `1px solid ${(RARITY_COLORS_HEX[cardData.bestPullRarity] || '#6B7280')}33`, borderRadius: 14, padding: 12 }}>
+                <div style={{ width: 72, height: 72, borderRadius: 12, overflow: 'hidden', background: cardData.bestPull.can_bg_color || '#0D2B2B', flexShrink: 0 }}>
+                  {cardData.bestPullImage ? (
+                    <img
+                      src={proxyImageUrl(cardData.bestPullImage)}
+                      alt={cardData.bestPull.can_name}
+                      crossOrigin="anonymous"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                    />
                   ) : (
-                    <div key={i} style={{
-                      background: 'rgba(255,255,255,0.02)',
-                      border: '1px dashed rgba(255,255,255,0.08)',
-                      borderRadius: 12,
-                      aspectRatio: '3/4',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}>
-                      <span style={{ opacity: 0.15, fontSize: 20 }}>🥤</span>
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: 24, opacity: 0.2 }}>🥤</span>
                     </div>
-                  )
-                ))}
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 10, color: '#00E5FF', fontFamily: 'monospace', opacity: 0.7, textTransform: 'uppercase', marginBottom: 2 }}>{cardData.bestPull.can_brand}</div>
+                  <div style={{ fontSize: 15, color: '#F0F4F8', fontWeight: 800, lineHeight: 1.2, marginBottom: 6 }}>{cardData.bestPull.can_name}</div>
+                  <div style={{
+                    display: 'inline-block', fontSize: 9, fontFamily: 'monospace', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
+                    color: RARITY_COLORS_HEX[cardData.bestPullRarity] || '#6B7280',
+                    background: rarityHexToRgba(cardData.bestPullRarity || 'Common', 0.15),
+                    border: `1px solid ${(RARITY_COLORS_HEX[cardData.bestPullRarity] || '#6B7280')}55`,
+                    borderRadius: 4, padding: '3px 7px',
+                  }}>
+                    {cardData.bestPullRarity || '???'}
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <div style={{ padding: '20px 0', textAlign: 'center' }}>
+                <span style={{ fontSize: 11, color: 'rgba(240,244,248,0.3)', fontFamily: 'monospace' }}>No pulls yet this month</span>
+              </div>
+            )}
+          </div>
 
           {/* Rarity bar */}
           {cardData.rarityBreakdown.length > 0 && (
@@ -485,30 +191,10 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
             </div>
           )}
 
-          {/* Latest Achievement — profile variant only */}
-          {cardData.kind === 'profile' && cardData.latestAchievement && (
-            <div style={{ padding: '0 20px 16px' }}>
-              <div style={{ fontSize: 9, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>
-                Latest Achievement
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,215,0,0.06)', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 10, padding: '8px 12px' }}>
-                <span style={{ fontSize: 22 }}>{cardData.latestAchievement.icon}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#FFD700', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{cardData.latestAchievement.title}</div>
-                  {cardData.latestAchievement.unlockedAt && (
-                    <div style={{ fontSize: 9, color: 'rgba(240,244,248,0.4)', fontFamily: 'monospace', marginTop: 2 }}>
-                      {format(new Date(cardData.latestAchievement.unlockedAt), 'MMM d, yyyy')}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Footer */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 24px 20px', borderTop: '1px solid rgba(255,255,255,0.05)', margin: '0 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 24px 20px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
             <span style={{ fontSize: 10, color: 'rgba(0,229,255,0.4)', fontFamily: 'monospace', letterSpacing: '0.08em' }}>
-              {appUrl.replace('https://', '').replace('http://', '')}
+              {typeof window !== 'undefined' ? window.location.origin.replace('https://', '').replace('http://', '') : ''}
             </span>
           </div>
         </div>
@@ -525,14 +211,14 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
         {cardDataUrl && !generating && (
           <div className="w-full max-w-[360px]">
             <p className="text-[10px] font-mono text-muted-foreground text-center mb-2">Long-press the image to save</p>
-            <img src={cardDataUrl} alt={cardData.kind === 'monthly' ? 'Recap card' : 'Share card'} className="w-full rounded-2xl border border-border" />
+            <img src={cardDataUrl} alt="Recap card" className="w-full rounded-2xl border border-border" />
           </div>
         )}
 
         {/* Action button */}
         <Button
           className="w-full max-w-[360px] font-mono text-xs gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-          onClick={handleSave}
+          onClick={() => handleSave(filename)}
           disabled={!cardDataUrl || generating || saving}
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
@@ -543,7 +229,7 @@ export default function ShareCardModal({ user, onClose, variant = 'profile', mon
         <Button
           variant="outline"
           className="w-full max-w-[360px] font-mono text-xs gap-2 border-primary/30 text-primary hover:bg-primary/10"
-          onClick={handleShareImage}
+          onClick={() => handleShareImage(filename, `My ${cardData.monthLabel} Sippd Recap`)}
           disabled={!cardDataUrl || generating || saving}
         >
           <Share2 className="w-4 h-4" />

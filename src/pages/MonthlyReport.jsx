@@ -306,7 +306,7 @@ export default function MonthlyReport() {
       )}
 
       {showShareCard && (
-        <ShareCardModal user={user} onClose={() => setShowShareCard(false)} variant="monthly" monthlyData={monthlyData} />
+        <ShareCardModal user={user} onClose={() => setShowShareCard(false)} monthlyData={monthlyData} />
       )}
     </div>
   );

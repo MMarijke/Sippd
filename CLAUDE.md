@@ -26,6 +26,4 @@ Deployed functions:
   - image-proxy
   - delete-account
   - paddle-webhook
-  - get-subscription-status (pending — code merged but not yet deployed;
-    needs PADDLE_API_KEY and PADDLE_API_ENVIRONMENT set as Edge Function
-    secrets first)
+  - get-subscription-status

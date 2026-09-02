@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Radio, RefreshCw, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
@@ -10,7 +10,8 @@ import ActivityCard from '@/components/feed/ActivityCard';
 import { cn } from '@/lib/utils';
 
 export default function Feed() {
-  const [tab, setTab] = useState('global');
+  const [searchParams] = useSearchParams();
+  const [tab, setTab] = useState(searchParams.get('tab') === 'following' ? 'following' : 'global');
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();

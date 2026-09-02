@@ -1,15 +1,14 @@
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Link } from 'react-router-dom';
 import { ScanLine, BarChart2, Rss } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import PageHeader from '@/components/shared/PageHeader';
 import StatsRow from '@/components/dashboard/StatsRow';
-import RarityChart from '@/components/dashboard/RarityChart';
-import SpotlightCarousel from '@/components/dashboard/SpotlightCarousel';
+import RarityHero from '@/components/dashboard/RarityHero';
+import FeedPreview from '@/components/dashboard/FeedPreview';
+import RecentPullsGrid from '@/components/dashboard/RecentPullsGrid';
 import { getItemScore, getDisplayRarity } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
 import { format } from 'date-fns';
@@ -19,7 +18,19 @@ import AchievementUnlockAnimation from '@/components/achievements/AchievementUnl
 
 export default function Home() {
   const { user } = useAuth();
-  const [selectedBrand, setSelectedBrand] = useState('All');
+
+  const { data: profile } = useQuery({
+    queryKey: ['my-profile', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
   const { data: collection = [], isLoading: loadingCollection } = useQuery({
     queryKey: ['user-collection', user?.id],
@@ -80,8 +91,6 @@ export default function Home() {
     return sc ? getDisplayRarity(sc) : (item.can_rarity || 'Common');
   };
 
-  const totalCans = collected.length;
-
   const rarePulls = collected.filter(c =>
     ['Rare', 'Ultra Rare', 'Legendary'].includes(getEffectiveRarity(c))
   ).length;
@@ -92,14 +101,12 @@ export default function Home() {
 
   const wishlistCount = collection.filter(c => c.status === 'wishlist').length;
 
-  const brands = ['All', ...new Set(collected.map(c => c.can_brand).filter(Boolean))].slice(0, 9);
-
   return (
     <div>
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
       <PageHeader
         title="SIPPD"
-        subtitle="Your Energy Drink Vault"
+        subtitle={profile?.full_name ? `${profile.full_name}'s vault` : 'Your Energy Drink Vault'}
         action={
           <Link to="/scan">
             <Button size="sm" className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
@@ -109,82 +116,39 @@ export default function Home() {
         }
       />
 
-      {/* Hero Stat */}
-      <div className="px-5 relative mt-5">
-        <div className="relative w-full min-h-[160px] rounded-2xl hero-card p-6">
-          {/* Left column: text */}
-          <div>
-            <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">
-              COLLECTION SCORE
-            </p>
-            <p className="text-5xl font-mono font-black text-foreground">
-              {isLoading ? '—' : score}
-            </p>
-            <p className="text-xs font-mono text-muted-foreground">
-              Your Energy Drink Vault
-            </p>
-            <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-mono text-primary">
-              {isLoading ? '—' : `${totalCans} cans`}
-            </div>
-          </div>
+      <div className="px-5 mt-5">
+        <RarityHero collected={isLoading ? [] : collected} sharedCansMap={sharedCansMap} />
+      </div>
 
-          {/* Right column: floating image */}
-          {collected[0]?.can_image_url && (
-            <img
-              src={collected[0].can_image_url}
-              alt={collected[0].can_name}
-              className="absolute right-4 -top-6 w-28 h-28 object-contain drop-shadow-2xl"
-            />
-          )}
+      <div className="px-5 mt-5">
+        <div className="bg-card border border-border rounded-2xl p-5">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">
+            COLLECTION SCORE
+          </p>
+          <p className="text-5xl font-mono font-black text-foreground">
+            {isLoading ? '—' : score}
+          </p>
+          <p className="text-xs font-mono text-muted-foreground">
+            Your Energy Drink Vault
+          </p>
         </div>
       </div>
 
       <div className="mt-5">
         <StatsRow
-          totalCans={isLoading ? '—' : totalCans}
           rarePulls={isLoading ? '—' : rarePulls}
           streak={streak}
           wishlistCount={isLoading ? '—' : wishlistCount}
         />
       </div>
 
-      {!isLoading && collected.length > 0 && brands.length > 1 && (
-        <div className="mt-5">
-          <p className="px-5 mb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-            Browse by Brand
-          </p>
-          <div className="flex gap-2 overflow-x-auto px-5 pb-1 scrollbar-none">
-            {brands.map(brand => (
-              <button
-                key={brand}
-                onClick={() => setSelectedBrand(brand)}
-                className={cn(
-                  'flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-mono font-semibold transition-all',
-                  selectedBrand === brand
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary border border-border text-muted-foreground hover:border-primary/30'
-                )}
-              >
-                {brand}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="px-5 mt-5">
+        <FeedPreview />
+      </div>
 
       {!isLoading && (
         <div className="mt-5">
-          <SpotlightCarousel
-            collected={collected}
-            sharedCansMap={sharedCansMap}
-            selectedBrand={selectedBrand}
-          />
-        </div>
-      )}
-
-      {!isLoading && (
-        <div className="px-5 mt-5">
-          <RarityChart collection={collected} sharedCansMap={sharedCansMap} />
+          <RecentPullsGrid collected={collected} sharedCansMap={sharedCansMap} />
         </div>
       )}
 

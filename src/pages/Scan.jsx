@@ -153,7 +153,7 @@ export default function Scan() {
                 >
                   <div className="w-10 h-10 rounded-lg bg-secondary overflow-hidden flex-shrink-0">
                     {can.image_url ? (
-                      <img src={can.image_url} alt={can.name} className="w-full h-full object-cover" />
+                      <img src={can.image_url} alt={can.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Package className="w-4 h-4 text-muted-foreground/30" />

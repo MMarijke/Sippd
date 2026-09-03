@@ -22,7 +22,7 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
         </div>
         {!unlocked && (
           <div className="absolute -top-1 -right-1">
-            <Lock className="w-3 h-3 text-muted-foreground/50" />
+            <Lock className="w-3 h-3 text-muted-foreground" />
           </div>
         )}
         <p className={cn('text-[9px] font-mono leading-tight truncate w-full', unlocked ? 'text-foreground' : 'text-muted-foreground')}>
@@ -56,7 +56,7 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
       {/* Lock overlay */}
       {!unlocked && (
         <div className="absolute top-3 right-3">
-          <Lock className="w-3.5 h-3.5 text-muted-foreground/50" />
+          <Lock className="w-3.5 h-3.5 text-muted-foreground" />
         </div>
       )}
 

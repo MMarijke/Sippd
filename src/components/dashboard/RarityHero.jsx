@@ -1,7 +1,34 @@
+import { useEffect, useRef, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { getDisplayRarity, RARITY_HEX, RARITY_ORDER } from '@/lib/rarityConsensus';
 
 export default function RarityHero({ collected, sharedCansMap = {} }) {
+  // Recharts sizes percentage-based innerRadius/outerRadius off a generic
+  // min(width,height)/2 rule that has no idea our Pie's cy sits at the
+  // bottom edge (cy="100%") with only the top half in use — so "100%"
+  // caps out at roughly HALF the height we actually have room for, no
+  // matter what percentage is requested. Measuring the box ourselves and
+  // passing real pixel radii is the only way around that.
+  const wrapperRef = useRef(null);
+  const [size, setSize] = useState({ width: 330, height: 165 });
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect;
+      if (width > 0 && height > 0) setSize({ width, height });
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // 78% of the box height for the ring's outer edge — leaves headroom for
+  // the on-arc labels (which sit further out still) without touching the
+  // container's top or side edges.
+  const outerRadius = size.height * 0.78;
+  const innerRadius = outerRadius * 0.82;
+
   const rarityCounts = {};
   collected.forEach(item => {
     const sharedCan = sharedCansMap[item.can_id];
@@ -20,11 +47,10 @@ export default function RarityHero({ collected, sharedCansMap = {} }) {
 
   // Count label + rounded end caps, drawn from inside the Pie's own label
   // callback because that's the only place recharts hands over the real
-  // computed pixel geometry (cx/cy/radius) — percentages alone can't place
-  // a label outside the ring or a cap at the arc's true start/end.
+  // computed pixel geometry (cx/cy) to pair with our own measured radii.
   const renderArcLabel = (props) => {
     if (isEmpty) return null;
-    const { cx, cy, midAngle, innerRadius, outerRadius, value, index, name } = props;
+    const { cx, cy, midAngle, value, index, name } = props;
     const RADIAN = Math.PI / 180;
     const color = RARITY_HEX[name] || '#6B7280';
     const pathRadius = (innerRadius + outerRadius) / 2;
@@ -67,7 +93,7 @@ export default function RarityHero({ collected, sharedCansMap = {} }) {
         Rarity Breakdown
       </p>
 
-      <div className="relative w-full max-w-[330px] mx-auto mt-2" style={{ aspectRatio: '2 / 1' }}>
+      <div ref={wrapperRef} className="relative w-full max-w-[330px] mx-auto mt-2" style={{ aspectRatio: '2 / 1' }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -76,8 +102,8 @@ export default function RarityHero({ collected, sharedCansMap = {} }) {
               cy="100%"
               startAngle={180}
               endAngle={0}
-              innerRadius="58%"
-              outerRadius="68%"
+              innerRadius={innerRadius}
+              outerRadius={outerRadius}
               paddingAngle={0}
               dataKey="value"
               stroke="none"

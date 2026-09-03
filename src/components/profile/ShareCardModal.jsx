@@ -8,7 +8,7 @@ import { useCardCapture } from '@/hooks/useCardCapture';
 
 // Recap card for MonthlyReport.jsx. This used to also serve Profile.jsx's
 // Top Pulls export (a `variant="profile"` path) — that now lives in
-// TopPullsCard's own capture mode plus Profile.jsx's inline share flow,
+// CollectionCard's own capture mode plus Profile.jsx's inline share flow,
 // both built on the same useCardCapture hook this file uses. This file only
 // ever renders the monthly recap shape now.
 export default function ShareCardModal({ user, onClose, monthlyData }) {

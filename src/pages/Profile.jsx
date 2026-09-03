@@ -2,14 +2,14 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { LogOut, Zap, Star, Bookmark, Heart, Settings, Medal, Pencil, Check, X, Share2, Download, Info, ScanLine } from 'lucide-react';
+import { LogOut, Bookmark, Heart, Settings, Medal, Pencil, Check, X, Share2, Download, ScanLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Link, useNavigate } from 'react-router-dom';
 import PageHeader from '@/components/shared/PageHeader';
 import StatBox from '@/components/shared/StatBox';
-import TopPullsCard from '@/components/profile/TopPullsCard';
-import { useNavigate } from 'react-router-dom';
+import CollectionCard from '@/components/profile/CollectionCard';
+import AchievementBadge from '@/components/achievements/AchievementBadge';
 import { toast } from 'sonner';
 import { getItemScore } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
@@ -17,6 +17,7 @@ import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
 import { useTogglePin } from '@/hooks/useTogglePin';
 import { useShare } from '@/hooks/useShare';
 import { useCardCapture } from '@/hooks/useCardCapture';
+import { computeAchievements, selectHighlightAchievements } from '@/lib/achievements';
 import TradeHistory from '@/components/profile/TradeHistory';
 import TradeLogDialog from '@/components/profile/TradeLogDialog';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
@@ -129,13 +130,23 @@ export default function Profile() {
     return acc + getItemScore(c, sharedCansMap[c.can_id]);
   }, 0);
 
-  const { top6, rarityBreakdown, latestAchievement, getEffectiveRarity } = useCollectionHighlights({
+  const { top6, rarityBreakdown, getEffectiveRarity } = useCollectionHighlights({
     collection,
     sharedCansMap,
     streak,
     voteCount: votes.length,
     userCreatedDate: user?.created_at,
   });
+
+  const achievements = useMemo(
+    () => computeAchievements(collection, streak, votes.length, user?.created_at),
+    [collection, streak, votes.length, user?.created_at]
+  );
+  const unlockedCount = achievements.filter(a => a.unlocked).length;
+  const highlightAchievements = useMemo(
+    () => selectHighlightAchievements(achievements, 10),
+    [achievements]
+  );
 
   const { togglePin, isPending: pinPending } = useTogglePin();
   const pinnedCount = collected.filter(c => c.pinned_at).length;
@@ -146,8 +157,8 @@ export default function Profile() {
   const cardSignature = useMemo(() => {
     const cans = top6.map(item => `${item.id}:${getEffectiveRarity(item)}:${item.pinned_at || ''}`).join('|');
     const breakdown = rarityBreakdown.map(r => `${r.rarity}:${r.count}`).join(',');
-    return `${cans}__${breakdown}__${latestAchievement?.title || ''}__${streak}__${score}`;
-  }, [top6, rarityBreakdown, latestAchievement, streak, score, getEffectiveRarity]);
+    return `${cans}__${breakdown}__${streak}__${score}`;
+  }, [top6, rarityBreakdown, streak, score, getEffectiveRarity]);
 
   const { generating, cardDataUrl, saving: cardSaving, generateCard, handleSave, handleShareImage } = useCardCapture(captureRef, cardSignature);
 
@@ -235,126 +246,33 @@ export default function Profile() {
         )}
       </div>
 
-      {/* Score hero — matches Home.jsx's dashboard hero card treatment, pushed further with rank */}
+      {/* Achievements strip */}
       {!isLoading && (
-        <div className="px-5">
-          <div className="relative rounded-2xl hero-card p-6">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">
-              Collection Score
-            </p>
-            <div className="flex items-end gap-3">
-              <p className="text-7xl font-mono font-black text-foreground leading-none">
-                {score}
-              </p>
-              {rank && (
-                <span className="mb-2 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/30 text-xs font-mono font-semibold text-primary">
-                  #{rank}
-                </span>
-              )}
-            </div>
-            <Popover>
-              <PopoverTrigger className="mt-3 inline-flex items-center gap-1.5 text-primary/60 hover:text-primary transition-colors" aria-label="How Score works">
-                <Info className="w-3 h-3" />
-                <span className="text-[11px] font-mono">How this works</span>
-              </PopoverTrigger>
-              <PopoverContent className="w-64 text-xs font-mono leading-relaxed" side="bottom" align="start">
-                <p className="font-semibold text-foreground mb-1">How Score works</p>
-                <p className="text-muted-foreground">
-                  Score weights your collection by rarity — Common counts as 1 point, Legendary as 5. Your rank above compares Score against every collector; the Ranks page also lets you compare by Total Cans or Rare Pulls.
-                </p>
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-      )}
-
-      {/* Top Pulls — this card is the share card. Tapping the share icon
-          expands the same card into a Save/Share preview inline, instead of
-          opening a separate full-screen surface. */}
-      {!isLoading && top6.length > 0 && (
         <div className="px-5 space-y-3">
-          <TopPullsCard
-            mode="live"
-            top6={top6}
-            rarityBreakdown={rarityBreakdown}
-            latestAchievement={latestAchievement}
-            getEffectiveRarity={getEffectiveRarity}
-            pinnedCount={pinnedCount}
-            onTogglePin={item => togglePin({ collectionItem: item, pinnedCount })}
-            pinPending={pinPending}
-            sharing={showShareCard}
-            onShare={() => setShowShareCard(v => !v)}
-          />
-
-          {showShareCard && (
-            <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
-              {/* Hidden capture-mode card for html2canvas — not visible to user */}
-              <div style={{ position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' }}>
-                <TopPullsCard
-                  ref={captureRef}
-                  mode="capture"
-                  top6={top6}
-                  rarityBreakdown={rarityBreakdown}
-                  latestAchievement={latestAchievement}
-                  sharedCansMap={sharedCansMap}
-                  userName={profile?.full_name}
-                  score={score}
-                  totalCans={collected.length}
-                  rarePulls={rarePulls}
-                  streak={streak}
-                />
-              </div>
-
-              {generating && (
-                <div className="flex flex-col items-center gap-2 py-4">
-                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="text-xs font-mono text-muted-foreground">Generating card…</p>
-                </div>
-              )}
-
-              {cardDataUrl && !generating && (
-                <img src={cardDataUrl} alt="Share card" className="w-full rounded-2xl border border-border" />
-              )}
-
-              <div className="flex gap-2">
-                <Button
-                  className="flex-1 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
-                  onClick={() => handleSave('sippd-top-pulls.png')}
-                  disabled={!cardDataUrl || generating || cardSaving}
-                >
-                  <Download className="w-4 h-4" />
-                  {cardSaving ? 'Saving…' : 'Save'}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
-                  onClick={() => handleShareImage('sippd-top-pulls.png', 'My Sippd Top Pulls')}
-                  disabled={!cardDataUrl || generating || cardSaving}
-                >
-                  <Share2 className="w-4 h-4" />
-                  Share
-                </Button>
-              </div>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full font-mono text-xs text-muted-foreground gap-2"
-                onClick={generateCard}
-                disabled={generating}
-              >
-                {generating ? '…' : '↻'} Regenerate
-              </Button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Medal className="w-4 h-4 text-primary" />
+              <h2 className="text-sm font-display font-bold text-foreground tracking-wide">Achievements</h2>
+              <span className="text-xs font-mono text-muted-foreground">Unlocked {unlockedCount}/{achievements.length}</span>
             </div>
-          )}
+          </div>
+          <div className="grid grid-cols-5 gap-x-2 gap-y-4">
+            {highlightAchievements.map(a => (
+              <AchievementBadge key={a.key} achievement={a} size="compact" />
+            ))}
+          </div>
+          <Link to="/achievements" className="block text-center text-xs font-mono text-primary hover:text-primary/80 transition-colors">
+            View All →
+          </Link>
         </div>
       )}
 
+      {/* Collection Card — this card is the share card. Tapping the share
+          icon expands the same card into a Save/Share preview inline,
+          instead of opening a separate full-screen surface. */}
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-3 px-5">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-24 rounded-2xl bg-card/40 border border-border/30 animate-pulse" />
-          ))}
+        <div className="px-5">
+          <div className="h-64 rounded-2xl bg-card/40 border border-border/30 animate-pulse" />
         </div>
       ) : collected.length === 0 ? (
         <div className="px-5">
@@ -375,33 +293,100 @@ export default function Profile() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 px-5">
-          <StatBox icon={Zap} label="Cans" value={collected.length} />
-          <StatBox icon={Bookmark} label="Wishlist" value={wishlist} />
-          <StatBox icon={Star} label="Rare" value={rarePulls} />
-          <StatBox icon={Heart} label="Favourites" value={favourites} glow />
+        <div className="px-5 space-y-3">
+          <CollectionCard
+            mode="live"
+            top6={top6}
+            rarityBreakdown={rarityBreakdown}
+            getEffectiveRarity={getEffectiveRarity}
+            pinnedCount={pinnedCount}
+            onTogglePin={item => togglePin({ collectionItem: item, pinnedCount })}
+            pinPending={pinPending}
+            sharing={showShareCard}
+            onShare={() => setShowShareCard(v => !v)}
+            score={score}
+            rarePulls={rarePulls}
+            totalCans={collected.length}
+            rank={rank}
+          />
+
+          {showShareCard && (
+            <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+              {/* Hidden capture-mode card for html2canvas — not visible to user */}
+              <div style={{ position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' }}>
+                <CollectionCard
+                  ref={captureRef}
+                  mode="capture"
+                  top6={top6}
+                  rarityBreakdown={rarityBreakdown}
+                  sharedCansMap={sharedCansMap}
+                  userName={profile?.full_name}
+                  score={score}
+                  totalCans={collected.length}
+                  rarePulls={rarePulls}
+                />
+              </div>
+
+              {generating && (
+                <div className="flex flex-col items-center gap-2 py-4">
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <p className="text-xs font-mono text-muted-foreground">Generating card…</p>
+                </div>
+              )}
+
+              {cardDataUrl && !generating && (
+                <img src={cardDataUrl} alt="Share card" className="w-full rounded-2xl border border-border" />
+              )}
+
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+                  onClick={() => handleSave('sippd-collection.png')}
+                  disabled={!cardDataUrl || generating || cardSaving}
+                >
+                  <Download className="w-4 h-4" />
+                  {cardSaving ? 'Saving…' : 'Save'}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                  onClick={() => handleShareImage('sippd-collection.png', 'My Sippd Collection')}
+                  disabled={!cardDataUrl || generating || cardSaving}
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </Button>
+              </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full font-mono text-xs text-muted-foreground gap-2"
+                onClick={generateCard}
+                disabled={generating}
+              >
+                {generating ? '…' : '↻'} Regenerate
+              </Button>
+            </div>
+          )}
+
+          {/* Wishlist/Favourites have no other home in the new layout (Score,
+              Rare Pulls, and Cans all moved into the Collection Card above)
+              — kept as a small secondary row rather than dropped silently. */}
+          <div className="grid grid-cols-2 gap-3">
+            <StatBox icon={Bookmark} label="Wishlist" value={wishlist} />
+            <StatBox icon={Heart} label="Favourites" value={favourites} glow />
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full justify-start font-mono text-xs gap-2 border-primary/30 text-primary hover:bg-primary/10"
+            onClick={handleShareProfileLink}
+          >
+            <Share2 className="w-4 h-4" /> Share Profile Link
+          </Button>
         </div>
       )}
-
-      {/* Primary tier: keeps the scroll on the page's peak content. Share
-          Card creation lives on the Top Pulls card itself now, next to the
-          content it captures, instead of as a disconnected button here. */}
-      <div className="px-5 space-y-2">
-        <Button
-          variant="outline"
-          className="w-full justify-start font-mono text-xs gap-2 border-primary/30 text-primary hover:bg-primary/10"
-          onClick={() => navigate('/achievements')}
-        >
-          <Medal className="w-4 h-4" /> Achievements
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full justify-start font-mono text-xs gap-2 border-primary/30 text-primary hover:bg-primary/10"
-          onClick={handleShareProfileLink}
-        >
-          <Share2 className="w-4 h-4" /> Share Profile Link
-        </Button>
-      </div>
 
       <TradeHistory userId={user?.id} user={user} onLogTrade={() => setShowTradeLog(true)} />
 

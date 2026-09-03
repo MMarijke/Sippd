@@ -39,7 +39,9 @@ export default function FilterBar({ filters, onFiltersChange, viewMode, onViewMo
           <Button
             variant="ghost"
             size="icon"
-            className={`h-8 w-8 ${viewMode === 'grid' ? 'bg-card text-primary' : 'text-muted-foreground'}`}
+            aria-label="Grid view"
+            aria-pressed={viewMode === 'grid'}
+            className={`h-11 w-11 ${viewMode === 'grid' ? 'bg-card text-primary' : 'text-muted-foreground'}`}
             onClick={() => onViewModeChange('grid')}
           >
             <LayoutGrid className="w-4 h-4" />
@@ -47,7 +49,9 @@ export default function FilterBar({ filters, onFiltersChange, viewMode, onViewMo
           <Button
             variant="ghost"
             size="icon"
-            className={`h-8 w-8 ${viewMode === 'list' ? 'bg-card text-primary' : 'text-muted-foreground'}`}
+            aria-label="List view"
+            aria-pressed={viewMode === 'list'}
+            className={`h-11 w-11 ${viewMode === 'list' ? 'bg-card text-primary' : 'text-muted-foreground'}`}
             onClick={() => onViewModeChange('list')}
           >
             <List className="w-4 h-4" />

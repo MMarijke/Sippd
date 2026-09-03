@@ -172,6 +172,8 @@ export default function MostWanted() {
                   }
                   toggleFavourite({ collectionItem: myItem, sharedCan: can });
                 }}
+                aria-label={isFav ? 'Remove from favourites' : 'Add to favourites'}
+                aria-pressed={isFav}
                 className={cn(
                   'w-8 h-8 rounded-full flex items-center justify-center transition-colors',
                   isFav

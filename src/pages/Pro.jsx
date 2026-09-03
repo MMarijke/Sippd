@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Check, Zap } from 'lucide-react';
+import { ChevronLeft, Check, Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -18,23 +19,28 @@ export default function Pro() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isPro } = useSubscription();
+  const [loadingPriceId, setLoadingPriceId] = useState(null);
 
   const handleCheckout = async (priceId) => {
     if (!priceId) {
       toast.error('Pricing is not configured yet — check back soon.');
       return;
     }
+    if (loadingPriceId) return;
+    setLoadingPriceId(priceId);
     try {
       await openCheckout(priceId, user);
     } catch (e) {
       toast.error('Could not open checkout: ' + (e.message || 'Unknown error'));
+    } finally {
+      setLoadingPriceId(null);
     }
   };
 
   return (
     <div className="min-h-screen bg-background pb-10">
       <div className="flex items-center gap-3 px-4 pt-5 pb-4 border-b border-border">
-        <button onClick={() => navigate(-1)} className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center border border-border">
+        <button onClick={() => navigate(-1)} aria-label="Back" className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center border border-border">
           <ChevronLeft className="w-4 h-4 text-foreground" />
         </button>
         <div>
@@ -64,16 +70,22 @@ export default function Pro() {
             <div className="space-y-2">
               <Button
                 onClick={() => handleCheckout(PADDLE_MONTHLY_PRICE_ID)}
+                disabled={!!loadingPriceId}
                 className="w-full font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                Monthly — $2.99/mo
+                {loadingPriceId === PADDLE_MONTHLY_PRICE_ID
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : 'Monthly — $2.99/mo'}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => handleCheckout(PADDLE_ANNUAL_PRICE_ID)}
+                disabled={!!loadingPriceId}
                 className="w-full font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
               >
-                Annual — $19.99/yr
+                {loadingPriceId === PADDLE_ANNUAL_PRICE_ID
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : 'Annual — $19.99/yr'}
               </Button>
             </div>
           </>

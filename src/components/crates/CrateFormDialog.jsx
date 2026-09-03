@@ -60,7 +60,7 @@ export default function CrateFormDialog({ crate, onClose, userId }) {
           <SheetTitle asChild>
             <h2 className="text-base font-display font-bold text-foreground">{isEdit ? 'Edit Crate' : 'New Crate'}</h2>
           </SheetTitle>
-          <button onClick={onClose} className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground flex-shrink-0">
+          <button onClick={onClose} aria-label="Close" className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground flex-shrink-0">
             <X className="w-4 h-4" />
           </button>
         </div>

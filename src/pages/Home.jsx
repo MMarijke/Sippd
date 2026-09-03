@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Link } from 'react-router-dom';
-import { ScanLine, BarChart2, Rss } from 'lucide-react';
+import { ScanLine, BarChart2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
 import StatsRow from '@/components/dashboard/StatsRow';
@@ -107,6 +107,7 @@ export default function Home() {
       <PageHeader
         title="SIPPD"
         subtitle={profile?.full_name ? `${profile.full_name}'s vault` : 'Your Energy Drink Vault'}
+        bellClassName="h-8 w-8 rounded-md"
         action={
           <Link to="/scan">
             <Button size="sm" className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
@@ -161,20 +162,6 @@ export default function Home() {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-display font-semibold text-foreground tracking-wide">Monthly Report</p>
             <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{format(new Date(), 'MMMM yyyy')} · Tap to view</p>
-          </div>
-          <span className="text-xs font-mono text-primary">→</span>
-        </div>
-      </Link>
-
-      {/* Feed CTA — Feed has no BottomNav entry, this is its primary discovery path */}
-      <Link to="/feed" className="block px-5 mt-5">
-        <div className="flex items-center gap-4 bg-card border border-primary/20 rounded-xl p-4 hover:border-primary/40 transition-colors cursor-pointer">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <Rss className="w-5 h-5 text-primary" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-display font-semibold text-foreground tracking-wide">Activity Feed</p>
-            <p className="text-[11px] font-mono text-muted-foreground mt-0.5">See what other collectors are pulling</p>
           </div>
           <span className="text-xs font-mono text-primary">→</span>
         </div>

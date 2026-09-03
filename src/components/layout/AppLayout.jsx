@@ -3,8 +3,8 @@ import BottomNav from './BottomNav';
 
 export default function AppLayout() {
   return (
-    <div className="min-h-screen bg-background font-body">
-      <main className="pb-24 max-w-lg mx-auto">
+    <div className="flex flex-col h-dvh bg-background font-body">
+      <main className="flex-1 overflow-y-auto pb-6 max-w-lg mx-auto w-full">
         <Outlet />
       </main>
       <BottomNav />

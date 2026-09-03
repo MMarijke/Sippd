@@ -1,15 +1,12 @@
-"use client";
-import { useTheme } from "next-themes"
 import { Toaster as Sonner } from "sonner"
 
+// Sippd has no light mode and no ThemeProvider — theme is always dark.
 const Toaster = ({
   ...props
 }) => {
-  const { theme = "system" } = useTheme()
-
   return (
     (<Sonner
-      theme={theme}
+      theme="dark"
       className="toaster group"
       toastOptions={{
         classNames: {

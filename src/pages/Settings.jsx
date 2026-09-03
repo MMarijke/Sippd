@@ -288,7 +288,10 @@ export default function Settings() {
   const toggleNotifyRareFollows = async () => {
     const next = !profile?.notify_rare_follows;
     const { error } = await supabase.from('profiles').update({ notify_rare_follows: next }).eq('id', user.id);
-    if (error) { toast.error('Failed to update'); return; }
+    if (error) {
+      toast.error('Failed to update rare pull alerts: ' + (error.message || 'Unknown error'));
+      return;
+    }
     refetchProfile();
     toast.success(next ? 'Rare pull alerts enabled' : 'Rare pull alerts disabled');
   };
@@ -296,7 +299,10 @@ export default function Settings() {
   const togglePrivate = async () => {
     const next = !profile?.is_private;
     const { error } = await supabase.from('profiles').update({ is_private: next }).eq('id', user.id);
-    if (error) { toast.error('Failed to update'); return; }
+    if (error) {
+      toast.error('Failed to update privacy setting: ' + (error.message || 'Unknown error'));
+      return;
+    }
     refetchProfile();
     toast.success(next ? 'Account set to private' : 'Account set to public');
   };

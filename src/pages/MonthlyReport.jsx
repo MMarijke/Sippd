@@ -22,7 +22,7 @@ export default function MonthlyReport() {
   const [monthDate, setMonthDate] = useState(() => startOfMonth(new Date()));
   const [showShareCard, setShowShareCard] = useState(false);
 
-  const { data: collection = [] } = useQuery({
+  const { data: collection = [], isLoading: loadingCollection } = useQuery({
     queryKey: ['user-collection', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -36,7 +36,7 @@ export default function MonthlyReport() {
     enabled: !!user?.id,
   });
 
-  const { data: sharedCans = [] } = useQuery({
+  const { data: sharedCans = [], isLoading: loadingShared } = useQuery({
     queryKey: ['shared-cans'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -48,6 +48,8 @@ export default function MonthlyReport() {
       return data;
     },
   });
+
+  const isLoading = !user || loadingCollection || loadingShared;
 
   const sharedCansMap = useMemo(
     () => Object.fromEntries(sharedCans.map(c => [c.id, c])),
@@ -132,6 +134,28 @@ export default function MonthlyReport() {
   }), [monthLabel, collected.length, monthScore, streak, bestPull, bestPullImage, bestPullRarity, rarityChartData]);
 
   const hasActivity = collected.length > 0 || wishlistCount > 0;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="flex items-center gap-3 px-4 pt-5 pb-4 border-b border-border">
+          <div className="w-11 h-11 rounded-full bg-card/40 animate-pulse flex-shrink-0" />
+          <div className="flex-1 flex justify-center">
+            <div className="h-5 w-32 bg-card/40 animate-pulse rounded-lg" />
+          </div>
+          <div className="w-9" />
+        </div>
+        <div className="px-5 py-5 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="h-20 bg-card/40 animate-pulse rounded-xl" />
+            <div className="h-20 bg-card/40 animate-pulse rounded-xl" />
+          </div>
+          <div className="h-16 bg-card/40 animate-pulse rounded-xl" />
+          <div className="h-32 bg-card/40 animate-pulse rounded-xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

@@ -180,7 +180,7 @@ export default function Profile() {
   });
 
   return (
-    <div className="space-y-5 pb-24">
+    <div className="space-y-5">
       <PageHeader
         title="Profile"
         showBell={false}

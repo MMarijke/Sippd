@@ -50,7 +50,7 @@ export default function Achievements() {
   const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements);
 
   return (
-    <div className="min-h-screen bg-background pb-10">
+    <div className="bg-background">
       {toAnimate && (
         <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />
       )}

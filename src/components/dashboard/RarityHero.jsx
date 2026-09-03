@@ -19,12 +19,12 @@ export default function RarityHero({ collected, sharedCansMap = {} }) {
   const data = isEmpty ? [{ name: 'Empty', value: 1 }] : tiers;
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5">
+    <div>
       <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground text-center">
         Rarity Breakdown
       </p>
 
-      <div className="relative w-full max-w-[260px] mx-auto mt-2" style={{ aspectRatio: '2 / 1' }}>
+      <div className="relative w-full max-w-[330px] mx-auto mt-2" style={{ aspectRatio: '2 / 1' }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -35,7 +35,7 @@ export default function RarityHero({ collected, sharedCansMap = {} }) {
               endAngle={0}
               innerRadius="60%"
               outerRadius="100%"
-              paddingAngle={isEmpty ? 0 : 3}
+              paddingAngle={0}
               dataKey="value"
               stroke="none"
               isAnimationActive={false}

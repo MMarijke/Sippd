@@ -79,7 +79,7 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
               <p className="text-[11px] font-mono text-muted-foreground">with {targetUser?.full_name || 'this collector'}</p>
             </div>
           </div>
-          <button onClick={onClose} className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground flex-shrink-0">
+          <button onClick={onClose} aria-label="Close" className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground flex-shrink-0">
             <X className="w-4 h-4" />
           </button>
         </div>

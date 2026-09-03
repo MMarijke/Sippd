@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Sparkles, Plus } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CanImageBox from '@/components/shared/CanImageBox';
 import RarityBadge from '@/components/shared/RarityBadge';
@@ -50,9 +50,10 @@ export default function RecommendedCans({ collection, sharedCans }) {
           const conf = getConfidence(sc.total_votes);
           const rarity = conf === 'unrated' ? null : getDisplayRarity(sc);
           return (
-            <div
+            <button
               key={sc.id}
-              className="flex-shrink-0 w-32 bg-card border border-border rounded-2xl overflow-hidden cursor-pointer hover:border-primary/30 transition-colors"
+              type="button"
+              className="flex-shrink-0 w-32 bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/30 transition-colors text-left"
               onClick={() => navigate(`/can/${sc.id}`)}
             >
               <CanImageBox
@@ -70,7 +71,7 @@ export default function RecommendedCans({ collection, sharedCans }) {
                   : <span className="text-[10px] font-mono text-muted-foreground">? ? ?</span>
                 }
               </div>
-            </div>
+            </button>
           );
         })}
       </div>

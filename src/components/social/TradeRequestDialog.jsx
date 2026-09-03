@@ -53,6 +53,9 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
       toast.success('Trade request sent!');
       onClose();
     },
+    onError: (error) => {
+      toast.error('Failed to send trade request: ' + (error.message || 'Unknown error'));
+    },
   });
 
   const canSubmit = offerCanId && wantCanName.trim();

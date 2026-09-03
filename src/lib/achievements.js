@@ -92,6 +92,28 @@ export const ACHIEVEMENT_DEFINITIONS = [
   },
 ];
 
+/**
+ * Pick achievements for a compact highlight strip: unlocked ones first
+ * (most recently unlocked first), then locked incremental ones ordered by
+ * how close they are to unlocking, capped at `limit`.
+ */
+export function selectHighlightAchievements(achievements, limit = 10) {
+  const unlocked = [...achievements.filter(a => a.unlocked)].sort((a, b) => {
+    if (a.unlockedAt && b.unlockedAt) return new Date(b.unlockedAt) - new Date(a.unlockedAt);
+    if (a.unlockedAt) return -1;
+    if (b.unlockedAt) return 1;
+    return 0;
+  });
+
+  const locked = [...achievements.filter(a => !a.unlocked)].sort((a, b) => {
+    const pctA = a.incremental && a.progress ? a.progress.current / a.progress.goal : 0;
+    const pctB = b.incremental && b.progress ? b.progress.current / b.progress.goal : 0;
+    return pctB - pctA;
+  });
+
+  return [...unlocked, ...locked].slice(0, limit);
+}
+
 export function computeAchievements(collection, streak = 0, voteCount = 0, userCreatedDate = null) {
   const collected = collection.filter(c => c.status === 'collected').sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
   const wishlist = collection.filter(c => c.status === 'wishlist').sort((a, b) => new Date(a.created_at) - new Date(b.created_at));

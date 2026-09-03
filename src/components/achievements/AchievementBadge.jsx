@@ -2,10 +2,35 @@ import { Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
-export default function AchievementBadge({ achievement }) {
+export default function AchievementBadge({ achievement, size = 'default' }) {
   const { title, description, icon, unlocked, unlockedAt, incremental, progress } = achievement;
   const showProgress = incremental && !unlocked && progress;
   const pct = showProgress ? Math.min((progress.current / progress.goal) * 100, 100) : 0;
+
+  if (size === 'compact') {
+    return (
+      <div className="relative flex flex-col items-center text-center gap-1.5" title={description}>
+        <div
+          className={cn(
+            'w-11 h-11 rounded-xl flex items-center justify-center text-lg transition-all',
+            unlocked
+              ? 'bg-primary/10 border border-primary/30 shadow-[0_0_12px_rgba(0,240,255,0.15)]'
+              : 'bg-muted/50 border border-border/30 grayscale opacity-40'
+          )}
+        >
+          {icon}
+        </div>
+        {!unlocked && (
+          <div className="absolute -top-1 -right-1">
+            <Lock className="w-3 h-3 text-muted-foreground/50" />
+          </div>
+        )}
+        <p className={cn('text-[9px] font-mono leading-tight truncate w-full', unlocked ? 'text-foreground' : 'text-muted-foreground')}>
+          {title}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div

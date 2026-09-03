@@ -1,15 +1,14 @@
 import { forwardRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Pin, ImageDown, X as XIcon } from 'lucide-react';
-import { format } from 'date-fns';
+import { Pin, Share2, X as XIcon, Zap, Star } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { MAX_PINS } from '@/hooks/useTogglePin';
 import { getDisplayRarity, getConfidence, RARITY_HEX as RARITY_COLORS_HEX, rarityHexToRgba, RARITY_BG_CLASS } from '@/lib/rarityConsensus';
 import { proxyImageUrl } from '@/lib/cardCapture';
 
 // Capture-mode cell — proxied image, no links, no pin button, so it renders
-// safely inside html2canvas. Carries the exact same visual language as the
-// original ShareCardModal export card (not reinvented, per the shape brief).
+// safely inside html2canvas. Carries the same visual language the old
+// Top Pulls export card used (not reinvented, per the shape brief).
 function CaptureCell({ item, sharedCan }) {
   const conf = sharedCan ? getConfidence(sharedCan.total_votes) : 'unrated';
   const rarity = conf === 'unrated' ? null : getDisplayRarity(sharedCan || item);
@@ -52,22 +51,21 @@ function CaptureCell({ item, sharedCan }) {
 
 function EmptyCaptureCell() {
   return (
-    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 12, aspectRatio: '3/4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 12, aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <span style={{ opacity: 0.15, fontSize: 20 }}>🥤</span>
     </div>
   );
 }
 
-// Renders in two modes from the same data: `live` is exactly what's on
-// Profile.jsx (interactive, app-themed); `capture` is the branded,
-// fixed-dimension export card html2canvas captures via `ref`. One owner
-// for this markup instead of two hand-maintained copies that can drift.
-const TopPullsCard = forwardRef(function TopPullsCard(
+// Renders in two modes from the same data: `live` is what's on Profile.jsx
+// (interactive, app-themed); `capture` is the branded, fixed-dimension
+// export card html2canvas captures via `ref`. One owner for this markup
+// instead of two hand-maintained copies that can drift.
+const CollectionCard = forwardRef(function CollectionCard(
   {
     mode,
     top6,
     rarityBreakdown,
-    latestAchievement,
     getEffectiveRarity,
     sharedCansMap = {},
     // live mode only
@@ -76,15 +74,17 @@ const TopPullsCard = forwardRef(function TopPullsCard(
     pinPending,
     onShare,
     sharing,
+    rank,
     // capture mode only
     userName,
     score,
     totalCans,
     rarePulls,
-    streak,
   },
   ref
 ) {
+  const displayName = userName || 'Collector';
+
   if (mode === 'capture') {
     const filledCells = [...top6, ...Array(Math.max(0, 6 - top6.length)).fill(null)];
     const appUrl = typeof window !== 'undefined' ? window.location.origin.replace('https://', '').replace('http://', '') : '';
@@ -107,29 +107,25 @@ const TopPullsCard = forwardRef(function TopPullsCard(
         <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, background: 'radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%)', borderRadius: '50%' }} />
         <div style={{ position: 'absolute', bottom: 80, left: -60, width: 200, height: 200, background: 'radial-gradient(circle, rgba(0,229,255,0.05) 0%, transparent 70%)', borderRadius: '50%' }} />
 
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '24px 24px 16px' }}>
+        <div style={{ padding: '24px 24px 4px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(0,229,255,0.15)', border: '1px solid rgba(0,229,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: '#00E5FF', fontSize: 14 }}>⚡</span>
+            <div style={{ width: 24, height: 24, borderRadius: 7, background: 'rgba(0,229,255,0.15)', border: '1px solid rgba(0,229,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: '#00E5FF', fontSize: 12 }}>⚡</span>
             </div>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 900, color: '#00E5FF', letterSpacing: '0.15em', lineHeight: 1 }}>SIPPD</div>
-              <div style={{ fontSize: 8, color: 'rgba(0,229,255,0.5)', letterSpacing: '0.05em', marginTop: 1 }}>ENERGY DRINK TRACKER</div>
-            </div>
+            <span style={{ fontSize: 11, fontWeight: 900, color: '#00E5FF', letterSpacing: '0.15em' }}>SIPPD</span>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 15, fontWeight: 800, color: '#F0F4F8', lineHeight: 1.2 }}>{userName || 'Collector'}</div>
-            <div style={{ fontSize: 11, color: '#00E5FF', fontFamily: 'monospace', marginTop: 2 }}>Score: {score}</div>
+          <div style={{ fontSize: 17, fontWeight: 800, color: '#F0F4F8', marginTop: 10 }}>
+            {displayName}&rsquo;s Collection
           </div>
         </div>
 
-        <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, rgba(0,229,255,0.3), transparent)', margin: '0 24px' }} />
+        <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, rgba(0,229,255,0.3), transparent)', margin: '14px 24px 0' }} />
 
         <div style={{ display: 'flex', justifyContent: 'space-around', padding: '14px 24px' }}>
           {[
+            { label: 'SCORE', value: score },
+            { label: 'RARE PULLS', value: rarePulls },
             { label: 'CANS', value: totalCans },
-            { label: 'RARE', value: rarePulls },
-            { label: 'STREAK', value: `${streak}d` },
           ].map(({ label, value }) => (
             <div key={label} style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 22, fontWeight: 900, color: '#F0F4F8', lineHeight: 1 }}>{value}</div>
@@ -138,21 +134,8 @@ const TopPullsCard = forwardRef(function TopPullsCard(
           ))}
         </div>
 
-        <div style={{ padding: '0 20px' }}>
-          <div style={{ fontSize: 10, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 10 }}>
-            Top Pulls
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-            {filledCells.map((item, i) => (
-              item
-                ? <CaptureCell key={item.id} item={item} sharedCan={sharedCansMap[item.can_id]} />
-                : <EmptyCaptureCell key={`empty-${i}`} />
-            ))}
-          </div>
-        </div>
-
         {rarityBreakdown.length > 0 && (
-          <div style={{ padding: '16px 20px 12px' }}>
+          <div style={{ padding: '0 20px 16px' }}>
             <div style={{ fontSize: 10, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>
               Rarity Breakdown
             </div>
@@ -171,29 +154,27 @@ const TopPullsCard = forwardRef(function TopPullsCard(
           </div>
         )}
 
-        {latestAchievement && (
-          <div style={{ padding: '0 20px 16px' }}>
-            <div style={{ fontSize: 9, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>
-              Latest Achievement
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,215,0,0.06)', border: '1px solid rgba(255,215,0,0.2)', borderRadius: 10, padding: '8px 12px' }}>
-              <span style={{ fontSize: 22 }}>{latestAchievement.icon}</span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#FFD700', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{latestAchievement.title}</div>
-                {latestAchievement.unlockedAt && (
-                  <div style={{ fontSize: 9, color: 'rgba(240,244,248,0.4)', fontFamily: 'monospace', marginTop: 2 }}>
-                    {format(new Date(latestAchievement.unlockedAt), 'MMM d, yyyy')}
-                  </div>
-                )}
-              </div>
-            </div>
+        <div style={{ padding: '0 20px' }}>
+          <div style={{ fontSize: 10, color: 'rgba(0,229,255,0.6)', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 10 }}>
+            Pinned ({top6.length}/{MAX_PINS})
           </div>
-        )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            {filledCells.map((item, i) => (
+              item
+                ? <CaptureCell key={item.id} item={item} sharedCan={sharedCansMap[item.can_id]} />
+                : <EmptyCaptureCell key={`empty-${i}`} />
+            ))}
+          </div>
+        </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 24px 20px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <span style={{ fontSize: 10, color: 'rgba(0,229,255,0.4)', fontFamily: 'monospace', letterSpacing: '0.08em' }}>
-            {appUrl}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '16px 24px 20px', borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: 16 }}>
+          <span style={{ fontSize: 12, fontWeight: 900, color: 'rgba(0,229,255,0.5)', letterSpacing: '0.1em' }}>
+            SIPPD
           </span>
+        </div>
+
+        <div style={{ position: 'absolute', bottom: 20, left: 24, fontSize: 9, color: 'rgba(240,244,248,0.3)', fontFamily: 'monospace', letterSpacing: '0.05em' }}>
+          {appUrl}
         </div>
       </div>
     );
@@ -202,23 +183,55 @@ const TopPullsCard = forwardRef(function TopPullsCard(
   // live mode
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
-      <div className="flex items-center justify-between mb-3 gap-2">
-        <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">Top Pulls</p>
-        <div className="flex items-center gap-2 min-w-0">
-          {latestAchievement && (
-            <span className="flex items-center gap-1.5 text-[10px] font-mono text-[#FFD700] truncate">
-              <span>{latestAchievement.icon}</span> {latestAchievement.title}
-            </span>
-          )}
-          <button
-            onClick={onShare}
-            aria-label={sharing ? 'Close share card' : 'Create share card'}
-            className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
-          >
-            {sharing ? <XIcon className="w-3.5 h-3.5" /> : <ImageDown className="w-3.5 h-3.5" />}
-          </button>
-        </div>
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <h2 className="text-sm font-display font-bold text-foreground tracking-wide truncate">
+          {displayName}&rsquo;s Collection
+        </h2>
+        <button
+          onClick={onShare}
+          aria-label={sharing ? 'Close share card' : 'Share collection card'}
+          className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
+        >
+          {sharing ? <XIcon className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+        </button>
       </div>
+
+      <div className="grid grid-cols-3 divide-x divide-border mb-5">
+        {[
+          { icon: Zap, label: 'Score', value: score, badge: rank ? `#${rank}` : null },
+          { icon: Star, label: 'Rare Pulls', value: rarePulls },
+          { icon: Zap, label: 'Cans', value: totalCans },
+        ].map(({ icon: Icon, label, value, badge }) => (
+          <div key={label} className="flex flex-col items-center text-center px-1">
+            <Icon className="w-3.5 h-3.5 text-primary mb-1" />
+            <span className="text-xl font-mono font-bold text-foreground tabular-nums">{value}</span>
+            <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">{label}</span>
+            {badge && (
+              <span className="mt-1 px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-[9px] font-mono font-semibold text-primary">
+                {badge}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {rarityBreakdown.length > 0 && (
+        <div className="mb-5">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60 mb-2">Rarity Breakdown</p>
+          <div className="flex h-1.5 rounded-full overflow-hidden gap-px">
+            {rarityBreakdown.map(({ rarity, pct }) => (
+              <div key={rarity} className={`h-full ${RARITY_BG_CLASS[rarity]}`} style={{ width: `${pct}%` }} />
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+            {rarityBreakdown.map(({ rarity, count }) => (
+              <span key={rarity} className="text-[10px] font-mono text-muted-foreground">
+                {rarity} <span className="text-foreground">{count}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-2">
         {top6.map(item => (
@@ -258,31 +271,11 @@ const TopPullsCard = forwardRef(function TopPullsCard(
           </div>
         ))}
       </div>
-      {pinnedCount > 0 && (
-        <p className="text-[10px] font-mono text-muted-foreground mt-2">
-          {pinnedCount}/{MAX_PINS} pinned
-        </p>
-      )}
-
-      {rarityBreakdown.length > 0 && (
-        <div className="mt-4">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60 mb-2">Rarity Breakdown</p>
-          <div className="flex h-1.5 rounded-full overflow-hidden gap-px">
-            {rarityBreakdown.map(({ rarity, pct }) => (
-              <div key={rarity} className={`h-full ${RARITY_BG_CLASS[rarity]}`} style={{ width: `${pct}%` }} />
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
-            {rarityBreakdown.map(({ rarity, count }) => (
-              <span key={rarity} className="text-[10px] font-mono text-muted-foreground">
-                {rarity} <span className="text-foreground">{count}</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+      <p className="text-[10px] font-mono text-muted-foreground mt-2">
+        {pinnedCount}/{MAX_PINS} pinned
+      </p>
     </div>
   );
 });
 
-export default TopPullsCard;
+export default CollectionCard;

@@ -70,6 +70,9 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
       toast.success('Entry updated');
       onClose();
     },
+    onError: (error) => {
+      toast.error('Failed to update entry: ' + (error.message || 'Unknown error'));
+    },
   });
 
   return (

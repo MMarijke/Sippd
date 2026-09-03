@@ -95,6 +95,9 @@ export default function TradeLogDialog({ collection, onClose }) {
       setTemplateName('');
       setShowSaveTemplate(false);
     },
+    onError: (error) => {
+      toast.error('Failed to save template: ' + (error.message || 'Unknown error'));
+    },
   });
 
   const applyTemplate = (tpl) => {
@@ -128,6 +131,9 @@ export default function TradeLogDialog({ collection, onClose }) {
       queryClient.invalidateQueries({ queryKey: ['trades'] });
       toast.success('Trade logged!');
       onClose();
+    },
+    onError: (error) => {
+      toast.error('Failed to log trade: ' + (error.message || 'Unknown error'));
     },
   });
 

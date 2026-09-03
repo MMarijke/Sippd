@@ -171,27 +171,42 @@ function ChangePasswordPanel({ user }) {
 
   return (
     <div className="space-y-3 px-5 pt-4">
-      <Input
-        type="password"
-        placeholder="Current password"
-        value={form.current}
-        onChange={e => setForm(f => ({ ...f, current: e.target.value }))}
-        className="bg-secondary border-border focus-visible:ring-primary/50"
-      />
-      <Input
-        type="password"
-        placeholder="New password"
-        value={form.next}
-        onChange={e => setForm(f => ({ ...f, next: e.target.value }))}
-        className="bg-secondary border-border focus-visible:ring-primary/50"
-      />
-      <Input
-        type="password"
-        placeholder="Confirm new password"
-        value={form.confirm}
-        onChange={e => setForm(f => ({ ...f, confirm: e.target.value }))}
-        className="bg-secondary border-border focus-visible:ring-primary/50"
-      />
+      <div>
+        <label htmlFor="current-password" className="text-xs font-mono text-muted-foreground mb-1.5 block">Current password</label>
+        <Input
+          id="current-password"
+          type="password"
+          placeholder="Current password"
+          autoComplete="current-password"
+          value={form.current}
+          onChange={e => setForm(f => ({ ...f, current: e.target.value }))}
+          className="bg-secondary border-border focus-visible:ring-primary/50"
+        />
+      </div>
+      <div>
+        <label htmlFor="new-password" className="text-xs font-mono text-muted-foreground mb-1.5 block">New password</label>
+        <Input
+          id="new-password"
+          type="password"
+          placeholder="New password"
+          autoComplete="new-password"
+          value={form.next}
+          onChange={e => setForm(f => ({ ...f, next: e.target.value }))}
+          className="bg-secondary border-border focus-visible:ring-primary/50"
+        />
+      </div>
+      <div>
+        <label htmlFor="confirm-password" className="text-xs font-mono text-muted-foreground mb-1.5 block">Confirm new password</label>
+        <Input
+          id="confirm-password"
+          type="password"
+          placeholder="Confirm new password"
+          autoComplete="new-password"
+          value={form.confirm}
+          onChange={e => setForm(f => ({ ...f, confirm: e.target.value }))}
+          className="bg-secondary border-border focus-visible:ring-primary/50"
+        />
+      </div>
       <Button className="w-full font-mono text-xs" onClick={save} disabled={saving}>
         {saving ? 'Updating…' : 'Update Password'}
       </Button>

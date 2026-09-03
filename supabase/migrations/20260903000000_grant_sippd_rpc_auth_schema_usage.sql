@@ -1,0 +1,23 @@
+-- Fix: "permission denied for schema auth" on vote_on_can() and every other
+-- SECURITY DEFINER RPC owned by sippd_rpc that calls auth.uid().
+--
+-- sippd_rpc has always had EXECUTE on auth.uid() (granted by Supabase's
+-- platform default to PUBLIC/authenticated), but calling a schema-qualified
+-- function requires BOTH execute on the function AND usage on its containing
+-- schema — sippd_rpc never had the latter. 20260829000000_drop_debug_auth_context.sql
+-- records vote_on_can() as "confirmed working end-to-end" on 2026-08-29;
+-- verified live against this project on 2026-09-03 that sippd_rpc currently
+-- has has_function_privilege(sippd_rpc, 'auth.uid()', 'EXECUTE') = true but
+-- has_schema_privilege(sippd_rpc, 'auth', 'USAGE') = false — Supabase's
+-- platform-level auth schema defaults most likely tightened since then,
+-- outside this repo's own migration history, silently breaking every
+-- sippd_rpc RPC that calls auth.uid() (vote_on_can, toggle_favourite,
+-- request_follow, accept/deny_follow_request, send/respond_to_trade_request,
+-- react_to_activity, tick_streak).
+--
+-- USAGE on a schema only grants the ability to resolve/reference objects in
+-- it by name — it does not itself grant SELECT on any table (auth.users
+-- stays inaccessible to sippd_rpc unless separately granted, which this
+-- does not do). This is the minimal, additive fix.
+
+grant usage on schema auth to sippd_rpc;

@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { Outlet, useLocation, useNavigationType } from 'react-router-dom';
 import BottomNav from './BottomNav';
 
 // Locks document scroll for as long as an AppLayout page is mounted, so
@@ -14,11 +14,6 @@ import BottomNav from './BottomNav';
 // Scoped to the effect's lifetime, not global CSS, because routes outside
 // AppLayout (MonthlyReport, Settings, CanDetail, etc.) have no internal
 // scroll container of their own and need normal document-level scroll.
-//
-// Trade-off: this also defeats the browser's native scroll-position
-// restoration on back/forward nav (it restores window.scrollY, not an
-// arbitrary div's scrollTop) — accepted for now, since the alternative is
-// content genuinely hidden behind the nav on short viewports.
 function useLockBodyScroll() {
   useEffect(() => {
     const { body, documentElement } = document;
@@ -39,12 +34,45 @@ function useLockBodyScroll() {
   }, []);
 }
 
+// Locking body scroll means the browser's native history-based scroll
+// restoration (window.scrollY, tracked per history entry) can't do
+// anything anymore — window.scrollY never moves now. This restores the
+// same behavior scoped to <main>'s own scrollTop instead: back/forward
+// nav (POP) restores exactly where that page was left; a normal forward
+// navigation (PUSH/REPLACE) starts at the top, same as browsers do by
+// default. Keyed on location.key rather than pathname since key is
+// per-history-entry — the same entry going back always carries the same
+// key, while two separate visits to the same path don't collide.
+const mainScrollPositions = new Map();
+
+function useRestoreMainScroll(mainRef) {
+  const location = useLocation();
+  const navigationType = useNavigationType();
+
+  useEffect(() => {
+    const main = mainRef.current;
+    if (!main) return;
+
+    main.scrollTop = navigationType === 'POP'
+      ? (mainScrollPositions.get(location.key) ?? 0)
+      : 0;
+
+    const handleScroll = () => {
+      mainScrollPositions.set(location.key, main.scrollTop);
+    };
+    main.addEventListener('scroll', handleScroll, { passive: true });
+    return () => main.removeEventListener('scroll', handleScroll);
+  }, [location.key, navigationType, mainRef]);
+}
+
 export default function AppLayout() {
   useLockBodyScroll();
+  const mainRef = useRef(null);
+  useRestoreMainScroll(mainRef);
 
   return (
     <div className="flex flex-col h-dvh bg-background font-body">
-      <main className="flex-1 overflow-y-auto pb-6 max-w-lg mx-auto w-full">
+      <main ref={mainRef} className="flex-1 overflow-y-auto pb-6 max-w-lg mx-auto w-full">
         <Outlet />
       </main>
       <BottomNav />

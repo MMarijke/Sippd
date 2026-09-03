@@ -2,12 +2,11 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { LogOut, Bookmark, Heart, Settings, Medal, Pencil, Check, X, Share2, Download, ScanLine } from 'lucide-react';
+import { LogOut, Settings, Medal, Pencil, Check, X, Share2, Download, ScanLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link, useNavigate } from 'react-router-dom';
 import PageHeader from '@/components/shared/PageHeader';
-import StatBox from '@/components/shared/StatBox';
 import CollectionCard from '@/components/profile/CollectionCard';
 import AchievementBadge from '@/components/achievements/AchievementBadge';
 import { toast } from 'sonner';
@@ -15,7 +14,6 @@ import { getItemScore } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
 import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
 import { useTogglePin } from '@/hooks/useTogglePin';
-import { useShare } from '@/hooks/useShare';
 import { useCardCapture } from '@/hooks/useCardCapture';
 import { computeAchievements, selectHighlightAchievements } from '@/lib/achievements';
 import TradeHistory from '@/components/profile/TradeHistory';
@@ -123,8 +121,6 @@ export default function Profile() {
   const rarePulls = collected.filter(c =>
     ['Rare', 'Ultra Rare', 'Legendary'].includes(c.can_rarity)
   ).length;
-  const wishlist = collection.filter(c => c.status === 'wishlist').length;
-  const favourites = collection.filter(c => c.is_favourite).length;
 
   const score = collected.reduce((acc, c) => {
     return acc + getItemScore(c, sharedCansMap[c.can_id]);
@@ -162,9 +158,10 @@ export default function Profile() {
 
   const { generating, cardDataUrl, saving: cardSaving, generateCard, handleSave, handleShareImage } = useCardCapture(captureRef, cardSignature);
 
-  // The card only mounts (and its ref attaches) once showShareCard flips
-  // true — useCardCapture's own effect only regenerates on signature
-  // changes, so opening needs its own explicit first-generate call.
+  // The ref only attaches to the live card once showShareCard flips true
+  // (see the `ref={showShareCard ? captureRef : null}` below) — useCardCapture's
+  // own effect only regenerates on signature changes, so opening needs its
+  // own explicit first-generate call.
   useEffect(() => {
     if (showShareCard) generateCard();
   }, [showShareCard]);
@@ -182,37 +179,37 @@ export default function Profile() {
     enabled: !!user?.id && score > 0,
   });
 
-  const { copyLink } = useShare();
-
-  const handleShareProfileLink = () => {
-    if (!user?.id) return;
-    const url = `${window.location.origin}/u/${user.id}`;
-    copyLink(url, 'Link copied!');
-  };
-
   return (
     <div className="space-y-5 pb-24">
-      <PageHeader title="Profile" />
+      <PageHeader
+        title="Profile"
+        showBell={false}
+        action={
+          <Link
+            to="/settings"
+            aria-label="Settings"
+            className="w-11 h-11 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+          >
+            <Settings className="w-4 h-4" />
+          </Link>
+        }
+      />
 
-      <div className="px-5">
+      <div className="px-5 flex items-center gap-3">
         {isLoading ? (
-          <div className="bg-card border border-border rounded-2xl p-6 flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-card/40 animate-pulse flex-shrink-0" />
-            <div className="flex-1 min-w-0 space-y-2">
-              <div className="h-5 w-32 bg-card/40 animate-pulse rounded-lg" />
-              <div className="h-4 w-20 bg-card/40 animate-pulse rounded-lg" />
-            </div>
-          </div>
+          <>
+            <div className="w-10 h-10 rounded-full bg-card/40 animate-pulse flex-shrink-0" />
+            <div className="h-4 w-28 bg-card/40 animate-pulse rounded-lg" />
+          </>
         ) : (
-        <div className="bg-card border border-border rounded-2xl p-6 flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center neon-glow">
-            <span className="text-2xl font-display font-bold text-primary">
-              {profile?.full_name?.[0]?.toUpperCase() || '?'}
-            </span>
-          </div>
-          <div className="flex-1 min-w-0">
+          <>
+            <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+              <span className="text-sm font-display font-bold text-primary">
+                {profile?.full_name?.[0]?.toUpperCase() || '?'}
+              </span>
+            </div>
             {editing ? (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-1 min-w-0">
                 <Input
                   ref={inputRef}
                   value={nameInput}
@@ -229,20 +226,17 @@ export default function Profile() {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-display font-bold text-foreground">{profile?.full_name || 'Collector'}</h2>
-                <button onClick={startEdit} aria-label="Edit display name" className="p-1.5 -m-1.5 text-muted-foreground hover:text-primary transition-colors">
-                  <Pencil className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-1.5 min-w-0">
+                <h2 className="text-base font-display font-bold text-foreground truncate">{profile?.full_name || 'Collector'}</h2>
+                <button onClick={startEdit} aria-label="Edit display name" className="p-1 -m-1 text-muted-foreground hover:text-primary transition-colors flex-shrink-0">
+                  <Pencil className="w-3 h-3" />
                 </button>
+                {profile?.region && (
+                  <span className="text-xs font-mono text-muted-foreground truncate">· 📍 {profile.region}</span>
+                )}
               </div>
             )}
-            {profile?.region && (
-              <p className="text-xs font-mono text-muted-foreground mt-0.5 truncate">
-                📍 {profile.region}
-              </p>
-            )}
-          </div>
-        </div>
+          </>
         )}
       </div>
 
@@ -267,9 +261,9 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Collection Card — this card is the share card. Tapping the share
-          icon expands the same card into a Save/Share preview inline,
-          instead of opening a separate full-screen surface. */}
+      {/* Collection Card — this card IS the share card. Tapping the share
+          icon expands a Save/Share preview inline, capturing this exact
+          card (see the conditional ref below) — no separate export render. */}
       {isLoading ? (
         <div className="px-5">
           <div className="h-64 rounded-2xl bg-card/40 border border-border/30 animate-pulse" />
@@ -295,7 +289,7 @@ export default function Profile() {
       ) : (
         <div className="px-5 space-y-3">
           <CollectionCard
-            mode="live"
+            ref={showShareCard ? captureRef : null}
             top6={top6}
             rarityBreakdown={rarityBreakdown}
             getEffectiveRarity={getEffectiveRarity}
@@ -308,25 +302,11 @@ export default function Profile() {
             rarePulls={rarePulls}
             totalCans={collected.length}
             rank={rank}
+            userName={profile?.full_name}
           />
 
           {showShareCard && (
             <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
-              {/* Hidden capture-mode card for html2canvas — not visible to user */}
-              <div style={{ position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' }}>
-                <CollectionCard
-                  ref={captureRef}
-                  mode="capture"
-                  top6={top6}
-                  rarityBreakdown={rarityBreakdown}
-                  sharedCansMap={sharedCansMap}
-                  userName={profile?.full_name}
-                  score={score}
-                  totalCans={collected.length}
-                  rarePulls={rarePulls}
-                />
-              </div>
-
               {generating && (
                 <div className="flex flex-col items-center gap-2 py-4">
                   <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -369,36 +349,14 @@ export default function Profile() {
               </Button>
             </div>
           )}
-
-          {/* Wishlist/Favourites have no other home in the new layout (Score,
-              Rare Pulls, and Cans all moved into the Collection Card above)
-              — kept as a small secondary row rather than dropped silently. */}
-          <div className="grid grid-cols-2 gap-3">
-            <StatBox icon={Bookmark} label="Wishlist" value={wishlist} />
-            <StatBox icon={Heart} label="Favourites" value={favourites} glow />
-          </div>
-
-          <Button
-            variant="outline"
-            className="w-full justify-start font-mono text-xs gap-2 border-primary/30 text-primary hover:bg-primary/10"
-            onClick={handleShareProfileLink}
-          >
-            <Share2 className="w-4 h-4" /> Share Profile Link
-          </Button>
         </div>
       )}
 
       <TradeHistory userId={user?.id} user={user} onLogTrade={() => setShowTradeLog(true)} />
 
-      {/* Utility tier: settings & log out — stays last, the standard trailing position */}
+      {/* Utility tier: log out — stays last, the standard trailing position.
+          Settings now lives as the gear icon in the header. */}
       <div className="px-5 space-y-1">
-        <Button
-          variant="ghost"
-          className="w-full justify-start font-mono text-xs gap-2 text-muted-foreground hover:text-foreground"
-          onClick={() => navigate('/settings')}
-        >
-          <Settings className="w-4 h-4" /> Settings
-        </Button>
         <Button
           variant="ghost"
           className="w-full justify-start font-mono text-xs gap-2 text-destructive hover:bg-destructive/10"

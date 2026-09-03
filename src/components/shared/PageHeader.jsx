@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
 import { cn } from '@/lib/utils';
 
-export default function PageHeader({ title, subtitle, action, bellClassName }) {
+export default function PageHeader({ title, subtitle, action, showBell = true, bellClassName }) {
   const { user } = useAuth();
   const { unreadCount } = useNotifications(user);
 
@@ -16,21 +16,23 @@ export default function PageHeader({ title, subtitle, action, bellClassName }) {
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         {action}
-        <Link
-          to="/notifications"
-          aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
-          className={cn(
-            'relative w-11 h-11 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0',
-            bellClassName
-          )}
-        >
-          <Bell className="w-4 h-4" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive rounded-full flex items-center justify-center text-[9px] font-mono font-bold text-white">
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
-          )}
-        </Link>
+        {showBell && (
+          <Link
+            to="/notifications"
+            aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+            className={cn(
+              'relative w-11 h-11 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0',
+              bellClassName
+            )}
+          >
+            <Bell className="w-4 h-4" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive rounded-full flex items-center justify-center text-[9px] font-mono font-bold text-white">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </Link>
+        )}
       </div>
     </div>
   );

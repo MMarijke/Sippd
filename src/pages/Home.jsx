@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -79,27 +80,43 @@ export default function Home() {
     enabled: !!user?.id,
   });
 
-  const achievements = computeAchievements(collection, streak, votes.length, user?.created_at);
+  const achievements = useMemo(
+    () => computeAchievements(collection, streak, votes.length, user?.created_at),
+    [collection, streak, votes.length, user?.created_at]
+  );
   const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements);
 
-  const sharedCansMap = Object.fromEntries(sharedCans.map(c => [c.id, c]));
+  const sharedCansMap = useMemo(
+    () => Object.fromEntries(sharedCans.map(c => [c.id, c])),
+    [sharedCans]
+  );
 
-  const collected = collection.filter(c => c.status === 'collected');
+  const collected = useMemo(
+    () => collection.filter(c => c.status === 'collected'),
+    [collection]
+  );
 
   const getEffectiveRarity = (item) => {
     const sc = sharedCansMap[item.can_id];
     return sc ? getDisplayRarity(sc) : (item.can_rarity || 'Common');
   };
 
-  const rarePulls = collected.filter(c =>
-    ['Rare', 'Ultra Rare', 'Legendary'].includes(getEffectiveRarity(c))
-  ).length;
+  const rarePulls = useMemo(
+    () => collected.filter(c =>
+      ['Rare', 'Ultra Rare', 'Legendary'].includes(getEffectiveRarity(c))
+    ).length,
+    [collected, sharedCansMap]
+  );
 
-  const score = collected.reduce((acc, c) => {
-    return acc + getItemScore(c, sharedCansMap[c.can_id]);
-  }, 0);
+  const score = useMemo(
+    () => collected.reduce((acc, c) => acc + getItemScore(c, sharedCansMap[c.can_id]), 0),
+    [collected, sharedCansMap]
+  );
 
-  const wishlistCount = collection.filter(c => c.status === 'wishlist').length;
+  const wishlistCount = useMemo(
+    () => collection.filter(c => c.status === 'wishlist').length,
+    [collection]
+  );
 
   return (
     <div>

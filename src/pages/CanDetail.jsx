@@ -12,7 +12,7 @@ import { useFavourite } from '@/hooks/useFavourite';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import RarityBadge from '@/components/shared/RarityBadge';
-import { getDisplayRarity, getConfidence, RARITY_ORDER, VOTE_FIELDS } from '@/lib/rarityConsensus';
+import { getDisplayRarity, getConfidence, RARITY_ORDER } from '@/lib/rarityConsensus';
 import { cn } from '@/lib/utils';
 import DeleteConfirmDialog from '@/components/candetail/DeleteConfirmDialog';
 import EditEntrySheet from '@/components/candetail/EditEntrySheet';
@@ -160,7 +160,8 @@ export default function CanDetail() {
         {/* Back */}
         <button
           onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center border border-border"
+          aria-label="Back"
+          className="absolute top-4 left-4 w-11 h-11 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center border border-border"
         >
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
@@ -170,8 +171,10 @@ export default function CanDetail() {
           <div className="absolute top-4 right-4 flex gap-2">
             <button
               onClick={() => toggleFavourite({ collectionItem: item, sharedCan: can })}
+              aria-label={item.is_favourite ? 'Remove from favourites' : 'Add to favourites'}
+              aria-pressed={item.is_favourite}
               className={cn(
-                'w-10 h-10 rounded-full backdrop-blur-sm flex items-center justify-center border transition-colors',
+                'w-11 h-11 rounded-full backdrop-blur-sm flex items-center justify-center border transition-colors',
                 item.is_favourite
                   ? 'bg-primary/20 border-primary/40'
                   : 'bg-background/80 border-border'
@@ -181,7 +184,8 @@ export default function CanDetail() {
             </button>
             <button
               onClick={() => setShowEdit(true)}
-              className="w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center border border-border"
+              aria-label="Edit entry"
+              className="w-11 h-11 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center border border-border"
             >
               <Pencil className="w-4 h-4 text-foreground" />
             </button>

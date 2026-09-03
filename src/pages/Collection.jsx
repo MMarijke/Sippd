@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -89,7 +89,10 @@ export default function Collection() {
     enabled: !!user?.id,
   });
 
-  const sharedCansMap = Object.fromEntries(sharedCans.map(c => [c.id, c]));
+  const sharedCansMap = useMemo(
+    () => Object.fromEntries(sharedCans.map(c => [c.id, c])),
+    [sharedCans]
+  );
 
   const achievements = computeAchievements(collection, streak, votes.length, user?.created_at);
   const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements);
@@ -99,7 +102,11 @@ export default function Collection() {
     return sc ? getDisplayRarity(sc) : (item.can_rarity || 'Common');
   };
 
-  const filtered = collection
+  // Was recomputing this full filter+sort pass on every keystroke in the
+  // search box, over the entire collection — the page most likely to hold
+  // hundreds of items. sharedCansMap is memoized above specifically so this
+  // dependency is stable across renders that don't actually change it.
+  const filtered = useMemo(() => collection
     .filter(item => {
       if (filters.status !== 'all' && item.status !== filters.status) return false;
       if (filters.rarity !== 'all' && getEffectiveRarity(item) !== filters.rarity) return false;
@@ -122,7 +129,7 @@ export default function Collection() {
       if (sort === 'rarity_desc') return RARITY_ORDER.indexOf(getEffectiveRarity(b)) - RARITY_ORDER.indexOf(getEffectiveRarity(a));
       if (sort === 'rarity_asc') return RARITY_ORDER.indexOf(getEffectiveRarity(a)) - RARITY_ORDER.indexOf(getEffectiveRarity(b));
       return 0;
-    });
+    }), [collection, filters, searchQuery, sharedCansMap]);
 
   return (
     <div className="space-y-4">

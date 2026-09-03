@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Star, Package } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import RarityBadge from '@/components/shared/RarityBadge';
 import CanImageBox from '@/components/shared/CanImageBox';
 import { getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
@@ -16,11 +18,17 @@ const MEDAL_COLORS = [
   'text-amber-600 border-amber-600/40 bg-amber-600/5',
 ];
 
+// Rows are heavier than Collection's grid cards (medal styling, favourite
+// button + count), so a smaller page than Collection's PAGE_SIZE=60 keeps
+// first paint light while still rendering enough to feel like a real list.
+const PAGE_SIZE = 30;
+
 export default function MostWanted() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { toggleFavourite } = useFavourite();
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const { data: sharedCans = [], isLoading } = useQuery({
     queryKey: ['shared-cans'],
@@ -106,7 +114,7 @@ export default function MostWanted() {
 
   return (
     <div className="px-5 pt-4 space-y-2">
-      {ranked.map((can, i) => {
+      {ranked.slice(0, visibleCount).map((can, i) => {
         const myItem = myCollectionMap[can.id];
         const isMedal = i < 3;
         const confidence = getConfidence(can.total_votes);
@@ -180,6 +188,18 @@ export default function MostWanted() {
           </div>
         );
       })}
+
+      {ranked.length > visibleCount && (
+        <div className="flex justify-center pt-4">
+          <Button
+            variant="outline"
+            className="font-mono text-xs border-primary/30 text-primary hover:bg-primary/10"
+            onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+          >
+            Load More ({ranked.length - visibleCount} remaining)
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { Search, Package, Loader2 } from 'lucide-react';
+import { Search, Package, Loader2, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
@@ -110,17 +110,22 @@ export default function Scan() {
 
   return (
     <div className="flex flex-col gap-0 pb-8">
-      <PageHeader title="Scan / Search" subtitle="Find a can or add a new one" />
+      <PageHeader
+        title="Scan / Search"
+        subtitle="Find a can or add a new one"
+        action={
+          <Button
+            size="sm"
+            variant="outline"
+            className="font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+            onClick={() => { setSelectedCan(null); setMode('add'); }}
+          >
+            <Plus className="w-3.5 h-3.5" /> Add
+          </Button>
+        }
+      />
 
-      <BarcodeScanner onDetected={handleBarcodeLookup} />
-
-      <div className="flex items-center gap-3 px-5 mt-6">
-        <div className="flex-1 h-px bg-border" />
-        <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest">Or search manually</span>
-        <div className="flex-1 h-px bg-border" />
-      </div>
-
-      <div className="px-5 mt-4 space-y-3">
+      <div className="px-5 space-y-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -195,13 +200,24 @@ export default function Scan() {
         )}
       </div>
 
-      <div className="text-center mt-8">
-        <button
+      <div className="mt-6">
+        <BarcodeScanner onDetected={handleBarcodeLookup} />
+      </div>
+
+      <div className="flex items-center gap-3 px-5 mt-6">
+        <div className="flex-1 h-px bg-border" />
+        <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest">OR</span>
+        <div className="flex-1 h-px bg-border" />
+      </div>
+
+      <div className="px-5 mt-4">
+        <Button
+          variant="outline"
+          className="w-full font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
           onClick={() => { setSelectedCan(null); setMode('add'); }}
-          className="text-[11px] font-mono text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
         >
-          + Add can manually
-        </button>
+          <Plus className="w-3.5 h-3.5" /> Add Manually
+        </Button>
       </div>
     </div>
   );

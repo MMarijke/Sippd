@@ -18,6 +18,49 @@ export default function RarityHero({ collected, sharedCansMap = {} }) {
 
   const data = isEmpty ? [{ name: 'Empty', value: 1 }] : tiers;
 
+  // Count label + rounded end caps, drawn from inside the Pie's own label
+  // callback because that's the only place recharts hands over the real
+  // computed pixel geometry (cx/cy/radius) — percentages alone can't place
+  // a label outside the ring or a cap at the arc's true start/end.
+  const renderArcLabel = (props) => {
+    if (isEmpty) return null;
+    const { cx, cy, midAngle, innerRadius, outerRadius, value, index, name } = props;
+    const RADIAN = Math.PI / 180;
+    const color = RARITY_HEX[name] || '#6B7280';
+    const pathRadius = (innerRadius + outerRadius) / 2;
+    const strokeWidth = outerRadius - innerRadius;
+    const labelRadius = outerRadius + 16;
+    const lx = cx + labelRadius * Math.cos(-midAngle * RADIAN);
+    const ly = cy + labelRadius * Math.sin(-midAngle * RADIAN);
+
+    const caps = [];
+    if (index === 0) {
+      const sx = cx + pathRadius * Math.cos(-180 * RADIAN);
+      const sy = cy + pathRadius * Math.sin(-180 * RADIAN);
+      caps.push(<circle key="cap-start" cx={sx} cy={sy} r={strokeWidth / 2} fill={color} />);
+    }
+    if (index === data.length - 1) {
+      const ex = cx + pathRadius * Math.cos(0);
+      const ey = cy + pathRadius * Math.sin(0);
+      caps.push(<circle key="cap-end" cx={ex} cy={ey} r={strokeWidth / 2} fill={color} />);
+    }
+
+    return (
+      <g key={`arc-label-${name}`}>
+        {caps}
+        <text
+          x={lx}
+          y={ly}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          style={{ fill: 'hsl(var(--foreground))', fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-mono)' }}
+        >
+          {value}
+        </text>
+      </g>
+    );
+  };
+
   return (
     <div>
       <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground text-center">
@@ -33,12 +76,14 @@ export default function RarityHero({ collected, sharedCansMap = {} }) {
               cy="100%"
               startAngle={180}
               endAngle={0}
-              innerRadius="60%"
-              outerRadius="100%"
+              innerRadius="58%"
+              outerRadius="68%"
               paddingAngle={0}
               dataKey="value"
               stroke="none"
               isAnimationActive={false}
+              label={renderArcLabel}
+              labelLine={false}
             >
               {data.map((entry) => (
                 <Cell
@@ -62,14 +107,13 @@ export default function RarityHero({ collected, sharedCansMap = {} }) {
 
       {!isEmpty && (
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mt-4">
-          {tiers.map(({ name, value }) => (
+          {tiers.map(({ name }) => (
             <div key={name} className="flex items-center gap-1.5">
               <div
                 className="w-2 h-2 rounded-full flex-shrink-0"
                 style={{ backgroundColor: RARITY_HEX[name] }}
               />
               <span className="text-xs font-mono text-muted-foreground">{name}</span>
-              <span className="text-xs font-mono font-semibold text-foreground">{value}</span>
             </div>
           ))}
         </div>

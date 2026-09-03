@@ -109,7 +109,7 @@ export default function Scan() {
   }
 
   return (
-    <div className="flex flex-col gap-0 pb-8">
+    <div className="flex flex-col gap-0">
       <PageHeader
         title="Scan / Search"
         subtitle="Find a can or add a new one"

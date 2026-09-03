@@ -106,7 +106,7 @@ export default function Feed() {
   const followsNobody = followingIds.size === 0;
 
   return (
-    <div className="space-y-0 pb-24">
+    <div className="space-y-0">
       <PageHeader
         title="Feed"
         subtitle="Community activity"

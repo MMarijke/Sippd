@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 
@@ -23,6 +24,9 @@ export function useFavourite() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-collection'] });
       queryClient.invalidateQueries({ queryKey: ['shared-cans'] });
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to update favourite');
     },
   });
 

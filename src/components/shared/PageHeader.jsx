@@ -2,9 +2,8 @@ import { Link } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
-import { cn } from '@/lib/utils';
 
-export default function PageHeader({ title, subtitle, action, showBell = true, bellClassName }) {
+export default function PageHeader({ title, subtitle, action, showBell = true }) {
   const { user } = useAuth();
   const { unreadCount } = useNotifications(user);
 
@@ -20,10 +19,7 @@ export default function PageHeader({ title, subtitle, action, showBell = true, b
           <Link
             to="/notifications"
             aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
-            className={cn(
-              'relative w-11 h-11 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0',
-              bellClassName
-            )}
+            className="relative h-8 w-8 rounded-md bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (

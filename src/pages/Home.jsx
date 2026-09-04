@@ -124,7 +124,6 @@ export default function Home() {
       <PageHeader
         title="SIPPD"
         subtitle={profile?.full_name ? `${profile.full_name}'s vault` : 'Your Energy Drink Vault'}
-        bellClassName="h-8 w-8 rounded-md"
         action={
           <Link to="/scan">
             <Button size="sm" className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">

@@ -9,9 +9,12 @@ import { proxyImageUrl } from '@/lib/cardCapture';
 // This card IS the share card — the ref forwarded here is what
 // useCardCapture's html2canvas call captures directly, so there is no
 // separate "capture mode" render to keep in sync with what's on screen.
-// Images route through proxyImageUrl/crossOrigin because html2canvas
-// taints on non-Supabase-hosted images (e.g. Open Food Facts imports)
-// otherwise — that's a capture requirement, not a data/masking difference.
+// Images only route through proxyImageUrl/crossOrigin while `sharing` is
+// true (i.e. actually being captured) — html2canvas taints on cross-origin
+// images without that, but it also requires the target host to be on
+// image-proxy's allowlist, which arbitrary user-typed can image URLs won't
+// always be. Loading the raw URL the rest of the app uses whenever we're
+// not mid-capture keeps ordinary browsing from depending on that allowlist.
 const CollectionCard = forwardRef(function CollectionCard(
   {
     top6,
@@ -94,11 +97,11 @@ const CollectionCard = forwardRef(function CollectionCard(
               <div className="aspect-square" style={{ backgroundColor: item.can_bg_color || '#0D2B2B' }}>
                 {item.can_image_url ? (
                   <img
-                    src={proxyImageUrl(item.can_image_url)}
+                    src={sharing ? proxyImageUrl(item.can_image_url) : item.can_image_url}
                     alt={item.can_name}
                     loading="lazy"
                     decoding="async"
-                    crossOrigin="anonymous"
+                    crossOrigin={sharing ? 'anonymous' : undefined}
                     className="w-full h-full object-contain"
                   />
                 ) : (

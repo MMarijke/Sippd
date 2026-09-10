@@ -6,6 +6,7 @@ import { X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
 const EMOJIS = ['📦', '🔥', '⭐', '💎', '🏆', '🌊', '🎯', '🍋', '🧊', '🌈', '🎃', '🚀'];
@@ -85,8 +86,9 @@ export default function CrateFormDialog({ crate, onClose, userId }) {
 
         {/* Name */}
         <div>
-          <p className="text-xs font-mono text-muted-foreground mb-1.5">Name <span className="text-destructive">*</span></p>
+          <Label htmlFor="crate-name" className="text-xs font-mono text-muted-foreground mb-1.5 block">Name <span className="text-destructive">*</span></Label>
           <Input
+            id="crate-name"
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder="e.g. Rare Finds, Summer Editions..."
@@ -97,8 +99,9 @@ export default function CrateFormDialog({ crate, onClose, userId }) {
 
         {/* Description */}
         <div>
-          <p className="text-xs font-mono text-muted-foreground mb-1.5">Description <span className="text-muted-foreground">(optional)</span></p>
+          <Label htmlFor="crate-description" className="text-xs font-mono text-muted-foreground mb-1.5 block">Description <span className="text-muted-foreground">(optional)</span></Label>
           <Input
+            id="crate-description"
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder="Short description..."

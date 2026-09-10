@@ -89,8 +89,9 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
 
           {/* Name */}
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Can Name</Label>
+            <Label htmlFor="edit-can-name" className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Can Name</Label>
             <Input
+              id="edit-can-name"
               value={form.can_name}
               onChange={e => update('can_name', e.target.value)}
               className="bg-secondary border-border font-body"
@@ -100,16 +101,18 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
           {/* Brand + Flavour */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Brand</Label>
+              <Label htmlFor="edit-can-brand" className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Brand</Label>
               <Input
+                id="edit-can-brand"
                 value={form.can_brand}
                 onChange={e => update('can_brand', e.target.value)}
                 className="bg-secondary border-border font-body"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Flavour</Label>
+              <Label htmlFor="edit-can-flavour" className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Flavour</Label>
               <Input
+                id="edit-can-flavour"
                 value={form.can_flavour}
                 onChange={e => update('can_flavour', e.target.value)}
                 className="bg-secondary border-border font-body"
@@ -119,8 +122,9 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
 
           {/* Edition */}
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Edition</Label>
+            <Label htmlFor="edit-can-edition" className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Edition</Label>
             <Input
+              id="edit-can-edition"
               value={form.can_edition}
               onChange={e => update('can_edition', e.target.value)}
               className="bg-secondary border-border font-body"
@@ -193,6 +197,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
                   </label>
                 ) : (
                   <Input
+                    aria-label="Image URL"
                     value={form.can_image_url}
                     onChange={e => update('can_image_url', e.target.value)}
                     placeholder="https://example.com/can.jpg"
@@ -249,8 +254,9 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
 
           {/* Notes */}
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Notes</Label>
+            <Label htmlFor="edit-can-notes" className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Notes</Label>
             <Textarea
+              id="edit-can-notes"
               value={form.notes}
               onChange={e => update('notes', e.target.value)}
               placeholder="Where you found it, condition, trade value..."

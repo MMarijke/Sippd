@@ -276,10 +276,11 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
       )}
 
       <div className="space-y-1.5">
-        <Label className={cn('text-xs font-mono uppercase tracking-wider', errors.name ? 'text-destructive' : 'text-muted-foreground')}>
+        <Label htmlFor="addcan-name" className={cn('text-xs font-mono uppercase tracking-wider', errors.name ? 'text-destructive' : 'text-muted-foreground')}>
           Can Name {errors.name && <span className="normal-case">— required</span>}
         </Label>
         <Input
+          id="addcan-name"
           value={form.name}
           onChange={e => update('name', e.target.value)}
           placeholder="e.g. Monster Ultra Paradise"
@@ -290,10 +291,11 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className={cn('text-xs font-mono uppercase tracking-wider', errors.brand ? 'text-destructive' : 'text-muted-foreground')}>
+          <Label htmlFor="addcan-brand" className={cn('text-xs font-mono uppercase tracking-wider', errors.brand ? 'text-destructive' : 'text-muted-foreground')}>
             Brand {errors.brand && <span className="normal-case">— required</span>}
           </Label>
           <Input
+            id="addcan-brand"
             value={form.brand}
             onChange={e => update('brand', e.target.value)}
             placeholder="Monster"
@@ -302,8 +304,9 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Flavour / Variant</Label>
+          <Label htmlFor="addcan-flavour" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Flavour / Variant</Label>
           <Input
+            id="addcan-flavour"
             value={form.flavour}
             onChange={e => update('flavour', e.target.value)}
             placeholder="Ultra Paradise"
@@ -315,8 +318,9 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Edition</Label>
+          <Label htmlFor="addcan-edition" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Edition</Label>
           <Input
+            id="addcan-edition"
             value={form.edition}
             onChange={e => update('edition', e.target.value)}
             placeholder="2024 Special"
@@ -325,8 +329,9 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Date Added</Label>
+          <Label htmlFor="addcan-date-added" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Date Added</Label>
           <Input
+            id="addcan-date-added"
             type="date"
             value={form.date_added}
             onChange={e => update('date_added', e.target.value)}
@@ -337,8 +342,9 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
 
       {!prefillData?.id && (
         <div className="space-y-1.5">
-          <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Barcode (optional)</Label>
+          <Label htmlFor="addcan-barcode" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Barcode (optional)</Label>
           <Input
+            id="addcan-barcode"
             value={form.barcode}
             onChange={e => update('barcode', e.target.value.replace(/\D/g, ''))}
             placeholder="e.g. 5000112548167"
@@ -476,6 +482,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
                 </label>
               ) : (
                 <Input
+                  aria-label="Image URL"
                   value={form.image_url}
                   onChange={e => update('image_url', e.target.value)}
                   placeholder="https://example.com/can.jpg"
@@ -494,8 +501,9 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
       )}
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Notes (optional)</Label>
+        <Label htmlFor="addcan-notes" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Notes (optional)</Label>
         <Textarea
+          id="addcan-notes"
           value={form.notes}
           onChange={e => update('notes', e.target.value)}
           placeholder="Where you found it, condition, trade value..."

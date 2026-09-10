@@ -8,6 +8,7 @@ import { useTheme, THEMES } from '@/hooks/useTheme';
 import { ArrowLeft, ChevronRight, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -86,8 +87,9 @@ function EditNamePanel({ userId, initialName, onDone }) {
 
   return (
     <div className="space-y-4 px-5 pt-4">
-      <p className="text-xs font-mono text-muted-foreground">Enter your new display name.</p>
+      <Label htmlFor="settings-display-name" className="text-xs font-mono text-muted-foreground block">Enter your new display name.</Label>
       <Input
+        id="settings-display-name"
         value={value}
         onChange={e => setValue(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') save(); }}
@@ -123,8 +125,9 @@ function EditRegionPanel({ userId, initialRegion, onDone }) {
 
   return (
     <div className="space-y-4 px-5 pt-4">
-      <p className="text-xs font-mono text-muted-foreground">Your city or country (shown on leaderboard)</p>
+      <Label htmlFor="settings-region" className="text-xs font-mono text-muted-foreground block">Your city or country (shown on leaderboard)</Label>
       <Input
+        id="settings-region"
         value={value}
         onChange={e => setValue(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') save(); }}

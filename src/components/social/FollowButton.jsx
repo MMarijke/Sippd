@@ -55,7 +55,7 @@ export default function FollowButton({ targetUser, currentUser }) {
       <Button
         size="sm"
         variant="outline"
-        className="font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
+        className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
         onClick={() => unfollowMutation.mutate()}
         disabled={unfollowMutation.isPending}
       >
@@ -70,7 +70,7 @@ export default function FollowButton({ targetUser, currentUser }) {
       <Button
         size="sm"
         variant="outline"
-        className="font-mono text-xs gap-1.5 border-border text-muted-foreground"
+        className="h-11 font-mono text-xs gap-1.5 border-border text-muted-foreground"
         disabled
       >
         <Clock className="w-3.5 h-3.5" />
@@ -82,7 +82,7 @@ export default function FollowButton({ targetUser, currentUser }) {
   return (
     <Button
       size="sm"
-      className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+      className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
       onClick={() => followMutation.mutate()}
       disabled={followMutation.isPending}
     >

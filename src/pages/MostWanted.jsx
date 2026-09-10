@@ -101,6 +101,9 @@ export default function MostWanted() {
       queryClient.invalidateQueries({ queryKey: ['user-collection'] });
       toast.success(`Added ${can.name} to wishlist!`);
     },
+    onError: (error, can) => {
+      toast.error(`Failed to add ${can.name} to wishlist: ` + (error?.message || 'Unknown error'));
+    },
   });
 
   const handleCanTap = (can) => {
@@ -240,7 +243,7 @@ export default function MostWanted() {
         <div className="flex justify-center pt-4">
           <Button
             variant="outline"
-            className="font-mono text-xs border-primary/30 text-primary hover:bg-primary/10"
+            className="h-11 font-mono text-xs border-primary/30 text-primary hover:bg-primary/10"
             onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
           >
             Load More ({ranked.length - visibleCount} remaining)

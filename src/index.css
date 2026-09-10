@@ -96,7 +96,10 @@
     --card: 220 12% 9%;
     --popover: 220 12% 9%;
     --primary: 220 9% 56%;
-    --primary-foreground: 0 0% 100%;
+    /* Dark foreground (matching every other theme's on-primary text), not
+       white — white-on-this-gray computes to ~3.4:1, below WCAG AA's 4.5:1
+       floor for small text like the header Scan button's label. */
+    --primary-foreground: 240 20% 4%;
     --secondary: 220 10% 18%;
     --muted: 220 10% 9%;
     --accent: 185 100% 50%;

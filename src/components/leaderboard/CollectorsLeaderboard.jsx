@@ -57,6 +57,7 @@ export default function CollectorsLeaderboard() {
         <div className="flex flex-1 bg-secondary rounded-lg border border-border p-0.5">
           <Button
             variant="ghost"
+            aria-pressed={sortBy === 'total'}
             className={cn('flex-1 h-8 font-mono text-xs', sortBy === 'total' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setSortBy('total')}
           >
@@ -64,6 +65,7 @@ export default function CollectorsLeaderboard() {
           </Button>
           <Button
             variant="ghost"
+            aria-pressed={sortBy === 'rare'}
             className={cn('flex-1 h-8 font-mono text-xs', sortBy === 'rare' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setSortBy('rare')}
           >

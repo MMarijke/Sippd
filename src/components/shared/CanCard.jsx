@@ -69,6 +69,8 @@ export default function CanCard({ can, onClick, showStatus, sharedCan, onFavouri
           <button
             onClick={handleStar}
             disabled={isPending}
+            aria-label={isFavourite ? 'Remove from favourites' : 'Add to favourites'}
+            aria-pressed={isFavourite}
             className="absolute top-2 right-2 w-6 h-6 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center transition-colors hover:bg-background/90"
           >
             <Star className={cn('w-3.5 h-3.5 transition-colors', isFavourite ? 'fill-primary text-primary' : 'text-muted-foreground')} />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Trophy, Star, Search, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -37,9 +37,11 @@ export default function Leaderboard() {
 
       {/* Tab toggle */}
       <div className="px-5 pb-4">
-        <div className="flex bg-secondary rounded-lg border border-border p-0.5">
+        <div role="tablist" aria-label="Leaderboard view" className="flex bg-secondary rounded-lg border border-border p-0.5">
           <Button
             variant="ghost"
+            role="tab"
+            aria-selected={tab === 'collectors'}
             className={cn('flex-1 h-8 font-mono text-xs gap-1.5', tab === 'collectors' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setTab('collectors')}
           >
@@ -47,6 +49,8 @@ export default function Leaderboard() {
           </Button>
           <Button
             variant="ghost"
+            role="tab"
+            aria-selected={tab === 'mostwanted'}
             className={cn('flex-1 h-8 font-mono text-xs gap-1.5', tab === 'mostwanted' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setTab('mostwanted')}
           >
@@ -54,6 +58,8 @@ export default function Leaderboard() {
           </Button>
           <Button
             variant="ghost"
+            role="tab"
+            aria-selected={tab === 'regional'}
             className={cn('flex-1 h-8 font-mono text-xs gap-1.5', tab === 'regional' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setTab('regional')}
           >

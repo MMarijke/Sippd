@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Radio, RefreshCw, Users } from 'lucide-react';
@@ -56,65 +56,70 @@ export default function FeedPreview() {
     enabled: !!user?.id,
   });
 
-  const goToFeed = (e, tab) => {
-    e.stopPropagation();
+  const goToFeed = (tab) => {
     navigate(tab === 'following' ? '/feed?tab=following' : '/feed');
   };
 
-  const handleRefresh = (e) => {
-    e.stopPropagation();
-    refetch();
-  };
-
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={() => navigate('/feed')}
-      onKeyDown={(e) => { if (e.key === 'Enter') navigate('/feed'); }}
-      className="bg-card border border-border rounded-2xl p-4 cursor-pointer hover:border-primary/40 transition-colors"
-    >
-      <div className="flex items-center justify-between mb-3">
-        <div>
+    // The card's own navigation is a full-area overlay Link (absolute
+    // inset-0, sibling — not ancestor — of the refresh/tab buttons) rather
+    // than a role="button" div wrapping them. That div's onKeyDown listened
+    // for Enter to navigate, but keydown bubbles: pressing Enter while
+    // focused on the inner Refresh button fired the outer navigation *in
+    // addition to* the button's own action. Making the buttons true
+    // siblings instead of interactive descendants removes that bubbling
+    // bug entirely, not just the ARIA nesting smell.
+    <div className="relative bg-card border border-border rounded-2xl p-4 hover:border-primary/40 transition-colors">
+      <Link
+        to="/feed"
+        aria-label="View feed"
+        className="absolute inset-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      />
+      <div className="relative flex items-center justify-between mb-3">
+        <div className="pointer-events-none">
           <h3 className="text-sm font-display font-semibold text-foreground tracking-wide">Feed</h3>
           <p className="text-[11px] font-mono text-muted-foreground">Community activity</p>
         </div>
         <button
-          onClick={handleRefresh}
+          onClick={() => refetch()}
           aria-label="Refresh feed"
-          className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center border border-border text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+          className="relative z-10 w-8 h-8 rounded-full bg-secondary flex items-center justify-center border border-border text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
         >
           <RefreshCw className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      <div className="flex bg-secondary rounded-lg border border-border p-0.5 mb-3">
+      <div role="tablist" aria-label="Feed scope" className="relative z-10 flex bg-secondary rounded-lg border border-border p-0.5 mb-3">
         <button
-          onClick={(e) => goToFeed(e, 'global')}
-          className="flex-1 h-7 font-mono text-[11px] rounded-md transition-colors gap-1.5 flex items-center justify-center bg-card text-primary shadow-sm"
+          role="tab"
+          aria-selected="true"
+          onClick={() => goToFeed('global')}
+          className="flex-1 h-7 font-mono text-[11px] rounded-md transition-colors gap-1.5 flex items-center justify-center bg-card text-primary shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Radio className="w-3 h-3" /> Global
         </button>
         <button
-          onClick={(e) => goToFeed(e, 'following')}
-          className="flex-1 h-7 font-mono text-[11px] rounded-md transition-colors gap-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground"
+          role="tab"
+          aria-selected="false"
+          onClick={() => goToFeed('following')}
+          className="flex-1 h-7 font-mono text-[11px] rounded-md transition-colors gap-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Users className="w-3 h-3" /> Following
         </button>
       </div>
 
       {isLoading ? (
-        <div className="space-y-2">
+        <div className="space-y-2 pointer-events-none">
           {[0, 1, 2].map(i => (
             <div key={i} className="h-11 rounded-xl bg-secondary/60 animate-pulse" />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div className="py-4 text-center">
+        <div className="py-4 text-center pointer-events-none">
           <p className="text-xs font-mono text-muted-foreground">No activity yet</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 pointer-events-none">
           {items.map(item => (
             <div key={item.id} className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0 text-xs font-display font-bold text-primary">

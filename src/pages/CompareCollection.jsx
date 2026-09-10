@@ -181,13 +181,15 @@ export default function CompareCollection() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2">
+        <div role="tablist" aria-label="Compare view" className="flex gap-2">
           {TABS.map(t => (
             <button
               key={t.key}
+              role="tab"
+              aria-selected={tab === t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                'flex-1 py-2 rounded-xl border text-[11px] font-mono transition-colors',
+                'flex-1 py-2 rounded-xl border text-[11px] font-mono transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 tab === t.key ? activeTabColors[t.key] : tabColors[t.key]
               )}
             >

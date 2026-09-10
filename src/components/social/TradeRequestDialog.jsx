@@ -101,7 +101,7 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
                   <p className="text-sm font-body font-medium text-foreground truncate">{selectedOffer.can_name}</p>
                   <p className="text-[11px] font-mono text-muted-foreground">{selectedOffer.can_brand}</p>
                 </div>
-                <button onClick={() => { setOfferCanId(''); setOfferSearch(''); }} className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground">
+                <button onClick={() => { setOfferCanId(''); setOfferSearch(''); }} aria-label="Clear selected offer" className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground">
                   <X className="w-3 h-3" />
                 </button>
               </div>

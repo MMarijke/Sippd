@@ -71,9 +71,9 @@ export const ACHIEVEMENT_DEFINITIONS = [
     check: ({ wishlist }) => wishlist.length >= 10, getDate: ({ wishlist }) => wishlist[9]?.created_at,
   },
   {
-    key: 'brand_completionist', title: 'Brand Completionist', description: 'Collect 5 variants from the same brand', icon: '🎯', incremental: true, goal: 5,
-    getProgress: ({ topBrand }) => ({ current: topBrand.count, goal: 5, label: topBrand.name ? `${topBrand.name} variants` : 'variants from one brand' }),
-    check: ({ topBrand }) => topBrand.count >= 5, getDate: ({ topBrand }) => topBrand.date || null,
+    key: 'brand_completionist', title: 'Brand Completionist', description: 'Collect 5 different variants from the same brand', icon: '🎯', incremental: true, goal: 5,
+    getProgress: ({ topVariantBrand }) => ({ current: topVariantBrand.count, goal: 5, label: topVariantBrand.name ? `${topVariantBrand.name} variants` : 'variants from one brand' }),
+    check: ({ topVariantBrand }) => topVariantBrand.count >= 5, getDate: ({ topVariantBrand }) => topVariantBrand.date || null,
   },
   {
     key: 'brand_collector', title: 'Brand Collector', description: 'Collect 5 cans from the same brand', icon: '🏪', incremental: true, goal: 5,
@@ -124,15 +124,29 @@ export function computeAchievements(collection, streak = 0, voteCount = 0, userC
 
   const brandCounts = {};
   const brandDates = {};
+  // Distinct can_name values seen per brand — "cans from a brand" (raw
+  // count, brandCounts below) and "variants from a brand" are genuinely
+  // different measures once flavours/editions repeat, so brand_completionist
+  // and brand_collector no longer collapse onto the same underlying number.
+  const brandVariants = {};
   collected.forEach(c => {
     const b = c.can_brand || 'Unknown';
     brandCounts[b] = (brandCounts[b] || 0) + 1;
     if (!brandDates[b]) brandDates[b] = c.created_at;
+    if (!brandVariants[b]) brandVariants[b] = new Set();
+    brandVariants[b].add(c.can_name || 'Unknown');
   });
   const topBrandName = Object.keys(brandCounts).sort((a, b) => brandCounts[b] - brandCounts[a])[0] || null;
   const topBrand = { name: topBrandName, count: topBrandName ? brandCounts[topBrandName] : 0, date: topBrandName ? brandDates[topBrandName] : null };
 
-  const ctx = { collected, wishlist, favourites, rarePlus, ultraRare, limited, streak, topBrand, voteCount, userCreatedDate };
+  const topVariantBrandName = Object.keys(brandVariants).sort((a, b) => brandVariants[b].size - brandVariants[a].size)[0] || null;
+  const topVariantBrand = {
+    name: topVariantBrandName,
+    count: topVariantBrandName ? brandVariants[topVariantBrandName].size : 0,
+    date: topVariantBrandName ? brandDates[topVariantBrandName] : null,
+  };
+
+  const ctx = { collected, wishlist, favourites, rarePlus, ultraRare, limited, streak, topBrand, topVariantBrand, voteCount, userCreatedDate };
 
   return ACHIEVEMENT_DEFINITIONS.map(def => {
     const unlocked = def.check(ctx);

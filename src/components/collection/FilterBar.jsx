@@ -10,7 +10,7 @@ export default function FilterBar({ filters, onFiltersChange, viewMode, onViewMo
     <div className="px-5 space-y-2">
       <div className="flex items-center gap-2">
         <Select value={filters.status} onValueChange={v => update('status', v)}>
-          <SelectTrigger className="flex-1 bg-secondary border-border text-xs font-mono h-9">
+          <SelectTrigger className="flex-1 bg-secondary border-border text-xs font-mono h-11">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -22,7 +22,7 @@ export default function FilterBar({ filters, onFiltersChange, viewMode, onViewMo
         </Select>
 
         <Select value={filters.rarity} onValueChange={v => update('rarity', v)}>
-          <SelectTrigger className="flex-1 bg-secondary border-border text-xs font-mono h-9">
+          <SelectTrigger className="flex-1 bg-secondary border-border text-xs font-mono h-11">
             <SelectValue placeholder="Rarity" />
           </SelectTrigger>
           <SelectContent>
@@ -76,7 +76,7 @@ export default function FilterBar({ filters, onFiltersChange, viewMode, onViewMo
         </button>
 
         <Select value={filters.sort || 'date_desc'} onValueChange={v => update('sort', v)}>
-          <SelectTrigger className="flex-1 bg-secondary border-border text-xs font-mono h-9">
+          <SelectTrigger className="flex-1 bg-secondary border-border text-xs font-mono h-11">
             <SelectValue placeholder="Sort" />
           </SelectTrigger>
           <SelectContent>

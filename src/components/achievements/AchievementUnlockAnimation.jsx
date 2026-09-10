@@ -129,8 +129,8 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
           fontWeight: 700,
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
-          color: '#00E5FF',
-          textShadow: '0 0 12px rgba(0,229,255,0.6)',
+          color: 'hsl(var(--primary))',
+          textShadow: '0 0 12px hsl(var(--primary) / 0.6)',
         }}>
           Achievement Unlocked
         </p>

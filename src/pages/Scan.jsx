@@ -1,17 +1,19 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { Search, Package, Loader2, Plus } from 'lucide-react';
+import { Search, Package, Loader2, Plus, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
 import RarityBadge from '@/components/shared/RarityBadge';
 import AddCanForm from '@/components/scan/AddCanForm';
 import BarcodeScanner from '@/components/scan/BarcodeScanner';
+import { toast } from 'sonner';
 
 async function lookupOpenFoodFacts(barcode) {
   const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+  if (!res.ok) throw new Error(`Open Food Facts lookup failed (${res.status})`);
   const data = await res.json();
   if (data.status !== 1 || !data.product) return null;
   const p = data.product;
@@ -31,7 +33,11 @@ export default function Scan() {
   const [selectedCan, setSelectedCan] = useState(null);
   const [offLookup, setOffLookup] = useState(false);
 
-  const { data: sharedCans = [] } = useQuery({
+  const {
+    data: sharedCans = [],
+    isError: isSharedCansError,
+    refetch: refetchSharedCans,
+  } = useQuery({
     queryKey: ['shared-cans'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -44,6 +50,10 @@ export default function Scan() {
     },
   });
 
+  useEffect(() => {
+    if (isSharedCansError) toast.error('Could not load the can database');
+  }, [isSharedCansError]);
+
   const handleBarcodeLookup = async (barcode) => {
     const match = sharedCans.find(c => c.barcode === barcode);
     if (match) {
@@ -52,10 +62,15 @@ export default function Scan() {
       return;
     }
     setOffLookup(true);
-    const result = await lookupOpenFoodFacts(barcode);
-    setOffLookup(false);
-    setSelectedCan(result || { barcode, _offMiss: true });
-    setMode('add');
+    try {
+      const result = await lookupOpenFoodFacts(barcode);
+      setSelectedCan(result || { barcode, _offMiss: true });
+      setMode('add');
+    } catch {
+      toast.error("Couldn't look up that barcode — check your connection and try again.");
+    } finally {
+      setOffLookup(false);
+    }
   };
 
   const filtered = useMemo(
@@ -140,12 +155,29 @@ export default function Scan() {
           />
         </div>
 
-        {searchQuery.length >= 2 && (
+        {offLookup && (
+          // Not gated behind searchQuery.length — a camera-triggered scan
+          // (the primary intended path) leaves the search box empty, and
+          // this lookup still needs to show it's working either way.
+          <div className="flex items-center justify-center gap-2 py-6 text-muted-foreground font-mono">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Checking Open Food Facts...
+          </div>
+        )}
+
+        {!offLookup && searchQuery.length >= 2 && (
           <div className="space-y-2">
-            {offLookup ? (
-              <div className="flex items-center justify-center gap-2 py-6 text-muted-foreground font-mono">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Checking Open Food Facts...
+            {isSharedCansError ? (
+              <div className="text-center py-6 space-y-3">
+                <p className="text-sm text-muted-foreground font-mono">Couldn't load the can database</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                  onClick={() => refetchSharedCans()}
+                >
+                  <RefreshCw className="w-3.5 h-3.5" /> Retry
+                </Button>
               </div>
             ) : filtered.length > 0 ? (
               filtered.slice(0, 10).map(can => (

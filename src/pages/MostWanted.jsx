@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Star, AlertCircle, RefreshCw } from 'lucide-react';
+import { Star, Plus, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import RarityBadge from '@/components/shared/RarityBadge';
@@ -106,19 +106,28 @@ export default function MostWanted() {
     },
   });
 
+  // Row tap is pure navigation now — it used to silently insert a wishlist
+  // row for an unowned can with zero confirmation, the one interactive
+  // surface in this tablist that mutated data on a bare tap while the other
+  // two tabs (Collectors/Regional) are read-only. CanDetail already renders
+  // a shared can gracefully whether or not the viewer owns it (falls back
+  // to shared_cans data, hides the owner-only actions), so it's a safe
+  // target regardless of ownership. The actual write now lives only behind
+  // the explicit "Add to Wishlist" button below.
   const handleCanTap = (can) => {
-    const myItem = myCollectionMap[can.id];
-    if (myItem) {
-      navigate(`/can/${can.id}`);
-    } else if (isLoadingMyCollection || isMyCollectionError) {
+    navigate(`/can/${can.id}`);
+  };
+
+  const handleAddToWishlist = (can) => {
+    if (isLoadingMyCollection || isMyCollectionError) {
       // Ownership status isn't known yet (still loading) or couldn't be
       // confirmed (fetch failed) — myCollectionMap would silently read as
-      // {} in both cases, which previously made an already-owned can look
-      // not-owned and fired a wishlist-add instead of navigating to it.
+      // {} in both cases, which would let this fire for a can the user
+      // already owns.
       toast.error("Couldn't check your collection — try again in a moment.");
-    } else {
-      addToWishlist.mutate(can);
+      return;
     }
+    addToWishlist.mutate(can);
   };
 
   if (isLoading) {
@@ -211,26 +220,36 @@ export default function MostWanted() {
             </button>
 
             <div className="flex flex-col items-center gap-1 flex-shrink-0">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (!myItem) {
-                    toast.info('Add this can to your collection first to favourite it.');
-                    return;
-                  }
-                  toggleFavourite({ collectionItem: myItem, sharedCan: can });
-                }}
-                aria-label={isFav ? 'Remove from favourites' : 'Add to favourites'}
-                aria-pressed={isFav}
-                className={cn(
-                  'w-11 h-11 rounded-full flex items-center justify-center transition-colors',
-                  isFav
-                    ? 'bg-primary/20 text-primary'
-                    : 'bg-secondary text-muted-foreground hover:text-primary'
-                )}
-              >
-                <Star className={cn('w-4 h-4', isFav && 'fill-primary')} />
-              </button>
+              {myItem ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFavourite({ collectionItem: myItem, sharedCan: can });
+                  }}
+                  aria-label={isFav ? 'Remove from favourites' : 'Add to favourites'}
+                  aria-pressed={isFav}
+                  className={cn(
+                    'w-11 h-11 rounded-full flex items-center justify-center transition-colors',
+                    isFav
+                      ? 'bg-primary/20 text-primary'
+                      : 'bg-secondary text-muted-foreground hover:text-primary'
+                  )}
+                >
+                  <Star className={cn('w-4 h-4', isFav && 'fill-primary')} />
+                </button>
+              ) : (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddToWishlist(can);
+                  }}
+                  disabled={addToWishlist.isPending}
+                  aria-label={`Add ${can.name} to wishlist`}
+                  className="w-11 h-11 rounded-full flex items-center justify-center bg-secondary text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              )}
               <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
                 {can.community_favourites || 0}
               </span>

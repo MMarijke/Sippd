@@ -120,8 +120,9 @@ export default function Login() {
 
           <form onSubmit={handleEmailSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Email</Label>
+              <Label htmlFor="login-email" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Email</Label>
               <Input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -132,8 +133,9 @@ export default function Login() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Password</Label>
+              <Label htmlFor="login-password" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Password</Label>
               <Input
+                id="login-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -146,8 +148,9 @@ export default function Login() {
 
             {mode === 'signup' && (
               <div className="space-y-1.5">
-                <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Confirm Password</Label>
+                <Label htmlFor="login-confirm-password" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Confirm Password</Label>
                 <Input
+                  id="login-confirm-password"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}

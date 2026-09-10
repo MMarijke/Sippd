@@ -195,7 +195,7 @@ export default function TradeLogDialog({ collection, onClose }) {
 
           <div className="space-y-3">
             <div>
-              <label className="text-xs font-mono text-muted-foreground mb-1 block">Traded With (optional)</label>
+              <label htmlFor="trade-partner-search" className="text-xs font-mono text-muted-foreground mb-1 block">Traded With (optional)</label>
               {tradedWithId ? (
                 <div className="flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-xl px-3 py-2">
                   <User className="w-4 h-4 text-primary flex-shrink-0" />
@@ -211,6 +211,7 @@ export default function TradeLogDialog({ collection, onClose }) {
               ) : (
                 <div className="relative">
                   <Input
+                    id="trade-partner-search"
                     value={userSearch || tradedWith}
                     onChange={e => {
                       const val = e.target.value;
@@ -251,8 +252,9 @@ export default function TradeLogDialog({ collection, onClose }) {
             </div>
 
             <div>
-              <label className="text-xs font-mono text-muted-foreground mb-1 block">Date</label>
+              <label htmlFor="tradelog-date" className="text-xs font-mono text-muted-foreground mb-1 block">Date</label>
               <Input
+                id="tradelog-date"
                 type="date"
                 value={tradeDate}
                 onChange={e => setTradeDate(e.target.value)}
@@ -260,8 +262,9 @@ export default function TradeLogDialog({ collection, onClose }) {
               />
             </div>
             <div>
-              <label className="text-xs font-mono text-muted-foreground mb-1 block">Notes (optional)</label>
+              <label htmlFor="tradelog-notes" className="text-xs font-mono text-muted-foreground mb-1 block">Notes (optional)</label>
               <Input
+                id="tradelog-notes"
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
                 placeholder="Any details about the trade..."
@@ -275,6 +278,7 @@ export default function TradeLogDialog({ collection, onClose }) {
               {showSaveTemplate ? (
                 <div className="flex gap-2">
                   <Input
+                    aria-label="Template name"
                     value={templateName}
                     onChange={e => setTemplateName(e.target.value)}
                     placeholder="Template name…"
@@ -327,10 +331,11 @@ export default function TradeLogDialog({ collection, onClose }) {
 
 function CanPicker({ label, items, selected, search, onSearch, onSelect, onClear }) {
   const showList = !selected && (search.length > 0 || items.length <= 8);
+  const inputId = `can-picker-${label.toLowerCase().replace(/\s+/g, '-')}`;
 
   return (
     <div>
-      <label className="text-xs font-mono text-muted-foreground mb-1.5 block">{label}</label>
+      <label htmlFor={inputId} className="text-xs font-mono text-muted-foreground mb-1.5 block">{label}</label>
       {selected ? (
         <div className="flex items-center gap-3 bg-primary/5 border border-primary/20 rounded-xl px-3 py-2.5">
           <div
@@ -352,6 +357,7 @@ function CanPicker({ label, items, selected, search, onSearch, onSelect, onClear
       ) : (
         <div className="space-y-1.5">
           <Input
+            id={inputId}
             value={search}
             onChange={e => onSearch(e.target.value)}
             placeholder="Search your collection…"

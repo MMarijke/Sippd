@@ -86,7 +86,7 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
 
         <div className="flex-1 overflow-y-auto px-5 pb-6 space-y-5">
           <div>
-            <label className="text-xs font-mono text-muted-foreground mb-1.5 block">I'm offering…</label>
+            <label htmlFor="trade-offer-search" className="text-xs font-mono text-muted-foreground mb-1.5 block">I'm offering…</label>
             {selectedOffer ? (
               <div className="flex items-center gap-3 bg-primary/5 border border-primary/20 rounded-xl px-3 py-2.5">
                 <div
@@ -108,6 +108,7 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
             ) : (
               <div className="space-y-1.5">
                 <Input
+                  id="trade-offer-search"
                   value={offerSearch}
                   onChange={e => setOfferSearch(e.target.value)}
                   placeholder="Search your collection…"
@@ -141,8 +142,9 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
           </div>
 
           <div>
-            <label className="text-xs font-mono text-muted-foreground mb-1.5 block">I want… (describe the can)</label>
+            <label htmlFor="trade-want-can" className="text-xs font-mono text-muted-foreground mb-1.5 block">I want… (describe the can)</label>
             <Input
+              id="trade-want-can"
               value={wantCanName}
               onChange={e => setWantCanName(e.target.value)}
               placeholder="e.g. Monster Ultra Gold"
@@ -151,8 +153,9 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
           </div>
 
           <div>
-            <label className="text-xs font-mono text-muted-foreground mb-1.5 block">Message (optional)</label>
+            <label htmlFor="trade-message" className="text-xs font-mono text-muted-foreground mb-1.5 block">Message (optional)</label>
             <Input
+              id="trade-message"
               value={message}
               onChange={e => setMessage(e.target.value)}
               placeholder="Any note for the other collector…"

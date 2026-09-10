@@ -416,6 +416,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
                 key={r}
                 type="button"
                 onClick={() => update('rarity', r)}
+                aria-pressed={form.rarity === r}
                 className={cn(
                   'h-11 px-3 flex items-center rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider transition-all',
                   form.rarity === r
@@ -438,6 +439,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
               key={opt.value}
               type="button"
               onClick={() => update('status', opt.value)}
+              aria-pressed={form.status === opt.value}
               className={cn(
                 'flex-1 h-11 flex items-center justify-center rounded-lg text-xs font-mono font-semibold transition-all',
                 form.status === opt.value
@@ -498,6 +500,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
                 <button
                   type="button"
                   onClick={() => setImageMode('upload')}
+                  aria-pressed={imageMode === 'upload'}
                   className={cn('h-11 px-3 rounded-md text-xs font-mono transition-all flex items-center gap-1.5',
                     imageMode === 'upload' ? 'bg-card text-foreground' : 'text-muted-foreground')}
                 >
@@ -506,6 +509,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
                 <button
                   type="button"
                   onClick={() => setImageMode('url')}
+                  aria-pressed={imageMode === 'url'}
                   className={cn('h-11 px-3 rounded-md text-xs font-mono transition-all flex items-center gap-1.5',
                     imageMode === 'url' ? 'bg-card text-foreground' : 'text-muted-foreground')}
                 >

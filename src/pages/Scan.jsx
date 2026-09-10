@@ -135,7 +135,7 @@ export default function Scan() {
           <Button
             size="sm"
             variant="outline"
-            className="font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+            className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
             onClick={() => { setSelectedCan(null); setMode('add'); }}
           >
             <Plus className="w-3.5 h-3.5" /> Add
@@ -173,7 +173,7 @@ export default function Scan() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                  className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
                   onClick={() => refetchSharedCans()}
                 >
                   <RefreshCw className="w-3.5 h-3.5" /> Retry
@@ -214,7 +214,7 @@ export default function Scan() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                    className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
                     onClick={() => handleBarcodeLookup(searchQuery)}
                   >
                     <Search className="w-3.5 h-3.5" /> Look up on Open Food Facts
@@ -223,7 +223,7 @@ export default function Scan() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                    className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
                     onClick={() => { setSelectedCan({ name: searchQuery }); setMode('add'); }}
                   >
                     + Add "{searchQuery}" as new can
@@ -248,7 +248,7 @@ export default function Scan() {
       <div className="px-5 mt-4">
         <Button
           variant="outline"
-          className="w-full font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+          className="h-11 w-full font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
           onClick={() => { setSelectedCan(null); setMode('add'); }}
         >
           <Plus className="w-3.5 h-3.5" /> Add Manually

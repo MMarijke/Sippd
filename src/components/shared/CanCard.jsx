@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Star, CheckCircle, PackagePlus } from 'lucide-react';
 import RarityBadge from './RarityBadge';
 import CanImageBox from './CanImageBox';
@@ -6,7 +7,7 @@ import { getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
 import { useFavourite } from '@/hooks/useFavourite';
 import { cn } from '@/lib/utils';
 
-export default function CanCard({ can, onClick, showStatus, sharedCan, onFavouriteToggle, onAddToCrate }) {
+export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFavouriteToggle, onAddToCrate }) {
   const name = can.can_name || can.name;
   const brand = can.can_brand || can.brand;
   const imageUrl = can.can_image_url || can.image_url || sharedCan?.image_url;
@@ -32,17 +33,30 @@ export default function CanCard({ can, onClick, showStatus, sharedCan, onFavouri
   };
 
   return (
+    // Navigation is a full-area overlay Link (absolute inset-0, sibling of
+    // the star/add-to-crate buttons) rather than an ancestor <Link> wrapping
+    // them — nesting <button> inside <a> is invalid HTML and produces
+    // unpredictable focus/click behavior, the same bug class CanListItem's
+    // row was restructured to avoid.
     <motion.div
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
       className={cn(
-        'bg-card border rounded-xl overflow-hidden cursor-pointer transition-all group',
+        'relative bg-card border rounded-xl overflow-hidden cursor-pointer transition-all group',
         isFavourite
           ? 'border-primary/50 shadow-[0_0_12px_hsl(var(--primary)/0.12)]'
           : 'border-border hover:border-primary/30'
       )}
     >
-      <div className="aspect-square relative overflow-hidden">
+      {to && (
+        <Link
+          to={to}
+          aria-label={name}
+          className="absolute inset-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+      )}
+
+      <div className="aspect-square relative overflow-hidden pointer-events-none">
         <CanImageBox
           imageUrl={imageUrl}
           bgColor={can.can_bg_color}
@@ -64,19 +78,6 @@ export default function CanCard({ can, onClick, showStatus, sharedCan, onFavouri
           )}
         </div>
 
-        {/* Star button */}
-        {can.id && (
-          <button
-            onClick={handleStar}
-            disabled={isPending}
-            aria-label={isFavourite ? 'Remove from favourites' : 'Add to favourites'}
-            aria-pressed={isFavourite}
-            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center transition-colors hover:bg-background/90"
-          >
-            <Star className={cn('w-3.5 h-3.5 transition-colors', isFavourite ? 'fill-primary text-primary' : 'text-muted-foreground')} />
-          </button>
-        )}
-
         {showStatus && can.status && !can.id && (
           <div className="absolute top-2 right-2">
             <span className={`text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded ${
@@ -95,7 +96,25 @@ export default function CanCard({ can, onClick, showStatus, sharedCan, onFavouri
           </div>
         )}
       </div>
-      <div className="p-3 flex items-end justify-between gap-2">
+
+      {/* Star button */}
+      {can.id && (
+        <button
+          onClick={handleStar}
+          disabled={isPending}
+          aria-label={isFavourite ? 'Remove from favourites' : 'Add to favourites'}
+          aria-pressed={isFavourite}
+          className="absolute top-0 right-0 z-10 w-11 h-11 rounded-full flex items-center justify-center transition-colors"
+        >
+          {/* Real tap target is the full 44px button above; this stays a
+              small visual badge so it doesn't dominate a ~160px grid tile. */}
+          <span className="w-6 h-6 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center hover:bg-background/90 transition-colors">
+            <Star className={cn('w-3.5 h-3.5 transition-colors', isFavourite ? 'fill-primary text-primary' : 'text-muted-foreground')} />
+          </span>
+        </button>
+      )}
+
+      <div className="p-3 flex items-end justify-between gap-2 pointer-events-none">
         <div className="min-w-0">
           <p className="text-[11px] font-mono text-primary/70 uppercase tracking-wider truncate">{brand}</p>
           <h3 className="text-sm font-semibold text-foreground truncate mt-0.5">{name}</h3>
@@ -107,7 +126,7 @@ export default function CanCard({ can, onClick, showStatus, sharedCan, onFavouri
           <button
             onClick={handleAddToCrate}
             aria-label="Add to crate"
-            className="w-11 h-11 rounded-lg bg-secondary/60 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors flex-shrink-0"
+            className="relative z-10 pointer-events-auto w-11 h-11 rounded-lg bg-secondary/60 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors flex-shrink-0"
           >
             <PackagePlus className="w-3.5 h-3.5" />
           </button>

@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, ScanLine, PackageOpen, AlertCircle, RefreshCw } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Search, ScanLine, PackageOpen, X, AlertCircle, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
@@ -190,6 +192,15 @@ export default function Collection() {
       return 0;
     }), [collection, filters, searchQuery, sharedCansMap]);
 
+  // Sort is excluded on purpose — it reorders results, it never excludes
+  // them, so it can't be the reason a search+filter combination landed on
+  // zero results and doesn't need a "clear" affordance of its own.
+  const hasActiveFilters = filters.status !== 'all' || filters.rarity !== 'all' || filters.favourites || searchQuery.length >= 2;
+  const clearFilters = () => {
+    setFilters(prev => ({ ...prev, status: 'all', rarity: 'all', favourites: false }));
+    setSearchQuery('');
+  };
+
   return (
     <div className="space-y-4">
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
@@ -257,13 +268,21 @@ export default function Collection() {
             title="No cans found"
             description={collection.length === 0 ? "Start scanning to build your vault!" : "Try adjusting your filters"}
             action={
-              collection.length === 0 && (
+              collection.length === 0 ? (
                 <Link to="/scan">
                   <Button className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground">
                     <ScanLine className="w-4 h-4" /> Add First Can
                   </Button>
                 </Link>
-              )
+              ) : hasActiveFilters ? (
+                <Button
+                  variant="outline"
+                  className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                  onClick={clearFilters}
+                >
+                  <X className="w-4 h-4" /> Clear Filters
+                </Button>
+              ) : null
             }
           />
         ) : (

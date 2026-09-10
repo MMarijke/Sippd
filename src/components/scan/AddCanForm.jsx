@@ -25,7 +25,7 @@ const STATUS_OPTIONS = [
   { value: 'duplicate', label: 'Duplicate' },
 ];
 
-export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
+export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCancel }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user: currentUser } = useAuth();
@@ -214,6 +214,11 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
           toast.success('Rare pull added to your vault!');
           onSuccess?.(pendingCan);
         }}
+        onScanNext={() => {
+          setShowReveal(false);
+          toast.success('Rare pull added to your vault!');
+          onScanNext?.(pendingCan);
+        }}
       />
     );
   }
@@ -227,6 +232,10 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         onComplete={() => {
           setShowAddedConfirmation(false);
           onSuccess?.(pendingCan);
+        }}
+        onScanNext={() => {
+          setShowAddedConfirmation(false);
+          onScanNext?.(pendingCan);
         }}
       />
     );

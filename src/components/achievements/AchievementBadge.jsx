@@ -9,7 +9,11 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
 
   if (size === 'compact') {
     return (
-      <div className="relative flex flex-col items-center text-center gap-1.5" title={description}>
+      <div
+        aria-label={`${title}: ${unlocked ? 'unlocked' : 'locked'}`}
+        className="relative flex flex-col items-center text-center gap-1.5"
+        title={description}
+      >
         <div
           className={cn(
             'w-11 h-11 rounded-xl flex items-center justify-center text-lg transition-all',
@@ -22,7 +26,7 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
         </div>
         {!unlocked && (
           <div className="absolute -top-1 -right-1">
-            <Lock className="w-3 h-3 text-muted-foreground" />
+            <Lock className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
           </div>
         )}
         <p className={cn('text-[9px] font-mono leading-tight truncate w-full', unlocked ? 'text-foreground' : 'text-muted-foreground')}>
@@ -34,6 +38,7 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
 
   return (
     <div
+      aria-label={`${title}: ${unlocked ? 'unlocked' : 'locked'}`}
       className={cn(
         'relative flex flex-col items-center text-center p-4 rounded-2xl border transition-all',
         unlocked
@@ -53,10 +58,11 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
         {icon}
       </div>
 
-      {/* Lock overlay */}
+      {/* Lock overlay — decorative; locked/unlocked state is already on the
+          card's own aria-label, so this stays out of the accessible name. */}
       {!unlocked && (
         <div className="absolute top-3 right-3">
-          <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+          <Lock className="w-3.5 h-3.5 text-muted-foreground" aria-hidden="true" />
         </div>
       )}
 
@@ -85,9 +91,13 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
         </div>
       )}
 
-      {unlocked && unlockedAt && (
+      {/* A handful of achievements (streaks, vote-count milestones) have no
+          natural collection-event timestamp to show here — they still need
+          a real text signal that they're unlocked, not just color/opacity,
+          so this doesn't stay conditional on unlockedAt being truthy. */}
+      {unlocked && (
         <p className="text-[9px] font-mono text-primary/60 mt-1.5 tracking-wider uppercase">
-          {format(new Date(unlockedAt), 'MMM d, yyyy')}
+          {unlockedAt ? format(new Date(unlockedAt), 'MMM d, yyyy') : 'Unlocked'}
         </p>
       )}
     </div>

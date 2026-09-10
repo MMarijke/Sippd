@@ -9,6 +9,7 @@ import { ArrowLeft, ChevronRight, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -228,7 +229,7 @@ function ChipToggle({ options, value, onChange }) {
           onClick={() => onChange(opt)}
           aria-pressed={value === opt}
           className={cn(
-            'px-3 py-1 rounded-full text-xs font-mono border transition-colors',
+            'h-11 px-3 flex items-center rounded-full text-xs font-mono border transition-colors',
             value === opt
               ? 'bg-primary/10 border-primary/40 text-primary'
               : 'bg-secondary border-border text-muted-foreground hover:border-primary/20'
@@ -481,15 +482,27 @@ export default function Settings() {
             />
           </div>
           <div>
-            <div className="px-4 pt-3.5 pb-1">
+            <div className="px-4 pt-3.5 pb-2">
               <p className="text-sm font-medium text-foreground">Default Rarity Vote</p>
               <p className="text-xs font-mono text-muted-foreground mt-0.5">Pre-selected when voting</p>
             </div>
-            <ChipToggle
-              options={RARITIES}
-              value={defaultRarity}
-              onChange={v => updatePref('defaultRarity', v)}
-            />
+            {/* A 5-option chip row put every rarity on screen at once, over
+                the ≤4-visible-options guideline this app applies elsewhere
+                (see FilterBar's Select for Status/Rarity/Sort) — a select
+                shows one value at a time and reaches the same 44px target
+                the chips needed anyway. */}
+            <div className="px-4 pb-3.5">
+              <Select value={defaultRarity} onValueChange={v => updatePref('defaultRarity', v)}>
+                <SelectTrigger className="h-11 bg-secondary border-border text-xs font-mono">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RARITIES.map(r => (
+                    <SelectItem key={r} value={r}>{r}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 

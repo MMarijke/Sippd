@@ -42,7 +42,7 @@ export default function Leaderboard() {
             variant="ghost"
             role="tab"
             aria-selected={tab === 'collectors'}
-            className={cn('flex-1 h-8 font-mono text-xs gap-1.5', tab === 'collectors' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            className={cn('flex-1 h-11 font-mono text-xs gap-1.5', tab === 'collectors' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setTab('collectors')}
           >
             <Trophy className="w-3.5 h-3.5" /> Collectors
@@ -51,7 +51,7 @@ export default function Leaderboard() {
             variant="ghost"
             role="tab"
             aria-selected={tab === 'mostwanted'}
-            className={cn('flex-1 h-8 font-mono text-xs gap-1.5', tab === 'mostwanted' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            className={cn('flex-1 h-11 font-mono text-xs gap-1.5', tab === 'mostwanted' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setTab('mostwanted')}
           >
             <Star className="w-3.5 h-3.5" /> Most Wanted
@@ -60,7 +60,7 @@ export default function Leaderboard() {
             variant="ghost"
             role="tab"
             aria-selected={tab === 'regional'}
-            className={cn('flex-1 h-8 font-mono text-xs gap-1.5', tab === 'regional' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            className={cn('flex-1 h-11 font-mono text-xs gap-1.5', tab === 'regional' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setTab('regional')}
           >
             <MapPin className="w-3.5 h-3.5" /> Regional

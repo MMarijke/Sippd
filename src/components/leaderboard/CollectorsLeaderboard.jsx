@@ -58,7 +58,7 @@ export default function CollectorsLeaderboard() {
           <Button
             variant="ghost"
             aria-pressed={sortBy === 'total'}
-            className={cn('flex-1 h-8 font-mono text-xs', sortBy === 'total' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            className={cn('flex-1 h-11 font-mono text-xs', sortBy === 'total' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setSortBy('total')}
           >
             <Zap className="w-3.5 h-3.5 mr-1.5" /> Total Cans
@@ -66,7 +66,7 @@ export default function CollectorsLeaderboard() {
           <Button
             variant="ghost"
             aria-pressed={sortBy === 'rare'}
-            className={cn('flex-1 h-8 font-mono text-xs', sortBy === 'rare' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            className={cn('flex-1 h-11 font-mono text-xs', sortBy === 'rare' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setSortBy('rare')}
           >
             <Trophy className="w-3.5 h-3.5 mr-1.5" /> Rare Pulls

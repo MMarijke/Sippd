@@ -35,8 +35,41 @@ export default function CollectorsLeaderboard() {
 
   const isEmpty = !isLoading && ranked.length === 0;
 
-  const myEntry = scores.find(s => s.user_id === currentUser?.id);
-  const myMetric = myEntry?.[metricColumn] ?? 0;
+  // Competition-style ranking (ties share a rank) — the same algorithm the
+  // "Your Rank" banner's count query already uses. Previously each row used
+  // its plain array index instead, so a tied score could show a different
+  // number in a row than in the banner for the same person in the same view.
+  let lastScore = null;
+  let lastRank = 0;
+  const rankedWithRank = ranked.map((entry, i) => {
+    const score = entry[metricColumn];
+    if (score !== lastScore) {
+      lastRank = i + 1;
+      lastScore = score;
+    }
+    return { ...entry, rank: lastRank };
+  });
+
+  // Fetched directly rather than derived from `scores` (capped at 50 rows
+  // above) — deriving it from that capped list meant any real collector
+  // outside the top 50 had no matching entry, so their own metric silently
+  // read as 0 and they were told "Not ranked yet" despite having a real,
+  // just-not-top-50 rank.
+  const { data: myScoreRow } = useQuery({
+    queryKey: ['my-leaderboard-score', currentUser?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('leaderboard_scores')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .single();
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no row yet, not an error here
+      return data ?? null;
+    },
+    enabled: !!currentUser?.id,
+  });
+
+  const myMetric = myScoreRow?.[metricColumn] ?? 0;
 
   const { data: myRank } = useQuery({
     queryKey: ['my-rank', sortBy, currentUser?.id, myMetric],
@@ -111,9 +144,9 @@ export default function CollectorsLeaderboard() {
         </div>
       ) : (
         <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
-          {ranked.map((entry, i) => {
+          {rankedWithRank.map((entry) => {
             const isMe = entry.user_id === currentUser?.id;
-            const isMedal = i < 3;
+            const isMedal = entry.rank <= 3;
             const score = entry[metricColumn];
             const name = entry.full_name || 'Collector';
             const initial = name.charAt(0).toUpperCase();
@@ -124,9 +157,9 @@ export default function CollectorsLeaderboard() {
               >
                 <div className="w-7 flex-shrink-0 text-center">
                   {isMedal ? (
-                    <span className={cn('text-base', MEDAL_COLORS[i])}>{MEDAL[i]}</span>
+                    <span className={cn('text-base', MEDAL_COLORS[entry.rank - 1])}>{MEDAL[entry.rank - 1]}</span>
                   ) : (
-                    <span className="text-xs font-mono text-muted-foreground">#{i + 1}</span>
+                    <span className="text-xs font-mono text-muted-foreground">#{entry.rank}</span>
                   )}
                 </div>
                 <div className={cn(

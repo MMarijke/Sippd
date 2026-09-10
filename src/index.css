@@ -81,6 +81,86 @@
     --rarity-ultra: 271 91% 65%;
     --rarity-legendary: 330 81% 60%;
   }
+
+  /* Theme system: Signal Cyan (the values above) is the default/free look
+     and stays untouched. Each theme below only swaps the surface/brand
+     tokens — background, card, primary, secondary, muted, accent, border,
+     ring — never --foreground (body text stays legible), --destructive
+     (errors stay universally red), or --rarity-* (a can's actual rarity
+     badge must read the same regardless of the viewer's theme, including
+     in exported/shared card images). --accent is cyan on every themed
+     look, echoing the base brand color; Signal Cyan keeps its own pink
+     accent. Applied via [data-theme] on <html> — see useTheme.js. */
+  [data-theme="common"] {
+    --background: 220 15% 5%;
+    --card: 220 12% 9%;
+    --popover: 220 12% 9%;
+    --primary: 220 9% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 10% 18%;
+    --muted: 220 10% 9%;
+    --accent: 185 100% 50%;
+    --accent-foreground: 240 20% 4%;
+    --border: 220 10% 16%;
+    --input: 220 10% 16%;
+    --ring: 220 9% 56%;
+  }
+  [data-theme="uncommon"] {
+    --background: 142 25% 4%;
+    --card: 142 20% 8%;
+    --popover: 142 20% 8%;
+    --primary: 142 71% 45%;
+    --primary-foreground: 240 20% 4%;
+    --secondary: 142 12% 16%;
+    --muted: 142 15% 8%;
+    --accent: 185 100% 50%;
+    --accent-foreground: 240 20% 4%;
+    --border: 142 15% 16%;
+    --input: 142 15% 16%;
+    --ring: 142 71% 45%;
+  }
+  [data-theme="rare"] {
+    --background: 217 30% 4%;
+    --card: 217 22% 8%;
+    --popover: 217 22% 8%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 240 20% 4%;
+    --secondary: 217 14% 18%;
+    --muted: 217 16% 9%;
+    --accent: 185 100% 50%;
+    --accent-foreground: 240 20% 4%;
+    --border: 217 15% 16%;
+    --input: 217 15% 16%;
+    --ring: 217 91% 60%;
+  }
+  [data-theme="ultra"] {
+    --background: 271 25% 4%;
+    --card: 271 18% 8%;
+    --popover: 271 18% 8%;
+    --primary: 271 91% 65%;
+    --primary-foreground: 240 20% 4%;
+    --secondary: 271 12% 18%;
+    --muted: 271 14% 9%;
+    --accent: 185 100% 50%;
+    --accent-foreground: 240 20% 4%;
+    --border: 271 14% 16%;
+    --input: 271 14% 16%;
+    --ring: 271 91% 65%;
+  }
+  [data-theme="legendary"] {
+    --background: 330 25% 4%;
+    --card: 330 18% 8%;
+    --popover: 330 18% 8%;
+    --primary: 330 81% 60%;
+    --primary-foreground: 240 20% 4%;
+    --secondary: 330 12% 18%;
+    --muted: 330 14% 9%;
+    --accent: 185 100% 50%;
+    --accent-foreground: 240 20% 4%;
+    --border: 330 14% 16%;
+    --input: 330 14% 16%;
+    --ring: 330 81% 60%;
+  }
 }
 
 @layer base {

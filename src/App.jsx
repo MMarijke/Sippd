@@ -4,6 +4,7 @@ import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider } from '@/lib/AuthContext';
+import { useTheme } from '@/hooks/useTheme';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
 import Login from './pages/Login';
@@ -24,10 +25,19 @@ import CompareCollection from './pages/CompareCollection';
 import Wishlist from './pages/Wishlist';
 import Pro from './pages/Pro';
 
+// Applies the signed-in user's saved theme to <html> for the whole app
+// lifetime, independent of which route is mounted — Settings' picker calls
+// the same hook's setTheme(), and both share its query cache.
+function ThemeEffect() {
+  useTheme();
+  return null;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClientInstance}>
       <AuthProvider>
+        <ThemeEffect />
         <Router>
           <Routes>
             <Route path="/login" element={<Login />} />

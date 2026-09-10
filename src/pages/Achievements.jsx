@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { AlertCircle, ChevronLeft, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import AchievementBadge from '@/components/achievements/AchievementBadge';
 import AchievementUnlockAnimation from '@/components/achievements/AchievementUnlockAnimation';
@@ -16,7 +17,12 @@ export default function Achievements() {
   const streak = useStreak();
   const { user } = useAuth();
 
-  const { data: collection = [], isLoading } = useQuery({
+  const {
+    data: collection = [],
+    isLoading: isLoadingCollection,
+    isError: isCollectionError,
+    refetch: refetchCollection,
+  } = useQuery({
     queryKey: ['user-collection', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -30,7 +36,12 @@ export default function Achievements() {
     enabled: !!user?.id,
   });
 
-  const { data: votes = [] } = useQuery({
+  const {
+    data: votes = [],
+    isLoading: isLoadingVotes,
+    isError: isVotesError,
+    refetch: refetchVotes,
+  } = useQuery({
     queryKey: ['my-votes', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -44,6 +55,14 @@ export default function Achievements() {
     },
     enabled: !!user?.id,
   });
+
+  const isLoading = isLoadingCollection || isLoadingVotes;
+  const isError = isCollectionError || isVotesError;
+
+  useEffect(() => {
+    if (isCollectionError) toast.error('Could not load your collection');
+    if (isVotesError) toast.error('Could not load your votes');
+  }, [isCollectionError, isVotesError]);
 
   const achievements = useMemo(
     () => computeAchievements(collection, streak, votes.length, user?.created_at),
@@ -72,7 +91,7 @@ export default function Achievements() {
         <div>
           <h1 className="text-xl font-display font-bold text-foreground tracking-wide">Achievements</h1>
           <p className="text-xs font-mono text-muted-foreground mt-0.5">
-            {isLoading ? '...' : `${unlocked} / ${achievements.length} unlocked`}
+            {isLoading ? '...' : isError ? '—' : `${unlocked} / ${achievements.length} unlocked`}
           </p>
         </div>
       </div>
@@ -88,7 +107,22 @@ export default function Achievements() {
       </div>
 
       {/* Grid */}
-      {isLoading ? (
+      {isError ? (
+        <div className="px-5">
+          <div className="bg-card border border-destructive/30 rounded-2xl p-10 flex flex-col items-center text-center">
+            <AlertCircle className="w-10 h-10 text-destructive mb-3" />
+            <p className="text-sm font-display font-semibold text-foreground">Couldn't load your achievements</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-11 mt-4 font-mono text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+              onClick={() => { refetchCollection(); refetchVotes(); }}
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Retry
+            </Button>
+          </div>
+        </div>
+      ) : isLoading ? (
         <div className="grid grid-cols-2 gap-3 px-5">
           {Array.from({ length: 18 }).map((_, i) => (
             <div key={i} className="h-36 rounded-2xl bg-card/40 border border-border/30 animate-pulse" />

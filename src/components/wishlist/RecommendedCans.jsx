@@ -58,7 +58,6 @@ export default function RecommendedCans({ collection, sharedCans }) {
             >
               <CanImageBox
                 imageUrl={sc.image_url}
-                bgColor="#0D2B2B"
                 alt={sc.name}
                 className="aspect-square"
                 iconSize="w-7 h-7"

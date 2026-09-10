@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { Link } from 'react-router-dom';
 import { Pin, Share2, X as XIcon, Zap, Star } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
@@ -44,7 +45,7 @@ const CollectionCard = forwardRef(function CollectionCard(
         <button
           onClick={onShare}
           aria-label={sharing ? 'Close share card' : 'Share collection card'}
-          className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
+          className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
         >
           {sharing ? <XIcon className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
         </button>
@@ -94,7 +95,7 @@ const CollectionCard = forwardRef(function CollectionCard(
             className="relative rounded-xl overflow-hidden border border-primary/20 bg-black/20 hover:border-primary/40 transition-colors"
           >
             <Link to={`/can/${item.can_id}`} className="block">
-              <div className="aspect-square" style={{ backgroundColor: item.can_bg_color || '#0D2B2B' }}>
+              <div className="aspect-square" style={{ backgroundColor: item.can_bg_color || DEFAULT_CAN_BG }}>
                 {item.can_image_url ? (
                   <img
                     src={sharing ? proxyImageUrl(item.can_image_url) : item.can_image_url}

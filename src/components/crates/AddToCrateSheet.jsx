@@ -8,6 +8,7 @@ import { X, Plus, Minus, PackageOpen } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import CrateFormDialog from '@/components/crates/CrateFormDialog';
 
 export default function AddToCrateSheet({ can, onClose }) {
@@ -85,7 +86,7 @@ export default function AddToCrateSheet({ can, onClose }) {
           <div className="flex items-center gap-3 min-w-0">
             <div
               className="w-10 h-10 rounded-lg overflow-hidden border border-border flex-shrink-0"
-              style={{ background: can.can_bg_color || '#0D2B2B' }}
+              style={{ background: can.can_bg_color || DEFAULT_CAN_BG }}
             >
               {can.can_image_url && (
                 <img src={can.can_image_url} alt={can.can_name} loading="lazy" decoding="async" className="w-full h-full object-contain" />

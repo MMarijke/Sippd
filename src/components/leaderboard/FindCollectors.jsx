@@ -79,7 +79,8 @@ export default function FindCollectors({ query }) {
           <div key={u.id} className="flex items-center gap-3 px-4 py-3">
             <button
               onClick={() => navigate(`/u/${u.id}`)}
-              className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-sm font-display font-bold text-primary flex-shrink-0 hover:bg-primary/20 transition-colors"
+              aria-label={`View ${u.full_name || 'this collector'}'s profile`}
+              className="w-11 h-11 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-sm font-display font-bold text-primary flex-shrink-0 hover:bg-primary/20 transition-colors"
             >
               {initial}
             </button>

@@ -55,7 +55,7 @@ export default function CrateFormDialog({ crate, onClose, userId }) {
         className="max-w-lg mx-auto bg-card border-t border-border rounded-t-3xl p-6 space-y-5"
       >
         <SheetDescription className="sr-only">
-          {isEdit ? 'Edit the name, icon, and description of this crate.' : 'Create a new crate to organize a subset of your collection.'}
+          {isEdit ? 'Edit the name, icon, and description of this crate.' : 'Create a new crate to organise a subset of your collection.'}
         </SheetDescription>
         <div className="flex items-center justify-between">
           <SheetTitle asChild>
@@ -74,7 +74,9 @@ export default function CrateFormDialog({ crate, onClose, userId }) {
               <button
                 key={e}
                 onClick={() => setEmoji(e)}
-                className={`w-9 h-9 rounded-xl text-lg flex items-center justify-center border transition-all ${
+                aria-label={`Use ${e} icon`}
+                aria-pressed={emoji === e}
+                className={`w-11 h-11 rounded-xl text-lg flex items-center justify-center border transition-all ${
                   emoji === e ? 'border-primary bg-primary/10' : 'border-border bg-secondary hover:border-primary/40'
                 }`}
               >

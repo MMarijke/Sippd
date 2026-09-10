@@ -149,7 +149,7 @@ export default function Wishlist() {
           <Input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search wishlist..."
+            placeholder="Search wishlist…"
             className="pl-9 bg-secondary border-border font-body"
           />
         </div>

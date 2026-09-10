@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -221,7 +222,7 @@ export default function TradeLogDialog({ collection, onClose }) {
                   <button
                     onClick={() => { setTradedWith(''); setTradedWithId(''); setUserSearch(''); }}
                     aria-label="Clear selected trade partner"
-                    className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground"
+                    className="w-11 h-11 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -358,7 +359,7 @@ function CanPicker({ label, items, selected, search, onSearch, onSelect, onClear
         <div className="flex items-center gap-3 bg-primary/5 border border-primary/20 rounded-xl px-3 py-2.5">
           <div
             className="w-9 h-9 rounded-lg overflow-hidden border border-border flex-shrink-0"
-            style={{ background: selected.can_bg_color || '#0D2B2B' }}
+            style={{ background: selected.can_bg_color || DEFAULT_CAN_BG }}
           >
             {selected.can_image_url && (
               <img src={selected.can_image_url} alt={selected.can_name} loading="lazy" decoding="async" className="w-full h-full object-contain" />
@@ -368,7 +369,7 @@ function CanPicker({ label, items, selected, search, onSearch, onSelect, onClear
             <p className="text-sm font-body font-medium text-foreground truncate">{selected.can_name}</p>
             <p className="text-[11px] font-mono text-muted-foreground">{selected.can_brand}</p>
           </div>
-          <button onClick={onClear} aria-label="Clear selection" className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground">
+          <button onClick={onClear} aria-label="Clear selection" className="w-11 h-11 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground">
             <X className="w-3 h-3" />
           </button>
         </div>
@@ -391,7 +392,7 @@ function CanPicker({ label, items, selected, search, onSearch, onSelect, onClear
                 >
                   <div
                     className="w-7 h-7 rounded-md overflow-hidden border border-border flex-shrink-0"
-                    style={{ background: item.can_bg_color || '#0D2B2B' }}
+                    style={{ background: item.can_bg_color || DEFAULT_CAN_BG }}
                   >
                     {item.can_image_url && (
                       <img src={item.can_image_url} alt={item.can_name} loading="lazy" decoding="async" className="w-full h-full object-contain" />

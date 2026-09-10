@@ -191,9 +191,9 @@ export default function PublicProfile() {
                 <span className="text-2xl font-display font-bold text-primary">{initial}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-xl font-display font-bold text-foreground">{displayName}</h1>
-                  {isPrivate && <Lock className="w-4 h-4 text-muted-foreground" />}
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-display font-bold text-foreground truncate">{displayName}</h1>
+                  {isPrivate && <Lock className="w-4 h-4 text-muted-foreground flex-shrink-0" />}
                 </div>
               </div>
               <div className="flex items-center gap-2">

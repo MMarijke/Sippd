@@ -12,6 +12,7 @@ import { Loader2, Upload, Zap, Link as LinkIcon, X, Users, ShieldCheck, ShieldAl
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { format } from 'date-fns';
 import RarityReveal from './RarityReveal';
+import AddedConfirmation from './AddedConfirmation';
 import { cn } from '@/lib/utils';
 import { RARITY_ORDER, getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
 import { CAN_BG_COLORS, DEFAULT_CAN_BG } from '@/lib/canBgColors';
@@ -29,6 +30,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
   const queryClient = useQueryClient();
   const { user: currentUser } = useAuth();
   const [showReveal, setShowReveal] = useState(false);
+  const [showAddedConfirmation, setShowAddedConfirmation] = useState(false);
   const [revealRarity, setRevealRarity] = useState('');
   const [pendingCan, setPendingCan] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -80,7 +82,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
     if (!form.name.trim())  e.name  = true;
     if (!form.brand.trim()) e.brand = true;
     setErrors(e);
-    return Object.keys(e).length === 0;
+    return e;
   };
 
   const createMutation = useMutation({
@@ -137,8 +139,14 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         setPendingCan(insertedRow);
         setShowReveal(true);
       } else {
-        toast.success('Can added to your vault!');
-        onSuccess?.(insertedRow);
+        // Previously just a toast fired in the same tick as onSuccess (which
+        // navigates away in Scan.jsx), so the toast for the common case —
+        // the majority of real adds — was easy to miss entirely underneath
+        // the page transition. This gives every successful add a real,
+        // visible beat before moving on, scaled down from RarityReveal so
+        // a rare pull still feels distinctly bigger.
+        setPendingCan(insertedRow);
+        setShowAddedConfirmation(true);
       }
     },
     onError: (error) => {
@@ -158,7 +166,20 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
   });
 
   const handleSubmit = () => {
-    if (validate()) createMutation.mutate();
+    const e = validate();
+    if (Object.keys(e).length === 0) {
+      createMutation.mutate();
+      return;
+    }
+    // The form is a single long scroll with no section anchors — on a
+    // failed submit, jump to whichever required field is invalid instead
+    // of just coloring a label that may already be off-screen above.
+    const firstInvalidId = e.name ? 'addcan-name' : e.brand ? 'addcan-brand' : null;
+    const el = firstInvalidId && document.getElementById(firstInvalidId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.focus();
+    }
   };
 
   const handleImageUpload = async (e) => {
@@ -190,6 +211,20 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
         onComplete={() => {
           setShowReveal(false);
           toast.success('Rare pull added to your vault!');
+          onSuccess?.(pendingCan);
+        }}
+      />
+    );
+  }
+
+  if (showAddedConfirmation) {
+    return (
+      <AddedConfirmation
+        canName={form.name}
+        imageUrl={pendingCan?.can_image_url}
+        bgColor={pendingCan?.can_bg_color}
+        onComplete={() => {
+          setShowAddedConfirmation(false);
           onSuccess?.(pendingCan);
         }}
       />

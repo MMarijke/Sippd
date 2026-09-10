@@ -283,7 +283,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user, signOut } = useAuth();
-  const { isPro } = useSubscription();
+  const { isPro, isLoading: isProLoading } = useSubscription();
   const { theme, setTheme, isPending: themePending } = useTheme();
   const [panel, setPanel] = useState(null); // 'name' | 'region' | 'password'
   const [prefs, setPrefs] = useState(loadPrefs);
@@ -446,7 +446,15 @@ export default function Settings() {
 
         <SectionHeader title="Subscription" />
         <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
-          {isPro ? (
+          {isProLoading ? (
+            // isPro defaults to false while useSubscription()'s own query is
+            // in flight — rendering the isPro branches below on that default
+            // would show a real Pro subscriber "Upgrade to Pro" for a beat
+            // on every load, which is worse than a loading row.
+            <div className="px-4 py-3.5">
+              <div className="h-4 w-40 rounded bg-secondary/60 animate-pulse" />
+            </div>
+          ) : isPro ? (
             <>
               <SettingsRow
                 label="Status"
@@ -485,16 +493,31 @@ export default function Settings() {
           <div className="px-4 pt-3.5">
             <p className="text-sm font-medium text-foreground">Theme</p>
             <p className="text-xs font-mono text-muted-foreground mt-0.5">
-              {isPro ? 'Pick your look' : 'Signal Cyan is free — the rest unlock with Pro'}
+              {isProLoading ? 'Loading…' : isPro ? 'Pick your look' : 'Signal Cyan is free — the rest unlock with Pro'}
             </p>
           </div>
-          <ThemePicker
-            theme={theme}
-            setTheme={setTheme}
-            isPro={isPro}
-            isPending={themePending}
-            onLockedTap={() => navigate('/pro')}
-          />
+          {isProLoading ? (
+            // Same reasoning as the Subscription section above: locked is
+            // computed from isPro, so rendering real tiles here would briefly
+            // lock every theme — including a Pro user's own already-selected
+            // one — until the subscription query resolves.
+            <div className="grid grid-cols-3 gap-3 p-4">
+              {THEMES.map(({ id }) => (
+                <div key={id} className="flex flex-col items-center gap-2 rounded-xl border border-border p-3">
+                  <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
+                  <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <ThemePicker
+              theme={theme}
+              setTheme={setTheme}
+              isPro={isPro}
+              isPending={themePending}
+              onLockedTap={() => navigate('/pro')}
+            />
+          )}
         </div>
 
         <SectionHeader title="Preferences" />

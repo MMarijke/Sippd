@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, ScanLine, PackageOpen, X, AlertCircle, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -22,15 +22,42 @@ import { toast } from 'sonner';
 const PAGE_SIZE = 60;
 
 export default function Collection() {
-  const [viewMode, setViewMode] = useState('grid');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState({ status: 'all', rarity: 'all', favourites: false, sort: 'date_desc' });
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Initial state reads from the URL once on mount so a bookmarked or
+  // back-navigated link reproduces the exact same search/filter/sort/view
+  // combination, not just an empty default state.
+  const [viewMode, setViewMode] = useState(() => (searchParams.get('view') === 'list' ? 'list' : 'grid'));
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') || '');
+  const [filters, setFilters] = useState(() => ({
+    status: searchParams.get('status') || 'all',
+    rarity: searchParams.get('rarity') || 'all',
+    favourites: searchParams.get('fav') === '1',
+    sort: searchParams.get('sort') || 'date_desc',
+  }));
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [crateTarget, setCrateTarget] = useState(null);
   const { user } = useAuth();
   const streak = useStreak();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Keep the URL in sync with search/filter/sort/view so back-navigation
+  // (e.g. from a can's detail page) and bookmarked/shared links land back
+  // on the same filtered view instead of resetting to the unfiltered
+  // default. Only non-default values are written, keeping a plain visit
+  // to /collection free of query-string clutter. `replace` avoids pushing
+  // a new history entry for every keystroke/filter change.
+  useEffect(() => {
+    const next = {};
+    if (searchQuery) next.q = searchQuery;
+    if (filters.status !== 'all') next.status = filters.status;
+    if (filters.rarity !== 'all') next.rarity = filters.rarity;
+    if (filters.favourites) next.fav = '1';
+    if (filters.sort !== 'date_desc') next.sort = filters.sort;
+    if (viewMode !== 'grid') next.view = viewMode;
+    setSearchParams(next, { replace: true });
+  }, [searchQuery, filters, viewMode, setSearchParams]);
 
   // Reset to the first page whenever the filtered set's criteria change —
   // otherwise switching filters could leave a large stale render count
@@ -40,11 +67,14 @@ export default function Collection() {
   }, [filters, searchQuery]);
 
   // AddCanForm can hand off the can it just created via navigation state so
-  // the "add to a crate?" offer survives the redirect to this page.
+  // the "add to a crate?" offer survives the redirect to this page. Carries
+  // the current search string forward so this doesn't clear an in-progress
+  // filtered view (not that this particular hand-off currently arrives with
+  // one, but there's no reason for it to silently drop one if it ever does).
   useEffect(() => {
     if (location.state?.addedCan) {
       setCrateTarget(location.state.addedCan);
-      navigate(location.pathname, { replace: true, state: {} });
+      navigate({ pathname: location.pathname, search: location.search }, { replace: true, state: {} });
     }
   }, [location.state]);
 

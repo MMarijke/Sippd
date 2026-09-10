@@ -141,9 +141,13 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
                   <button
                     onClick={() => update('can_image_url', '')}
                     aria-label="Remove image"
-                    className="absolute top-2 right-2 w-7 h-7 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-border hover:bg-background"
+                    className="group absolute top-0 right-0 w-11 h-11 flex items-center justify-center"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    {/* Real tap target is the full 44px button above; this stays a
+                        small visual badge so it doesn't dominate the preview. */}
+                    <span className="w-7 h-7 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-border group-hover:bg-background">
+                      <X className="w-3.5 h-3.5" />
+                    </span>
                   </button>
                 </div>
                 <div className="space-y-1.5">
@@ -174,7 +178,8 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
                   <button
                     type="button"
                     onClick={() => setImageMode('upload')}
-                    className={cn('px-3 py-1 rounded-md text-xs font-mono transition-all flex items-center gap-1.5',
+                    aria-pressed={imageMode === 'upload'}
+                    className={cn('h-11 px-3 rounded-md text-xs font-mono transition-all flex items-center gap-1.5',
                       imageMode === 'upload' ? 'bg-card text-foreground' : 'text-muted-foreground')}
                   >
                     <Upload className="w-3 h-3" /> Upload
@@ -182,7 +187,8 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
                   <button
                     type="button"
                     onClick={() => setImageMode('url')}
-                    className={cn('px-3 py-1 rounded-md text-xs font-mono transition-all flex items-center gap-1.5',
+                    aria-pressed={imageMode === 'url'}
+                    className={cn('h-11 px-3 rounded-md text-xs font-mono transition-all flex items-center gap-1.5',
                       imageMode === 'url' ? 'bg-card text-foreground' : 'text-muted-foreground')}
                   >
                     <LinkIcon className="w-3 h-3" /> Paste URL
@@ -242,8 +248,9 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
                   key={opt.value}
                   type="button"
                   onClick={() => update('status', opt.value)}
+                  aria-pressed={form.status === opt.value}
                   className={cn(
-                    'flex-1 py-2 rounded-lg text-xs font-mono font-semibold transition-all',
+                    'flex-1 h-11 flex items-center justify-center rounded-lg text-xs font-mono font-semibold transition-all',
                     form.status === opt.value
                       ? 'bg-primary text-primary-foreground shadow'
                       : 'text-muted-foreground hover:text-foreground'
@@ -270,7 +277,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
           <Button
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
-            className="w-full font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+            className="h-11 w-full font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
           >
             {saveMutation.isPending
               ? <Loader2 className="w-4 h-4 animate-spin" />

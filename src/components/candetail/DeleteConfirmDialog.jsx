@@ -23,14 +23,14 @@ export default function DeleteConfirmDialog({ open, onCancel, onConfirm, isPendi
         <AlertDialogFooter>
           <AlertDialogCancel
             onClick={onCancel}
-            className="font-mono text-xs border-border bg-transparent hover:bg-secondary"
+            className="h-11 font-mono text-xs border-border bg-transparent hover:bg-secondary"
           >
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isPending}
-            className="font-mono text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-1.5"
+            className="h-11 font-mono text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-1.5"
           >
             {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
             Remove

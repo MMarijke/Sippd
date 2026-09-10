@@ -242,7 +242,7 @@ export default function CanDetail() {
               <Users className="w-3 h-3" /> Community Rarity
               <Popover>
                 <PopoverTrigger
-                  className="p-2 -m-2 normal-case tracking-normal text-muted-foreground hover:text-foreground transition-colors"
+                  className="p-[15px] -m-[15px] normal-case tracking-normal text-muted-foreground hover:text-foreground transition-colors"
                   aria-label="How Community Rarity works"
                 >
                   <Info className="w-3 h-3" />
@@ -354,7 +354,7 @@ export default function CanDetail() {
         {item && (
           <Button
             variant="outline"
-            className="w-full font-mono text-xs gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10 mt-4"
+            className="h-11 w-full font-mono text-xs gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10 mt-4"
             onClick={() => setShowDelete(true)}
           >
             <Trash2 className="w-4 h-4" />

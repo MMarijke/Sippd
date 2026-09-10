@@ -160,7 +160,8 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
           action: { label: 'Upgrade', onClick: () => navigate('/pro') },
         });
       } else {
-        toast.error('Failed to add can: ' + (error?.message || 'Unknown error'));
+        console.error('Failed to add can:', error);
+        toast.error('Failed to add can — please try again.');
       }
     },
   });

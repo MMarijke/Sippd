@@ -291,7 +291,7 @@ export default function Profile() {
               Scan your first can to start tracking your score, rare pulls, and collection stats.
             </p>
             <Button
-              className="mt-4 font-mono text-xs gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+              className="h-11 mt-4 font-mono text-xs gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => navigate('/scan')}
             >
               <ScanLine className="w-4 h-4" /> Scan Your First Can
@@ -332,7 +332,7 @@ export default function Profile() {
 
               <div className="flex gap-2">
                 <Button
-                  className="flex-1 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="h-11 flex-1 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
                   onClick={() => handleSave('sippd-collection.png')}
                   disabled={!cardDataUrl || generating || cardSaving}
                 >
@@ -341,7 +341,7 @@ export default function Profile() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex-1 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                  className="h-11 flex-1 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
                   onClick={() => handleShareImage('sippd-collection.png', 'My Sippd Collection')}
                   disabled={!cardDataUrl || generating || cardSaving}
                 >
@@ -353,7 +353,7 @@ export default function Profile() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full font-mono text-xs text-muted-foreground gap-2"
+                className="h-11 w-full font-mono text-xs text-muted-foreground gap-2"
                 onClick={generateCard}
                 disabled={generating}
               >

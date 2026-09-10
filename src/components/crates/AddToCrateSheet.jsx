@@ -116,7 +116,7 @@ export default function AddToCrateSheet({ can, onClose }) {
               <p className="text-sm font-mono text-muted-foreground">No crates yet.</p>
               <Button
                 size="sm"
-                className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+                className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
                 onClick={() => setShowCreateCrate(true)}
               >
                 <Plus className="w-3.5 h-3.5" /> Create Your First Crate

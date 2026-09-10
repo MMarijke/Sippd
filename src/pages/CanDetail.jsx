@@ -12,7 +12,7 @@ import { useFavourite } from '@/hooks/useFavourite';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import RarityBadge from '@/components/shared/RarityBadge';
-import { getDisplayRarity, getConfidence, RARITY_ORDER } from '@/lib/rarityConsensus';
+import { getDisplayRarity, getConfidence, RARITY_ORDER, RARITY_TEXT_CLASS } from '@/lib/rarityConsensus';
 import { cn } from '@/lib/utils';
 import DeleteConfirmDialog from '@/components/candetail/DeleteConfirmDialog';
 import EditEntrySheet from '@/components/candetail/EditEntrySheet';
@@ -28,14 +28,6 @@ const STATUS_CONFIG = {
   collected: { label: 'In Vault', color: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/30' },
   wishlist:  { label: 'Wishlist', color: 'text-blue-400',    bg: 'bg-blue-400/10 border-blue-400/30'    },
   duplicate: { label: 'Duplicate', color: 'text-muted-foreground', bg: 'bg-secondary border-border' },
-};
-
-const RARITY_COLORS = {
-  'Common':    'text-rarity-common',
-  'Uncommon':  'text-rarity-uncommon',
-  'Rare':      'text-rarity-rare',
-  'Ultra Rare':'text-rarity-ultra',
-  'Legendary': 'text-rarity-legendary',
 };
 
 export default function CanDetail() {
@@ -263,7 +255,7 @@ export default function CanDetail() {
               <p className="text-[11px] font-mono text-muted-foreground mt-1">Not enough votes yet — need {Math.max(0, 5 - totalVotes)} more</p>
             </div>
           ) : (
-            <p className={cn('text-3xl font-display font-black tracking-wide', RARITY_COLORS[rarity] || 'text-foreground')}>
+            <p className={cn('text-3xl font-display font-black tracking-wide', RARITY_TEXT_CLASS[rarity] || 'text-foreground')}>
               {rarity}
             </p>
           )}
@@ -296,7 +288,7 @@ export default function CanDetail() {
             <div className="pt-2 border-t border-border">
               <p className="text-[11px] font-mono text-muted-foreground">
                 Your vote:{' '}
-                <span className={cn('font-semibold', RARITY_COLORS[myVote.voted_rarity] || 'text-foreground')}>
+                <span className={cn('font-semibold', RARITY_TEXT_CLASS[myVote.voted_rarity] || 'text-foreground')}>
                   {myVote.voted_rarity}
                 </span>
                 <span className="ml-1 text-muted-foreground">· locked</span>

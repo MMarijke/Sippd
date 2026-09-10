@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { X, Plus, Minus } from 'lucide-react';
@@ -152,7 +153,7 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
             <Input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search your collection..."
+              placeholder="Search your collection…"
               className="bg-secondary border-border font-body mb-3"
             />
           )}
@@ -194,7 +195,7 @@ function CanRow({ item, action, onAction, disabled }) {
     <div className="flex items-center gap-3 bg-secondary/40 border border-border rounded-xl px-3 py-2.5">
       <div
         className="w-9 h-9 rounded-lg overflow-hidden border border-border flex-shrink-0"
-        style={{ background: item.can_bg_color || '#0D2B2B' }}
+        style={{ background: item.can_bg_color || DEFAULT_CAN_BG }}
       >
         {item.can_image_url && (
           <img src={item.can_image_url} alt={item.can_name} loading="lazy" decoding="async" className="w-full h-full object-contain" />

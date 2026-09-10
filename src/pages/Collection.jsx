@@ -159,7 +159,7 @@ export default function Collection() {
           <Input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search your collection..."
+            placeholder="Search your collection…"
             className="pl-9 bg-secondary border-border font-body"
           />
         </div>
@@ -179,7 +179,7 @@ export default function Collection() {
           </div>
         ) : filtered.length === 0 ? (
           <EmptyState
-            title="No Cans Found"
+            title="No cans found"
             description={collection.length === 0 ? "Start scanning to build your vault!" : "Try adjusting your filters"}
             action={
               collection.length === 0 && (

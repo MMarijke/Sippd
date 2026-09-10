@@ -443,7 +443,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
                       className="w-8 h-8 rounded-lg border-2 transition-all"
                       style={{
                         backgroundColor: hex,
-                        borderColor: form.bg_color === hex ? 'hsl(var(--primary))' : 'rgba(255,255,255,0.1)',
+                        borderColor: form.bg_color === hex ? 'hsl(var(--primary))' : 'hsl(var(--border))',
                         boxShadow: form.bg_color === hex ? '0 0 0 2px hsl(var(--primary) / 0.3)' : 'none',
                       }}
                     />

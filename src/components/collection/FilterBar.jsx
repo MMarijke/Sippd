@@ -63,8 +63,9 @@ export default function FilterBar({ filters, onFiltersChange, viewMode, onViewMo
       <div className="flex items-center gap-2">
         <button
           onClick={() => update('favourites', !filters.favourites)}
+          aria-pressed={filters.favourites}
           className={cn(
-            'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-mono transition-colors',
+            'flex items-center gap-1.5 h-11 px-3 rounded-lg border text-xs font-mono transition-colors',
             filters.favourites
               ? 'bg-primary/10 border-primary/40 text-primary'
               : 'bg-secondary border-border text-muted-foreground hover:text-foreground'

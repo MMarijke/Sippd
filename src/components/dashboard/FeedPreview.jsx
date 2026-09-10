@@ -89,18 +89,20 @@ export default function FeedPreview() {
         </button>
       </div>
 
-      <div role="tablist" aria-label="Feed scope" className="relative z-10 flex bg-secondary rounded-lg border border-border p-0.5 mb-3">
+      {/* These are navigation shortcuts, not a filter — the preview below
+          always shows global activity regardless of which one is tapped.
+          Marking them up as buttons that navigate (rather than a
+          role="tablist"/role="tab" pair with static aria-selected) avoids
+          promising screen-reader and sighted users a local filter this
+          preview doesn't implement. */}
+      <div aria-label="Feed shortcuts" className="relative z-10 flex bg-secondary rounded-lg border border-border p-0.5 mb-3">
         <button
-          role="tab"
-          aria-selected="true"
           onClick={() => goToFeed('global')}
           className="flex-1 h-7 font-mono text-[11px] rounded-md transition-colors gap-1.5 flex items-center justify-center bg-card text-primary shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Radio className="w-3 h-3" /> Global
         </button>
         <button
-          role="tab"
-          aria-selected="false"
           onClick={() => goToFeed('following')}
           className="flex-1 h-7 font-mono text-[11px] rounded-md transition-colors gap-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >

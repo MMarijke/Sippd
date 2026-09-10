@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
-import { ArrowLeft, ChevronRight } from 'lucide-react';
+import { useTheme, THEMES } from '@/hooks/useTheme';
+import { ArrowLeft, ChevronRight, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -237,12 +238,49 @@ function ChipToggle({ options, value, onChange }) {
   );
 }
 
+// ─── Theme Picker ────────────────────────────────────────────────────────────
+function ThemePicker({ theme, setTheme, isPro, isPending, onLockedTap }) {
+  return (
+    <div className="grid grid-cols-3 gap-3 p-4">
+      {THEMES.map(({ id, label, pro, swatch }) => {
+        const locked = pro && !isPro;
+        const selected = theme === id;
+        return (
+          <button
+            key={id}
+            onClick={() => (locked ? onLockedTap() : setTheme(id))}
+            disabled={isPending}
+            aria-label={locked ? `${label} — Pro only, tap to upgrade` : `Use ${label} theme`}
+            aria-pressed={selected}
+            className={cn(
+              'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors',
+              selected ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/20'
+            )}
+          >
+            <div
+              className="w-9 h-9 rounded-full border border-white/10"
+              style={{ background: swatch }}
+            />
+            <span className="text-[10px] font-mono text-muted-foreground text-center leading-tight">{label}</span>
+            {locked && (
+              <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-background/80 border border-border flex items-center justify-center">
+                <Lock className="w-2.5 h-2.5 text-muted-foreground" />
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Settings() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user, signOut } = useAuth();
   const { isPro } = useSubscription();
+  const { theme, setTheme, isPending: themePending } = useTheme();
   const [panel, setPanel] = useState(null); // 'name' | 'region' | 'password'
   const [prefs, setPrefs] = useState(loadPrefs);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -407,6 +445,23 @@ export default function Settings() {
               onClick={() => navigate('/pro')}
             />
           )}
+        </div>
+
+        <SectionHeader title="Appearance" />
+        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+          <div className="px-4 pt-3.5">
+            <p className="text-sm font-medium text-foreground">Theme</p>
+            <p className="text-xs font-mono text-muted-foreground mt-0.5">
+              {isPro ? 'Pick your look' : 'Signal Cyan is free — the rest unlock with Pro'}
+            </p>
+          </div>
+          <ThemePicker
+            theme={theme}
+            setTheme={setTheme}
+            isPro={isPro}
+            isPending={themePending}
+            onLockedTap={() => navigate('/pro')}
+          />
         </div>
 
         <SectionHeader title="Preferences" />

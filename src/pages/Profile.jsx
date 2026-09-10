@@ -69,7 +69,7 @@ export default function Profile() {
     setEditing(false);
   };
 
-  const { data: collection = [] } = useQuery({
+  const { data: collection = [], isLoading: isLoadingCollection } = useQuery({
     queryKey: ['user-collection', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -83,7 +83,7 @@ export default function Profile() {
     enabled: !!user?.id,
   });
 
-  const { data: sharedCans = [] } = useQuery({
+  const { data: sharedCans = [], isLoading: isLoadingSharedCans } = useQuery({
     queryKey: ['shared-cans'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -97,7 +97,7 @@ export default function Profile() {
     enabled: !!user?.id,
   });
 
-  const { data: votes = [] } = useQuery({
+  const { data: votes = [], isLoading: isLoadingVotes } = useQuery({
     queryKey: ['my-votes', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -111,6 +111,12 @@ export default function Profile() {
     },
     enabled: !!user?.id,
   });
+
+  // Achievements strip and the collection card both depend on collection/
+  // sharedCans/votes, not just profile — gating them on the profile
+  // query's isLoading alone let the "No cans yet" empty state flash for
+  // real collectors while those other queries were still in flight.
+  const contentLoading = isLoading || isLoadingCollection || isLoadingSharedCans || isLoadingVotes;
 
   const sharedCansMap = useMemo(
     () => Object.fromEntries(sharedCans.map(c => [c.id, c])),
@@ -247,7 +253,7 @@ export default function Profile() {
       </div>
 
       {/* Achievements strip */}
-      {!isLoading && (
+      {!contentLoading && (
         <div className="px-5 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -270,7 +276,7 @@ export default function Profile() {
       {/* Collection Card — this card IS the share card. Tapping the share
           icon expands a Save/Share preview inline, capturing this exact
           card (see the conditional ref below) — no separate export render. */}
-      {isLoading ? (
+      {contentLoading ? (
         <div className="px-5">
           <div className="h-64 rounded-2xl bg-card/40 border border-border/30 animate-pulse" />
         </div>

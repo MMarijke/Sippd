@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
@@ -288,8 +288,14 @@ export default function Settings() {
   const [prefs, setPrefs] = useState(loadPrefs);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [notifyPending, setNotifyPending] = useState(false);
+  const [privatePending, setPrivatePending] = useState(false);
 
-  const { data: profile } = useQuery({
+  const {
+    data: profile,
+    isLoading: profileLoading,
+    isError: profileError,
+  } = useQuery({
     queryKey: ['my-profile', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
@@ -299,9 +305,17 @@ export default function Settings() {
     enabled: !!user?.id,
   });
 
+  useEffect(() => {
+    if (profileError) toast.error('Could not load your profile');
+  }, [profileError]);
+
   const refetchProfile = () => queryClient.invalidateQueries({ queryKey: ['my-profile', user?.id] });
 
-  const { data: subscriptionDetails, isLoading: subscriptionLoading } = useQuery({
+  const {
+    data: subscriptionDetails,
+    isLoading: subscriptionLoading,
+    isError: subscriptionError,
+  } = useQuery({
     queryKey: ['subscription-status', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke('get-subscription-status');
@@ -311,6 +325,10 @@ export default function Settings() {
     },
     enabled: !!user?.id && isPro,
   });
+
+  useEffect(() => {
+    if (subscriptionError) toast.error('Could not load your subscription details');
+  }, [subscriptionError]);
 
   const handleManageSubscription = () => {
     if (!subscriptionDetails?.manage_url) {
@@ -327,8 +345,10 @@ export default function Settings() {
   };
 
   const toggleNotifyRareFollows = async () => {
+    setNotifyPending(true);
     const next = !profile?.notify_rare_follows;
     const { error } = await supabase.from('profiles').update({ notify_rare_follows: next }).eq('id', user.id);
+    setNotifyPending(false);
     if (error) {
       toast.error('Failed to update rare pull alerts: ' + (error.message || 'Unknown error'));
       return;
@@ -338,8 +358,10 @@ export default function Settings() {
   };
 
   const togglePrivate = async () => {
+    setPrivatePending(true);
     const next = !profile?.is_private;
     const { error } = await supabase.from('profiles').update({ is_private: next }).eq('id', user.id);
+    setPrivatePending(false);
     if (error) {
       toast.error('Failed to update privacy setting: ' + (error.message || 'Unknown error'));
       return;
@@ -429,11 +451,13 @@ export default function Settings() {
                 sub={
                   subscriptionLoading
                     ? 'Loading…'
-                    : subscriptionDetails?.cancel_at
-                      ? `Cancels ${format(new Date(subscriptionDetails.cancel_at), 'MMM d, yyyy')}`
-                      : subscriptionDetails?.next_billing_date
-                        ? format(new Date(subscriptionDetails.next_billing_date), 'MMM d, yyyy')
-                        : '—'
+                    : subscriptionError
+                      ? "Couldn't load"
+                      : subscriptionDetails?.cancel_at
+                        ? `Cancels ${format(new Date(subscriptionDetails.cancel_at), 'MMM d, yyyy')}`
+                        : subscriptionDetails?.next_billing_date
+                          ? format(new Date(subscriptionDetails.next_billing_date), 'MMM d, yyyy')
+                          : '—'
                 }
               />
               <SettingsRow
@@ -500,21 +524,32 @@ export default function Settings() {
               <p className="text-sm font-medium text-foreground">Rare Pull Alerts</p>
               <p className="text-xs font-mono text-muted-foreground mt-0.5">Notify me when someone I follow adds an Ultra Rare or Legendary can</p>
             </div>
-            <button
-              onClick={toggleNotifyRareFollows}
-              role="switch"
-              aria-checked={!!profile?.notify_rare_follows}
-              aria-label="Rare Pull Alerts"
-              className={cn(
-                'relative w-11 h-6 rounded-full transition-colors flex-shrink-0',
-                profile?.notify_rare_follows ? 'bg-primary' : 'bg-secondary border border-border'
-              )}
-            >
-              <div className={cn(
-                'absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all',
-                profile?.notify_rare_follows ? 'left-5' : 'left-0.5'
-              )} />
-            </button>
+            {profileLoading ? (
+              // Not a real switch reading the actual saved value yet — the
+              // profile query hasn't resolved, and asserting an aria-checked
+              // "off" state (which is what !!undefined would render below)
+              // would momentarily lie about the user's real setting.
+              <div className="w-11 h-6 rounded-full bg-secondary/60 animate-pulse flex-shrink-0" />
+            ) : (
+              <button
+                onClick={toggleNotifyRareFollows}
+                role="switch"
+                aria-checked={!!profile?.notify_rare_follows}
+                aria-label="Rare Pull Alerts"
+                disabled={notifyPending}
+                className={cn(
+                  'relative w-11 h-6 rounded-full transition-colors flex-shrink-0',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                  'disabled:opacity-50 disabled:cursor-not-allowed',
+                  profile?.notify_rare_follows ? 'bg-primary' : 'bg-secondary border border-border'
+                )}
+              >
+                <div className={cn(
+                  'absolute top-0.5 w-5 h-5 rounded-full bg-foreground shadow transition-all',
+                  profile?.notify_rare_follows ? 'left-5' : 'left-0.5'
+                )} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -525,21 +560,28 @@ export default function Settings() {
               <p className="text-sm font-medium text-foreground">Private Account</p>
               <p className="text-xs font-mono text-muted-foreground mt-0.5">Only approved followers can see your collection</p>
             </div>
-            <button
-              onClick={togglePrivate}
-              role="switch"
-              aria-checked={!!profile?.is_private}
-              aria-label="Private Account"
-              className={cn(
-                'relative w-11 h-6 rounded-full transition-colors flex-shrink-0',
-                profile?.is_private ? 'bg-primary' : 'bg-secondary border border-border'
-              )}
-            >
-              <div className={cn(
-                'absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all',
-                profile?.is_private ? 'left-5' : 'left-0.5'
-              )} />
-            </button>
+            {profileLoading ? (
+              <div className="w-11 h-6 rounded-full bg-secondary/60 animate-pulse flex-shrink-0" />
+            ) : (
+              <button
+                onClick={togglePrivate}
+                role="switch"
+                aria-checked={!!profile?.is_private}
+                aria-label="Private Account"
+                disabled={privatePending}
+                className={cn(
+                  'relative w-11 h-6 rounded-full transition-colors flex-shrink-0',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                  'disabled:opacity-50 disabled:cursor-not-allowed',
+                  profile?.is_private ? 'bg-primary' : 'bg-secondary border border-border'
+                )}
+              >
+                <div className={cn(
+                  'absolute top-0.5 w-5 h-5 rounded-full bg-foreground shadow transition-all',
+                  profile?.is_private ? 'left-5' : 'left-0.5'
+                )} />
+              </button>
+            )}
           </div>
         </div>
 

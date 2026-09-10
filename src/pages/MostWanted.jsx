@@ -175,7 +175,7 @@ export default function MostWanted() {
                 aria-label={isFav ? 'Remove from favourites' : 'Add to favourites'}
                 aria-pressed={isFav}
                 className={cn(
-                  'w-8 h-8 rounded-full flex items-center justify-center transition-colors',
+                  'w-11 h-11 rounded-full flex items-center justify-center transition-colors',
                   isFav
                     ? 'bg-primary/20 text-primary'
                     : 'bg-secondary text-muted-foreground hover:text-primary'

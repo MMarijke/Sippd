@@ -228,7 +228,7 @@ export default function Profile() {
             ) : (
               <div className="flex items-center gap-1.5 min-w-0">
                 <h2 className="text-base font-display font-bold text-foreground truncate">{profile?.full_name || 'Collector'}</h2>
-                <button onClick={startEdit} aria-label="Edit display name" className="p-1 -m-1 text-muted-foreground hover:text-primary transition-colors flex-shrink-0">
+                <button onClick={startEdit} aria-label="Edit display name" className="p-4 text-muted-foreground hover:text-primary transition-colors flex-shrink-0">
                   <Pencil className="w-3 h-3" />
                 </button>
                 {profile?.region && (

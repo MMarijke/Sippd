@@ -7,27 +7,28 @@ export default function CanListItem({ item, sharedCan, onAddToCrate }) {
   const confidence = sharedCan ? getConfidence(sharedCan.total_votes) : 'confirmed';
   const rarity = confidence === 'unrated' ? '???' : (sharedCan ? getDisplayRarity(sharedCan) : (item.can_rarity || 'Common'));
 
-  const handleAddToCrate = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onAddToCrate?.();
-  };
-
   return (
-    <Link
-      to={`/can/${item.can_id}`}
-      className="flex items-center gap-3 p-3 bg-card border border-border rounded-xl hover:border-primary/30 transition-all"
-    >
-      <div className="w-12 h-12 rounded-lg bg-secondary overflow-hidden flex-shrink-0">
+    // The row's own navigation is a full-area overlay Link (absolute inset-0)
+    // rather than wrapping every child in an <a>, so the "Add to crate"
+    // button below can be a real sibling instead of a <button> nested
+    // inside an <a> — nesting interactive elements is invalid HTML and
+    // produces unpredictable focus/click behavior.
+    <div className="relative flex items-center gap-3 p-3 bg-card border border-border rounded-xl hover:border-primary/30 transition-all">
+      <Link
+        to={`/can/${item.can_id}`}
+        aria-label={item.can_name}
+        className="absolute inset-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      />
+      <div className="w-12 h-12 rounded-lg bg-secondary overflow-hidden flex-shrink-0 pointer-events-none">
         {item.can_image_url ? (
-          <img src={item.can_image_url} alt={item.can_name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+          <img src={item.can_image_url} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Package className="w-5 h-5 text-muted-foreground/30" />
           </div>
         )}
       </div>
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 pointer-events-none">
         <p className="text-sm font-semibold text-foreground truncate">{item.can_name}</p>
         <div className="flex items-center gap-2 mt-0.5">
           <span className="text-[11px] font-mono text-muted-foreground">{item.can_brand}</span>
@@ -40,7 +41,7 @@ export default function CanListItem({ item, sharedCan, onAddToCrate }) {
           </span>
         </div>
       </div>
-      <div className="flex flex-col items-end gap-1">
+      <div className="flex flex-col items-end gap-1 pointer-events-none">
         <RarityBadge rarity={rarity} />
         {confidence === 'low' && (
           <span className="text-[8px] font-mono uppercase tracking-wider px-1 py-0.5 rounded text-yellow-400 border border-yellow-400/30">
@@ -55,14 +56,14 @@ export default function CanListItem({ item, sharedCan, onAddToCrate }) {
       </div>
       {onAddToCrate && (
         <button
-          onClick={handleAddToCrate}
+          onClick={onAddToCrate}
           aria-label="Add to crate"
-          className="w-9 h-9 rounded-lg bg-secondary/60 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors flex-shrink-0"
+          className="relative z-10 w-11 h-11 rounded-lg bg-secondary/60 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors flex-shrink-0"
         >
           <PackagePlus className="w-3.5 h-3.5" />
         </button>
       )}
-      <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-    </Link>
+      <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 pointer-events-none" />
+    </div>
   );
 }

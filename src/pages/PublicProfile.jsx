@@ -203,7 +203,7 @@ export default function PublicProfile() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-8 font-mono text-xs gap-1.5 border-primary/20 text-primary hover:bg-primary/10"
+                    className="h-11 font-mono text-xs gap-1.5 border-primary/20 text-primary hover:bg-primary/10"
                     onClick={() => setShowTradeDialog(true)}
                   >
                     <ArrowRightLeft className="w-3.5 h-3.5" /> Trade
@@ -211,7 +211,7 @@ export default function PublicProfile() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-8 font-mono text-xs gap-1.5 border-border text-muted-foreground hover:text-foreground"
+                    className="h-11 font-mono text-xs gap-1.5 border-border text-muted-foreground hover:text-foreground"
                     onClick={() => navigate(`/compare?with=${userId}`)}
                   >
                     <GitCompare className="w-3.5 h-3.5" /> Compare

@@ -8,9 +8,18 @@ import { useAuth } from '@/lib/AuthContext';
  * in the RPC — this hook just triggers it and reads the result.
  */
 export function useStreak() {
+  return useStreakStatus().streak;
+}
+
+/**
+ * Same data as useStreak(), plus isLoading, for callers that need to gate
+ * their own display (e.g. Home's StatsRow, which shows '—' for its other
+ * two stats while loading and would otherwise flash "0d" here first).
+ */
+export function useStreakStatus() {
   const { user } = useAuth();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['streak', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('tick_streak', { p_caller_id: user.id });
@@ -21,5 +30,5 @@ export function useStreak() {
     staleTime: Infinity,
   });
 
-  return data?.current_streak ?? 0;
+  return { streak: data?.current_streak ?? 0, isLoading: !user || isLoading };
 }

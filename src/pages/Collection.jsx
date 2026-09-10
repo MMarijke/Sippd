@@ -169,12 +169,12 @@ export default function Collection() {
         action={
           <div className="flex items-center gap-2">
             <Link to="/crates">
-              <Button size="sm" variant="outline" className="font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
+              <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
                 <PackageOpen className="w-4 h-4" /> Crates
               </Button>
             </Link>
             <Link to="/scan">
-              <Button size="sm" variant="outline" className="font-mono text-xs gap-1.5">
+              <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5">
                 <ScanLine className="w-4 h-4" /> Add
               </Button>
             </Link>
@@ -189,7 +189,8 @@ export default function Collection() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search your collection…"
-            className="pl-9 bg-secondary border-border font-body"
+            aria-label="Search your collection"
+            className="h-11 pl-9 bg-secondary border-border font-body"
           />
         </div>
       </div>
@@ -228,7 +229,7 @@ export default function Collection() {
             action={
               collection.length === 0 && (
                 <Link to="/scan">
-                  <Button className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground">
+                  <Button className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground">
                     <ScanLine className="w-4 h-4" /> Add First Can
                   </Button>
                 </Link>
@@ -240,14 +241,14 @@ export default function Collection() {
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-2 gap-3">
                 {filtered.slice(0, visibleCount).map(item => (
-                  <Link key={item.id} to={`/can/${item.can_id}`}>
-                    <CanCard
-                      can={item}
-                      showStatus
-                      sharedCan={sharedCansMap[item.can_id]}
-                      onAddToCrate={() => setCrateTarget(item)}
-                    />
-                  </Link>
+                  <CanCard
+                    key={item.id}
+                    can={item}
+                    to={`/can/${item.can_id}`}
+                    showStatus
+                    sharedCan={sharedCansMap[item.can_id]}
+                    onAddToCrate={() => setCrateTarget(item)}
+                  />
                 ))}
               </div>
             ) : (
@@ -267,7 +268,7 @@ export default function Collection() {
               <div className="flex justify-center pt-4">
                 <Button
                   variant="outline"
-                  className="font-mono text-xs border-primary/30 text-primary hover:bg-primary/10"
+                  className="h-11 font-mono text-xs border-primary/30 text-primary hover:bg-primary/10"
                   onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
                 >
                   Load More ({filtered.length - visibleCount} remaining)

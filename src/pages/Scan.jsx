@@ -55,6 +55,14 @@ export default function Scan() {
   }, [isSharedCansError]);
 
   const handleBarcodeLookup = async (barcode) => {
+    if (isSharedCansError) {
+      // sharedCans silently defaults to [] on a fetch failure — without this
+      // guard, a barcode for a can that already exists would look like a
+      // miss and get routed to OpenFoodFacts / vote_on_can as a first
+      // sighting, quietly duplicating an existing can in the database.
+      toast.error("Can't verify that barcode against the database right now — try again in a moment.");
+      return;
+    }
     const match = sharedCans.find(c => c.barcode === barcode);
     if (match) {
       setSelectedCan(match);

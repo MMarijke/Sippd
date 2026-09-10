@@ -360,6 +360,11 @@ export default function Settings() {
       return;
     }
     await signOut();
+    // Toaster is mounted at the app root (App.jsx), so this survives the
+    // navigate() below — without it, the whole flow ends in silence: the
+    // user is just dropped on the landing page with nothing confirming the
+    // irreversible action they just took actually happened.
+    toast.success('Your account has been deleted');
     navigate('/');
   };
 
@@ -559,6 +564,7 @@ export default function Settings() {
         onCancel={() => setShowDeleteConfirm(false)}
         onConfirm={handleDeleteAccount}
         isPending={deletingAccount}
+        requireTypedConfirmation
         title="Delete Account?"
         description="This will permanently delete your account and all your data. This cannot be undone."
         confirmLabel="Delete My Account"

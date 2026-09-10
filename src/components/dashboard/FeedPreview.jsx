@@ -83,7 +83,7 @@ export default function FeedPreview() {
         <button
           onClick={() => refetch()}
           aria-label="Refresh feed"
-          className="relative z-10 w-8 h-8 rounded-full bg-secondary flex items-center justify-center border border-border text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+          className="relative z-10 w-11 h-11 rounded-full bg-secondary flex items-center justify-center border border-border text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
         >
           <RefreshCw className="w-3.5 h-3.5" />
         </button>
@@ -98,13 +98,13 @@ export default function FeedPreview() {
       <div aria-label="Feed shortcuts" className="relative z-10 flex bg-secondary rounded-lg border border-border p-0.5 mb-3">
         <button
           onClick={() => goToFeed('global')}
-          className="flex-1 h-7 font-mono text-[11px] rounded-md transition-colors gap-1.5 flex items-center justify-center bg-card text-primary shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex-1 h-11 font-mono text-[11px] rounded-md transition-colors gap-1.5 flex items-center justify-center bg-card text-primary shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Radio className="w-3 h-3" /> Global
         </button>
         <button
           onClick={() => goToFeed('following')}
-          className="flex-1 h-7 font-mono text-[11px] rounded-md transition-colors gap-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex-1 h-11 font-mono text-[11px] rounded-md transition-colors gap-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Users className="w-3 h-3" /> Following
         </button>

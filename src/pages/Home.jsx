@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Link } from 'react-router-dom';
-import { ScanLine, BarChart2 } from 'lucide-react';
+import { ScanLine, BarChart2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import PageHeader from '@/components/shared/PageHeader';
@@ -35,7 +35,12 @@ export default function Home() {
     enabled: !!user?.id,
   });
 
-  const { data: collection = [], isLoading: loadingCollection } = useQuery({
+  const {
+    data: collection = [],
+    isLoading: loadingCollection,
+    isError: isCollectionError,
+    refetch: refetchCollection,
+  } = useQuery({
     queryKey: ['user-collection', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -50,7 +55,12 @@ export default function Home() {
     refetchOnMount: true,
   });
 
-  const { data: sharedCans = [], isLoading: loadingShared } = useQuery({
+  const {
+    data: sharedCans = [],
+    isLoading: loadingShared,
+    isError: isSharedCansError,
+    refetch: refetchSharedCans,
+  } = useQuery({
     queryKey: ['shared-cans'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -66,6 +76,15 @@ export default function Home() {
 
   const { streak, isLoading: streakLoading } = useStreakStatus();
   const isLoading = !user || loadingCollection || loadingShared;
+  // Profile and votes fetch failures already degrade gracefully (subtitle
+  // falls back to default text; achievements just see 0 votes) without
+  // misrepresenting the user's data, so only these two — which otherwise
+  // silently render as "0 cans" on a fetch failure — get a visible retry.
+  const hasCollectionError = isCollectionError || isSharedCansError;
+  const retryCollection = () => {
+    refetchCollection();
+    refetchSharedCans();
+  };
 
   const { data: votes = [] } = useQuery({
     queryKey: ['my-votes', user?.id],
@@ -125,7 +144,11 @@ export default function Home() {
     [collected]
   );
 
-  const isNewUser = !isLoading && collected.length === 0;
+  // Excludes hasCollectionError: a failed fetch also leaves `collected`
+  // at its empty default, and a fetch failure is not the same thing as a
+  // genuinely empty vault — it should show the retry card, not a
+  // "welcome, add your first can" message.
+  const isNewUser = !isLoading && !hasCollectionError && collected.length === 0;
 
   return (
     <div>
@@ -135,56 +158,77 @@ export default function Home() {
         subtitle={profile?.full_name ? `${profile.full_name}'s vault` : 'Your Energy Drink Vault'}
         action={
           <Link to="/scan">
-            <Button size="sm" className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button size="sm" className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
               <ScanLine className="w-4 h-4" /> Scan
             </Button>
           </Link>
         }
       />
 
-      {isNewUser && (
+      {hasCollectionError ? (
         <div className="px-5 mt-5">
-          <div className="hero-card rounded-2xl p-5 text-center">
-            <p className="text-sm font-display font-semibold text-foreground">Welcome to Sippd</p>
+          <div className="bg-card border border-destructive/30 rounded-2xl p-5 text-center">
+            <p className="text-sm font-display font-semibold text-foreground">Couldn't load your vault</p>
             <p className="text-xs font-mono text-muted-foreground mt-1.5">
-              Scan your first can to start building your vault.
+              Check your connection and try again.
             </p>
-            <Link to="/scan" className="inline-block mt-3">
-              <Button size="sm" className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
-                <ScanLine className="w-4 h-4" /> Scan Your First Can
-              </Button>
-            </Link>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-11 font-mono text-xs gap-1.5 mt-3 border-destructive/30 text-destructive hover:bg-destructive/10"
+              onClick={retryCollection}
+            >
+              <RefreshCw className="w-4 h-4" /> Retry
+            </Button>
           </div>
         </div>
-      )}
+      ) : (
+        <>
+          {isNewUser && (
+            <div className="px-5 mt-5">
+              <div className="hero-card rounded-2xl p-5 text-center">
+                <p className="text-sm font-display font-semibold text-foreground">Welcome to Sippd</p>
+                <p className="text-xs font-mono text-muted-foreground mt-1.5">
+                  Scan your first can to start building your vault.
+                </p>
+                <Link to="/scan" className="inline-block mt-3">
+                  <Button size="sm" className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+                    <ScanLine className="w-4 h-4" /> Scan Your First Can
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
 
-      <div className="px-5 mt-5">
-        <RarityHero collected={collected} sharedCansMap={sharedCansMap} isLoading={isLoading} />
-      </div>
-
-      {!isNewUser && (
-        <div className="px-5 mt-5">
-          <div className="hero-card rounded-2xl p-5">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">
-              COLLECTION SCORE
-            </p>
-            <p className="text-5xl font-mono font-black text-foreground">
-              {isLoading ? '—' : score}
-            </p>
-            <p className="text-xs font-mono text-muted-foreground">
-              Your Energy Drink Vault
-            </p>
+          <div className="px-5 mt-5">
+            <RarityHero collected={collected} sharedCansMap={sharedCansMap} isLoading={isLoading} />
           </div>
-        </div>
-      )}
 
-      <div className="mt-5">
-        <StatsRow
-          rarePulls={isLoading ? '—' : rarePulls}
-          streak={streakLoading ? '—' : `${streak}d`}
-          wishlistCount={isLoading ? '—' : wishlistCount}
-        />
-      </div>
+          {!isNewUser && (
+            <div className="px-5 mt-5">
+              <div className="hero-card rounded-2xl p-5">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">
+                  COLLECTION SCORE
+                </p>
+                <p className="text-5xl font-mono font-black text-foreground">
+                  {isLoading ? '—' : score}
+                </p>
+                <p className="text-xs font-mono text-muted-foreground">
+                  Your Energy Drink Vault
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-5">
+            <StatsRow
+              rarePulls={isLoading ? '—' : rarePulls}
+              streak={streakLoading ? '—' : `${streak}d`}
+              wishlistCount={isLoading ? '—' : wishlistCount}
+            />
+          </div>
+        </>
+      )}
 
       <div className="px-5 mt-5">
         {isNewUser && (
@@ -195,7 +239,7 @@ export default function Home() {
         <FeedPreview />
       </div>
 
-      {!isLoading && collected.length > 0 && brands.length > 1 && (
+      {!isLoading && !hasCollectionError && collected.length > 0 && brands.length > 1 && (
         <div className="mt-5">
           <p className="px-5 mb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
             Browse by Brand
@@ -207,7 +251,7 @@ export default function Home() {
                 onClick={() => setSelectedBrand(brand)}
                 aria-pressed={selectedBrand === brand}
                 className={cn(
-                  'flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-mono font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  'flex-shrink-0 h-11 px-4 flex items-center rounded-full text-xs font-mono font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   selectedBrand === brand
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-secondary border border-border text-muted-foreground hover:border-primary/30'
@@ -220,14 +264,16 @@ export default function Home() {
         </div>
       )}
 
-      <div className="mt-5">
-        <SpotlightCarousel
-          collected={collected}
-          sharedCansMap={sharedCansMap}
-          selectedBrand={selectedBrand}
-          isLoading={isLoading}
-        />
-      </div>
+      {!hasCollectionError && (
+        <div className="mt-5">
+          <SpotlightCarousel
+            collected={collected}
+            sharedCansMap={sharedCansMap}
+            selectedBrand={selectedBrand}
+            isLoading={isLoading}
+          />
+        </div>
+      )}
 
       {/* Monthly Report CTA */}
       <Link to="/monthly-report" className="block px-5 mt-5">

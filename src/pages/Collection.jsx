@@ -3,8 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, ScanLine, PackageOpen, AlertCircle, RefreshCw } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, ScanLine, PackageOpen, X, AlertCircle, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';

@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import DeleteConfirmDialog from '@/components/candetail/DeleteConfirmDialog';
 import EditEntrySheet from '@/components/candetail/EditEntrySheet';
 import CanImageBox from '@/components/shared/CanImageBox';
+import { toast } from 'sonner';
 
 // Invert VOTE_FIELDS: field name → tier label
 const VOTE_LABELS = Object.fromEntries(
@@ -91,7 +92,11 @@ export default function CanDetail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-collection'] });
+      setShowDelete(false);
       navigate('/collection');
+    },
+    onError: (error) => {
+      toast.error('Failed to remove from collection: ' + (error?.message || 'Unknown error'));
     },
   });
 
@@ -115,8 +120,10 @@ export default function CanDetail() {
         .sort((a, b) => b.votes - a.votes)
     : [];
 
-  const status = item?.status || 'collected';
-  const statusCfg = STATUS_CONFIG[status] || STATUS_CONFIG.collected;
+  // No fallback to 'collected' — an absent item means this can isn't in
+  // the viewer's vault at all (unowned, or their collection is still
+  // loading), and showing "In Vault" in either case would be a lie.
+  const statusCfg = item ? (STATUS_CONFIG[item.status] || STATUS_CONFIG.collected) : null;
 
   if (isLoading) {
     return (
@@ -205,9 +212,11 @@ export default function CanDetail() {
 
         {/* Status + Rarity row */}
         <div className="flex items-center gap-2 flex-wrap">
-          <span className={cn('text-xs font-mono font-semibold px-2.5 py-1 rounded-full border', statusCfg.bg, statusCfg.color)}>
-            {statusCfg.label}
-          </span>
+          {statusCfg && (
+            <span className={cn('text-xs font-mono font-semibold px-2.5 py-1 rounded-full border', statusCfg.bg, statusCfg.color)}>
+              {statusCfg.label}
+            </span>
+          )}
           {confidence !== 'unrated' && <RarityBadge rarity={rarity} size="md" />}
           {confidence === 'unrated' && (
             <span className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground border border-border rounded px-1.5 py-0.5">
@@ -358,7 +367,7 @@ export default function CanDetail() {
       <DeleteConfirmDialog
         open={showDelete}
         onCancel={() => setShowDelete(false)}
-        onConfirm={() => { setShowDelete(false); deleteMutation.mutate(); }}
+        onConfirm={() => deleteMutation.mutate()}
         isPending={deleteMutation.isPending}
         canName={name}
       />

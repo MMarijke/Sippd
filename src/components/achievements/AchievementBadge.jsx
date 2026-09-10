@@ -14,7 +14,7 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
           className={cn(
             'w-11 h-11 rounded-xl flex items-center justify-center text-lg transition-all',
             unlocked
-              ? 'bg-primary/10 border border-primary/30 shadow-[0_0_12px_rgba(0,240,255,0.15)]'
+              ? 'bg-primary/10 border border-primary/30 shadow-[0_0_12px_hsl(var(--primary)/0.15)]'
               : 'bg-muted/50 border border-border/30 grayscale opacity-40'
           )}
         >
@@ -37,7 +37,7 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
       className={cn(
         'relative flex flex-col items-center text-center p-4 rounded-2xl border transition-all',
         unlocked
-          ? 'bg-card border-primary/20 shadow-[0_0_12px_rgba(0,240,255,0.07)]'
+          ? 'bg-card border-primary/20 shadow-[0_0_12px_hsl(var(--primary)/0.07)]'
           : 'bg-card/40 border-border/40'
       )}
     >
@@ -46,7 +46,7 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
         className={cn(
           'w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-3 transition-all',
           unlocked
-            ? 'bg-primary/10 border border-primary/30 shadow-[0_0_16px_rgba(0,240,255,0.15)]'
+            ? 'bg-primary/10 border border-primary/30 shadow-[0_0_16px_hsl(var(--primary)/0.15)]'
             : 'bg-muted/50 border border-border/30 grayscale opacity-40'
         )}
       >

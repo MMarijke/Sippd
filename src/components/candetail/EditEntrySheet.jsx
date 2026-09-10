@@ -153,8 +153,8 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
                         className="w-8 h-8 rounded-lg border-2 transition-all"
                         style={{
                           backgroundColor: hex,
-                          borderColor: form.can_bg_color === hex ? '#00E5FF' : 'rgba(255,255,255,0.1)',
-                          boxShadow: form.can_bg_color === hex ? '0 0 0 2px rgba(0,229,255,0.3)' : 'none',
+                          borderColor: form.can_bg_color === hex ? 'hsl(var(--primary))' : 'rgba(255,255,255,0.1)',
+                          boxShadow: form.can_bg_color === hex ? '0 0 0 2px hsl(var(--primary) / 0.3)' : 'none',
                         }}
                       />
                     ))}

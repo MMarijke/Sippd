@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
@@ -58,13 +58,16 @@ export default function Scan() {
     setMode('add');
   };
 
-  const filtered = searchQuery.length >= 2
-    ? sharedCans.filter(c =>
-        c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.barcode?.includes(searchQuery)
-      )
-    : [];
+  const filtered = useMemo(
+    () => searchQuery.length >= 2
+      ? sharedCans.filter(c =>
+          c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          c.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          c.barcode?.includes(searchQuery)
+        )
+      : [],
+    [searchQuery, sharedCans]
+  );
 
   const handleSearchKeyDown = async (e) => {
     if (e.key !== 'Enter') return;

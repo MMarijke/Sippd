@@ -34,6 +34,8 @@ export default function AddedConfirmation({ canName, imageUrl, bgColor, onComple
     >
       <motion.div
         className="flex flex-col items-center text-center"
+        role="status"
+        aria-live="polite"
         initial={reducedMotion ? false : { scale: 0.85, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={reducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 20 }}
@@ -52,6 +54,7 @@ export default function AddedConfirmation({ canName, imageUrl, bgColor, onComple
         </div>
         <p className="text-sm font-semibold text-foreground max-w-[220px] truncate">{canName}</p>
         <p className="text-xs font-mono uppercase tracking-widest text-primary/70 mt-1">Added to your vault</p>
+        <p className="text-[11px] font-mono text-muted-foreground/60 tracking-widest uppercase mt-4">Tap to continue</p>
       </motion.div>
     </motion.div>
   );

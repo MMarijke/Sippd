@@ -120,6 +120,14 @@ export default function Scan() {
             setSearchQuery('');
             navigate('/collection', addedCan ? { state: { addedCan } } : undefined);
           }}
+          onScanNext={() => {
+            // Stays on Scan instead of the usual navigate to /collection —
+            // the common flow for anyone logging several cans in one
+            // sitting shouldn't have to leave and come back for each one.
+            setMode('search');
+            setSelectedCan(null);
+            setSearchQuery('');
+          }}
           onCancel={() => { setMode('search'); setSelectedCan(null); }}
         />
       </div>

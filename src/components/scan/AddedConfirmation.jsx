@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
-import { Check } from 'lucide-react';
+import { Check, ScanLine } from 'lucide-react';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import CanImageBox from '@/components/shared/CanImageBox';
 
@@ -10,7 +10,7 @@ import CanImageBox from '@/components/shared/CanImageBox';
 // before the page navigates away. This is deliberately smaller/faster: real
 // feedback for the habit-forming everyday case, without diluting what makes
 // a rare pull feel special.
-export default function AddedConfirmation({ canName, imageUrl, bgColor, onComplete }) {
+export default function AddedConfirmation({ canName, imageUrl, bgColor, onComplete, onScanNext }) {
   const autoDismissRef = useRef(null);
   const reducedMotion = usePrefersReducedMotion();
 
@@ -22,6 +22,12 @@ export default function AddedConfirmation({ canName, imageUrl, bgColor, onComple
   const handleTap = () => {
     clearTimeout(autoDismissRef.current);
     onComplete();
+  };
+
+  const handleScanNext = (e) => {
+    e.stopPropagation();
+    clearTimeout(autoDismissRef.current);
+    onScanNext();
   };
 
   return (
@@ -54,7 +60,23 @@ export default function AddedConfirmation({ canName, imageUrl, bgColor, onComple
         </div>
         <p className="text-sm font-semibold text-foreground max-w-[220px] truncate">{canName}</p>
         <p className="text-xs font-mono uppercase tracking-widest text-primary/70 mt-1">Added to your vault</p>
-        <p className="text-[11px] font-mono text-muted-foreground/60 tracking-widest uppercase mt-4">Tap to continue</p>
+
+        <div className="flex items-center gap-2 mt-5" onClick={e => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={handleScanNext}
+            className="h-11 px-4 rounded-full border border-primary/30 text-primary text-xs font-mono font-semibold flex items-center gap-1.5 hover:bg-primary/10 transition-colors"
+          >
+            <ScanLine className="w-3.5 h-3.5" /> Scan Next
+          </button>
+          <button
+            type="button"
+            onClick={handleTap}
+            className="h-11 px-4 rounded-full bg-primary text-primary-foreground text-xs font-mono font-semibold hover:bg-primary/90 transition-colors"
+          >
+            View Collection
+          </button>
+        </div>
       </motion.div>
     </motion.div>
   );

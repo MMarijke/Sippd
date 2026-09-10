@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
+import { ScanLine } from 'lucide-react';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 const RARITY_CONFIG = {
@@ -43,7 +44,7 @@ const PARTICLES = Array.from({ length: 30 }, (_, i) => ({
   shape: Math.random() > 0.5 ? 'circle' : 'rect',
 }));
 
-export default function RarityReveal({ rarity, canName, onComplete }) {
+export default function RarityReveal({ rarity, canName, onComplete, onScanNext }) {
   const config = RARITY_CONFIG[rarity] || RARITY_CONFIG['Rare'];
   const autoDismissRef = useRef(null);
   const reducedMotion = usePrefersReducedMotion();
@@ -56,6 +57,12 @@ export default function RarityReveal({ rarity, canName, onComplete }) {
   const handleTap = () => {
     clearTimeout(autoDismissRef.current);
     onComplete();
+  };
+
+  const handleScanNext = (e) => {
+    e.stopPropagation();
+    clearTimeout(autoDismissRef.current);
+    onScanNext();
   };
 
   return (
@@ -206,18 +213,33 @@ export default function RarityReveal({ rarity, canName, onComplete }) {
           Added to your vault
         </motion.p>
 
-        {/* Tap hint — infinite opacity pulse under normal motion; a
-            static, readable hint under reduced motion instead of removed
-            entirely, since it's the one piece of real information here
-            (how to dismiss). */}
-        <motion.p
-          className="text-[11px] font-mono text-white/30 tracking-widest uppercase"
-          initial={{ opacity: reducedMotion ? 0.6 : 0 }}
-          animate={{ opacity: reducedMotion ? 0.6 : [0, 0.6, 0] }}
-          transition={reducedMotion ? { duration: 0 } : { delay: 1.2, duration: 1, repeat: Infinity }}
+        {/* Explicit actions rather than an unlabeled tap-anywhere hint — a
+            rare pull is exactly the moment someone is most likely to want
+            to keep scanning, so that choice is named rather than implied. */}
+        <motion.div
+          className="flex items-center gap-3"
+          initial={reducedMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={reducedMotion ? { duration: 0 } : { delay: 1.2, duration: 0.4 }}
+          onClick={e => e.stopPropagation()}
         >
-          Tap to continue
-        </motion.p>
+          <button
+            type="button"
+            onClick={handleScanNext}
+            className="h-11 px-5 rounded-full border text-xs font-mono font-semibold uppercase tracking-wider flex items-center gap-1.5 transition-colors"
+            style={{ borderColor: config.accent + '60', color: config.accent }}
+          >
+            <ScanLine className="w-3.5 h-3.5" /> Scan Next
+          </button>
+          <button
+            type="button"
+            onClick={handleTap}
+            className="h-11 px-5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider text-black transition-colors"
+            style={{ backgroundColor: config.accent }}
+          >
+            View Collection
+          </button>
+        </motion.div>
       </motion.div>
     </motion.div>
   );

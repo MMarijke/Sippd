@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, ScanLine, PackageOpen, X } from 'lucide-react';
+import { Search, ScanLine, PackageOpen, X, AlertCircle, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
@@ -17,6 +17,7 @@ import { computeAchievements } from '@/lib/achievements';
 import { useAchievementUnlock } from '@/hooks/useAchievementUnlock';
 import AchievementUnlockAnimation from '@/components/achievements/AchievementUnlockAnimation';
 import { useStreak } from '@/lib/useStreak';
+import { toast } from 'sonner';
 
 const PAGE_SIZE = 60;
 
@@ -47,7 +48,12 @@ export default function Collection() {
     }
   }, [location.state]);
 
-  const { data: collection = [], isLoading } = useQuery({
+  const {
+    data: collection = [],
+    isLoading,
+    isError: isCollectionError,
+    refetch: refetchCollection,
+  } = useQuery({
     queryKey: ['user-collection', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -61,7 +67,11 @@ export default function Collection() {
     enabled: !!user?.id,
   });
 
-  const { data: sharedCans = [] } = useQuery({
+  const {
+    data: sharedCans = [],
+    isError: isSharedCansError,
+    refetch: refetchSharedCans,
+  } = useQuery({
     queryKey: ['shared-cans'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -74,7 +84,11 @@ export default function Collection() {
     },
   });
 
-  const { data: votes = [] } = useQuery({
+  const {
+    data: votes = [],
+    isError: isVotesError,
+    refetch: refetchVotes,
+  } = useQuery({
     queryKey: ['my-votes', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -88,6 +102,21 @@ export default function Collection() {
     },
     enabled: !!user?.id,
   });
+
+  // A failed fetch here would otherwise render identically to a genuinely
+  // empty collection (filtered.length === 0) — misleading an established
+  // collector into thinking their vault is empty. One combined flag/retry
+  // avoids toasting/retrying three times for what's usually one root cause.
+  const hasLoadError = isCollectionError || isSharedCansError || isVotesError;
+  const retryCollection = () => {
+    refetchCollection();
+    refetchSharedCans();
+    refetchVotes();
+  };
+
+  useEffect(() => {
+    if (hasLoadError) toast.error('Could not load your collection');
+  }, [hasLoadError]);
 
   const sharedCansMap = useMemo(
     () => Object.fromEntries(sharedCans.map(c => [c.id, c])),
@@ -149,12 +178,12 @@ export default function Collection() {
         action={
           <div className="flex items-center gap-2">
             <Link to="/crates">
-              <Button size="sm" variant="outline" className="font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
+              <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
                 <PackageOpen className="w-4 h-4" /> Crates
               </Button>
             </Link>
             <Link to="/scan">
-              <Button size="sm" variant="outline" className="font-mono text-xs gap-1.5">
+              <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5">
                 <ScanLine className="w-4 h-4" /> Add
               </Button>
             </Link>
@@ -169,7 +198,8 @@ export default function Collection() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search your collection…"
-            className="pl-9 bg-secondary border-border font-body"
+            aria-label="Search your collection"
+            className="h-11 pl-9 bg-secondary border-border font-body"
           />
         </div>
       </div>
@@ -186,6 +216,21 @@ export default function Collection() {
           <div className="flex items-center justify-center py-16">
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
+        ) : hasLoadError ? (
+          <EmptyState
+            icon={AlertCircle}
+            title="Couldn't load your collection"
+            description="Check your connection and try again."
+            action={
+              <Button
+                variant="outline"
+                className="h-11 font-mono text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+                onClick={retryCollection}
+              >
+                <RefreshCw className="w-4 h-4" /> Retry
+              </Button>
+            }
+          />
         ) : filtered.length === 0 ? (
           <EmptyState
             title="No cans found"
@@ -213,14 +258,14 @@ export default function Collection() {
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-2 gap-3">
                 {filtered.slice(0, visibleCount).map(item => (
-                  <Link key={item.id} to={`/can/${item.can_id}`}>
-                    <CanCard
-                      can={item}
-                      showStatus
-                      sharedCan={sharedCansMap[item.can_id]}
-                      onAddToCrate={() => setCrateTarget(item)}
-                    />
-                  </Link>
+                  <CanCard
+                    key={item.id}
+                    can={item}
+                    to={`/can/${item.can_id}`}
+                    showStatus
+                    sharedCan={sharedCansMap[item.can_id]}
+                    onAddToCrate={() => setCrateTarget(item)}
+                  />
                 ))}
               </div>
             ) : (
@@ -240,7 +285,7 @@ export default function Collection() {
               <div className="flex justify-center pt-4">
                 <Button
                   variant="outline"
-                  className="font-mono text-xs border-primary/30 text-primary hover:bg-primary/10"
+                  className="h-11 font-mono text-xs border-primary/30 text-primary hover:bg-primary/10"
                   onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
                 >
                   Load More ({filtered.length - visibleCount} remaining)

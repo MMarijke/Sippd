@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { Trophy, Zap, Crown, Info } from 'lucide-react';
-import { useState } from 'react';
+import { Trophy, Zap, Crown, Info, AlertCircle, RefreshCw } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 const MEDAL_COLORS = ['text-yellow-400', 'text-slate-300', 'text-amber-600'];
@@ -16,7 +17,12 @@ export default function CollectorsLeaderboard() {
 
   const metricColumn = sortBy === 'total' ? 'total_cans' : 'rare_pulls';
 
-  const { data: scores = [], isLoading } = useQuery({
+  const {
+    data: scores = [],
+    isLoading,
+    isError: isScoresError,
+    refetch: refetchScores,
+  } = useQuery({
     queryKey: ['leaderboard-scores', sortBy],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -29,11 +35,15 @@ export default function CollectorsLeaderboard() {
     },
   });
 
+  useEffect(() => {
+    if (isScoresError) toast.error('Could not load the leaderboard');
+  }, [isScoresError]);
+
   // Ordering comes from the DB query above (per active tab) — this only
   // hides collectors with nothing in their vault yet.
   const ranked = scores.filter(s => s.total_cans > 0);
 
-  const isEmpty = !isLoading && ranked.length === 0;
+  const isEmpty = !isLoading && !isScoresError && ranked.length === 0;
 
   // Competition-style ranking (ties share a rank) — the same algorithm the
   // "Your Rank" banner's count query already uses. Previously each row used
@@ -125,7 +135,7 @@ export default function CollectorsLeaderboard() {
         <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-between">
           <span className="text-xs font-mono text-muted-foreground">Your Rank</span>
           <span className={cn('text-sm font-display font-bold', sortBy === 'rare' ? 'text-rarity-ultra' : 'text-primary')}>
-            {myMetric > 0 ? (myRank ? `#${myRank}` : '…') : 'Not ranked yet'}
+            {isScoresError ? '—' : myMetric > 0 ? (myRank ? `#${myRank}` : '…') : 'Not ranked yet'}
           </span>
         </div>
       )}
@@ -136,6 +146,19 @@ export default function CollectorsLeaderboard() {
             <div key={i} className="h-16 rounded-xl bg-card/40 border border-border/30 animate-pulse mb-2" />
           ))}
         </>
+      ) : isScoresError ? (
+        <div className="bg-card border border-destructive/30 rounded-2xl p-8 flex flex-col items-center text-center">
+          <AlertCircle className="w-10 h-10 text-destructive mb-3" />
+          <p className="text-sm font-display font-semibold text-foreground">Couldn't load the leaderboard</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-11 mt-4 font-mono text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+            onClick={() => refetchScores()}
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Retry
+          </Button>
+        </div>
       ) : isEmpty ? (
         <div className="bg-card border border-border rounded-2xl p-8 flex flex-col items-center text-center">
           <Crown className="w-10 h-10 text-primary mb-3" />

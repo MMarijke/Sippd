@@ -93,11 +93,10 @@ export const ACHIEVEMENT_DEFINITIONS = [
 ];
 
 /**
- * Pick achievements for a compact highlight strip: unlocked ones first
- * (most recently unlocked first), then locked incremental ones ordered by
- * how close they are to unlocking, capped at `limit`.
+ * Shared ordering: unlocked ones first (most recently unlocked first),
+ * then locked incremental ones ordered by how close they are to unlocking.
  */
-export function selectHighlightAchievements(achievements, limit = 10) {
+function sortAchievements(achievements) {
   const unlocked = [...achievements.filter(a => a.unlocked)].sort((a, b) => {
     if (a.unlockedAt && b.unlockedAt) return new Date(b.unlockedAt) - new Date(a.unlockedAt);
     if (a.unlockedAt) return -1;
@@ -111,7 +110,24 @@ export function selectHighlightAchievements(achievements, limit = 10) {
     return pctB - pctA;
   });
 
-  return [...unlocked, ...locked].slice(0, limit);
+  return [...unlocked, ...locked];
+}
+
+/**
+ * Pick achievements for a compact highlight strip: sortAchievements'
+ * ordering, capped at `limit`.
+ */
+export function selectHighlightAchievements(achievements, limit = 10) {
+  return sortAchievements(achievements).slice(0, limit);
+}
+
+/**
+ * Order the full achievements gallery the same way as the highlight strip
+ * (unlocked-first, then closest-to-unlocking), uncapped — every achievement
+ * still shows, just in the order that actually answers "what's next".
+ */
+export function sortAchievementsForGallery(achievements) {
+  return sortAchievements(achievements);
 }
 
 export function computeAchievements(collection, streak = 0, voteCount = 0, userCreatedDate = null) {

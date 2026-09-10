@@ -1,15 +1,16 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Link } from 'react-router-dom';
 import { ScanLine, BarChart2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import PageHeader from '@/components/shared/PageHeader';
 import StatsRow from '@/components/dashboard/StatsRow';
 import RarityHero from '@/components/dashboard/RarityHero';
 import FeedPreview from '@/components/dashboard/FeedPreview';
-import RecentPullsGrid from '@/components/dashboard/RecentPullsGrid';
+import SpotlightCarousel from '@/components/dashboard/SpotlightCarousel';
 import { getItemScore, getDisplayRarity } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
 import { format } from 'date-fns';
@@ -19,6 +20,7 @@ import AchievementUnlockAnimation from '@/components/achievements/AchievementUnl
 
 export default function Home() {
   const { user } = useAuth();
+  const [selectedBrand, setSelectedBrand] = useState('All');
 
   const { data: profile } = useQuery({
     queryKey: ['my-profile', user?.id],
@@ -118,6 +120,11 @@ export default function Home() {
     [collection]
   );
 
+  const brands = useMemo(
+    () => ['All', ...new Set(collected.map(c => c.can_brand).filter(Boolean))].slice(0, 9),
+    [collected]
+  );
+
   return (
     <div>
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
@@ -163,9 +170,34 @@ export default function Home() {
         <FeedPreview />
       </div>
 
+      {!isLoading && collected.length > 0 && brands.length > 1 && (
+        <div className="mt-5">
+          <p className="px-5 mb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+            Browse by Brand
+          </p>
+          <div className="flex gap-2 overflow-x-auto px-5 pb-1 scrollbar-none">
+            {brands.map(brand => (
+              <button
+                key={brand}
+                onClick={() => setSelectedBrand(brand)}
+                aria-pressed={selectedBrand === brand}
+                className={cn(
+                  'flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-mono font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  selectedBrand === brand
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary border border-border text-muted-foreground hover:border-primary/30'
+                )}
+              >
+                {brand}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {!isLoading && (
         <div className="mt-5">
-          <RecentPullsGrid collected={collected} sharedCansMap={sharedCansMap} />
+          <SpotlightCarousel collected={collected} sharedCansMap={sharedCansMap} selectedBrand={selectedBrand} />
         </div>
       )}
 

@@ -65,7 +65,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
     if (isEmpty) return null;
     const { cx, cy, midAngle, value, index, name } = props;
     const RADIAN = Math.PI / 180;
-    const color = RARITY_HEX[name] || '#6B7280';
+    const color = RARITY_HEX[name] || RARITY_HEX.Common;
     const pathRadius = (innerRadius + outerRadius) / 2;
     const strokeWidth = outerRadius - innerRadius;
     const labelRadius = outerRadius + 16;
@@ -127,7 +127,13 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
               {data.map((entry) => (
                 <Cell
                   key={entry.name}
-                  fill={isEmpty ? '#3F3F46' : (RARITY_HEX[entry.name] || '#6B7280')}
+                  // Empty-state ring reads from --secondary (a themed UI-chrome
+                  // token, reskinned per theme via [data-theme] on <html>) rather
+                  // than a literal hex — unlike RARITY_HEX below, this color has
+                  // no product meaning tied to a specific rarity tier, so it
+                  // should track the active theme like the rest of the app's
+                  // neutral surfaces.
+                  fill={isEmpty ? 'hsl(var(--secondary))' : (RARITY_HEX[entry.name] || RARITY_HEX.Common)}
                 />
               ))}
             </Pie>

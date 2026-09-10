@@ -12,7 +12,7 @@ import RarityHero from '@/components/dashboard/RarityHero';
 import FeedPreview from '@/components/dashboard/FeedPreview';
 import SpotlightCarousel from '@/components/dashboard/SpotlightCarousel';
 import { getItemScore, getDisplayRarity } from '@/lib/rarityConsensus';
-import { useStreak } from '@/lib/useStreak';
+import { useStreakStatus } from '@/lib/useStreak';
 import { format } from 'date-fns';
 import { computeAchievements } from '@/lib/achievements';
 import { useAchievementUnlock } from '@/hooks/useAchievementUnlock';
@@ -64,7 +64,7 @@ export default function Home() {
     refetchOnMount: true,
   });
 
-  const streak = useStreak();
+  const { streak, isLoading: streakLoading } = useStreakStatus();
   const isLoading = !user || loadingCollection || loadingShared;
 
   const { data: votes = [] } = useQuery({
@@ -181,7 +181,7 @@ export default function Home() {
       <div className="mt-5">
         <StatsRow
           rarePulls={isLoading ? '—' : rarePulls}
-          streak={streak}
+          streak={streakLoading ? '—' : `${streak}d`}
           wishlistCount={isLoading ? '—' : wishlistCount}
         />
       </div>

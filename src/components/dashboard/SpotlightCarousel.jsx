@@ -3,9 +3,11 @@ import CanImageBox from '@/components/shared/CanImageBox';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { getDisplayRarity } from '@/lib/rarityConsensus';
 
-// Card width targets ~1.2 cards visible in the scroll viewport (80% of the
-// screen, leaving a ~20% peek of the next card past the page's own px-5
-// padding) — capped so it doesn't get absurd on tablet-width viewports.
+// Card width tracks 80vw, capped at 280px so it doesn't get absurd on
+// tablet-width viewports. At the common 375px mobile viewport, the 280px
+// cap is what actually governs (80vw would be 300px there), leaving
+// roughly a 13% peek of the next card past the page's own px-5 padding —
+// narrower than 80vw's own ~20% margin, since the cap is doing the work.
 const CARD_WIDTH = 'min(80vw, 280px)';
 
 export default function SpotlightCarousel({ collected, sharedCansMap, selectedBrand, isLoading = false }) {

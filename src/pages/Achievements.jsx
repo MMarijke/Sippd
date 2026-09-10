@@ -5,10 +5,11 @@ import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, ChevronLeft, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import AchievementBadge from '@/components/achievements/AchievementBadge';
 import AchievementUnlockAnimation from '@/components/achievements/AchievementUnlockAnimation';
-import { computeAchievements } from '@/lib/achievements';
+import { ACHIEVEMENT_DEFINITIONS, computeAchievements, sortAchievementsForGallery } from '@/lib/achievements';
 import { useStreak } from '@/lib/useStreak';
 import { useAchievementUnlock } from '@/hooks/useAchievementUnlock';
 
@@ -69,6 +70,13 @@ export default function Achievements() {
     [collection, streak, votes.length, user?.created_at]
   );
   const unlocked = achievements.filter(a => a.unlocked).length;
+  // Unlocked-first, then closest-to-unlocking — the same ordering already
+  // used for Profile's compact strip, so the dedicated gallery page is at
+  // least as well-organized as the preview that links to it.
+  const sortedAchievements = useMemo(
+    () => sortAchievementsForGallery(achievements),
+    [achievements]
+  );
 
   const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements);
 
@@ -83,7 +91,7 @@ export default function Achievements() {
         <Button
           variant="ghost"
           size="icon"
-          className="w-9 h-9 rounded-xl text-muted-foreground hover:text-foreground"
+          className="w-11 h-11 rounded-xl text-muted-foreground hover:text-foreground"
           onClick={() => navigate('/profile')}
         >
           <ChevronLeft className="w-5 h-5" />
@@ -98,11 +106,13 @@ export default function Achievements() {
 
       {/* Progress bar */}
       <div className="px-5 mb-5">
-        <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-          <div
-            className="h-full bg-primary rounded-full transition-all duration-700 neon-glow"
-            style={{ width: achievements.length ? `${(unlocked / achievements.length) * 100}%` : '0%' }}
-          />
+        <div className={cn('h-1.5 bg-secondary rounded-full overflow-hidden', isLoading && 'animate-pulse')}>
+          {!isLoading && !isError && (
+            <div
+              className="h-full bg-primary rounded-full transition-all duration-700 neon-glow"
+              style={{ width: achievements.length ? `${(unlocked / achievements.length) * 100}%` : '0%' }}
+            />
+          )}
         </div>
       </div>
 
@@ -124,13 +134,13 @@ export default function Achievements() {
         </div>
       ) : isLoading ? (
         <div className="grid grid-cols-2 gap-3 px-5">
-          {Array.from({ length: 18 }).map((_, i) => (
+          {Array.from({ length: ACHIEVEMENT_DEFINITIONS.length }).map((_, i) => (
             <div key={i} className="h-36 rounded-2xl bg-card/40 border border-border/30 animate-pulse" />
           ))}
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 px-5">
-          {achievements.map(a => (
+          {sortedAchievements.map(a => (
             <AchievementBadge key={a.key} achievement={a} />
           ))}
         </div>

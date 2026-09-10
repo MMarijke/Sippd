@@ -439,8 +439,10 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
                       key={hex}
                       type="button"
                       title={label}
+                      aria-label={label}
+                      aria-pressed={form.bg_color === hex}
                       onClick={() => update('bg_color', hex)}
-                      className="w-8 h-8 rounded-lg border-2 transition-all"
+                      className="w-11 h-11 rounded-lg border-2 transition-all"
                       style={{
                         backgroundColor: hex,
                         borderColor: form.bg_color === hex ? 'hsl(var(--primary))' : 'hsl(var(--border))',

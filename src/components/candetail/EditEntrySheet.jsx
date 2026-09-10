@@ -154,8 +154,10 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
                         key={hex}
                         type="button"
                         title={label}
+                        aria-label={label}
+                        aria-pressed={form.can_bg_color === hex}
                         onClick={() => update('can_bg_color', hex)}
-                        className="w-8 h-8 rounded-lg border-2 transition-all"
+                        className="w-11 h-11 rounded-lg border-2 transition-all"
                         style={{
                           backgroundColor: hex,
                           borderColor: form.can_bg_color === hex ? 'hsl(var(--primary))' : 'hsl(var(--border))',

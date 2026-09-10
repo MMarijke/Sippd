@@ -8,11 +8,36 @@ import { getDisplayRarity } from '@/lib/rarityConsensus';
 // padding) — capped so it doesn't get absurd on tablet-width viewports.
 const CARD_WIDTH = 'min(80vw, 280px)';
 
-export default function SpotlightCarousel({ collected, sharedCansMap, selectedBrand }) {
+export default function SpotlightCarousel({ collected, sharedCansMap, selectedBrand, isLoading = false }) {
   const filtered = selectedBrand && selectedBrand !== 'All'
     ? collected.filter(item => item.can_brand === selectedBrand)
     : collected;
   const items = filtered.slice(0, 8);
+
+  if (isLoading) {
+    return (
+      <div>
+        <div className="flex items-center justify-between px-5 mb-3">
+          <h3 className="text-base font-display font-bold text-foreground">Recent Pulls</h3>
+        </div>
+        <div className="flex gap-3 overflow-x-auto scrollbar-none px-5 pb-1">
+          {[0, 1].map(i => (
+            <div
+              key={i}
+              className="flex-shrink-0 rounded-2xl bg-card border border-border overflow-hidden"
+              style={{ width: CARD_WIDTH }}
+            >
+              <div className="w-full h-[140px] bg-secondary/60 animate-pulse" />
+              <div className="px-3 py-2.5 space-y-2">
+                <div className="h-3.5 w-2/3 rounded bg-secondary/60 animate-pulse" />
+                <div className="h-3 w-1/3 rounded bg-secondary/60 animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

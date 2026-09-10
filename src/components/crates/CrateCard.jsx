@@ -18,7 +18,7 @@ export default function CrateCard({ crate, collection, onClick, onEdit, onDelete
       >
         {/* Emoji + name */}
         <div className="text-2xl mb-2">{crate.emoji || '📦'}</div>
-        <p className="text-sm font-display font-semibold text-foreground leading-tight pr-10 truncate">{crate.name}</p>
+        <p className="text-sm font-display font-semibold text-foreground leading-tight pr-24 truncate">{crate.name}</p>
         <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{canCount} can{canCount !== 1 ? 's' : ''}</p>
 
         {/* Mini preview images */}
@@ -46,14 +46,14 @@ export default function CrateCard({ crate, collection, onClick, onEdit, onDelete
         <button
           onClick={onEdit}
           aria-label="Edit crate"
-          className="w-9 h-9 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          className="w-11 h-11 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
         >
           <Pencil className="w-3 h-3" />
         </button>
         <button
           onClick={onDelete}
           aria-label="Delete crate"
-          className="w-9 h-9 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
+          className="w-11 h-11 rounded-md bg-secondary/80 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
         >
           <Trash2 className="w-3 h-3" />
         </button>

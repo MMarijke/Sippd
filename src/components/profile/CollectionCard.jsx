@@ -119,9 +119,13 @@ const CollectionCard = forwardRef(function CollectionCard(
               onClick={() => onTogglePin(item)}
               disabled={pinPending}
               aria-label={item.pinned_at ? 'Unpin from showcase' : 'Pin to showcase'}
-              className="absolute top-1 right-1 w-6 h-6 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center transition-colors hover:bg-background/90"
+              className="absolute top-0 right-0 w-11 h-11 rounded-full flex items-center justify-center transition-colors"
             >
-              <Pin className={`w-3 h-3 transition-colors ${item.pinned_at ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+              {/* Real tap target is the full 44px button above; this stays a
+                  small visual badge so it doesn't dominate a ~100px tile. */}
+              <span className="w-6 h-6 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center">
+                <Pin className={`w-3 h-3 transition-colors ${item.pinned_at ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+              </span>
             </button>
           </div>
         ))}

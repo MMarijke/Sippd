@@ -172,7 +172,7 @@ export default function MonthlyReport() {
           <button
             onClick={() => setMonthDate(d => startOfMonth(subMonths(d, 1)))}
             aria-label="Previous month"
-            className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center border border-border"
+            className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center border border-border"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -183,12 +183,12 @@ export default function MonthlyReport() {
             onClick={() => setMonthDate(d => startOfMonth(addMonths(d, 1)))}
             disabled={isCurrentMonth}
             aria-label="Next month"
-            className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center border border-border disabled:opacity-30"
+            className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center border border-border disabled:opacity-30"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
-        <div className="w-9" />
+        <div className="w-11" />
       </div>
 
       <div className="px-5 py-5 pb-32 space-y-4">

@@ -105,7 +105,7 @@ export default function CanCard({ can, onClick, showStatus, sharedCan, onFavouri
           <button
             onClick={handleAddToCrate}
             aria-label="Add to crate"
-            className="w-8 h-8 rounded-lg bg-secondary/60 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors flex-shrink-0"
+            className="w-11 h-11 rounded-lg bg-secondary/60 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors flex-shrink-0"
           >
             <PackagePlus className="w-3.5 h-3.5" />
           </button>

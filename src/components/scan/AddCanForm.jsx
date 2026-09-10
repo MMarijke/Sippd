@@ -270,7 +270,7 @@ export default function AddCanForm({ prefillData, onSuccess, onCancel }) {
               <Popover>
                 <PopoverTrigger
                   onClick={e => e.stopPropagation()}
-                  className="p-2 -m-2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="p-[15px] -m-[15px] text-muted-foreground hover:text-foreground transition-colors"
                   aria-label="How Community Rarity works"
                 >
                   <Info className="w-3.5 h-3.5" />

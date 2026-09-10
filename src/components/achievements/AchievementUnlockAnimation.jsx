@@ -56,11 +56,22 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
     return () => clearTimeout(timerRef.current);
   }, [reducedMotion]);
 
-  const handleTap = () => {
+  const dismiss = () => {
     clearTimeout(timerRef.current);
     setPhase('exit');
     setTimeout(onDismiss, reducedMotion ? 0 : 400);
   };
+
+  // Escape to close — keyboard-only users have no other way out before the
+  // 3s auto-dismiss besides tabbing to... nothing, there's no button here.
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') dismiss();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const isEnter = phase === 'enter';
   const isExit = phase === 'exit';
@@ -73,7 +84,10 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
 
   return createPortal(
     <div
-      onClick={handleTap}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="achievement-unlock-title"
+      onClick={dismiss}
       style={{
         position: 'fixed',
         inset: 0,
@@ -165,7 +179,7 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
         </div>
 
         {/* Title */}
-        <p style={{
+        <p id="achievement-unlock-title" style={{
           fontSize: 22,
           fontWeight: 900,
           fontFamily: "'Orbitron', sans-serif",

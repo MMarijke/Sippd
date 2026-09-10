@@ -95,6 +95,7 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
             <button
               key={opt}
               onClick={() => setFilter(opt)}
+              aria-pressed={filter === opt}
               className={cn(
                 'px-2.5 py-1 rounded-lg border text-[11px] font-mono transition-colors capitalize',
                 filter === opt
@@ -173,6 +174,8 @@ function TradeCard({ trade, onDelete, onStatusChange }) {
               <button
                 key={s}
                 onClick={() => onStatusChange(s)}
+                aria-label={`Set status to ${STATUS_STYLES[s].label}`}
+                aria-pressed={status === s}
                 className={cn(
                   'px-2 py-0.5 rounded-md border text-[10px] font-mono transition-colors capitalize',
                   status === s

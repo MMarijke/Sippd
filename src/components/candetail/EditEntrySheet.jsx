@@ -140,6 +140,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
                   <img src={form.can_image_url} alt="Can" className="w-full h-full object-contain" />
                   <button
                     onClick={() => update('can_image_url', '')}
+                    aria-label="Remove image"
                     className="absolute top-2 right-2 w-7 h-7 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-border hover:bg-background"
                   >
                     <X className="w-3.5 h-3.5" />

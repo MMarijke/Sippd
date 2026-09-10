@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Pencil, Trash2, Calendar, Tag,
+  AlertCircle, ArrowLeft, Package, Pencil, RefreshCw, Trash2, Calendar, Tag,
   FileText, Users, ShieldCheck, ShieldAlert, StickyNote, Star, Info, CheckCircle,
 } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -40,7 +40,12 @@ export default function CanDetail() {
   const [showEdit, setShowEdit] = useState(false);
   const { toggleFavourite } = useFavourite();
 
-  const { data: collectionItems = [] } = useQuery({
+  const {
+    data: collectionItems = [],
+    isLoading: isLoadingCollectionItems,
+    isError: isCollectionItemsError,
+    refetch: refetchCollectionItems,
+  } = useQuery({
     queryKey: ['user-collection', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -54,7 +59,12 @@ export default function CanDetail() {
     enabled: !!user?.id,
   });
 
-  const { data: can, isLoading } = useQuery({
+  const {
+    data: can,
+    isLoading: isLoadingCan,
+    isError: isCanError,
+    refetch: refetchCan,
+  } = useQuery({
     queryKey: ['shared-can', canId],
     queryFn: async () => {
       const { data, error } = await supabase.from('shared_cans').select('*').eq('id', canId).single();
@@ -64,7 +74,12 @@ export default function CanDetail() {
     enabled: !!canId,
   });
 
-  const { data: myVote } = useQuery({
+  const {
+    data: myVote,
+    isLoading: isLoadingMyVote,
+    isError: isMyVoteError,
+    refetch: refetchMyVote,
+  } = useQuery({
     queryKey: ['rarity-vote', canId, user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -78,6 +93,13 @@ export default function CanDetail() {
     },
     enabled: !!canId && !!user?.id,
   });
+
+  const isLoading = isLoadingCan || isLoadingCollectionItems || isLoadingMyVote;
+  const isError = isCanError || isCollectionItemsError || isMyVoteError;
+
+  useEffect(() => {
+    if (isError) toast.error("Couldn't load this can");
+  }, [isError]);
 
   const item = collectionItems.find(c => c.can_id === canId);
 
@@ -134,6 +156,45 @@ export default function CanDetail() {
         <div className="grid grid-cols-2 gap-3 px-5 mt-4">
           <div className="h-20 bg-card/40 animate-pulse rounded-2xl" />
           <div className="h-20 bg-card/40 animate-pulse rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-background px-5 pt-24">
+        <div className="bg-card border border-destructive/30 rounded-2xl p-10 flex flex-col items-center text-center">
+          <AlertCircle className="w-10 h-10 text-destructive mb-3" />
+          <p className="text-sm font-display font-semibold text-foreground">Couldn't load this can</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-11 mt-4 font-mono text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+            onClick={() => { refetchCan(); refetchCollectionItems(); refetchMyVote(); }}
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (can == null && !item) {
+    return (
+      <div className="min-h-screen bg-background px-5 pt-24">
+        <div className="bg-card border border-border rounded-2xl p-10 flex flex-col items-center text-center">
+          <Package className="w-10 h-10 text-muted-foreground mb-3" />
+          <p className="text-sm font-display font-semibold text-foreground">Can not found</p>
+          <p className="text-xs font-mono text-muted-foreground mt-1">It may have been removed.</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-11 mt-4 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+            onClick={() => navigate('/collection')}
+          >
+            Back to Collection
+          </Button>
         </div>
       </div>
     );

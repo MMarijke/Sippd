@@ -144,6 +144,12 @@ export default function Home() {
     [collected]
   );
 
+  // Excludes hasCollectionError: a failed fetch also leaves `collected`
+  // at its empty default, and a fetch failure is not the same thing as a
+  // genuinely empty vault — it should show the retry card, not a
+  // "welcome, add your first can" message.
+  const isNewUser = !isLoading && !hasCollectionError && collected.length === 0;
+
   return (
     <div>
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
@@ -178,23 +184,41 @@ export default function Home() {
         </div>
       ) : (
         <>
-          <div className="px-5 mt-5">
-            <RarityHero collected={isLoading ? [] : collected} sharedCansMap={sharedCansMap} />
-          </div>
+          {isNewUser && (
+            <div className="px-5 mt-5">
+              <div className="hero-card rounded-2xl p-5 text-center">
+                <p className="text-sm font-display font-semibold text-foreground">Welcome to Sippd</p>
+                <p className="text-xs font-mono text-muted-foreground mt-1.5">
+                  Scan your first can to start building your vault.
+                </p>
+                <Link to="/scan" className="inline-block mt-3">
+                  <Button size="sm" className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+                    <ScanLine className="w-4 h-4" /> Scan Your First Can
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
 
           <div className="px-5 mt-5">
-            <div className="bg-card border border-border rounded-2xl p-5">
-              <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">
-                COLLECTION SCORE
-              </p>
-              <p className="text-5xl font-mono font-black text-foreground">
-                {isLoading ? '—' : score}
-              </p>
-              <p className="text-xs font-mono text-muted-foreground">
-                Your Energy Drink Vault
-              </p>
-            </div>
+            <RarityHero collected={collected} sharedCansMap={sharedCansMap} isLoading={isLoading} />
           </div>
+
+          {!isNewUser && (
+            <div className="px-5 mt-5">
+              <div className="hero-card rounded-2xl p-5">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">
+                  COLLECTION SCORE
+                </p>
+                <p className="text-5xl font-mono font-black text-foreground">
+                  {isLoading ? '—' : score}
+                </p>
+                <p className="text-xs font-mono text-muted-foreground">
+                  Your Energy Drink Vault
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="mt-5">
             <StatsRow
@@ -207,6 +231,11 @@ export default function Home() {
       )}
 
       <div className="px-5 mt-5">
+        {isNewUser && (
+          <p className="text-xs font-mono text-muted-foreground mb-2">
+            While you're getting started, see what other collectors are up to:
+          </p>
+        )}
         <FeedPreview />
       </div>
 
@@ -235,9 +264,14 @@ export default function Home() {
         </div>
       )}
 
-      {!isLoading && !hasCollectionError && (
+      {!hasCollectionError && (
         <div className="mt-5">
-          <SpotlightCarousel collected={collected} sharedCansMap={sharedCansMap} selectedBrand={selectedBrand} />
+          <SpotlightCarousel
+            collected={collected}
+            sharedCansMap={sharedCansMap}
+            selectedBrand={selectedBrand}
+            isLoading={isLoading}
+          />
         </div>
       )}
 

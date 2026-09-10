@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { getDisplayRarity, RARITY_HEX, RARITY_ORDER } from '@/lib/rarityConsensus';
 
-export default function RarityHero({ collected, sharedCansMap = {} }) {
+export default function RarityHero({ collected, sharedCansMap = {}, isLoading = false }) {
   // Recharts sizes percentage-based innerRadius/outerRadius off a generic
   // min(width,height)/2 rule that has no idea our Pie's cy sits at the
   // bottom edge (cy="100%") with only the top half in use — so "100%"
@@ -22,6 +22,19 @@ export default function RarityHero({ collected, sharedCansMap = {} }) {
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  if (isLoading) {
+    return (
+      <div>
+        <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground text-center">
+          Rarity Breakdown
+        </p>
+        <div className="relative w-full max-w-[330px] mx-auto mt-2 flex items-end justify-center" style={{ aspectRatio: '2 / 1' }}>
+          <div className="w-3/4 h-3/4 rounded-t-full bg-secondary/60 animate-pulse" />
+        </div>
+      </div>
+    );
+  }
 
   // 78% of the box height for the ring's outer edge — leaves headroom for
   // the on-arc labels (which sit further out still) without touching the

@@ -2,9 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { MapPin, Crown } from 'lucide-react';
+import { MapPin, Crown, AlertCircle, RefreshCw } from 'lucide-react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 const MEDAL_COLORS = ['text-yellow-400', 'text-slate-300', 'text-amber-600'];
@@ -13,7 +15,12 @@ export default function RegionalLeaderboard() {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
 
-  const { data: profile, isLoading: isLoadingProfile } = useQuery({
+  const {
+    data: profile,
+    isLoading: isLoadingProfile,
+    isError: isProfileError,
+    refetch: refetchProfile,
+  } = useQuery({
     queryKey: ['my-profile', currentUser?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
@@ -23,7 +30,12 @@ export default function RegionalLeaderboard() {
     enabled: !!currentUser?.id,
   });
 
-  const { data: scores = [], isLoading } = useQuery({
+  const {
+    data: scores = [],
+    isLoading,
+    isError: isScoresError,
+    refetch: refetchScores,
+  } = useQuery({
     queryKey: ['leaderboard-scores-regional', profile?.region],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -37,6 +49,30 @@ export default function RegionalLeaderboard() {
     },
     enabled: !!profile?.region,
   });
+
+  useEffect(() => {
+    if (isProfileError) toast.error('Could not load your profile');
+    if (isScoresError) toast.error('Could not load the regional leaderboard');
+  }, [isProfileError, isScoresError]);
+
+  if (isProfileError) {
+    return (
+      <div className="px-5">
+        <div className="bg-card border border-destructive/30 rounded-2xl p-8 flex flex-col items-center text-center">
+          <AlertCircle className="w-10 h-10 text-destructive mb-3" />
+          <p className="text-sm font-display font-semibold text-foreground">Couldn't load your profile</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-11 mt-4 font-mono text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+            onClick={() => refetchProfile()}
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!isLoadingProfile && !profile?.region) {
     return (
@@ -56,7 +92,7 @@ export default function RegionalLeaderboard() {
   }
 
   const ranked = scores.filter(s => s.total_cans > 0);
-  const isEmpty = !isLoading && ranked.length === 0;
+  const isEmpty = !isLoading && !isScoresError && ranked.length === 0;
 
   return (
     <div className="px-5">
@@ -66,6 +102,19 @@ export default function RegionalLeaderboard() {
             <div key={i} className="h-16 rounded-xl bg-card/40 border border-border/30 animate-pulse mb-2" />
           ))}
         </>
+      ) : isScoresError ? (
+        <div className="bg-card border border-destructive/30 rounded-2xl p-8 flex flex-col items-center text-center">
+          <AlertCircle className="w-10 h-10 text-destructive mb-3" />
+          <p className="text-sm font-display font-semibold text-foreground">Couldn't load the regional leaderboard</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-11 mt-4 font-mono text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+            onClick={() => refetchScores()}
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Retry
+          </Button>
+        </div>
       ) : isEmpty ? (
         <div className="bg-card border border-border rounded-2xl p-8 flex flex-col items-center text-center">
           <Crown className="w-10 h-10 text-primary mb-3" />

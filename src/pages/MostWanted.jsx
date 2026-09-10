@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Star } from 'lucide-react';
+import { Star, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import RarityBadge from '@/components/shared/RarityBadge';
@@ -30,7 +30,12 @@ export default function MostWanted() {
   const { toggleFavourite } = useFavourite();
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const { data: sharedCans = [], isLoading } = useQuery({
+  const {
+    data: sharedCans = [],
+    isLoading,
+    isError: isSharedCansError,
+    refetch: refetchSharedCans,
+  } = useQuery({
     queryKey: ['shared-cans'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -43,7 +48,11 @@ export default function MostWanted() {
     },
   });
 
-  const { data: myCollection = [] } = useQuery({
+  const {
+    data: myCollection = [],
+    isLoading: isLoadingMyCollection,
+    isError: isMyCollectionError,
+  } = useQuery({
     queryKey: ['user-collection', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -55,6 +64,11 @@ export default function MostWanted() {
     },
     enabled: !!user?.id,
   });
+
+  useEffect(() => {
+    if (isSharedCansError) toast.error('Could not load Most Wanted');
+    if (isMyCollectionError) toast.error('Could not check your collection');
+  }, [isSharedCansError, isMyCollectionError]);
 
   const myCollectionMap = useMemo(
     () => Object.fromEntries(myCollection.map(c => [c.can_id, c])),
@@ -93,6 +107,12 @@ export default function MostWanted() {
     const myItem = myCollectionMap[can.id];
     if (myItem) {
       navigate(`/can/${can.id}`);
+    } else if (isLoadingMyCollection || isMyCollectionError) {
+      // Ownership status isn't known yet (still loading) or couldn't be
+      // confirmed (fetch failed) — myCollectionMap would silently read as
+      // {} in both cases, which previously made an already-owned can look
+      // not-owned and fired a wishlist-add instead of navigating to it.
+      toast.error("Couldn't check your collection — try again in a moment.");
     } else {
       addToWishlist.mutate(can);
     }
@@ -102,6 +122,25 @@ export default function MostWanted() {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (isSharedCansError) {
+    return (
+      <div className="px-5 pt-4">
+        <div className="bg-card border border-destructive/30 rounded-2xl p-10 flex flex-col items-center text-center">
+          <AlertCircle className="w-10 h-10 text-destructive mb-3" />
+          <p className="text-sm font-display font-semibold text-foreground">Couldn't load Most Wanted</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-11 mt-4 font-mono text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+            onClick={() => refetchSharedCans()}
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Retry
+          </Button>
+        </div>
       </div>
     );
   }

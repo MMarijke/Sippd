@@ -1,15 +1,23 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { AlertCircle, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import FollowButton from '@/components/social/FollowButton';
 
 export default function FindCollectors({ query }) {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
 
-  const { data: users = [] } = useQuery({
+  const {
+    data: users = [],
+    isLoading: isLoadingUsers,
+    isError: isUsersError,
+    refetch: refetchUsers,
+  } = useQuery({
     queryKey: ['public-profiles'],
     queryFn: async () => {
       const { data, error } = await supabase.from('public_profiles').select('*');
@@ -18,7 +26,7 @@ export default function FindCollectors({ query }) {
     },
   });
 
-  const { data: follows = [] } = useQuery({
+  const { data: follows = [], isError: isFollowsError } = useQuery({
     queryKey: ['my-follows', currentUser?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -33,7 +41,7 @@ export default function FindCollectors({ query }) {
     enabled: !!currentUser?.id,
   });
 
-  const { data: scores = [] } = useQuery({
+  const { data: scores = [], isError: isScoresError } = useQuery({
     queryKey: ['leaderboard-scores-lookup'],
     queryFn: async () => {
       const { data, error } = await supabase.from('leaderboard_scores').select('user_id, score');
@@ -41,6 +49,12 @@ export default function FindCollectors({ query }) {
       return data;
     },
   });
+
+  useEffect(() => {
+    if (isUsersError) toast.error('Could not search collectors');
+    if (isFollowsError) toast.error('Could not load your follows');
+    if (isScoresError) toast.error('Could not load collector scores');
+  }, [isUsersError, isFollowsError, isScoresError]);
 
   const myFollowingIds = useMemo(
     () => new Set(
@@ -63,6 +77,30 @@ export default function FindCollectors({ query }) {
       return accessible && u.full_name.toLowerCase().includes(q);
     }).slice(0, 8);
   }, [users, query, currentUser?.id, myFollowingIds]);
+
+  if (isLoadingUsers) {
+    return (
+      <p className="text-xs font-mono text-muted-foreground text-center py-4">Searching…</p>
+    );
+  }
+
+  if (isUsersError) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-4">
+        <p className="text-xs font-mono text-muted-foreground flex items-center gap-1.5">
+          <AlertCircle className="w-3.5 h-3.5 text-destructive" /> Couldn't search collectors
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-11 font-mono text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+          onClick={() => refetchUsers()}
+        >
+          <RefreshCw className="w-3.5 h-3.5" /> Retry
+        </Button>
+      </div>
+    );
+  }
 
   if (results.length === 0) {
     return (

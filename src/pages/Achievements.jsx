@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -44,7 +45,10 @@ export default function Achievements() {
     enabled: !!user?.id,
   });
 
-  const achievements = computeAchievements(collection, streak, votes.length, user?.created_at);
+  const achievements = useMemo(
+    () => computeAchievements(collection, streak, votes.length, user?.created_at),
+    [collection, streak, votes.length, user?.created_at]
+  );
   const unlocked = achievements.filter(a => a.unlocked).length;
 
   const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements);

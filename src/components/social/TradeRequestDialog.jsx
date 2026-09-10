@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { X, ArrowRightLeft, Send } from 'lucide-react';
@@ -27,11 +27,18 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
     enabled: !!currentUser?.id,
   });
 
-  const myCollected = myCollection.filter(c => c.status === 'collected');
-  const filteredOffer = myCollected.filter(c =>
-    !offerSearch ||
-    c.can_name?.toLowerCase().includes(offerSearch.toLowerCase()) ||
-    c.can_brand?.toLowerCase().includes(offerSearch.toLowerCase())
+  const myCollected = useMemo(
+    () => myCollection.filter(c => c.status === 'collected'),
+    [myCollection]
+  );
+
+  const filteredOffer = useMemo(
+    () => myCollected.filter(c =>
+      !offerSearch ||
+      c.can_name?.toLowerCase().includes(offerSearch.toLowerCase()) ||
+      c.can_brand?.toLowerCase().includes(offerSearch.toLowerCase())
+    ),
+    [myCollected, offerSearch]
   );
 
   const selectedOffer = myCollected.find(c => c.id === offerCanId);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -56,11 +56,17 @@ export default function MostWanted() {
     enabled: !!user?.id,
   });
 
-  const myCollectionMap = Object.fromEntries(myCollection.map(c => [c.can_id, c]));
+  const myCollectionMap = useMemo(
+    () => Object.fromEntries(myCollection.map(c => [c.can_id, c])),
+    [myCollection]
+  );
 
-  const ranked = sharedCans
-    .filter(c => (c.community_favourites || 0) >= 1)
-    .sort((a, b) => (b.community_favourites || 0) - (a.community_favourites || 0));
+  const ranked = useMemo(
+    () => sharedCans
+      .filter(c => (c.community_favourites || 0) >= 1)
+      .sort((a, b) => (b.community_favourites || 0) - (a.community_favourites || 0)),
+    [sharedCans]
+  );
 
   const addToWishlist = useMutation({
     mutationFn: async (can) => {

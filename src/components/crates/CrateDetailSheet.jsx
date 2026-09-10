@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { X, Plus, Minus } from 'lucide-react';
@@ -21,7 +21,7 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
   const [sort, setSort] = useState('date_desc');
   const [canIds, setCanIds] = useState(crate.can_ids || []);
 
-  const crateCanIds = new Set(canIds);
+  const crateCanIds = useMemo(() => new Set(canIds), [canIds]);
   const atCanLimit = canIds.length >= FREE_CRATE_CAN_LIMIT && !isPro;
 
   const applySorting = (items) => items.slice().sort((a, b) => {
@@ -34,10 +34,20 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
     return 0;
   });
 
-  const contents = applySorting(collection.filter(c => crateCanIds.has(c.id)));
-  const available = collection.filter(c => !crateCanIds.has(c.id) && c.status === 'collected');
-  const filteredAvailable = available.filter(c =>
-    !search || c.can_name?.toLowerCase().includes(search.toLowerCase()) || c.can_brand?.toLowerCase().includes(search.toLowerCase())
+  const contents = useMemo(
+    () => applySorting(collection.filter(c => crateCanIds.has(c.id))),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [collection, crateCanIds, sort]
+  );
+  const available = useMemo(
+    () => collection.filter(c => !crateCanIds.has(c.id) && c.status === 'collected'),
+    [collection, crateCanIds]
+  );
+  const filteredAvailable = useMemo(
+    () => available.filter(c =>
+      !search || c.can_name?.toLowerCase().includes(search.toLowerCase()) || c.can_brand?.toLowerCase().includes(search.toLowerCase())
+    ),
+    [available, search]
   );
 
   const updateCrate = useMutation({

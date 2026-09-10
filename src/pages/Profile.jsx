@@ -117,14 +117,20 @@ export default function Profile() {
     [sharedCans]
   );
 
-  const collected = collection.filter(c => c.status === 'collected');
-  const rarePulls = collected.filter(c =>
-    ['Rare', 'Ultra Rare', 'Legendary'].includes(c.can_rarity)
-  ).length;
+  const collected = useMemo(
+    () => collection.filter(c => c.status === 'collected'),
+    [collection]
+  );
 
-  const score = collected.reduce((acc, c) => {
-    return acc + getItemScore(c, sharedCansMap[c.can_id]);
-  }, 0);
+  const rarePulls = useMemo(
+    () => collected.filter(c => ['Rare', 'Ultra Rare', 'Legendary'].includes(c.can_rarity)).length,
+    [collected]
+  );
+
+  const score = useMemo(
+    () => collected.reduce((acc, c) => acc + getItemScore(c, sharedCansMap[c.can_id]), 0),
+    [collected, sharedCansMap]
+  );
 
   const { top6, rarityBreakdown, getEffectiveRarity } = useCollectionHighlights({
     collection,

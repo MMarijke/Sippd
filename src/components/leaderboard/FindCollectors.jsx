@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -41,19 +42,27 @@ export default function FindCollectors({ query }) {
     },
   });
 
-  const myFollowingIds = new Set(
-    follows.filter(f => f.follower_id === currentUser?.id && f.status === 'accepted').map(f => f.following_id)
+  const myFollowingIds = useMemo(
+    () => new Set(
+      follows.filter(f => f.follower_id === currentUser?.id && f.status === 'accepted').map(f => f.following_id)
+    ),
+    [follows, currentUser?.id]
   );
 
-  const scoreByUserId = Object.fromEntries(scores.map(s => [s.user_id, s.score]));
+  const scoreByUserId = useMemo(
+    () => Object.fromEntries(scores.map(s => [s.user_id, s.score])),
+    [scores]
+  );
 
-  const q = query.toLowerCase();
-  const results = users.filter(u => {
-    if (!u.full_name) return false;
-    if (u.id === currentUser?.id) return false;
-    const accessible = !u.is_private || myFollowingIds.has(u.id);
-    return accessible && u.full_name.toLowerCase().includes(q);
-  }).slice(0, 8);
+  const results = useMemo(() => {
+    const q = query.toLowerCase();
+    return users.filter(u => {
+      if (!u.full_name) return false;
+      if (u.id === currentUser?.id) return false;
+      const accessible = !u.is_private || myFollowingIds.has(u.id);
+      return accessible && u.full_name.toLowerCase().includes(q);
+    }).slice(0, 8);
+  }, [users, query, currentUser?.id, myFollowingIds]);
 
   if (results.length === 0) {
     return (

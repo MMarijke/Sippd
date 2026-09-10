@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -27,7 +27,10 @@ export default function TradeLogDialog({ collection, onClose }) {
   const [templateName, setTemplateName] = useState('');
   const [showSaveTemplate, setShowSaveTemplate] = useState(false);
 
-  const collected = collection.filter(c => c.status === 'collected');
+  const collected = useMemo(
+    () => collection.filter(c => c.status === 'collected'),
+    [collection]
+  );
 
   // RLS already scopes this to rows the current user participates in
   // (follower or followee) — no explicit filter needed.
@@ -50,21 +53,36 @@ export default function TradeLogDialog({ collection, onClose }) {
     enabled: follows.length > 0,
   });
 
-  const connectedUserIds = new Set([
-    ...follows.map(f => f.follower_id),
-    ...follows.map(f => f.following_id),
-  ]);
-  const connectedUsers = allUsers.filter(u => connectedUserIds.has(u.id));
-  // public_profiles has no email column, so this can only match on display name now
-  const filteredUsers = userSearch
-    ? connectedUsers.filter(u => u.full_name?.toLowerCase().includes(userSearch.toLowerCase()))
-    : connectedUsers.slice(0, 8);
-
-  const filteredAway = collected.filter(c =>
-    !searchAway || c.can_name?.toLowerCase().includes(searchAway.toLowerCase()) || c.can_brand?.toLowerCase().includes(searchAway.toLowerCase())
+  const connectedUserIds = useMemo(
+    () => new Set([
+      ...follows.map(f => f.follower_id),
+      ...follows.map(f => f.following_id),
+    ]),
+    [follows]
   );
-  const filteredReceived = collected.filter(c =>
-    !searchReceived || c.can_name?.toLowerCase().includes(searchReceived.toLowerCase()) || c.can_brand?.toLowerCase().includes(searchReceived.toLowerCase())
+  const connectedUsers = useMemo(
+    () => allUsers.filter(u => connectedUserIds.has(u.id)),
+    [allUsers, connectedUserIds]
+  );
+  // public_profiles has no email column, so this can only match on display name now
+  const filteredUsers = useMemo(
+    () => userSearch
+      ? connectedUsers.filter(u => u.full_name?.toLowerCase().includes(userSearch.toLowerCase()))
+      : connectedUsers.slice(0, 8),
+    [connectedUsers, userSearch]
+  );
+
+  const filteredAway = useMemo(
+    () => collected.filter(c =>
+      !searchAway || c.can_name?.toLowerCase().includes(searchAway.toLowerCase()) || c.can_brand?.toLowerCase().includes(searchAway.toLowerCase())
+    ),
+    [collected, searchAway]
+  );
+  const filteredReceived = useMemo(
+    () => collected.filter(c =>
+      !searchReceived || c.can_name?.toLowerCase().includes(searchReceived.toLowerCase()) || c.can_brand?.toLowerCase().includes(searchReceived.toLowerCase())
+    ),
+    [collected, searchReceived]
   );
 
   const selectedAway = collected.find(c => c.id === tradedAwayId);

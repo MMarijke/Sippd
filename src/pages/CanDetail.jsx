@@ -26,8 +26,8 @@ const VOTE_LABELS = Object.fromEntries(
 );
 
 const STATUS_CONFIG = {
-  collected: { label: 'In Vault', color: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/30' },
-  wishlist:  { label: 'Wishlist', color: 'text-blue-400',    bg: 'bg-blue-400/10 border-blue-400/30'    },
+  collected: { label: 'In Vault', color: 'text-success', bg: 'bg-success/10 border-success/30' },
+  wishlist:  { label: 'Wishlist', color: 'text-info',    bg: 'bg-info/10 border-info/30'    },
   duplicate: { label: 'Duplicate', color: 'text-muted-foreground', bg: 'bg-secondary border-border' },
 };
 
@@ -285,7 +285,7 @@ export default function CanDetail() {
             </span>
           )}
           {confidence === 'low' && (
-            <span className="flex items-center gap-1 text-[10px] font-mono text-yellow-400 border border-yellow-400/30 rounded px-1.5 py-0.5">
+            <span className="flex items-center gap-1 text-[10px] font-mono text-warning border border-warning/30 rounded px-1.5 py-0.5">
               <ShieldAlert className="w-2.5 h-2.5" /> Low Confidence
             </span>
           )}

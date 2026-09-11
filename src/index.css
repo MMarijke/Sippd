@@ -328,6 +328,31 @@
     0 0 10px hsl(var(--primary) / calc(0.1 * var(--glow-intensity)));
 }
 
+/* CanCard's favourited-state glow — was a fixed hsl(var(--primary)/0.12)
+   shadow, the one glow surface left out of the --glow-intensity system:
+   a Legendary-tier user's favourites glowed exactly as much as a
+   Common-tier user's, unlike every other glow in the app. */
+.favourite-glow {
+  box-shadow: 0 0 12px hsl(var(--primary) / calc(0.12 * var(--glow-intensity)));
+}
+
+/* RarityBadge's per-can glow — hue stays theme-invariant on purpose (a
+   can's actual rarity must read the same regardless of viewer theme,
+   same invariant as --rarity-* generally), but INTENSITY now escalates
+   with the viewer's active tier like every other glow surface. Replaces
+   three hardcoded rgba() literals that were a hand-copy of --rarity-*'s
+   hex values and couldn't scale. Common/Uncommon stay glow-free by
+   design (RarityBadge.jsx). */
+.rarity-glow-rare {
+  box-shadow: 0 0 8px hsl(var(--rarity-rare) / calc(0.3 * var(--glow-intensity)));
+}
+.rarity-glow-ultra {
+  box-shadow: 0 0 8px hsl(var(--rarity-ultra) / calc(0.3 * var(--glow-intensity)));
+}
+.rarity-glow-legendary {
+  box-shadow: 0 0 8px hsl(var(--rarity-legendary) / calc(0.5 * var(--glow-intensity)));
+}
+
 /* Hero card — the one-per-page emphasis treatment (Home's Collection Score;
    Profile's Score is a separate, pre-existing inconsistency out of scope
    here — see the critique's Minor Observations). Previously a hardcoded

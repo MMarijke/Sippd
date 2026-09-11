@@ -377,3 +377,24 @@ body {
   box-shadow: 0 8px 32px hsl(var(--background) / 0.4);
   transition: background 300ms ease, border-color 300ms ease;
 }
+
+/* Collection Score's own elevation — same frosted-glass family as
+   .glass-card (deliberately kept, not reverted to the old opaque
+   .hero-card gradient: see .impeccable/critique/2026-09-11T10-00-20Z)
+   but with a primary-tinted border/glow instead of the neutral
+   --foreground border, scaled by --glow-intensity so Home's headline
+   metric escalates with rarity tier the same way the rest of the app's
+   glow language already does. Welcome/error states stay on plain
+   .glass-card — this is what makes Score read as categorically
+   different from an onboarding nudge or a failure message, not just a
+   nicer box. */
+.glass-card-hero {
+  background: hsl(var(--card) / 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid hsl(var(--primary) / 0.4);
+  box-shadow:
+    0 8px 32px hsl(var(--background) / 0.4),
+    0 0 40px hsl(var(--primary) / calc(0.15 * var(--glow-intensity)));
+  transition: background 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+}

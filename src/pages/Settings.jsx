@@ -229,7 +229,7 @@ function ChipToggle({ options, value, onChange }) {
           onClick={() => onChange(opt)}
           aria-pressed={value === opt}
           className={cn(
-            'h-11 px-3 flex items-center rounded-full text-xs font-mono border transition-colors',
+            'h-10 px-3 flex items-center rounded-full text-xs font-mono border transition-colors',
             value === opt
               ? 'bg-primary/10 border-primary/40 text-primary'
               : 'bg-secondary border-border text-muted-foreground hover:border-primary/20'

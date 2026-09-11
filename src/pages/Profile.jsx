@@ -188,22 +188,6 @@ export default function Profile() {
   const [showShareCard, setShowShareCard] = useState(false);
   const captureRef = useRef(null);
 
-  const cardSignature = useMemo(() => {
-    const cans = top6.map(item => `${item.id}:${getEffectiveRarity(item)}:${item.pinned_at || ''}`).join('|');
-    const breakdown = rarityBreakdown.map(r => `${r.rarity}:${r.count}`).join(',');
-    return `${cans}__${breakdown}__${streak}__${score}`;
-  }, [top6, rarityBreakdown, streak, score, getEffectiveRarity]);
-
-  const { generating, cardDataUrl, saving: cardSaving, generateCard, handleSave, handleShareImage } = useCardCapture(captureRef, cardSignature);
-
-  // The ref only attaches to the live card once showShareCard flips true
-  // (see the `ref={showShareCard ? captureRef : null}` below) — useCardCapture's
-  // own effect only regenerates on signature changes, so opening needs its
-  // own explicit first-generate call.
-  useEffect(() => {
-    if (showShareCard) generateCard();
-  }, [showShareCard]);
-
   const { data: rank, isError: isRankError } = useQuery({
     queryKey: ['my-rank', user?.id, score],
     queryFn: async () => {
@@ -220,6 +204,26 @@ export default function Profile() {
   useEffect(() => {
     if (isRankError) toast.error('Could not load your rank');
   }, [isRankError]);
+
+  // rank/profile?.full_name included even though the visible card renders
+  // them straight from render-time props — rank resolves from its own,
+  // separately-timed query, so without this a card generated before it
+  // settles could permanently ship missing the rank badge.
+  const cardSignature = useMemo(() => {
+    const cans = top6.map(item => `${item.id}:${getEffectiveRarity(item)}:${item.pinned_at || ''}`).join('|');
+    const breakdown = rarityBreakdown.map(r => `${r.rarity}:${r.count}`).join(',');
+    return `${cans}__${breakdown}__${streak}__${score}__${rank || ''}__${profile?.full_name || ''}`;
+  }, [top6, rarityBreakdown, streak, score, getEffectiveRarity, rank, profile?.full_name]);
+
+  const { generating, cardDataUrl, saving: cardSaving, generateCard, handleSave, handleShareImage } = useCardCapture(captureRef, cardSignature);
+
+  // The ref only attaches to the live card once showShareCard flips true
+  // (see the `ref={showShareCard ? captureRef : null}` below) — useCardCapture's
+  // own effect only regenerates on signature changes, so opening needs its
+  // own explicit first-generate call.
+  useEffect(() => {
+    if (showShareCard) generateCard();
+  }, [showShareCard]);
 
   return (
     <div className="space-y-5">

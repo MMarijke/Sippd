@@ -27,11 +27,17 @@ export function useCardCapture(cardRef, signature) {
     setGenerating(true);
     setCardDataUrl(null);
     try {
+      // The capture needs an explicit fallback fill for any transparent
+      // area (html2canvas can't just "use the page background" the way a
+      // browser paint would) — reading the live --background token keeps
+      // that fill matching the viewer's actual active theme instead of
+      // always rendering the default theme's near-black behind the card.
+      const bgHsl = getComputedStyle(document.documentElement).getPropertyValue('--background').trim();
       const canvas = await html2canvas(cardRef.current, {
         scale: 2,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: '#080C14',
+        backgroundColor: bgHsl ? `hsl(${bgHsl})` : '#080C14',
         logging: false,
       });
       setCardDataUrl(canvas.toDataURL('image/png'));

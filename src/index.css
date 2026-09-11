@@ -353,13 +353,16 @@
   box-shadow: 0 0 8px hsl(var(--rarity-legendary) / calc(0.5 * var(--glow-intensity)));
 }
 
-/* Hero card — the one-per-page emphasis treatment (Home's Collection Score;
-   Profile's Score is a separate, pre-existing inconsistency out of scope
-   here — see the critique's Minor Observations). Previously a hardcoded
-   hex gradient that never reskinned with the active theme — the app's
-   single most-emphasized surface looked identical in every theme. Now
-   built from --card/--background (which already carry each theme's real
-   richness) plus a primary-tinted wash and glow-intensity-scaled shadow. */
+/* Hero card — Profile's Score (in CollectionCard, which doubles as the
+   literal share-image capture target). Home's own Collection Score has
+   since moved to .glass-card-hero, which relies on backdrop-filter blur —
+   untested and risky under html2canvas capture, so this card deliberately
+   keeps the older opaque-gradient recipe rather than following suit.
+   Previously a hardcoded hex gradient that never reskinned with the active
+   theme — the app's single most-emphasized surface looked identical in
+   every theme. Now built from --card/--background (which already carry
+   each theme's real richness) plus a primary-tinted wash and
+   glow-intensity-scaled shadow. */
 .hero-card {
   background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--background)) 100%);
   border: 1px solid hsl(var(--primary) / 0.3);

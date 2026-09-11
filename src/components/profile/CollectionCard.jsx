@@ -65,21 +65,33 @@ const CollectionCard = forwardRef(function CollectionCard(
         </button>
       </div>
 
-      <div className="grid grid-cols-3 divide-x divide-border mb-5">
+      {/* Score is the number this whole page (and the leaderboard/achievement
+          system) revolves around — .hero-card is the token index.css
+          reserves for exactly this spot, so it gets its own emphasis
+          instead of sitting as a third equal column next to Rare Pulls/
+          Cans. text-foreground, not text-primary/60 — that would land at
+          2.3-4.2:1 on 5 of 6 themes against .hero-card's opaque surface,
+          the same class of WCAG failure already fixed on Home's equivalent
+          label (text-foreground stays theme-invariant at 14.7-16.8:1). */}
+      <div className="hero-card rounded-2xl p-5 mb-3 text-center">
+        <p className="text-[10px] font-mono uppercase tracking-widest text-foreground">Score</p>
+        <p className="text-5xl font-mono font-black text-foreground tabular-nums">{score}</p>
+        {rank && (
+          <span className="inline-block mt-1.5 px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-[9px] font-mono font-semibold text-primary">
+            #{rank}
+          </span>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 divide-x divide-border mb-5">
         {[
-          { icon: Zap, label: 'Score', value: score, badge: rank ? `#${rank}` : null },
           { icon: Star, label: 'Rare Pulls', value: rarePulls },
           { icon: Zap, label: 'Cans', value: totalCans },
-        ].map(({ icon: Icon, label, value, badge }) => (
+        ].map(({ icon: Icon, label, value }) => (
           <div key={label} className="flex flex-col items-center text-center px-1">
             <Icon className="w-3.5 h-3.5 text-primary mb-1" />
             <span className="text-xl font-mono font-bold text-foreground tabular-nums">{value}</span>
             <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">{label}</span>
-            {badge && (
-              <span className="mt-1 px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-[9px] font-mono font-semibold text-primary">
-                {badge}
-              </span>
-            )}
           </div>
         ))}
       </div>

@@ -200,7 +200,7 @@ export default function Profile() {
           <Link
             to="/settings"
             aria-label="Settings"
-            className="w-11 h-11 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            className="w-11 h-11 rounded-lg bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
           >
             <Settings className="w-4 h-4" />
           </Link>
@@ -210,12 +210,12 @@ export default function Profile() {
       <div className="px-5 flex items-center gap-3">
         {isLoading ? (
           <>
-            <div className="w-10 h-10 rounded-full bg-card/40 animate-pulse flex-shrink-0" />
+            <div className="w-10 h-10 rounded-lg bg-card/40 animate-pulse flex-shrink-0" />
             <div className="h-4 w-28 bg-card/40 animate-pulse rounded-lg" />
           </>
         ) : (
           <>
-            <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
               <span className="text-sm font-display font-bold text-primary">
                 {profile?.full_name?.[0]?.toUpperCase() || '?'}
               </span>

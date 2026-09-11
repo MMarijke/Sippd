@@ -347,22 +347,30 @@ export default function Profile() {
             </div>
           ) : (
             <div className="px-5 space-y-3">
-              <CollectionCard
-                ref={showShareCard ? captureRef : null}
-                top6={top6}
-                rarityBreakdown={rarityBreakdown}
-                getEffectiveRarity={getEffectiveRarity}
-                pinnedCount={pinnedCount}
-                onTogglePin={item => togglePin({ collectionItem: item, pinnedCount })}
-                pinPending={pinPending}
-                sharing={showShareCard}
-                onShare={() => setShowShareCard(v => !v)}
-                score={score}
-                rarePulls={rarePulls}
-                totalCans={collected.length}
-                rank={rank}
-                userName={profile?.full_name}
-              />
+              {/* The live card stays mounted (and captureRef attached) until
+                  a snapshot exists — html2canvas needs it actually laid out
+                  to capture from. Once cardDataUrl is ready it swaps for
+                  that snapshot instead of sitting duplicated alongside it;
+                  generateCard clears cardDataUrl first (useCardCapture.js),
+                  which brings the live card back for the next capture. */}
+              {(!showShareCard || !cardDataUrl) && (
+                <CollectionCard
+                  ref={showShareCard ? captureRef : null}
+                  top6={top6}
+                  rarityBreakdown={rarityBreakdown}
+                  getEffectiveRarity={getEffectiveRarity}
+                  pinnedCount={pinnedCount}
+                  onTogglePin={item => togglePin({ collectionItem: item, pinnedCount })}
+                  pinPending={pinPending}
+                  sharing={showShareCard}
+                  onShare={() => setShowShareCard(v => !v)}
+                  score={score}
+                  rarePulls={rarePulls}
+                  totalCans={collected.length}
+                  rank={rank}
+                  userName={profile?.full_name}
+                />
+              )}
 
               {showShareCard && (
                 <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
@@ -374,7 +382,19 @@ export default function Profile() {
                   )}
 
                   {cardDataUrl && !generating && (
-                    <img src={cardDataUrl} alt="Share card" className="w-full rounded-2xl border border-border" />
+                    <>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-[10px] font-mono text-muted-foreground">Long-press the image to save</p>
+                        <button
+                          onClick={() => setShowShareCard(false)}
+                          aria-label="Close share preview"
+                          className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <img src={cardDataUrl} alt="Share card" className="w-full rounded-2xl border border-border" />
+                    </>
                   )}
 
                   <div className="flex gap-2">

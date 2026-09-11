@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { Link } from 'react-router-dom';
-import { Pin, Share2, X as XIcon, Zap, Star } from 'lucide-react';
+import { Pin, Share2, Zap, Star } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { MAX_PINS } from '@/hooks/useTogglePin';
 import { proxyImageUrl } from '@/lib/cardCapture';
@@ -57,13 +57,26 @@ const CollectionCard = forwardRef(function CollectionCard(
         <h2 className="text-sm font-display font-bold text-foreground tracking-wide truncate">
           {displayName}&rsquo;s Collection
         </h2>
-        <button
-          onClick={onShare}
-          aria-label={sharing ? 'Close share card' : 'Share collection card'}
-          className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
-        >
-          {sharing ? <XIcon className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
-        </button>
+        {/* Hidden while sharing, not swapped to an X — this exact DOM node
+            is what html2canvas captures as the share image. Toggling its
+            icon to a close "X" while sharing meant that X got baked into
+            the captured PNG as a static, non-functional pixel (this card
+            IS the capture source, see the module doc comment above) —
+            visually indistinguishable from a real button but unclickable,
+            sitting right next to the actual working close control in
+            Profile.jsx's share panel. The share panel is now the sole
+            close affordance at every stage (see its own "generating"
+            branch, which got a matching close button for the window
+            before this card unmounts). */}
+        {!sharing && (
+          <button
+            onClick={onShare}
+            aria-label="Share collection card"
+            className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
+          >
+            <Share2 className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Score is the number this whole page (and the leaderboard/achievement

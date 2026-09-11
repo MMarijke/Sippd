@@ -362,33 +362,42 @@ export default function Profile() {
 
               {showShareCard && (
                 <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+                  {/* This close button is now the ONLY way to exit share
+                      mode at every stage (CollectionCard's own header
+                      button is hidden while sharing — see its comment —
+                      since that same DOM node is what gets captured into
+                      the share image, and toggling its icon to an X while
+                      sharing baked a second, non-functional "close"
+                      pixel into the picture). Always rendered here,
+                      independent of generating/cardDataUrl, so there's
+                      never a moment with zero or two exits. */}
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[10px] font-mono text-muted-foreground">
+                      {generating ? 'Generating your card…' : 'Long-press the image to save'}
+                    </p>
+                    {/* Real tap target is the 44px button (p-1.5 -m-1.5
+                        on a 32px visual == exactly 44px); the visual
+                        badge stays small so it doesn't dominate this
+                        hint row next to 10px text. */}
+                    <button
+                      onClick={() => setShowShareCard(false)}
+                      aria-label="Close share preview"
+                      className="p-1.5 -m-1.5 rounded-lg flex-shrink-0"
+                    >
+                      <span className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center">
+                        <X className="w-4 h-4" />
+                      </span>
+                    </button>
+                  </div>
+
                   {generating && (
-                    <div className="flex flex-col items-center gap-2 py-4">
+                    <div className="flex justify-center py-4">
                       <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                      <p className="text-xs font-mono text-muted-foreground">Generating card…</p>
                     </div>
                   )}
 
                   {cardDataUrl && !generating && (
-                    <>
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-[10px] font-mono text-muted-foreground">Long-press the image to save</p>
-                        {/* Real tap target is the 44px button (p-1.5 -m-1.5
-                            on a 32px visual == exactly 44px); the visual
-                            badge stays small so it doesn't dominate this
-                            hint row next to 10px text. */}
-                        <button
-                          onClick={() => setShowShareCard(false)}
-                          aria-label="Close share preview"
-                          className="p-1.5 -m-1.5 rounded-lg flex-shrink-0"
-                        >
-                          <span className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center">
-                            <X className="w-4 h-4" />
-                          </span>
-                        </button>
-                      </div>
-                      <img src={cardDataUrl} alt="Share card" className="w-full rounded-2xl border border-border" />
-                    </>
+                    <img src={cardDataUrl} alt="Share card" className="w-full rounded-2xl border border-border" />
                   )}
 
                   <div className="flex gap-2">

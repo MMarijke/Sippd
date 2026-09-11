@@ -4,8 +4,22 @@ import { Link } from 'react-router-dom';
 import { Pin, Share2, X as XIcon, Zap, Star } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { MAX_PINS } from '@/hooks/useTogglePin';
-import { RARITY_BG_CLASS } from '@/lib/rarityConsensus';
 import { proxyImageUrl } from '@/lib/cardCapture';
+
+// Rarity Breakdown bar only — a monochromatic ramp built from the active
+// theme's own --primary hue (dim to vivid), so this proportion chart
+// complements whichever theme is active instead of five fixed rarity hues
+// clashing against it. Individual RarityBadge chips elsewhere keep the
+// theme-invariant --rarity-* tokens on purpose: a can's actual rarity must
+// still read the same regardless of viewer theme. See
+// .impeccable/critique/2026-09-11T08-11-49Z, Minor Observations.
+const BREAKDOWN_VAR = {
+  Common: '--breakdown-common',
+  Uncommon: '--breakdown-uncommon',
+  Rare: '--breakdown-rare',
+  'Ultra Rare': '--breakdown-ultra',
+  Legendary: '--breakdown-legendary',
+};
 
 // This card IS the share card — the ref forwarded here is what
 // useCardCapture's html2canvas call captures directly, so there is no
@@ -75,7 +89,11 @@ const CollectionCard = forwardRef(function CollectionCard(
           <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60 mb-2">Rarity Breakdown</p>
           <div className="flex h-1.5 rounded-full overflow-hidden gap-px">
             {rarityBreakdown.map(({ rarity, pct }) => (
-              <div key={rarity} className={`h-full ${RARITY_BG_CLASS[rarity]}`} style={{ width: `${pct}%` }} />
+              <div
+                key={rarity}
+                className="h-full"
+                style={{ width: `${pct}%`, backgroundColor: `hsl(var(${BREAKDOWN_VAR[rarity] || '--breakdown-legendary'}))` }}
+              />
             ))}
           </div>
           <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">

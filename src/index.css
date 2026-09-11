@@ -47,6 +47,20 @@
     --rarity-rare: 217 91% 60%;
     --rarity-ultra: 271 91% 65%;
     --rarity-legendary: 330 81% 60%;
+
+    /* Rarity Breakdown bar (CollectionCard's proportion chart) only — a
+       monochromatic ramp built from this theme's own --primary hue, dim to
+       vivid. Deliberately NOT --rarity-* : those identify an individual
+       can's actual rarity and must stay theme-invariant (including in
+       exported share images); this bar is a mood/proportion visualization
+       on the same share card, so making it complement the active theme
+       instead of clashing with it is a different, narrower call. See
+       .impeccable/critique/2026-09-11T08-11-49Z, Minor Observations. */
+    --breakdown-common: 185 30% 25%;
+    --breakdown-uncommon: 185 50% 35%;
+    --breakdown-rare: 185 65% 45%;
+    --breakdown-ultra: 185 80% 50%;
+    --breakdown-legendary: 185 100% 55%;
   }
 
   .dark {
@@ -84,6 +98,12 @@
     --rarity-rare: 217 91% 60%;
     --rarity-ultra: 271 91% 65%;
     --rarity-legendary: 330 81% 60%;
+
+    --breakdown-common: 185 30% 25%;
+    --breakdown-uncommon: 185 50% 35%;
+    --breakdown-rare: 185 65% 45%;
+    --breakdown-ultra: 185 80% 50%;
+    --breakdown-legendary: 185 100% 55%;
   }
 
   /* Theme system: Signal Cyan (the values above) is the default/free look
@@ -145,6 +165,11 @@
     --input: 220 16% 18%;
     --ring: 220 12% 58%;
     --glow-intensity: 0.6;
+    --breakdown-common: 220 25% 28%;
+    --breakdown-uncommon: 220 35% 38%;
+    --breakdown-rare: 220 45% 48%;
+    --breakdown-ultra: 220 55% 55%;
+    --breakdown-legendary: 220 65% 62%;
   }
   [data-theme="uncommon"] {
     --background: 142 28% 5%;
@@ -162,6 +187,11 @@
     --input: 142 22% 20%;
     --ring: 142 75% 50%;
     --glow-intensity: 0.8;
+    --breakdown-common: 142 35% 25%;
+    --breakdown-uncommon: 142 50% 35%;
+    --breakdown-rare: 142 65% 42%;
+    --breakdown-ultra: 142 78% 48%;
+    --breakdown-legendary: 142 90% 52%;
   }
   [data-theme="rare"] {
     --background: 217 34% 5%;
@@ -179,6 +209,11 @@
     --input: 217 26% 22%;
     --ring: 217 88% 60%;
     --glow-intensity: 1;
+    --breakdown-common: 217 40% 28%;
+    --breakdown-uncommon: 217 55% 40%;
+    --breakdown-rare: 217 70% 50%;
+    --breakdown-ultra: 217 82% 58%;
+    --breakdown-legendary: 217 95% 65%;
   }
   [data-theme="ultra"] {
     --background: 271 30% 6%;
@@ -195,6 +230,11 @@
     --input: 271 24% 24%;
     --ring: 271 90% 64%;
     --glow-intensity: 1.2;
+    --breakdown-common: 271 35% 28%;
+    --breakdown-uncommon: 271 50% 38%;
+    --breakdown-rare: 271 65% 48%;
+    --breakdown-ultra: 271 80% 58%;
+    --breakdown-legendary: 271 95% 66%;
   }
   [data-theme="legendary"] {
     --background: 330 36% 6%;
@@ -215,6 +255,11 @@
     --input: 330 28% 26%;
     --ring: 330 96% 68%;
     --glow-intensity: 1.5;
+    --breakdown-common: 330 40% 28%;
+    --breakdown-uncommon: 330 55% 40%;
+    --breakdown-rare: 330 72% 50%;
+    --breakdown-ultra: 330 85% 58%;
+    --breakdown-legendary: 330 98% 66%;
   }
 }
 
@@ -298,4 +343,37 @@
    surfaces app-wide without the cost of a full-tree `*` transition. */
 body {
   transition: background-color 300ms ease, color 300ms ease;
+}
+
+/* Home's colored hero backdrop — a vivid --primary/--accent glow
+   concentrated in the top ~640px (header + Collection Score), fading down
+   into the flat --background the rest of the app already uses, so a long
+   scroll doesn't drag saturated color behind dense list content further
+   down. Sized/positioned rather than `background-attachment: fixed`,
+   which is a known mobile-Safari scroll-jank source. Alphas were tuned
+   against Legendary (the brightest primary in the system) so header text
+   stays legible in every theme, not just the calmer ones. */
+.home-gradient-bg {
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(circle at 92% 2%, hsl(var(--primary) / 0.45) 0%, transparent 32%),
+    radial-gradient(circle at 8% 14%, hsl(var(--accent) / 0.22) 0%, transparent 34%),
+    linear-gradient(180deg, hsl(var(--primary) / 0.18) 0%, hsl(var(--background)) 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 640px;
+  background-position: top;
+  transition: background-color 300ms ease;
+}
+
+/* Frosted glass panel for content sitting directly on .home-gradient-bg —
+   dark translucent (not white; this is a dark-only app) so the colored
+   backdrop shows through softly instead of the opaque card-to-background
+   fill .hero-card uses elsewhere. */
+.glass-card {
+  background: hsl(var(--card) / 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid hsl(var(--foreground) / 0.12);
+  box-shadow: 0 8px 32px hsl(var(--background) / 0.4);
+  transition: background 300ms ease, border-color 300ms ease;
 }

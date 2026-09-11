@@ -151,7 +151,7 @@ export default function Home() {
   const isNewUser = !isLoading && !hasCollectionError && collected.length === 0;
 
   return (
-    <div>
+    <div className="home-gradient-bg">
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
       <PageHeader
         title="SIPPD"
@@ -167,7 +167,11 @@ export default function Home() {
 
       {hasCollectionError ? (
         <div className="px-5 mt-5">
-          <div className="bg-card border border-destructive/30 rounded-2xl p-5 text-center">
+          {/* Sits in the same gradient zone as the glass-card hero blocks below —
+              matches that translucent treatment but keeps an explicit destructive
+              border rather than .glass-card's own, so the error state stays visible
+              rather than losing to the class's border in the cascade. */}
+          <div className="bg-card/55 backdrop-blur-xl border border-destructive/30 rounded-2xl p-5 text-center">
             <p className="text-sm font-display font-semibold text-foreground">Couldn't load your vault</p>
             <p className="text-xs font-mono text-muted-foreground mt-1.5">
               Check your connection and try again.
@@ -186,7 +190,7 @@ export default function Home() {
         <>
           {isNewUser && (
             <div className="px-5 mt-5">
-              <div className="hero-card rounded-2xl p-5 text-center">
+              <div className="glass-card rounded-2xl p-5 text-center">
                 <p className="text-sm font-display font-semibold text-foreground">Welcome to Sippd</p>
                 <p className="text-xs font-mono text-muted-foreground mt-1.5">
                   Scan your first can to start building your vault.
@@ -206,7 +210,7 @@ export default function Home() {
 
           {!isNewUser && (
             <div className="px-5 mt-5">
-              <div className="hero-card rounded-2xl p-5">
+              <div className="glass-card rounded-2xl p-5">
                 <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">
                   COLLECTION SCORE
                 </p>

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { LogOut, Settings, Medal, Pencil, Check, X, Share2, Download, ScanLine } from 'lucide-react';
+import { AlertCircle, LogOut, RefreshCw, Settings, Medal, Pencil, Check, X, Share2, Download, ScanLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link, useNavigate } from 'react-router-dom';
@@ -69,7 +69,12 @@ export default function Profile() {
     setEditing(false);
   };
 
-  const { data: collection = [], isLoading: isLoadingCollection } = useQuery({
+  const {
+    data: collection = [],
+    isLoading: isLoadingCollection,
+    isError: isCollectionError,
+    refetch: refetchCollection,
+  } = useQuery({
     queryKey: ['user-collection', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -83,7 +88,11 @@ export default function Profile() {
     enabled: !!user?.id,
   });
 
-  const { data: sharedCans = [], isLoading: isLoadingSharedCans } = useQuery({
+  const {
+    data: sharedCans = [],
+    isLoading: isLoadingSharedCans,
+    isError: isSharedCansError,
+  } = useQuery({
     queryKey: ['shared-cans'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -97,7 +106,12 @@ export default function Profile() {
     enabled: !!user?.id,
   });
 
-  const { data: votes = [], isLoading: isLoadingVotes } = useQuery({
+  const {
+    data: votes = [],
+    isLoading: isLoadingVotes,
+    isError: isVotesError,
+    refetch: refetchVotes,
+  } = useQuery({
     queryKey: ['my-votes', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -117,6 +131,18 @@ export default function Profile() {
   // query's isLoading alone let the "No cans yet" empty state flash for
   // real collectors while those other queries were still in flight.
   const contentLoading = isLoading || isLoadingCollection || isLoadingSharedCans || isLoadingVotes;
+  // collection/votes drive what's actually rendered (achievements, the
+  // collection card, the empty state) — a failure here is indistinguishable
+  // from a genuinely empty collection unless it's surfaced explicitly.
+  // sharedCans/rank only back secondary display (score/rarity, the rank
+  // badge), so those get a toast rather than blocking the whole section.
+  const contentError = isCollectionError || isVotesError;
+
+  useEffect(() => {
+    if (isCollectionError) toast.error('Could not load your collection');
+    if (isVotesError) toast.error('Could not load your rarity votes');
+    if (isSharedCansError) toast.error('Could not load can data');
+  }, [isCollectionError, isVotesError, isSharedCansError]);
 
   const sharedCansMap = useMemo(
     () => Object.fromEntries(sharedCans.map(c => [c.id, c])),
@@ -178,7 +204,7 @@ export default function Profile() {
     if (showShareCard) generateCard();
   }, [showShareCard]);
 
-  const { data: rank } = useQuery({
+  const { data: rank, isError: isRankError } = useQuery({
     queryKey: ['my-rank', user?.id, score],
     queryFn: async () => {
       const { count, error } = await supabase
@@ -190,6 +216,10 @@ export default function Profile() {
     },
     enabled: !!user?.id && score > 0,
   });
+
+  useEffect(() => {
+    if (isRankError) toast.error('Could not load your rank');
+  }, [isRankError]);
 
   return (
     <div className="space-y-5">
@@ -252,116 +282,135 @@ export default function Profile() {
         )}
       </div>
 
-      {/* Achievements strip */}
-      {!contentLoading && (
-        <div className="px-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Medal className="w-4 h-4 text-primary" />
-              <h2 className="text-sm font-display font-bold text-foreground tracking-wide">Achievements</h2>
-              <span className="text-xs font-mono text-muted-foreground">Unlocked {unlockedCount}/{achievements.length}</span>
-            </div>
-          </div>
-          <div className="grid grid-cols-5 gap-x-2 gap-y-4">
-            {highlightAchievements.map(a => (
-              <AchievementBadge key={a.key} achievement={a} size="compact" />
-            ))}
-          </div>
-          <Link to="/achievements" className="block text-center text-xs font-mono text-primary hover:text-primary/80 transition-colors">
-            View All →
-          </Link>
-        </div>
-      )}
-
-      {/* Collection Card — this card IS the share card. Tapping the share
-          icon expands a Save/Share preview inline, capturing this exact
-          card (see the conditional ref below) — no separate export render. */}
-      {contentLoading ? (
+      {contentError ? (
         <div className="px-5">
-          <div className="h-64 rounded-2xl bg-card/40 border border-border/30 animate-pulse" />
-        </div>
-      ) : collected.length === 0 ? (
-        <div className="px-5">
-          <div className="bg-card border border-border rounded-2xl p-6 flex flex-col items-center text-center">
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-3">
-              <ScanLine className="w-6 h-6 text-primary" />
-            </div>
-            <p className="text-sm font-display font-bold text-foreground">No cans yet</p>
-            <p className="text-xs font-mono text-muted-foreground mt-1 max-w-[240px]">
-              Scan your first can to start tracking your score, rare pulls, and collection stats.
-            </p>
+          <div className="bg-card border border-destructive/30 rounded-2xl p-10 flex flex-col items-center text-center">
+            <AlertCircle className="w-10 h-10 text-destructive mb-3" />
+            <p className="text-sm font-display font-semibold text-foreground">Couldn't load your collection</p>
             <Button
-              className="h-11 mt-4 font-mono text-xs gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => navigate('/scan')}
+              variant="outline"
+              size="sm"
+              className="h-11 mt-4 font-mono text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+              onClick={() => { refetchCollection(); refetchVotes(); }}
             >
-              <ScanLine className="w-4 h-4" /> Scan Your First Can
+              <RefreshCw className="w-3.5 h-3.5" /> Retry
             </Button>
           </div>
         </div>
       ) : (
-        <div className="px-5 space-y-3">
-          <CollectionCard
-            ref={showShareCard ? captureRef : null}
-            top6={top6}
-            rarityBreakdown={rarityBreakdown}
-            getEffectiveRarity={getEffectiveRarity}
-            pinnedCount={pinnedCount}
-            onTogglePin={item => togglePin({ collectionItem: item, pinnedCount })}
-            pinPending={pinPending}
-            sharing={showShareCard}
-            onShare={() => setShowShareCard(v => !v)}
-            score={score}
-            rarePulls={rarePulls}
-            totalCans={collected.length}
-            rank={rank}
-            userName={profile?.full_name}
-          />
-
-          {showShareCard && (
-            <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
-              {generating && (
-                <div className="flex flex-col items-center gap-2 py-4">
-                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="text-xs font-mono text-muted-foreground">Generating card…</p>
+        <>
+          {/* Achievements strip */}
+          {!contentLoading && (
+            <div className="px-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Medal className="w-4 h-4 text-primary" />
+                  <h2 className="text-sm font-display font-bold text-foreground tracking-wide">Achievements</h2>
+                  <span className="text-xs font-mono text-muted-foreground">Unlocked {unlockedCount}/{achievements.length}</span>
                 </div>
-              )}
-
-              {cardDataUrl && !generating && (
-                <img src={cardDataUrl} alt="Share card" className="w-full rounded-2xl border border-border" />
-              )}
-
-              <div className="flex gap-2">
-                <Button
-                  className="h-11 flex-1 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
-                  onClick={() => handleSave('sippd-collection.png')}
-                  disabled={!cardDataUrl || generating || cardSaving}
-                >
-                  <Download className="w-4 h-4" />
-                  {cardSaving ? 'Saving…' : 'Save'}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-11 flex-1 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
-                  onClick={() => handleShareImage('sippd-collection.png', 'My Sippd Collection')}
-                  disabled={!cardDataUrl || generating || cardSaving}
-                >
-                  <Share2 className="w-4 h-4" />
-                  Share
-                </Button>
               </div>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-11 w-full font-mono text-xs text-muted-foreground gap-2"
-                onClick={generateCard}
-                disabled={generating}
-              >
-                {generating ? '…' : '↻'} Regenerate
-              </Button>
+              <div className="grid grid-cols-5 gap-x-2 gap-y-4">
+                {highlightAchievements.map(a => (
+                  <AchievementBadge key={a.key} achievement={a} size="compact" />
+                ))}
+              </div>
+              <Link to="/achievements" className="block text-center text-xs font-mono text-primary hover:text-primary/80 transition-colors">
+                View All →
+              </Link>
             </div>
           )}
-        </div>
+
+          {/* Collection Card — this card IS the share card. Tapping the share
+              icon expands a Save/Share preview inline, capturing this exact
+              card (see the conditional ref below) — no separate export render. */}
+          {contentLoading ? (
+            <div className="px-5">
+              <div className="h-64 rounded-2xl bg-card/40 border border-border/30 animate-pulse" />
+            </div>
+          ) : collected.length === 0 ? (
+            <div className="px-5">
+              <div className="bg-card border border-border rounded-2xl p-6 flex flex-col items-center text-center">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-3">
+                  <ScanLine className="w-6 h-6 text-primary" />
+                </div>
+                <p className="text-sm font-display font-bold text-foreground">No cans yet</p>
+                <p className="text-xs font-mono text-muted-foreground mt-1 max-w-[240px]">
+                  Scan your first can to start tracking your score, rare pulls, and collection stats.
+                </p>
+                <Button
+                  className="h-11 mt-4 font-mono text-xs gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                  onClick={() => navigate('/scan')}
+                >
+                  <ScanLine className="w-4 h-4" /> Scan Your First Can
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="px-5 space-y-3">
+              <CollectionCard
+                ref={showShareCard ? captureRef : null}
+                top6={top6}
+                rarityBreakdown={rarityBreakdown}
+                getEffectiveRarity={getEffectiveRarity}
+                pinnedCount={pinnedCount}
+                onTogglePin={item => togglePin({ collectionItem: item, pinnedCount })}
+                pinPending={pinPending}
+                sharing={showShareCard}
+                onShare={() => setShowShareCard(v => !v)}
+                score={score}
+                rarePulls={rarePulls}
+                totalCans={collected.length}
+                rank={rank}
+                userName={profile?.full_name}
+              />
+
+              {showShareCard && (
+                <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+                  {generating && (
+                    <div className="flex flex-col items-center gap-2 py-4">
+                      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      <p className="text-xs font-mono text-muted-foreground">Generating card…</p>
+                    </div>
+                  )}
+
+                  {cardDataUrl && !generating && (
+                    <img src={cardDataUrl} alt="Share card" className="w-full rounded-2xl border border-border" />
+                  )}
+
+                  <div className="flex gap-2">
+                    <Button
+                      className="h-11 flex-1 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+                      onClick={() => handleSave('sippd-collection.png')}
+                      disabled={!cardDataUrl || generating || cardSaving}
+                    >
+                      <Download className="w-4 h-4" />
+                      {cardSaving ? 'Saving…' : 'Save'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-11 flex-1 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                      onClick={() => handleShareImage('sippd-collection.png', 'My Sippd Collection')}
+                      disabled={!cardDataUrl || generating || cardSaving}
+                    >
+                      <Share2 className="w-4 h-4" />
+                      Share
+                    </Button>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-11 w-full font-mono text-xs text-muted-foreground gap-2"
+                    onClick={generateCard}
+                    disabled={generating}
+                  >
+                    {generating ? '…' : '↻'} Regenerate
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
 
       <TradeHistory userId={user?.id} user={user} onLogTrade={() => setShowTradeLog(true)} />

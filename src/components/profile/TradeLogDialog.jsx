@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
@@ -35,7 +35,7 @@ export default function TradeLogDialog({ collection, onClose }) {
 
   // RLS already scopes this to rows the current user participates in
   // (follower or followee) — no explicit filter needed.
-  const { data: follows = [] } = useQuery({
+  const { data: follows = [], isError: isFollowsError } = useQuery({
     queryKey: ['follows-for-trade'],
     queryFn: async () => {
       const { data, error } = await supabase.from('follows').select('*');
@@ -44,7 +44,7 @@ export default function TradeLogDialog({ collection, onClose }) {
     },
   });
 
-  const { data: allUsers = [] } = useQuery({
+  const { data: allUsers = [], isError: isAllUsersError } = useQuery({
     queryKey: ['all-users-for-trade'],
     queryFn: async () => {
       const { data, error } = await supabase.from('public_profiles').select('*');
@@ -53,6 +53,10 @@ export default function TradeLogDialog({ collection, onClose }) {
     },
     enabled: follows.length > 0,
   });
+
+  useEffect(() => {
+    if (isFollowsError || isAllUsersError) toast.error("Couldn't load your connections — trade partner search may be incomplete");
+  }, [isFollowsError, isAllUsersError]);
 
   const connectedUserIds = useMemo(
     () => new Set([

@@ -84,7 +84,7 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
             <span className="text-xs font-mono text-muted-foreground">({trades.length})</span>
           )}
         </div>
-        <Button size="sm" variant="outline" className="h-8 font-mono text-xs gap-1.5 border-primary/20 text-primary hover:bg-primary/10" onClick={onLogTrade}>
+        <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-primary/20 text-primary hover:bg-primary/10" onClick={onLogTrade}>
           <Plus className="w-3.5 h-3.5" /> Log Trade
         </Button>
       </div>
@@ -98,7 +98,7 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
               onClick={() => setFilter(opt)}
               aria-pressed={filter === opt}
               className={cn(
-                'px-2.5 py-1 rounded-lg border text-[11px] font-mono transition-colors capitalize',
+                'h-9 px-2.5 flex items-center rounded-lg border text-[11px] font-mono transition-colors capitalize',
                 filter === opt
                   ? 'bg-primary/10 border-primary/30 text-primary'
                   : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
@@ -122,7 +122,7 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
         <div className="bg-card border border-border rounded-xl p-6 text-center">
           <ArrowRightLeft className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" />
           <p className="text-sm font-mono text-muted-foreground">No trades logged yet.</p>
-          <Button size="sm" variant="ghost" className="mt-2 font-mono text-xs text-primary" onClick={onLogTrade}>
+          <Button size="sm" variant="ghost" className="h-11 mt-2 font-mono text-xs text-primary" onClick={onLogTrade}>
             <Plus className="w-3.5 h-3.5 mr-1" /> Log your first trade
           </Button>
         </div>
@@ -178,7 +178,7 @@ function TradeCard({ trade, onDelete, onStatusChange }) {
                 aria-label={`Set status to ${STATUS_STYLES[s].label}`}
                 aria-pressed={status === s}
                 className={cn(
-                  'px-2 py-0.5 rounded-md border text-[10px] font-mono transition-colors capitalize',
+                  'h-9 px-2 flex items-center rounded-md border text-[10px] font-mono transition-colors capitalize',
                   status === s
                     ? STATUS_STYLES[s].class
                     : 'bg-transparent border-border text-muted-foreground hover:text-foreground'

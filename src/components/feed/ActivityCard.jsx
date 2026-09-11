@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Flame, Package, Trophy } from 'lucide-react';
+import { Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { formatDistanceToNow } from 'date-fns';
@@ -55,11 +55,16 @@ export default function ActivityCard({ item, user, myReactionSet, onReact }) {
     <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={openProfile} className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0 text-sm font-display font-bold text-primary hover:bg-primary/20 transition-colors">
+        <Button
+          variant="ghost"
+          onClick={openProfile}
+          aria-label={`View ${item.user_name || 'Collector'}'s profile`}
+          className="w-11 h-11 rounded-full bg-primary/10 border border-primary/20 p-0 flex-shrink-0 text-sm font-display font-bold text-primary hover:bg-primary/20"
+        >
           {item.user_name?.[0]?.toUpperCase() || '?'}
-        </button>
+        </Button>
         <div className="flex-1 min-w-0">
-          <button onClick={openProfile} className="text-sm font-semibold text-foreground hover:text-primary transition-colors text-left">
+          <button onClick={openProfile} className="text-sm font-semibold text-foreground hover:text-primary transition-colors text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded">
             {item.user_name || 'Collector'}
           </button>
           <p className="text-[11px] font-mono text-muted-foreground">{timeAgo}</p>
@@ -105,18 +110,21 @@ export default function ActivityCard({ item, user, myReactionSet, onReact }) {
           const count = emoji === 'fire' ? item.reactions_fire : emoji === 'star' ? item.reactions_star : item.reactions_wow;
           const reacted = myReactionSet?.has(`${item.id}:${emoji}`);
           return (
-            <button
+            <Button
               key={emoji}
+              variant="ghost"
               onClick={() => onReact(item, emoji)}
+              aria-label={`React ${emoji}${count > 0 ? `, ${count} reactions` : ''}`}
+              aria-pressed={reacted}
               className={cn(
-                'flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-mono border transition-all',
+                'h-11 min-w-11 px-2.5 gap-1 rounded-full text-xs font-mono border transition-all',
                 reacted
-                  ? 'bg-primary/10 border-primary/30 text-primary'
+                  ? 'bg-primary/10 border-primary/30 text-primary hover:bg-primary/10 hover:text-primary'
                   : 'bg-secondary border-border text-muted-foreground hover:border-primary/20 hover:text-foreground'
               )}
             >
               {EMOJI_MAP[emoji]} {count > 0 ? count : ''}
-            </button>
+            </Button>
           );
         })}
       </div>

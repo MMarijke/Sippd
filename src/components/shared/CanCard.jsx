@@ -44,7 +44,7 @@ export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFav
       className={cn(
         'relative bg-card border rounded-xl overflow-hidden cursor-pointer transition-all group',
         isFavourite
-          ? 'border-primary/50 shadow-[0_0_12px_hsl(var(--primary)/0.12)]'
+          ? 'border-primary/50 favourite-glow'
           : 'border-border hover:border-primary/30'
       )}
     >

@@ -202,35 +202,47 @@ export default function Collection() {
   return (
     <div className="space-y-4">
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
-      <PageHeader
-        title="Your Haul"
-        subtitle={`${collection.length} cans total`}
-        action={
-          <div className="flex items-center gap-2">
-            <Link to="/crates">
-              <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
-                <PackageOpen className="w-4 h-4" /> Crates
-              </Button>
-            </Link>
-            <Link to="/scan">
-              <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5">
-                <ScanLine className="w-4 h-4" /> Add
-              </Button>
-            </Link>
-          </div>
-        }
-      />
 
-      <div className="px-5">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search your collection…"
-            aria-label="Search your collection"
-            className="h-11 pl-9 bg-secondary border-border font-body"
+      {/* Header zone: title + search only, on Home's own hero-zone gradient
+          layer — this is the app's other primary-nav destination, and it
+          previously carried none of Home's glass/gradient/glow language
+          (see .impeccable/critique/2026-09-11T11-52-01Z, P1). Scoped the
+          same way Home scopes its own hero zone: FilterBar and results sit
+          outside this wrapper, on the plain background. */}
+      <div className="relative">
+        <div className="home-gradient-bg-layer" aria-hidden="true" />
+        <div className="relative z-10 space-y-4">
+          <PageHeader
+            title="Your Haul"
+            subtitle={`${collection.length} cans total`}
+            action={
+              <div className="flex items-center gap-2">
+                <Link to="/crates">
+                  <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
+                    <PackageOpen className="w-4 h-4" /> Crates
+                  </Button>
+                </Link>
+                <Link to="/scan">
+                  <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5">
+                    <ScanLine className="w-4 h-4" /> Add
+                  </Button>
+                </Link>
+              </div>
+            }
           />
+
+          <div className="px-5">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search your collection…"
+                aria-label="Search your collection"
+                className="h-11 pl-9 bg-secondary border-border font-body"
+              />
+            </div>
+          </div>
         </div>
       </div>
 

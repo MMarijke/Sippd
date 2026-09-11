@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
-import { ArrowRightLeft, Plus, Trash2 } from 'lucide-react';
+import { AlertCircle, ArrowRightLeft, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -23,7 +23,12 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
   const [filter, setFilter] = useState('all');
   const [tradeToDelete, setTradeToDelete] = useState(null);
 
-  const { data: trades = [], isLoading } = useQuery({
+  const {
+    data: trades = [],
+    isLoading,
+    isError,
+    refetch: refetchTrades,
+  } = useQuery({
     queryKey: ['trades', userId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -36,6 +41,10 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
     },
     enabled: !!userId,
   });
+
+  useEffect(() => {
+    if (isError) toast.error('Could not load your trade history');
+  }, [isError]);
 
   const deleteTrade = useMutation({
     mutationFn: async (id) => {
@@ -118,7 +127,22 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
         </div>
       )}
 
-      {!isLoading && trades.length === 0 && (
+      {!isLoading && isError && (
+        <div className="bg-card border border-destructive/30 rounded-xl p-6 text-center">
+          <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
+          <p className="text-sm font-mono text-muted-foreground">Couldn't load your trade history.</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-11 mt-3 font-mono text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+            onClick={() => refetchTrades()}
+          >
+            <RefreshCw className="w-3.5 h-3.5" /> Retry
+          </Button>
+        </div>
+      )}
+
+      {!isLoading && !isError && trades.length === 0 && (
         <div className="bg-card border border-border rounded-xl p-6 text-center">
           <ArrowRightLeft className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" />
           <p className="text-sm font-mono text-muted-foreground">No trades logged yet.</p>
@@ -128,7 +152,7 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
         </div>
       )}
 
-      {!isLoading && trades.length > 0 && filtered.length === 0 && (
+      {!isLoading && !isError && trades.length > 0 && filtered.length === 0 && (
         <p className="text-xs font-mono text-muted-foreground text-center py-4">No {filter} trades.</p>
       )}
 

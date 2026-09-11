@@ -138,14 +138,34 @@ const CollectionCard = forwardRef(function CollectionCard(
             <Link to={`/can/${item.can_id}`} className="block">
               <div className="aspect-square" style={{ backgroundColor: item.can_bg_color || DEFAULT_CAN_BG }}>
                 {item.can_image_url ? (
-                  <img
-                    src={sharing ? proxyImageUrl(item.can_image_url) : item.can_image_url}
-                    alt={item.can_name}
-                    loading="lazy"
-                    decoding="async"
-                    crossOrigin={sharing ? 'anonymous' : undefined}
-                    className="w-full h-full object-contain"
-                  />
+                  <>
+                    {/* onError swaps to the same emoji fallback used for a
+                        missing URL — mainly for `sharing` mode, where a
+                        user-pasted image URL not on image-proxy's
+                        hostname allowlist (index.ts's ALLOWED_HOSTS) 403s
+                        instead of loading, so this photo would otherwise
+                        silently vanish (broken-image glyph) in the
+                        captured share card while showing fine on a normal
+                        page view (an ordinary image element needs no
+                        CORS; only the html2canvas capture does).
+                        DOM-direct, not React state — this renders per
+                        top6 item and doesn't need a re-render to swap. */}
+                    <img
+                      src={sharing ? proxyImageUrl(item.can_image_url) : item.can_image_url}
+                      alt={item.can_name}
+                      loading="lazy"
+                      decoding="async"
+                      crossOrigin={sharing ? 'anonymous' : undefined}
+                      className="w-full h-full object-contain"
+                      onError={e => {
+                        e.target.style.display = 'none';
+                        e.target.nextElementSibling.style.display = 'flex';
+                      }}
+                    />
+                    <div className="w-full h-full items-center justify-center" style={{ display: 'none' }}>
+                      <span className="text-lg opacity-20">🥤</span>
+                    </div>
+                  </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <span className="text-lg opacity-20">🥤</span>

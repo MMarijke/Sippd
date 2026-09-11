@@ -309,10 +309,16 @@
     0 0 30px hsl(var(--primary) / calc(0.1 * var(--glow-intensity)));
 }
 
+/* Alpha coefficients kept lower than .neon-glow's: text-shadow's blur
+   halos sit directly over glyph strokes rather than around a card edge,
+   so the same intensity that reads fine on a border blooms into the
+   digits themselves — worst on high-luminosity primaries (Signal Cyan's
+   100% S/50% L, Legendary's 96% S/68% L) where it washed out the
+   numerals rather than accenting them. */
 .neon-text {
   text-shadow:
-    0 0 10px hsl(var(--primary) / calc(0.5 * var(--glow-intensity))),
-    0 0 20px hsl(var(--primary) / calc(0.2 * var(--glow-intensity)));
+    0 0 10px hsl(var(--primary) / calc(0.3 * var(--glow-intensity))),
+    0 0 20px hsl(var(--primary) / calc(0.12 * var(--glow-intensity)));
 }
 
 .neon-border {

@@ -256,16 +256,23 @@ export default function Collection() {
             subtitle={`${collection.length} cans total`}
             action={
               <div className="flex items-center gap-2">
-                <Link to="/crates">
-                  <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
+                {/* asChild renders Link as the actual DOM element (via Radix's
+                    Slot) instead of nesting a <button> inside an <a> — see
+                    the sibling-overlay comment on CanCard/CanListItem for
+                    the same underlying reason. This exact fix was applied
+                    once already (fix/collection-button-link-nesting) but a
+                    later merge with a PR that also touched this header
+                    silently reverted these two sites — reapplying it. */}
+                <Button asChild size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
+                  <Link to="/crates">
                     <PackageOpen className="w-4 h-4" /> Crates
-                  </Button>
-                </Link>
-                <Link to="/scan">
-                  <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5">
+                  </Link>
+                </Button>
+                <Button asChild size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5">
+                  <Link to="/scan">
                     <ScanLine className="w-4 h-4" /> Add
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             }
           />

@@ -12,15 +12,6 @@ export const RARITY_HEX = {
   Legendary: '#EC4899',
 };
 
-// Tailwind background token per tier, for contexts using CSS custom properties
-export const RARITY_BG_CLASS = {
-  Common: 'bg-rarity-common',
-  Uncommon: 'bg-rarity-uncommon',
-  Rare: 'bg-rarity-rare',
-  'Ultra Rare': 'bg-rarity-ultra',
-  Legendary: 'bg-rarity-legendary',
-};
-
 // Tailwind text token per tier, for contexts using CSS custom properties
 export const RARITY_TEXT_CLASS = {
   Common: 'text-rarity-common',

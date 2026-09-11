@@ -98,7 +98,7 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
               onClick={() => setFilter(opt)}
               aria-pressed={filter === opt}
               className={cn(
-                'h-11 px-2.5 flex items-center rounded-lg border text-[11px] font-mono transition-colors capitalize',
+                'h-9 px-2.5 flex items-center rounded-lg border text-[11px] font-mono transition-colors capitalize',
                 filter === opt
                   ? 'bg-primary/10 border-primary/30 text-primary'
                   : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
@@ -178,7 +178,7 @@ function TradeCard({ trade, onDelete, onStatusChange }) {
                 aria-label={`Set status to ${STATUS_STYLES[s].label}`}
                 aria-pressed={status === s}
                 className={cn(
-                  'h-11 px-2 flex items-center rounded-md border text-[10px] font-mono transition-colors capitalize',
+                  'h-9 px-2 flex items-center rounded-md border text-[10px] font-mono transition-colors capitalize',
                   status === s
                     ? STATUS_STYLES[s].class
                     : 'bg-transparent border-border text-muted-foreground hover:text-foreground'

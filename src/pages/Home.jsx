@@ -139,8 +139,11 @@ export default function Home() {
     [collection]
   );
 
+  // Capped at 6 (was 9) — more than double the ~4-item working-memory
+  // guideline for a single decision point, per the Home critique's
+  // cognitive-load finding (.impeccable/critique/2026-09-11T13-24-04Z).
   const brands = useMemo(
-    () => ['All', ...new Set(collected.map(c => c.can_brand).filter(Boolean))].slice(0, 9),
+    () => ['All', ...new Set(collected.map(c => c.can_brand).filter(Boolean))].slice(0, 6),
     [collected]
   );
 
@@ -264,9 +267,14 @@ export default function Home() {
 
       {!isLoading && !hasCollectionError && collected.length > 0 && brands.length > 1 && (
         <div className="mt-5">
-          <p className="px-5 mb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-            Browse by Brand
-          </p>
+          <div className="px-5 mb-2 flex items-center justify-between">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+              Browse by Brand
+            </p>
+            {brands.length > 4 && (
+              <span className="text-[11px] font-mono text-muted-foreground">Swipe →</span>
+            )}
+          </div>
           <div className="flex gap-3 overflow-x-auto px-5 pb-1 scrollbar-none">
             {brands.map(brand => (
               <button

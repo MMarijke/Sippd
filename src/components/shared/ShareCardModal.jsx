@@ -68,8 +68,14 @@ export default function ShareCardModal({ title, onClose, cardSignature, filename
 
         {cardDataUrl && !generating && (
           <div className="w-full max-w-[360px]">
-            <p className="text-[10px] font-mono text-muted-foreground text-center mb-2">Long-press the image to save</p>
             <img src={cardDataUrl} alt="Share card" className="w-full rounded-2xl border border-border" />
+            {/* The Save button below is the primary path — it fails silently
+                on iOS Safari, though, which doesn't reliably honor a
+                synthetic <a download> click (see useCardCapture's
+                handleSave). Long-press is the one save path that always
+                works there, so it's called out as the iPhone-specific
+                alternative rather than a second competing instruction. */}
+            <p className="text-[10px] font-mono text-muted-foreground text-center mt-2">On iPhone, you can also long-press the image to save it</p>
           </div>
         )}
 

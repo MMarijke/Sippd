@@ -114,19 +114,33 @@ const ShareCardTemplate = forwardRef(function ShareCardTemplate(
       />
 
       <div className="relative z-10">
-        {/* Branding header — shared by both variants */}
-        <div className="flex items-center justify-between gap-3 mb-4">
-          <div className="flex items-center gap-2 min-w-0">
+        {/* Branding header — shared by both variants.
+            Deliberately NOT a flex row, and the tagline/username paragraphs
+            deliberately have no overflow/white-space/ellipsis utility on
+            them. Both were confirmed, via isolated html2canvas repro
+            against this exact component, to corrupt these custom-webfont
+            glyphs into garbage characters in the exported PNG while the
+            live DOM renders perfectly — an outer `justify-between` flex
+            row breaks glyph layout on its text descendants, and so does
+            `overflow-hidden` + `white-space: nowrap` (Tailwind `truncate`
+            included) on the text node itself, with or without
+            `text-overflow: ellipsis`. Long text is bounded by the
+            max-w-[…]% wrappers below and simply wraps instead of
+            truncating — acceptable since this template is only ever an
+            off-screen capture source, never shown live. The inner
+            icon+SIPPD flex row is unaffected and stays as flex. */}
+        <div className="relative mb-4" style={{ height: 30 }}>
+          <div className="absolute left-0 top-0 flex items-center gap-2 max-w-[70%]">
             <div className="w-7 h-7 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center flex-shrink-0">
               <Zap className="w-3.5 h-3.5 text-primary" />
             </div>
             <div className="min-w-0">
               <p className="text-xs font-display font-black text-primary tracking-[0.15em] leading-none">SIPPD</p>
-              <p className="text-[8px] font-mono text-primary/50 tracking-wide mt-0.5 truncate">ENERGY DRINK TRACKER</p>
+              <p className="text-[8px] font-mono text-primary/50 tracking-wide mt-0.5">ENERGY DRINK TRACKER</p>
             </div>
           </div>
-          <div className="text-right min-w-0">
-            <p className="text-sm font-display font-bold text-foreground leading-tight truncate">{displayName}</p>
+          <div className="absolute right-0 top-0 text-right max-w-[55%]">
+            <p className="text-sm font-display font-bold text-foreground leading-tight">{displayName}</p>
             <p className="text-[11px] font-mono text-primary mt-0.5">
               {variant === 'monthly' ? `${monthLabel} Recap` : 'Collection Score'}
             </p>

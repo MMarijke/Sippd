@@ -345,30 +345,39 @@ body {
   transition: background-color 300ms ease, color 300ms ease;
 }
 
-/* Home's colored hero backdrop — a vivid --primary/--accent glow
-   concentrated in the top ~640px (header + Collection Score), fading down
-   into the flat --background the rest of the app already uses, so a long
-   scroll doesn't drag saturated color behind dense list content further
-   down. Sized/positioned rather than `background-attachment: fixed`,
-   which is a known mobile-Safari scroll-jank source. Alphas were tuned
+/* Home's colored hero backdrop — a vivid --primary/--accent glow that
+   fades into the flat --background the rest of the app already uses.
+   Content-sized, not a fixed pixel value (see
+   .impeccable/critique/2026-09-11T10-00-20Z, P2): this is an absolutely-
+   positioned layer (`.home-gradient-bg-layer`) filling a `relative`
+   wrapper around exactly the "hero zone" (header + whichever of
+   welcome-card/RarityHero/Score/error-card is showing) — so it naturally
+   fits a short first-time-user stack or a taller returning-user one
+   without a magic number that has to be re-tuned by hand whenever that
+   content changes. Everything below the hero zone (StatsRow onward) sits
+   outside this wrapper entirely, on the plain background. Not
+   `background-attachment: fixed` — a known mobile-Safari scroll-jank
+   source, and no longer relevant once the layer is sized to its own
+   (short) container rather than the whole page. Alphas were tuned
    against Legendary (the brightest primary in the system) so header text
    stays legible in every theme, not just the calmer ones. */
-.home-gradient-bg {
+.home-gradient-bg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background-color: hsl(var(--background));
   background-image:
     radial-gradient(circle at 92% 2%, hsl(var(--primary) / 0.45) 0%, transparent 32%),
     radial-gradient(circle at 8% 14%, hsl(var(--accent) / 0.22) 0%, transparent 34%),
     linear-gradient(180deg, hsl(var(--primary) / 0.18) 0%, hsl(var(--background)) 100%);
-  background-repeat: no-repeat;
-  background-size: 100% 640px;
-  background-position: top;
   transition: background-color 300ms ease;
 }
 
-/* Frosted glass panel for content sitting directly on .home-gradient-bg —
-   dark translucent (not white; this is a dark-only app) so the colored
-   backdrop shows through softly instead of the opaque card-to-background
-   fill .hero-card uses elsewhere. */
+/* Frosted glass panel for content sitting directly on
+   .home-gradient-bg-layer — dark translucent (not white; this is a
+   dark-only app) so the colored backdrop shows through softly instead of
+   the opaque card-to-background fill .hero-card uses elsewhere. */
 .glass-card {
   background: hsl(var(--card) / 0.55);
   backdrop-filter: blur(20px);

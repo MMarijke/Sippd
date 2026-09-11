@@ -151,91 +151,106 @@ export default function Home() {
   const isNewUser = !isLoading && !hasCollectionError && collected.length === 0;
 
   return (
-    <div className="home-gradient-bg">
+    <div>
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
-      <PageHeader
-        title="SIPPD"
-        subtitle={profile?.full_name ? `${profile.full_name}'s vault` : 'Your Energy Drink Vault'}
-        action={
-          <Link to="/scan">
-            <Button size="sm" className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
-              <ScanLine className="w-4 h-4" /> Scan
-            </Button>
-          </Link>
-        }
-      />
 
-      {hasCollectionError ? (
-        <div className="px-5 mt-5">
-          {/* Sits in the same gradient zone as the glass-card hero blocks below —
-              matches that translucent treatment but keeps an explicit destructive
-              border rather than .glass-card's own, so the error state stays visible
-              rather than losing to the class's border in the cascade. */}
-          <div className="bg-card/55 backdrop-blur-xl border border-destructive/30 rounded-2xl p-5 text-center">
-            <p className="text-sm font-display font-semibold text-foreground">Couldn't load your vault</p>
-            <p className="text-xs font-mono text-muted-foreground mt-1.5">
-              Check your connection and try again.
-            </p>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-11 font-mono text-xs gap-1.5 mt-3 border-destructive/30 text-destructive hover:bg-destructive/10"
-              onClick={retryCollection}
-            >
-              <RefreshCw className="w-4 h-4" /> Retry
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <>
-          {isNewUser && (
+      {/* Hero zone: header + whichever of welcome-card/RarityHero/Score/
+          error-card is showing. The gradient layer is absolutely
+          positioned and fills this wrapper, so it's sized to this
+          zone's actual rendered content, not a fixed pixel guess —
+          a short first-time-user stack and a taller returning-user one
+          each get a gradient that fits them specifically. */}
+      <div className="relative">
+        <div className="home-gradient-bg-layer" aria-hidden="true" />
+        <div className="relative z-10">
+          <PageHeader
+            title="SIPPD"
+            subtitle={profile?.full_name ? `${profile.full_name}'s vault` : 'Your Energy Drink Vault'}
+            action={
+              <Link to="/scan">
+                <Button size="sm" className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+                  <ScanLine className="w-4 h-4" /> Scan
+                </Button>
+              </Link>
+            }
+          />
+
+          {hasCollectionError ? (
             <div className="px-5 mt-5">
-              <div className="glass-card rounded-2xl p-5 text-center">
-                <p className="text-sm font-display font-semibold text-foreground">Welcome to Sippd</p>
+              {/* Matches the glass-card translucent treatment but keeps an
+                  explicit destructive border rather than .glass-card's own,
+                  so the error state stays visible rather than losing to the
+                  class's border in the cascade. */}
+              <div className="bg-card/55 backdrop-blur-xl border border-destructive/30 rounded-2xl p-5 text-center">
+                <p className="text-sm font-display font-semibold text-foreground">Couldn't load your vault</p>
                 <p className="text-xs font-mono text-muted-foreground mt-1.5">
-                  Scan your first can to start building your vault.
+                  Check your connection and try again.
                 </p>
-                <Link to="/scan" className="inline-block mt-3">
-                  <Button size="sm" className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
-                    <ScanLine className="w-4 h-4" /> Scan Your First Can
-                  </Button>
-                </Link>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-11 font-mono text-xs gap-1.5 mt-3 border-destructive/30 text-destructive hover:bg-destructive/10"
+                  onClick={retryCollection}
+                >
+                  <RefreshCw className="w-4 h-4" /> Retry
+                </Button>
               </div>
             </div>
-          )}
+          ) : (
+            <>
+              {isNewUser && (
+                <div className="px-5 mt-5">
+                  <div className="glass-card rounded-2xl p-5 text-center">
+                    <p className="text-sm font-display font-semibold text-foreground">Welcome to Sippd</p>
+                    <p className="text-xs font-mono text-muted-foreground mt-1.5">
+                      Scan your first can to start building your vault.
+                    </p>
+                    <Link to="/scan" className="inline-block mt-3">
+                      <Button size="sm" className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+                        <ScanLine className="w-4 h-4" /> Scan Your First Can
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
 
-          <div className="px-5 mt-5">
-            <RarityHero collected={collected} sharedCansMap={sharedCansMap} isLoading={isLoading} />
-          </div>
-
-          {!isNewUser && (
-            <div className="px-5 mt-5">
-              {/* .glass-card-hero, not .glass-card — Score is the page's
-                  headline metric and needs to read as categorically
-                  different from the welcome/error cards' neutral glass,
-                  not just another instance of it. */}
-              <div className="glass-card-hero rounded-2xl p-5">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-primary">
-                  COLLECTION SCORE
-                </p>
-                <p className="text-5xl font-mono font-black text-foreground neon-text">
-                  {isLoading ? '—' : score}
-                </p>
-                <p className="text-xs font-mono text-muted-foreground">
-                  Your Energy Drink Vault
-                </p>
+              <div className="px-5 mt-5">
+                <RarityHero collected={collected} sharedCansMap={sharedCansMap} isLoading={isLoading} />
               </div>
-            </div>
-          )}
 
-          <div className="mt-5">
-            <StatsRow
-              rarePulls={isLoading ? '—' : rarePulls}
-              streak={streakLoading ? '—' : `${streak}d`}
-              wishlistCount={isLoading ? '—' : wishlistCount}
-            />
-          </div>
-        </>
+              {!isNewUser && (
+                <div className="px-5 mt-5">
+                  {/* .glass-card-hero, not .glass-card — Score is the page's
+                      headline metric and needs to read as categorically
+                      different from the welcome/error cards' neutral glass,
+                      not just another instance of it. */}
+                  <div className="glass-card-hero rounded-2xl p-5">
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-primary">
+                      COLLECTION SCORE
+                    </p>
+                    <p className="text-5xl font-mono font-black text-foreground neon-text">
+                      {isLoading ? '—' : score}
+                    </p>
+                    <p className="text-xs font-mono text-muted-foreground">
+                      Your Energy Drink Vault
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Below the hero zone: plain background, no gradient. */}
+      {!hasCollectionError && (
+        <div className="mt-5">
+          <StatsRow
+            rarePulls={isLoading ? '—' : rarePulls}
+            streak={streakLoading ? '—' : `${streak}d`}
+            wishlistCount={isLoading ? '—' : wishlistCount}
+          />
+        </div>
       )}
 
       <div className="px-5 mt-5">

@@ -21,6 +21,9 @@ import { toast } from 'sonner';
 
 const PAGE_SIZE = 60;
 
+// Matches FilterBar's own SelectItem labels for Status.
+const STATUS_LABELS = { collected: 'In Vault', wishlist: 'Wishlist', duplicate: 'Duplicates' };
+
 export default function Collection() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -207,6 +210,34 @@ export default function Collection() {
     setSearchQuery('');
   };
 
+  // Consolidates 4 separate controls into one scannable, removable summary
+  // — previously the only way to see what's currently filtering results was
+  // to inspect every control individually, and the only way to clear any of
+  // it was buried inside the zero-results empty state. Sort excluded, same
+  // reasoning as hasActiveFilters above: it reorders, it never excludes.
+  const activeFilterChips = [
+    filters.status !== 'all' && {
+      key: 'status',
+      label: STATUS_LABELS[filters.status] || filters.status,
+      onRemove: () => setFilters(prev => ({ ...prev, status: 'all' })),
+    },
+    filters.rarity !== 'all' && {
+      key: 'rarity',
+      label: filters.rarity,
+      onRemove: () => setFilters(prev => ({ ...prev, rarity: 'all' })),
+    },
+    filters.favourites && {
+      key: 'favourites',
+      label: 'Favourites',
+      onRemove: () => setFilters(prev => ({ ...prev, favourites: false })),
+    },
+    searchQuery.length >= 2 && {
+      key: 'search',
+      label: `"${searchQuery}"`,
+      onRemove: () => setSearchQuery(''),
+    },
+  ].filter(Boolean);
+
   return (
     <div className="space-y-4">
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
@@ -260,6 +291,32 @@ export default function Collection() {
         viewMode={viewMode}
         onViewModeChange={setViewMode}
       />
+
+      {activeFilterChips.length > 0 && (
+        <div className="px-5 flex flex-wrap items-center gap-2">
+          {activeFilterChips.map(chip => (
+            <span
+              key={chip.key}
+              className="inline-flex items-center gap-1 h-8 pl-3 pr-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[11px] font-mono"
+            >
+              {chip.label}
+              <button
+                onClick={chip.onRemove}
+                aria-label={`Remove ${chip.label} filter`}
+                className="p-1.5 -m-1 rounded-full hover:bg-primary/20 transition-colors"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          ))}
+          <button
+            onClick={clearFilters}
+            className="h-8 px-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Clear all
+          </button>
+        </div>
+      )}
 
       <div className="px-5">
         {isLoading ? (

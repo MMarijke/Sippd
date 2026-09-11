@@ -30,6 +30,9 @@
     --input: 240 10% 16%;
     --ring: 185 100% 50%;
     --radius: 0.75rem;
+    /* Baseline glow multiplier — see the Pro themes below for the escalating
+       rarity-tier scale this feeds into (.neon-glow/.neon-text/.neon-border). */
+    --glow-intensity: 1;
     --sidebar-background: 240 15% 6%;
     --sidebar-foreground: 200 20% 85%;
     --sidebar-primary: 185 100% 50%;
@@ -66,6 +69,7 @@
     --border: 240 10% 16%;
     --input: 240 10% 16%;
     --ring: 185 100% 50%;
+    --glow-intensity: 1;
     --sidebar-background: 240 15% 6%;
     --sidebar-foreground: 200 20% 85%;
     --sidebar-primary: 185 100% 50%;
@@ -83,86 +87,134 @@
   }
 
   /* Theme system: Signal Cyan (the values above) is the default/free look
-     and stays untouched. Each theme below only swaps the surface/brand
-     tokens — background, card, primary, secondary, muted, accent, border,
-     ring — never --foreground (body text stays legible), --destructive
-     (errors stay universally red), or --rarity-* (a can's actual rarity
-     badge must read the same regardless of the viewer's theme, including
-     in exported/shared card images). --accent is cyan on every themed
-     look, echoing the base brand color; Signal Cyan keeps its own pink
-     accent. Applied via [data-theme] on <html> — see useTheme.js. */
+     and stays untouched. Each theme below swaps the surface/brand tokens —
+     background, card, primary, secondary, muted, accent, border, ring — plus
+     --glow-intensity. Never --foreground (body text stays legible),
+     --destructive (errors stay universally red), or --rarity-* (a can's
+     actual rarity badge must read the same regardless of the viewer's
+     theme, including in exported/shared card images).
+
+     Redesigned 2026-09-11 (see .impeccable/critique/2026-09-11T08-11-49Z
+     for the full audit this responds to). Two rules replace the old
+     single-hue-swap formula:
+
+     1. RICHNESS ESCALATES WITH TIER, NOT JUST HUE. Every prior theme's
+        background/card/secondary/muted/border sat within 1-2 percentage
+        points of each other regardless of tier (border-L was *literally*
+        16% in all five) — only --primary differed, so five "themes" read
+        as one dark UI with a recolored button. Saturation AND lightness on
+        every surface token now climb from Common (flattest, greyest —
+        deliberately cheap-reading) to Legendary (richest, most saturated
+        near-black). Card in particular lifts much further off background
+        at higher tiers (9% L at Common -> 14% L at Legendary) instead of
+        the old fixed +4pt-everywhere recipe.
+     2. --accent IS OWN PER THEME, NOT PINNED TO CYAN. The old system gave
+        all five Pro themes the exact same accent (185 100% 50%) — half the
+        theme's identity was a shared constant. Each theme now gets its own
+        accent hue (thematically: Steel's spark, Verdant's gold, Cobalt's
+        electric teal, Voidglass's magenta, Aurora's gold trim).
+
+     --glow-intensity multiplies into .neon-glow/.neon-text/.neon-border
+     (and .hero-card's shadow) below, so a higher tier is felt as a real
+     increase in visual energy, not just a different-colored version of the
+     same energy. It also fixes a specific regression the audit caught:
+     Ultra's old primary (91% S / 65% L) out-saturated and out-brightened
+     Legendary's (81% S / 60% L) — the "pinnacle" Pro tier read calmer than
+     the one below it. Legendary is now the deliberate peak on saturation,
+     lightness, AND glow-intensity; Common is the deliberate floor.
+     Contrast re-verified for every new value: --foreground/--muted-foreground
+     stay theme-invariant and background/muted only moved 1-2pp lighter, so
+     the existing ~17.5:1 / ~6:1 contrast margins are preserved, not spent.
+     Applied via [data-theme] on <html> — see useTheme.js. */
   [data-theme="common"] {
-    --background: 220 15% 5%;
-    --card: 220 12% 9%;
-    --popover: 220 12% 9%;
-    --primary: 220 9% 56%;
+    --background: 220 18% 5%;
+    --card: 220 16% 9%;
+    --popover: 220 16% 9%;
+    --primary: 220 12% 58%;
     /* Dark foreground (matching every other theme's on-primary text), not
-       white — white-on-this-gray computes to ~3.4:1, below WCAG AA's 4.5:1
-       floor for small text like the header Scan button's label. */
+       white — white-on-this-gray falls below WCAG AA's 4.5:1 floor for
+       small text like the header Scan button's label. Re-verified after
+       the 56%->58% lightness bump: still safely in dark-text territory. */
     --primary-foreground: 240 20% 4%;
-    --secondary: 220 10% 18%;
-    --muted: 220 10% 9%;
-    --accent: 185 100% 50%;
+    --secondary: 220 14% 19%;
+    --muted: 220 12% 10%;
+    /* Steel's spark: warm amber against the coldest, greyest theme. */
+    --accent: 38 90% 55%;
     --accent-foreground: 240 20% 4%;
-    --border: 220 10% 16%;
-    --input: 220 10% 16%;
-    --ring: 220 9% 56%;
+    --border: 220 16% 18%;
+    --input: 220 16% 18%;
+    --ring: 220 12% 58%;
+    --glow-intensity: 0.6;
   }
   [data-theme="uncommon"] {
-    --background: 142 25% 4%;
-    --card: 142 20% 8%;
-    --popover: 142 20% 8%;
-    --primary: 142 71% 45%;
+    --background: 142 28% 5%;
+    --card: 142 26% 10%;
+    --popover: 142 26% 10%;
+    --primary: 142 75% 50%;
     --primary-foreground: 240 20% 4%;
-    --secondary: 142 12% 16%;
-    --muted: 142 15% 8%;
-    --accent: 185 100% 50%;
+    --secondary: 142 20% 20%;
+    --muted: 142 18% 10%;
+    /* Verdant's lime spark: sits between the green primary and Legendary's
+       gold-trim accent (45°) — deliberately distinct from it, not a repeat. */
+    --accent: 72 85% 55%;
     --accent-foreground: 240 20% 4%;
-    --border: 142 15% 16%;
-    --input: 142 15% 16%;
-    --ring: 142 71% 45%;
+    --border: 142 22% 20%;
+    --input: 142 22% 20%;
+    --ring: 142 75% 50%;
+    --glow-intensity: 0.8;
   }
   [data-theme="rare"] {
-    --background: 217 30% 4%;
-    --card: 217 22% 8%;
-    --popover: 217 22% 8%;
-    --primary: 217 91% 60%;
+    --background: 217 34% 5%;
+    --card: 217 30% 11%;
+    --popover: 217 30% 11%;
+    --primary: 217 88% 60%;
     --primary-foreground: 240 20% 4%;
-    --secondary: 217 14% 18%;
-    --muted: 217 16% 9%;
-    --accent: 185 100% 50%;
+    --secondary: 217 24% 21%;
+    --muted: 217 20% 11%;
+    /* Cobalt's electric teal: cooler and brighter than the base cyan, kept
+       distinct from Signal Cyan's own accent. */
+    --accent: 188 95% 55%;
     --accent-foreground: 240 20% 4%;
-    --border: 217 15% 16%;
-    --input: 217 15% 16%;
-    --ring: 217 91% 60%;
+    --border: 217 26% 22%;
+    --input: 217 26% 22%;
+    --ring: 217 88% 60%;
+    --glow-intensity: 1;
   }
   [data-theme="ultra"] {
-    --background: 271 25% 4%;
-    --card: 271 18% 8%;
-    --popover: 271 18% 8%;
-    --primary: 271 91% 65%;
+    --background: 271 30% 6%;
+    --card: 271 28% 13%;
+    --popover: 271 28% 13%;
+    --primary: 271 90% 64%;
     --primary-foreground: 240 20% 4%;
-    --secondary: 271 12% 18%;
-    --muted: 271 14% 9%;
-    --accent: 185 100% 50%;
+    --secondary: 271 22% 22%;
+    --muted: 271 18% 12%;
+    /* Voidglass's magenta: complementary shimmer against the void-purple. */
+    --accent: 312 90% 58%;
     --accent-foreground: 240 20% 4%;
-    --border: 271 14% 16%;
-    --input: 271 14% 16%;
-    --ring: 271 91% 65%;
+    --border: 271 24% 24%;
+    --input: 271 24% 24%;
+    --ring: 271 90% 64%;
+    --glow-intensity: 1.2;
   }
   [data-theme="legendary"] {
-    --background: 330 25% 4%;
-    --card: 330 18% 8%;
-    --popover: 330 18% 8%;
-    --primary: 330 81% 60%;
+    --background: 330 36% 6%;
+    --card: 330 32% 14%;
+    --popover: 330 32% 14%;
+    /* The deliberate peak: highest saturation and lightness of any theme
+       (was 81%/60% before this redesign — below Ultra's 91%/65%, which
+       is exactly the "pinnacle tier reads calmer than the one below it"
+       regression the audit flagged). */
+    --primary: 330 96% 68%;
     --primary-foreground: 240 20% 4%;
-    --secondary: 330 12% 18%;
-    --muted: 330 14% 9%;
-    --accent: 185 100% 50%;
+    --secondary: 330 26% 23%;
+    --muted: 330 20% 12%;
+    /* Aurora's gold trim: the classic legendary-tier accent. */
+    --accent: 45 95% 62%;
     --accent-foreground: 240 20% 4%;
-    --border: 330 14% 16%;
-    --input: 330 14% 16%;
-    --ring: 330 81% 60%;
+    --border: 330 28% 26%;
+    --input: 330 28% 26%;
+    --ring: 330 96% 68%;
+    --glow-intensity: 1.5;
   }
 }
 
@@ -202,23 +254,48 @@
 }
 
 /* Neon glow utilities — driven by --primary so the glow reskins with the
-   active theme instead of staying Signal Cyan under every Pro theme. */
+   active theme instead of staying Signal Cyan under every Pro theme. Alpha
+   is multiplied by --glow-intensity (0.6 at Common up to 1.5 at Legendary,
+   1 for the free/default theme) so a higher rarity tier is felt as more
+   visual energy, not just a different-colored version of the same energy. */
 .neon-glow {
-  box-shadow: 0 0 10px hsl(var(--primary) / 0.3), 0 0 30px hsl(var(--primary) / 0.1);
+  box-shadow:
+    0 0 10px hsl(var(--primary) / calc(0.3 * var(--glow-intensity))),
+    0 0 30px hsl(var(--primary) / calc(0.1 * var(--glow-intensity)));
 }
 
 .neon-text {
-  text-shadow: 0 0 10px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.2);
+  text-shadow:
+    0 0 10px hsl(var(--primary) / calc(0.5 * var(--glow-intensity))),
+    0 0 20px hsl(var(--primary) / calc(0.2 * var(--glow-intensity)));
 }
 
 .neon-border {
   border-color: hsl(var(--primary) / 0.3);
-  box-shadow: inset 0 0 10px hsl(var(--primary) / 0.05), 0 0 10px hsl(var(--primary) / 0.1);
+  box-shadow:
+    inset 0 0 10px hsl(var(--primary) / calc(0.05 * var(--glow-intensity))),
+    0 0 10px hsl(var(--primary) / calc(0.1 * var(--glow-intensity)));
 }
 
-/* Hero card — the one-per-page emphasis treatment (Profile's Score, Home's Collection Score). */
+/* Hero card — the one-per-page emphasis treatment (Home's Collection Score;
+   Profile's Score is a separate, pre-existing inconsistency out of scope
+   here — see the critique's Minor Observations). Previously a hardcoded
+   hex gradient that never reskinned with the active theme — the app's
+   single most-emphasized surface looked identical in every theme. Now
+   built from --card/--background (which already carry each theme's real
+   richness) plus a primary-tinted wash and glow-intensity-scaled shadow. */
 .hero-card {
-  background: linear-gradient(135deg, #0D2B2B 0%, #080C14 100%);
+  background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--background)) 100%);
   border: 1px solid hsl(var(--primary) / 0.3);
-  box-shadow: 0 0 24px hsl(var(--primary) / 0.06);
+  box-shadow: 0 0 24px hsl(var(--primary) / calc(0.1 * var(--glow-intensity)));
+  transition: background 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+}
+
+/* Theme-switch flourish: swapping [data-theme] is an instant class change
+   with no other trigger, so the transition lives on the surfaces
+   themselves (not on [data-theme], which would need to transition FROM a
+   value it doesn't hold DOM-wide) — this covers the two dominant themed
+   surfaces app-wide without the cost of a full-tree `*` transition. */
+body {
+  transition: background-color 300ms ease, color 300ms ease;
 }

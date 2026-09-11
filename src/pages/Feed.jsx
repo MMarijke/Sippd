@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Radio, RefreshCw, Users } from 'lucide-react';
+import { Radio, RefreshCw, Users, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
 import ActivityCard from '@/components/feed/ActivityCard';
@@ -16,7 +17,7 @@ export default function Feed() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: allActivity = [], isLoading, refetch } = useQuery({
+  const { data: allActivity = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['activity-feed'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -80,6 +81,8 @@ export default function Feed() {
     }
   });
 
+  const REACTION_COUNT_FIELD = { fire: 'reactions_fire', star: 'reactions_star', wow: 'reactions_wow' };
+
   const reactMutation = useMutation({
     mutationFn: async ({ activityId, emoji }) => {
       const { error } = await supabase.rpc('react_to_activity', {
@@ -89,7 +92,33 @@ export default function Feed() {
       });
       if (error) throw error;
     },
-    onSuccess: () => {
+    // Optimistic so the tap feels instant instead of waiting on a full
+    // refetch — rolled back in onError, reconciled with the server in
+    // onSettled either way.
+    onMutate: async ({ activityId, emoji }) => {
+      await queryClient.cancelQueries({ queryKey: ['activity-feed'] });
+      await queryClient.cancelQueries({ queryKey: ['my-reactions', user?.id] });
+
+      const previousActivity = queryClient.getQueryData(['activity-feed']);
+      const previousReactions = queryClient.getQueryData(['my-reactions', user?.id]);
+      const field = REACTION_COUNT_FIELD[emoji];
+
+      queryClient.setQueryData(['activity-feed'], (old = []) =>
+        old.map(item => item.id === activityId ? { ...item, [field]: (item[field] || 0) + 1 } : item)
+      );
+      queryClient.setQueryData(['my-reactions', user?.id], (old = []) => [
+        ...old,
+        { activity_id: activityId, reactor_id: user.id, emoji },
+      ]);
+
+      return { previousActivity, previousReactions };
+    },
+    onError: (error, variables, context) => {
+      if (context?.previousActivity) queryClient.setQueryData(['activity-feed'], context.previousActivity);
+      if (context?.previousReactions) queryClient.setQueryData(['my-reactions', user?.id], context.previousReactions);
+      toast.error(error.message || 'Failed to react');
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['activity-feed'] });
       queryClient.invalidateQueries({ queryKey: ['my-reactions'] });
     },
@@ -102,7 +131,7 @@ export default function Feed() {
     reactMutation.mutate({ activityId: item.id, emoji });
   };
 
-  const isEmpty = !isLoading && filtered.length === 0;
+  const isEmpty = !isLoading && !isError && filtered.length === 0;
   const followsNobody = followingIds.size === 0;
 
   return (
@@ -111,16 +140,24 @@ export default function Feed() {
         title="Feed"
         subtitle="Community activity"
         action={
-          <button onClick={() => refetch()} className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center border border-border text-muted-foreground hover:text-foreground transition-colors">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => refetch()}
+            aria-label="Refresh feed"
+            className="w-11 h-11 rounded-full bg-secondary border border-border text-muted-foreground hover:text-foreground"
+          >
             <RefreshCw className="w-3.5 h-3.5" />
-          </button>
+          </Button>
         }
       />
 
       <div className="px-5 pb-4">
-        <div className="flex bg-secondary rounded-lg border border-border p-0.5">
+        <div role="tablist" aria-label="Feed scope" className="flex bg-secondary rounded-lg border border-border p-0.5">
           <button
-            className={cn('flex-1 h-8 font-mono text-xs rounded-md transition-colors gap-1.5 flex items-center justify-center',
+            role="tab"
+            aria-selected={tab === 'global'}
+            className={cn('flex-1 h-11 font-mono text-xs rounded-md transition-colors gap-1.5 flex items-center justify-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
               tab === 'global' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
             )}
             onClick={() => setTab('global')}
@@ -128,7 +165,9 @@ export default function Feed() {
             <Radio className="w-3.5 h-3.5" /> Global
           </button>
           <button
-            className={cn('flex-1 h-8 font-mono text-xs rounded-md transition-colors gap-1.5 flex items-center justify-center',
+            role="tab"
+            aria-selected={tab === 'following'}
+            className={cn('flex-1 h-11 font-mono text-xs rounded-md transition-colors gap-1.5 flex items-center justify-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
               tab === 'following' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
             )}
             onClick={() => setTab('following')}
@@ -141,6 +180,19 @@ export default function Feed() {
       {isLoading ? (
         <div className="flex justify-center py-20">
           <div className="w-7 h-7 border-4 border-border border-t-primary rounded-full animate-spin" />
+        </div>
+      ) : isError ? (
+        <div className="flex flex-col items-center gap-3 py-20 px-8 text-center">
+          <AlertTriangle className="w-10 h-10 text-destructive/60" />
+          <p className="text-sm font-display font-semibold text-foreground">Couldn't load the feed</p>
+          <p className="text-xs font-mono text-muted-foreground">Check your connection and try again.</p>
+          <Button
+            size="sm"
+            onClick={() => refetch()}
+            className="font-mono text-xs bg-primary text-primary-foreground"
+          >
+            Try Again
+          </Button>
         </div>
       ) : isEmpty ? (
         tab === 'following' ? (

@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, ScanLine, Grid3X3, Trophy, User } from 'lucide-react';
+import { Home, ScanLine, Grid3X3, Trophy, User, Activity } from 'lucide-react';
 
 const navItems = [
   { path: '/', icon: Home, label: 'Vault' },
   { path: '/scan', icon: ScanLine, label: 'Scan' },
   { path: '/collection', icon: Grid3X3, label: 'Haul' },
+  { path: '/feed', icon: Activity, label: 'Feed' },
   { path: '/leaderboard', icon: Trophy, label: 'Ranks' },
   { path: '/profile', icon: User, label: 'Profile' },
 ];

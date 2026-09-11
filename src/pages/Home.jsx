@@ -252,14 +252,14 @@ export default function Home() {
           <p className="px-5 mb-2 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
             Browse by Brand
           </p>
-          <div className="flex gap-2 overflow-x-auto px-5 pb-1 scrollbar-none">
+          <div className="flex gap-3 overflow-x-auto px-5 pb-1 scrollbar-none">
             {brands.map(brand => (
               <button
                 key={brand}
                 onClick={() => setSelectedBrand(brand)}
                 aria-pressed={selectedBrand === brand}
                 className={cn(
-                  'flex-shrink-0 h-10 px-4 flex items-center rounded-full text-xs font-mono font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  'flex-shrink-0 h-11 px-4 flex items-center rounded-full text-xs font-mono font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   selectedBrand === brand
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-secondary border border-border text-muted-foreground hover:border-primary/30'

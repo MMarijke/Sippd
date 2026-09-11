@@ -11,9 +11,9 @@ import { RARITY_TEXT_CLASS } from '@/lib/rarityConsensus';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 
 const STATUS_STYLES = {
-  pending:   { label: 'Pending',   class: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
-  completed: { label: 'Completed', class: 'bg-green-500/10 text-green-400 border-green-500/20' },
-  cancelled: { label: 'Cancelled', class: 'bg-red-500/10 text-red-400 border-red-500/20' },
+  pending:   { label: 'Pending',   class: 'bg-warning/10 text-warning border-warning/20' },
+  completed: { label: 'Completed', class: 'bg-success/10 text-success border-success/20' },
+  cancelled: { label: 'Cancelled', class: 'bg-destructive/10 text-destructive border-destructive/20' },
 };
 
 const FILTER_OPTIONS = ['all', 'pending', 'completed', 'cancelled'];

@@ -26,6 +26,12 @@
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
+    --success: 158 64% 52%;
+    --success-foreground: 0 0% 98%;
+    --warning: 48 96% 53%;
+    --warning-foreground: 20 90% 10%;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 98%;
     --border: 240 10% 16%;
     --input: 240 10% 16%;
     --ring: 185 100% 50%;
@@ -80,6 +86,12 @@
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
+    --success: 158 64% 52%;
+    --success-foreground: 0 0% 98%;
+    --warning: 48 96% 53%;
+    --warning-foreground: 20 90% 10%;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 98%;
     --border: 240 10% 16%;
     --input: 240 10% 16%;
     --ring: 185 100% 50%;
@@ -110,9 +122,10 @@
      and stays untouched. Each theme below swaps the surface/brand tokens —
      background, card, primary, secondary, muted, accent, border, ring — plus
      --glow-intensity. Never --foreground (body text stays legible),
-     --destructive (errors stay universally red), or --rarity-* (a can's
-     actual rarity badge must read the same regardless of the viewer's
-     theme, including in exported/shared card images).
+     --destructive (errors stay universally red), --success/--warning/--info
+     (status meaning stays universally green/amber/blue, same reasoning), or
+     --rarity-* (a can's actual rarity badge must read the same regardless of
+     the viewer's theme, including in exported/shared card images).
 
      Redesigned 2026-09-11 (see .impeccable/critique/2026-09-11T08-11-49Z
      for the full audit this responds to). Two rules replace the old

@@ -8,9 +8,18 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
   const pct = showProgress ? Math.min((progress.current / progress.goal) * 100, 100) : 0;
 
   if (size === 'compact') {
+    // description-id: title="..." only reaches desktop mouse-hover — invisible
+    // to touch and screen-reader users, who otherwise have no path to the
+    // description at all in this compact size (the default size renders it
+    // as real visible text below the title). aria-describedby + a visually-
+    // hidden span gets it to screen readers without changing the compact
+    // tile's layout; touch users can still reach the same text via "View
+    // All →" to the full Achievements grid, which shows it inline.
+    const descriptionId = `achievement-desc-${achievement.key}`;
     return (
       <div
         aria-label={`${title}: ${unlocked ? 'unlocked' : 'locked'}`}
+        aria-describedby={descriptionId}
         className="relative flex flex-col items-center text-center gap-1.5"
         title={description}
       >
@@ -32,6 +41,7 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
         <p className={cn('text-[9px] font-mono leading-tight truncate w-full', unlocked ? 'text-foreground' : 'text-muted-foreground')}>
           {title}
         </p>
+        <span id={descriptionId} className="sr-only">{description}</span>
       </div>
     );
   }

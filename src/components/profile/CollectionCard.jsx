@@ -5,6 +5,7 @@ import { Pin, Share2, X as XIcon, Zap, Star } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { MAX_PINS } from '@/hooks/useTogglePin';
 import { proxyImageUrl } from '@/lib/cardCapture';
+import { cn } from '@/lib/utils';
 
 // Rarity Breakdown bar only — a monochromatic ramp built from the active
 // theme's own --primary hue (dim to vivid), so this proportion chart
@@ -122,7 +123,14 @@ const CollectionCard = forwardRef(function CollectionCard(
       )}
 
       <div className="grid grid-cols-3 gap-2">
-        {top6.map(item => (
+        {top6.map(item => {
+          // Proactively disables the button instead of relying on the
+          // mutation's own thrown-error toast (useTogglePin.js) — that
+          // still fires as a fallback for any race between two pin taps,
+          // but the common case is now prevented, not just explained
+          // after the fact.
+          const atCap = !item.pinned_at && pinnedCount >= MAX_PINS;
+          return (
           <div
             key={item.id}
             className="relative rounded-xl overflow-hidden border border-primary/20 bg-black/20 hover:border-primary/40 transition-colors"
@@ -151,18 +159,33 @@ const CollectionCard = forwardRef(function CollectionCard(
             </Link>
             <button
               onClick={() => onTogglePin(item)}
-              disabled={pinPending}
-              aria-label={item.pinned_at ? 'Unpin from showcase' : 'Pin to showcase'}
-              className="absolute top-0 right-0 w-11 h-11 rounded-full flex items-center justify-center transition-colors"
+              disabled={pinPending || atCap}
+              aria-label={
+                item.pinned_at
+                  ? 'Unpin from showcase'
+                  : atCap
+                    ? `Pin to showcase (${MAX_PINS} already pinned — unpin one first)`
+                    : 'Pin to showcase'
+              }
+              className={cn(
+                'absolute top-0 right-0 w-11 h-11 rounded-full flex items-center justify-center transition-colors',
+                atCap && 'cursor-not-allowed'
+              )}
             >
               {/* Real tap target is the full 44px button above; this stays a
                   small visual badge so it doesn't dominate a ~100px tile. */}
-              <span className="w-6 h-6 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center">
+              <span
+                className={cn(
+                  'w-6 h-6 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center',
+                  atCap && 'opacity-40'
+                )}
+              >
                 <Pin className={`w-3 h-3 transition-colors ${item.pinned_at ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
               </span>
             </button>
           </div>
-        ))}
+          );
+        })}
       </div>
       <p className="text-[10px] font-mono text-muted-foreground mt-2">
         {pinnedCount}/{MAX_PINS} pinned

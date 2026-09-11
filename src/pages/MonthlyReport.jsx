@@ -11,7 +11,8 @@ import { RARITY_POINTS, RARITY_ORDER, RARITY_HEX as RARITY_COLORS, getEffectiveR
 import { useStreak } from '@/lib/useStreak';
 import RarityBadge from '@/components/shared/RarityBadge';
 import CanImageBox from '@/components/shared/CanImageBox';
-import ShareCardModal from '@/components/profile/ShareCardModal';
+import ShareCardModal from '@/components/shared/ShareCardModal';
+import ShareCardTemplate from '@/components/shared/ShareCardTemplate';
 
 const RARITY_RANK = { Common: 1, Uncommon: 2, Rare: 3, 'Ultra Rare': 4, Legendary: 5 };
 
@@ -118,20 +119,23 @@ export default function MonthlyReport() {
   const monthLabel = format(monthDate, 'MMMM yyyy');
   const isCurrentMonth = format(monthDate, 'yyyy-MM') === format(new Date(), 'yyyy-MM');
 
-  const monthlyData = useMemo(() => ({
+  const monthlyRarityBreakdown = useMemo(() => rarityChartData.map(({ name, value }) => ({
+    rarity: name,
+    count: value,
+    pct: collected.length ? (value / collected.length) * 100 : 0,
+  })), [rarityChartData, collected.length]);
+
+  // Passed to ShareCardModal, which regenerates its capture whenever this
+  // changes — mirrors every field the exported card actually shows.
+  const cardSignature = useMemo(() => JSON.stringify({
     monthLabel,
     cansAdded: collected.length,
     monthScore,
     streak: streak ?? 0,
-    bestPull,
-    bestPullImage,
+    bestPullId: bestPull?.id || null,
     bestPullRarity,
-    rarityBreakdown: rarityChartData.map(({ name, value }) => ({
-      rarity: name,
-      count: value,
-      pct: collected.length ? (value / collected.length) * 100 : 0,
-    })),
-  }), [monthLabel, collected.length, monthScore, streak, bestPull, bestPullImage, bestPullRarity, rarityChartData]);
+    rarityBreakdown: monthlyRarityBreakdown,
+  }), [monthLabel, collected.length, monthScore, streak, bestPull, bestPullRarity, monthlyRarityBreakdown]);
 
   const hasActivity = collected.length > 0 || wishlistCount > 0;
 
@@ -330,7 +334,26 @@ export default function MonthlyReport() {
       )}
 
       {showShareCard && (
-        <ShareCardModal user={user} onClose={() => setShowShareCard(false)} monthlyData={monthlyData} />
+        <ShareCardModal
+          title="Recap Card"
+          onClose={() => setShowShareCard(false)}
+          cardSignature={cardSignature}
+          filename={`sippd-recap-${monthLabel.replace(/\s+/g, '-')}.png`}
+          shareTitle={`My ${monthLabel} Sippd Recap`}
+        >
+          <ShareCardTemplate
+            variant="monthly"
+            userName={user?.full_name}
+            monthLabel={monthLabel}
+            cansAdded={collected.length}
+            monthScore={monthScore}
+            streak={streak ?? 0}
+            bestPull={bestPull}
+            bestPullImage={bestPullImage}
+            bestPullRarity={bestPullRarity}
+            rarityBreakdown={monthlyRarityBreakdown}
+          />
+        </ShareCardModal>
       )}
     </div>
   );

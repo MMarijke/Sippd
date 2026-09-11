@@ -2,19 +2,20 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { AlertCircle, LogOut, RefreshCw, Settings, Medal, Pencil, Check, X, Share2, Download, ScanLine } from 'lucide-react';
+import { AlertCircle, LogOut, RefreshCw, Settings, Medal, Pencil, Check, X, ScanLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link, useNavigate } from 'react-router-dom';
 import PageHeader from '@/components/shared/PageHeader';
 import CollectionCard from '@/components/profile/CollectionCard';
+import ShareCardModal from '@/components/shared/ShareCardModal';
+import ShareCardTemplate from '@/components/shared/ShareCardTemplate';
 import AchievementBadge from '@/components/achievements/AchievementBadge';
 import { toast } from 'sonner';
 import { getItemScore } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
 import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
 import { useTogglePin } from '@/hooks/useTogglePin';
-import { useCardCapture } from '@/hooks/useCardCapture';
 import { computeAchievements, selectHighlightAchievements } from '@/lib/achievements';
 import TradeHistory from '@/components/profile/TradeHistory';
 import TradeLogDialog from '@/components/profile/TradeLogDialog';
@@ -186,7 +187,6 @@ export default function Profile() {
   const pinnedCount = collected.filter(c => c.pinned_at).length;
 
   const [showShareCard, setShowShareCard] = useState(false);
-  const captureRef = useRef(null);
 
   const { data: rank, isError: isRankError } = useQuery({
     queryKey: ['my-rank', user?.id, score],
@@ -205,25 +205,16 @@ export default function Profile() {
     if (isRankError) toast.error('Could not load your rank');
   }, [isRankError]);
 
-  // rank/profile?.full_name included even though the visible card renders
-  // them straight from render-time props — rank resolves from its own,
+  // rank/profile?.full_name included even though the live card renders them
+  // straight from render-time props — rank resolves from its own,
   // separately-timed query, so without this a card generated before it
-  // settles could permanently ship missing the rank badge.
+  // settles could permanently ship missing the rank badge. ShareCardModal's
+  // own useCardCapture regenerates whenever this signature changes.
   const cardSignature = useMemo(() => {
     const cans = top6.map(item => `${item.id}:${getEffectiveRarity(item)}:${item.pinned_at || ''}`).join('|');
     const breakdown = rarityBreakdown.map(r => `${r.rarity}:${r.count}`).join(',');
     return `${cans}__${breakdown}__${streak}__${score}__${rank || ''}__${profile?.full_name || ''}`;
   }, [top6, rarityBreakdown, streak, score, getEffectiveRarity, rank, profile?.full_name]);
-
-  const { generating, cardDataUrl, saving: cardSaving, generateCard, handleSave, handleShareImage } = useCardCapture(captureRef, cardSignature);
-
-  // The ref only attaches to the live card once showShareCard flips true
-  // (see the `ref={showShareCard ? captureRef : null}` below) — useCardCapture's
-  // own effect only regenerates on signature changes, so opening needs its
-  // own explicit first-generate call.
-  useEffect(() => {
-    if (showShareCard) generateCard();
-  }, [showShareCard]);
 
   return (
     <div className="space-y-5">
@@ -307,10 +298,12 @@ export default function Profile() {
               page's trophy case (Score now gets a real .hero-card
               treatment), so the showcase should be the first thing a
               returning user sees, not a wall of mostly-locked grey
-              badges. This card IS the share card too: tapping the share
-              icon expands a Save/Share preview inline, capturing this
-              exact card (see the conditional ref below) — no separate
-              export render. */}
+              badges. Tapping Share opens a dedicated ShareCardModal — the
+              live card here is purely interactive (pin/unpin, navigate);
+              the exported image is a separate ShareCardTemplate captured
+              hidden off-screen, never this on-screen card. See both
+              components' own doc comments for why that separation
+              matters. */}
           {contentLoading ? (
             <div className="px-5">
               <div className="h-64 rounded-2xl bg-card/40 border border-border/30 animate-pulse" />
@@ -334,103 +327,21 @@ export default function Profile() {
               </div>
             </div>
           ) : (
-            <div className="px-5 space-y-3">
-              {/* The live card stays mounted (and captureRef attached) until
-                  a snapshot exists — html2canvas needs it actually laid out
-                  to capture from. Once cardDataUrl is ready it swaps for
-                  that snapshot instead of sitting duplicated alongside it;
-                  generateCard clears cardDataUrl first (useCardCapture.js),
-                  which brings the live card back for the next capture. */}
-              {(!showShareCard || !cardDataUrl) && (
-                <CollectionCard
-                  ref={showShareCard ? captureRef : null}
-                  top6={top6}
-                  rarityBreakdown={rarityBreakdown}
-                  getEffectiveRarity={getEffectiveRarity}
-                  pinnedCount={pinnedCount}
-                  onTogglePin={item => togglePin({ collectionItem: item, pinnedCount })}
-                  pinPending={pinPending}
-                  sharing={showShareCard}
-                  onShare={() => setShowShareCard(v => !v)}
-                  score={score}
-                  rarePulls={rarePulls}
-                  totalCans={collected.length}
-                  rank={rank}
-                  userName={profile?.full_name}
-                />
-              )}
-
-              {showShareCard && (
-                <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
-                  {/* This close button is now the ONLY way to exit share
-                      mode at every stage (CollectionCard's own header
-                      button is hidden while sharing — see its comment —
-                      since that same DOM node is what gets captured into
-                      the share image, and toggling its icon to an X while
-                      sharing baked a second, non-functional "close"
-                      pixel into the picture). Always rendered here,
-                      independent of generating/cardDataUrl, so there's
-                      never a moment with zero or two exits. */}
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-[10px] font-mono text-muted-foreground">
-                      {generating ? 'Generating your card…' : 'Long-press the image to save'}
-                    </p>
-                    {/* Real tap target is the 44px button (p-1.5 -m-1.5
-                        on a 32px visual == exactly 44px); the visual
-                        badge stays small so it doesn't dominate this
-                        hint row next to 10px text. */}
-                    <button
-                      onClick={() => setShowShareCard(false)}
-                      aria-label="Close share preview"
-                      className="p-1.5 -m-1.5 rounded-lg flex-shrink-0"
-                    >
-                      <span className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center">
-                        <X className="w-4 h-4" />
-                      </span>
-                    </button>
-                  </div>
-
-                  {generating && (
-                    <div className="flex justify-center py-4">
-                      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                    </div>
-                  )}
-
-                  {cardDataUrl && !generating && (
-                    <img src={cardDataUrl} alt="Share card" className="w-full rounded-2xl border border-border" />
-                  )}
-
-                  <div className="flex gap-2">
-                    <Button
-                      className="h-11 flex-1 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
-                      onClick={() => handleSave('sippd-collection.png')}
-                      disabled={!cardDataUrl || generating || cardSaving}
-                    >
-                      <Download className="w-4 h-4" />
-                      {cardSaving ? 'Saving…' : 'Save'}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="h-11 flex-1 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
-                      onClick={() => handleShareImage('sippd-collection.png', 'My Sippd Collection')}
-                      disabled={!cardDataUrl || generating || cardSaving}
-                    >
-                      <Share2 className="w-4 h-4" />
-                      Share
-                    </Button>
-                  </div>
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-11 w-full font-mono text-xs text-muted-foreground gap-2"
-                    onClick={generateCard}
-                    disabled={generating}
-                  >
-                    {generating ? '…' : '↻'} Regenerate
-                  </Button>
-                </div>
-              )}
+            <div className="px-5">
+              <CollectionCard
+                top6={top6}
+                rarityBreakdown={rarityBreakdown}
+                getEffectiveRarity={getEffectiveRarity}
+                pinnedCount={pinnedCount}
+                onTogglePin={item => togglePin({ collectionItem: item, pinnedCount })}
+                pinPending={pinPending}
+                onShare={() => setShowShareCard(true)}
+                score={score}
+                rarePulls={rarePulls}
+                totalCans={collected.length}
+                rank={rank}
+                userName={profile?.full_name}
+              />
             </div>
           )}
 
@@ -482,6 +393,28 @@ export default function Profile() {
 
       {showTradeLog && (
         <TradeLogDialog collection={collection} onClose={() => setShowTradeLog(false)} />
+      )}
+
+      {showShareCard && (
+        <ShareCardModal
+          title="Share Collection"
+          onClose={() => setShowShareCard(false)}
+          cardSignature={cardSignature}
+          filename="sippd-collection.png"
+          shareTitle="My Sippd Collection"
+        >
+          <ShareCardTemplate
+            variant="collection"
+            userName={profile?.full_name}
+            score={score}
+            rank={rank}
+            rarePulls={rarePulls}
+            totalCans={collected.length}
+            rarityBreakdown={rarityBreakdown}
+            top6={top6}
+            getEffectiveRarity={getEffectiveRarity}
+          />
+        </ShareCardModal>
       )}
     </div>
   );

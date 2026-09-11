@@ -80,7 +80,7 @@ export default function Collection() {
 
   const {
     data: collection = [],
-    isLoading,
+    isLoading: isLoadingCollection,
     isError: isCollectionError,
     refetch: refetchCollection,
   } = useQuery({
@@ -99,6 +99,7 @@ export default function Collection() {
 
   const {
     data: sharedCans = [],
+    isLoading: isLoadingSharedCans,
     isError: isSharedCansError,
     refetch: refetchSharedCans,
   } = useQuery({
@@ -116,6 +117,7 @@ export default function Collection() {
 
   const {
     data: votes = [],
+    isLoading: isLoadingVotes,
     isError: isVotesError,
     refetch: refetchVotes,
   } = useQuery({
@@ -132,6 +134,12 @@ export default function Collection() {
     },
     enabled: !!user?.id,
   });
+
+  // Combined so a can can't render with its fallback cached rarity (no
+  // consensus data yet) during a window the page's own spinner has already
+  // stopped covering — previously only the collection query gated isLoading,
+  // so sharedCans/votes could still be in flight after the spinner cleared.
+  const isLoading = isLoadingCollection || isLoadingSharedCans || isLoadingVotes;
 
   // A failed fetch here would otherwise render identically to a genuinely
   // empty collection (filtered.length === 0) — misleading an established

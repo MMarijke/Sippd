@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
-import { X, Plus, Minus, PackageOpen } from 'lucide-react';
+import { X, Plus, Minus, PackageOpen, AlertCircle, RefreshCw } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -18,7 +18,7 @@ export default function AddToCrateSheet({ can, onClose }) {
   const queryClient = useQueryClient();
   const [showCreateCrate, setShowCreateCrate] = useState(false);
 
-  const { data: crates = [], isLoading } = useQuery({
+  const { data: crates = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['crates', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -109,6 +109,23 @@ export default function AddToCrateSheet({ can, onClose }) {
           {isLoading ? (
             <div className="flex justify-center py-16">
               <div className="w-7 h-7 border-4 border-border border-t-primary rounded-full animate-spin" />
+            </div>
+          ) : isError ? (
+            // Otherwise a failed fetch renders identically to "no crates
+            // yet" (crates.length === 0 on error, same as on a genuinely
+            // empty list) — same bug class already fixed on Collection.jsx's
+            // own three queries, missed here.
+            <div className="flex flex-col items-center gap-3 py-12 text-center">
+              <AlertCircle className="w-12 h-12 text-destructive/40" />
+              <p className="text-sm font-mono text-muted-foreground">Couldn't load your crates.</p>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-11 font-mono text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+                onClick={() => refetch()}
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> Retry
+              </Button>
             </div>
           ) : crates.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-12 text-center">

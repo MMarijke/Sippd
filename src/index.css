@@ -418,6 +418,24 @@ body {
   transition: background 300ms ease, border-color 300ms ease;
 }
 
+/* Error state's own border color — same frosted-glass family as
+   .glass-card (blur/background/shadow identical), but a sibling rule
+   rather than composing a Tailwind border-color utility on top of
+   .glass-card: this file's plain CSS rules are injected after
+   @tailwind utilities, so .glass-card's own `border` shorthand would
+   win the cascade over a utility class every time. Previously hand-
+   duplicated as `bg-card/55 backdrop-blur-xl border border-destructive/30`
+   on Home's error card — Tailwind's backdrop-blur-xl is 24px, silently
+   different from this family's 20px. */
+.glass-card-destructive {
+  background: hsl(var(--card) / 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid hsl(var(--destructive) / 0.3);
+  box-shadow: 0 8px 32px hsl(var(--background) / 0.4);
+  transition: background 300ms ease, border-color 300ms ease;
+}
+
 /* Collection Score's own elevation — same frosted-glass family as
    .glass-card (deliberately kept, not reverted to the old opaque
    .hero-card gradient: see .impeccable/critique/2026-09-11T10-00-20Z)

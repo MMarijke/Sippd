@@ -177,11 +177,7 @@ export default function Home() {
 
           {hasCollectionError ? (
             <div className="px-5 mt-5">
-              {/* Matches the glass-card translucent treatment but keeps an
-                  explicit destructive border rather than .glass-card's own,
-                  so the error state stays visible rather than losing to the
-                  class's border in the cascade. */}
-              <div className="bg-card/55 backdrop-blur-xl border border-destructive/30 rounded-2xl p-5 text-center">
+              <div className="glass-card-destructive rounded-2xl p-5 text-center">
                 <p className="text-sm font-display font-semibold text-foreground">Couldn't load your vault</p>
                 <p className="text-xs font-mono text-muted-foreground mt-1.5">
                   Check your connection and try again.

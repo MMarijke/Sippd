@@ -1,10 +1,8 @@
-import { forwardRef } from 'react';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { Link } from 'react-router-dom';
 import { Pin, Share2, Zap, Star } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { MAX_PINS } from '@/hooks/useTogglePin';
-import { proxyImageUrl } from '@/lib/cardCapture';
 import { cn } from '@/lib/utils';
 
 // Rarity Breakdown bar only — a monochromatic ramp built from the active
@@ -22,61 +20,44 @@ const BREAKDOWN_VAR = {
   Legendary: '--breakdown-legendary',
 };
 
-// This card IS the share card — the ref forwarded here is what
-// useCardCapture's html2canvas call captures directly, so there is no
-// separate "capture mode" render to keep in sync with what's on screen.
-// Images only route through proxyImageUrl/crossOrigin while `sharing` is
-// true (i.e. actually being captured) — html2canvas taints on cross-origin
-// images without that, but it also requires the target host to be on
-// image-proxy's allowlist, which arbitrary user-typed can image URLs won't
-// always be. Loading the raw URL the rest of the app uses whenever we're
-// not mid-capture keeps ordinary browsing from depending on that allowlist.
-const CollectionCard = forwardRef(function CollectionCard(
-  {
-    top6,
-    rarityBreakdown,
-    getEffectiveRarity,
-    pinnedCount,
-    onTogglePin,
-    pinPending,
-    onShare,
-    sharing,
-    rank,
-    userName,
-    score,
-    totalCans,
-    rarePulls,
-  },
-  ref
-) {
+// Profile's live, interactive trophy case — pin/unpin, navigate to a can,
+// open the share flow. Purely a live view now: the exported share image is
+// a separate, purpose-built ShareCardTemplate (src/components/shared/),
+// captured hidden/off-screen by ShareCardModal. This card used to double as
+// the literal html2canvas capture source, which is what caused this app's
+// last two share-flow bugs (a live control's icon baked into the exported
+// PNG as a dead pixel; the card needing conditional un/mounting to avoid
+// visually duplicating itself). No ref, no `sharing` mode, no proxied
+// images — this component only ever has one job now.
+export default function CollectionCard({
+  top6,
+  rarityBreakdown,
+  getEffectiveRarity,
+  pinnedCount,
+  onTogglePin,
+  pinPending,
+  onShare,
+  rank,
+  userName,
+  score,
+  totalCans,
+  rarePulls,
+}) {
   const displayName = userName || 'Collector';
 
   return (
-    <div ref={ref} className="bg-card border border-border rounded-2xl p-5">
+    <div className="bg-card border border-border rounded-2xl p-5">
       <div className="flex items-center justify-between mb-4 gap-2">
         <h2 className="text-sm font-display font-bold text-foreground tracking-wide truncate">
           {displayName}&rsquo;s Collection
         </h2>
-        {/* Hidden while sharing, not swapped to an X — this exact DOM node
-            is what html2canvas captures as the share image. Toggling its
-            icon to a close "X" while sharing meant that X got baked into
-            the captured PNG as a static, non-functional pixel (this card
-            IS the capture source, see the module doc comment above) —
-            visually indistinguishable from a real button but unclickable,
-            sitting right next to the actual working close control in
-            Profile.jsx's share panel. The share panel is now the sole
-            close affordance at every stage (see its own "generating"
-            branch, which got a matching close button for the window
-            before this card unmounts). */}
-        {!sharing && (
-          <button
-            onClick={onShare}
-            aria-label="Share collection card"
-            className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
-          >
-            <Share2 className="w-4 h-4" />
-          </button>
-        )}
+        <button
+          onClick={onShare}
+          aria-label="Share collection card"
+          className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
+        >
+          <Share2 className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Score is the number this whole page (and the leaderboard/achievement
@@ -153,22 +134,13 @@ const CollectionCard = forwardRef(function CollectionCard(
                 {item.can_image_url ? (
                   <>
                     {/* onError swaps to the same emoji fallback used for a
-                        missing URL — mainly for `sharing` mode, where a
-                        user-pasted image URL not on image-proxy's
-                        hostname allowlist (index.ts's ALLOWED_HOSTS) 403s
-                        instead of loading, so this photo would otherwise
-                        silently vanish (broken-image glyph) in the
-                        captured share card while showing fine on a normal
-                        page view (an ordinary image element needs no
-                        CORS; only the html2canvas capture does).
-                        DOM-direct, not React state — this renders per
-                        top6 item and doesn't need a re-render to swap. */}
+                        missing/broken URL, rather than a browser
+                        broken-image glyph. */}
                     <img
-                      src={sharing ? proxyImageUrl(item.can_image_url) : item.can_image_url}
+                      src={item.can_image_url}
                       alt={item.can_name}
                       loading="lazy"
                       decoding="async"
-                      crossOrigin={sharing ? 'anonymous' : undefined}
                       className="w-full h-full object-contain"
                       onError={e => {
                         e.target.style.display = 'none';
@@ -225,6 +197,4 @@ const CollectionCard = forwardRef(function CollectionCard(
       </p>
     </div>
   );
-});
-
-export default CollectionCard;
+}

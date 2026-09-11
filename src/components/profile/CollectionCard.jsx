@@ -98,7 +98,10 @@ const CollectionCard = forwardRef(function CollectionCard(
 
       {rarityBreakdown.length > 0 && (
         <div className="mb-5">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60 mb-2">Rarity Breakdown</p>
+          {/* text-foreground, not text-primary/60 — same WCAG failure as
+              Score's label above (2.3-4.2:1 on 5 of 6 themes), just never
+              propagated here when that one was fixed. */}
+          <p className="text-[10px] font-mono uppercase tracking-widest text-foreground mb-2">Rarity Breakdown</p>
           <div className="flex h-1.5 rounded-full overflow-hidden gap-px">
             {rarityBreakdown.map(({ rarity, pct }) => (
               <div

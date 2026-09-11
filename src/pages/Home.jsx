@@ -247,7 +247,7 @@ export default function Home() {
         <div className="mt-5">
           <StatsRow
             rarePulls={isLoading ? '—' : rarePulls}
-            streak={streakLoading ? '—' : `${streak}d`}
+            streak={(isLoading || streakLoading) ? '—' : `${streak}d`}
             wishlistCount={isLoading ? '—' : wishlistCount}
           />
         </div>

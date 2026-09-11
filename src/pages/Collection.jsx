@@ -281,6 +281,15 @@ export default function Collection() {
                 className="h-11 pl-9 bg-secondary border-border font-body"
               />
             </div>
+            {/* Only at exactly 1 character — the one moment the 2-char
+                minimum (line 184) makes typing look like it's doing
+                nothing. Once filtering actually starts, the active-filter
+                chip row already covers this. */}
+            {searchQuery.length === 1 && (
+              <p className="text-[11px] font-mono text-muted-foreground mt-1.5 ml-1">
+                Type one more character to search
+              </p>
+            )}
           </div>
         </div>
       </div>

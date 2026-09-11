@@ -78,8 +78,11 @@ export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFav
           )}
         </div>
 
-        {showStatus && can.status && !can.id && (
-          <div className="absolute top-2 right-2">
+        {/* Bottom-right, not top-right — the star button already occupies
+            that corner (absolute top-0 right-0, 44px) and would collide
+            with a same-corner badge. */}
+        {showStatus && can.status && (
+          <div className="absolute bottom-2 right-2">
             <span className={`text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded ${
               can.status === 'collected' ? 'bg-rarity-uncommon/20 text-rarity-uncommon' :
               can.status === 'wishlist' ? 'bg-rarity-rare/20 text-rarity-rare' :

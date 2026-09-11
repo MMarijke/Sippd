@@ -279,11 +279,11 @@ export default function Collection() {
             description={collection.length === 0 ? "Start scanning to build your vault!" : "Try adjusting your filters"}
             action={
               collection.length === 0 ? (
-                <Link to="/scan">
-                  <Button className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground">
+                <Button asChild className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground">
+                  <Link to="/scan">
                     <ScanLine className="w-4 h-4" /> Add First Can
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               ) : hasActiveFilters ? (
                 <Button
                   variant="outline"

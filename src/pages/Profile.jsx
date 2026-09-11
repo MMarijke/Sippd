@@ -303,30 +303,14 @@ export default function Profile() {
         </div>
       ) : (
         <>
-          {/* Achievements strip */}
-          {!contentLoading && (
-            <div className="px-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Medal className="w-4 h-4 text-primary" />
-                  <h2 className="text-sm font-display font-bold text-foreground tracking-wide">Achievements</h2>
-                  <span className="text-xs font-mono text-muted-foreground">Unlocked {unlockedCount}/{achievements.length}</span>
-                </div>
-              </div>
-              <div className="grid grid-cols-5 gap-x-2 gap-y-4">
-                {highlightAchievements.map(a => (
-                  <AchievementBadge key={a.key} achievement={a} size="compact" />
-                ))}
-              </div>
-              <Link to="/achievements" className="block text-center text-xs font-mono text-primary hover:text-primary/80 transition-colors">
-                View All →
-              </Link>
-            </div>
-          )}
-
-          {/* Collection Card — this card IS the share card. Tapping the share
-              icon expands a Save/Share preview inline, capturing this exact
-              card (see the conditional ref below) — no separate export render. */}
+          {/* Collection Card leads, Achievements follows — this is the
+              page's trophy case (Score now gets a real .hero-card
+              treatment), so the showcase should be the first thing a
+              returning user sees, not a wall of mostly-locked grey
+              badges. This card IS the share card too: tapping the share
+              icon expands a Save/Share preview inline, capturing this
+              exact card (see the conditional ref below) — no separate
+              export render. */}
           {contentLoading ? (
             <div className="px-5">
               <div className="h-64 rounded-2xl bg-card/40 border border-border/30 animate-pulse" />
@@ -438,6 +422,27 @@ export default function Profile() {
                   </Button>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Achievements strip */}
+          {!contentLoading && (
+            <div className="px-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Medal className="w-4 h-4 text-primary" />
+                  <h2 className="text-sm font-display font-bold text-foreground tracking-wide">Achievements</h2>
+                  <span className="text-xs font-mono text-muted-foreground">Unlocked {unlockedCount}/{achievements.length}</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-x-2 gap-y-4">
+                {highlightAchievements.map(a => (
+                  <AchievementBadge key={a.key} achievement={a} size="compact" />
+                ))}
+              </div>
+              <Link to="/achievements" className="block text-center text-xs font-mono text-primary hover:text-primary/80 transition-colors">
+                View All →
+              </Link>
             </div>
           )}
         </>

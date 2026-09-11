@@ -181,7 +181,7 @@ export default function TradeLogDialog({ collection, onClose }) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowTemplates(true)}
-              className="h-10 flex items-center gap-1.5 px-2.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-mono hover:bg-primary/20 transition-colors"
+              className="h-11 flex items-center gap-1.5 px-2.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-mono hover:bg-primary/20 transition-colors"
             >
               <BookmarkCheck className="w-3.5 h-3.5" /> Templates
             </button>
@@ -311,7 +311,7 @@ export default function TradeLogDialog({ collection, onClose }) {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-10 font-mono text-xs border-primary/20 text-primary hover:bg-primary/10 flex-shrink-0"
+                    className="h-11 font-mono text-xs border-primary/20 text-primary hover:bg-primary/10 flex-shrink-0"
                     disabled={!templateName.trim() || saveTemplate.isPending}
                     onClick={() => saveTemplate.mutate()}
                   >

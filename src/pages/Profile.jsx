@@ -389,12 +389,18 @@ export default function Profile() {
                     <>
                       <div className="flex items-center justify-between gap-2">
                         <p className="text-[10px] font-mono text-muted-foreground">Long-press the image to save</p>
+                        {/* Real tap target is the 44px button (p-1.5 -m-1.5
+                            on a 32px visual == exactly 44px); the visual
+                            badge stays small so it doesn't dominate this
+                            hint row next to 10px text. */}
                         <button
                           onClick={() => setShowShareCard(false)}
                           aria-label="Close share preview"
-                          className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
+                          className="p-1.5 -m-1.5 rounded-lg flex-shrink-0"
                         >
-                          <X className="w-4 h-4" />
+                          <span className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center">
+                            <X className="w-4 h-4" />
+                          </span>
                         </button>
                       </div>
                       <img src={cardDataUrl} alt="Share card" className="w-full rounded-2xl border border-border" />

@@ -107,7 +107,7 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
               onClick={() => setFilter(opt)}
               aria-pressed={filter === opt}
               className={cn(
-                'h-9 px-2.5 flex items-center rounded-lg border text-[11px] font-mono transition-colors capitalize',
+                'h-11 px-2.5 flex items-center rounded-lg border text-[11px] font-mono transition-colors capitalize',
                 filter === opt
                   ? 'bg-primary/10 border-primary/30 text-primary'
                   : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
@@ -196,19 +196,28 @@ function TradeCard({ trade, onDelete, onStatusChange }) {
           {/* Status badge — click to cycle */}
           <div className="flex gap-1">
             {['pending', 'completed', 'cancelled'].map(s => (
+              // Real tap target is the 44px button (p-1 -m-1 on a 36px
+              // visual == exactly 44px, without growing the row or
+              // crowding its two siblings); the pill itself stays compact
+              // so three of them side by side in this meta row don't
+              // dominate the card.
               <button
                 key={s}
                 onClick={() => onStatusChange(s)}
                 aria-label={`Set status to ${STATUS_STYLES[s].label}`}
                 aria-pressed={status === s}
-                className={cn(
-                  'h-9 px-2 flex items-center rounded-md border text-[10px] font-mono transition-colors capitalize',
-                  status === s
-                    ? STATUS_STYLES[s].class
-                    : 'bg-transparent border-border text-muted-foreground hover:text-foreground'
-                )}
+                className="p-1 -m-1 rounded-md"
               >
-                {STATUS_STYLES[s].label}
+                <span
+                  className={cn(
+                    'h-9 px-2 flex items-center rounded-md border text-[10px] font-mono transition-colors capitalize',
+                    status === s
+                      ? STATUS_STYLES[s].class
+                      : 'bg-transparent border-border text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {STATUS_STYLES[s].label}
+                </span>
               </button>
             ))}
           </div>

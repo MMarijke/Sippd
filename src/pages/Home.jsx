@@ -210,11 +210,15 @@ export default function Home() {
 
           {!isNewUser && (
             <div className="px-5 mt-5">
-              <div className="glass-card rounded-2xl p-5">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-primary/60">
+              {/* .glass-card-hero, not .glass-card — Score is the page's
+                  headline metric and needs to read as categorically
+                  different from the welcome/error cards' neutral glass,
+                  not just another instance of it. */}
+              <div className="glass-card-hero rounded-2xl p-5">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-primary">
                   COLLECTION SCORE
                 </p>
-                <p className="text-5xl font-mono font-black text-foreground">
+                <p className="text-5xl font-mono font-black text-foreground neon-text">
                   {isLoading ? '—' : score}
                 </p>
                 <p className="text-xs font-mono text-muted-foreground">

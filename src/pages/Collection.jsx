@@ -242,12 +242,14 @@ export default function Collection() {
     <div className="space-y-4">
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
 
-      {/* Header zone: title + search only, on Home's own hero-zone gradient
-          layer — this is the app's other primary-nav destination, and it
-          previously carried none of Home's glass/gradient/glow language
-          (see .impeccable/critique/2026-09-11T11-52-01Z, P1). Scoped the
-          same way Home scopes its own hero zone: FilterBar and results sit
-          outside this wrapper, on the plain background. */}
+      {/* Header zone: title + search + FilterBar, on Home's own hero-zone
+          gradient layer — this is the app's other primary-nav destination,
+          and it previously carried none of Home's glass/gradient/glow
+          language (see .impeccable/critique/2026-09-11T11-52-01Z, P1).
+          FilterBar is included so the fade reaches down as far as Home's
+          equivalent hero zone (header+RarityHero+Score) does, rather than
+          cutting off abruptly right after the search box. Results still
+          sit outside this wrapper, on the plain background. */}
       <div className="relative">
         <div className="home-gradient-bg-layer" aria-hidden="true" />
         <div className="relative z-10 space-y-4">
@@ -268,9 +270,12 @@ export default function Collection() {
                     <PackageOpen className="w-4 h-4" /> Crates
                   </Link>
                 </Button>
-                <Button asChild size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5">
+                {/* Filled primary, not outline — matches Home's Scan
+                    button exactly (same destination, same weight as the
+                    app's other primary-nav Scan entry point). */}
+                <Button asChild size="sm" className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
                   <Link to="/scan">
-                    <ScanLine className="w-4 h-4" /> Add
+                    <ScanLine className="w-4 h-4" /> Scan
                   </Link>
                 </Button>
               </div>
@@ -298,15 +303,21 @@ export default function Collection() {
               </p>
             )}
           </div>
+
+          {/* FilterBar included in the gradient zone, not just header+search
+              — the fade was cutting off far shorter than Home's equivalent
+              hero zone (header+RarityHero+Score), reading as an abrupt,
+              much weaker echo of it rather than a matching treatment. A
+              direct child here, same as PageHeader and the search block
+              above — space-y-4 on this wrapper already spaces it. */}
+          <FilterBar
+            filters={filters}
+            onFiltersChange={setFilters}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+          />
         </div>
       </div>
-
-      <FilterBar
-        filters={filters}
-        onFiltersChange={setFilters}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-      />
 
       {activeFilterChips.length > 0 && (
         <div className="px-5 flex flex-wrap items-center gap-2">

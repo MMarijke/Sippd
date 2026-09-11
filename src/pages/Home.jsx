@@ -228,7 +228,16 @@ export default function Home() {
                       different from the welcome/error cards' neutral glass,
                       not just another instance of it. */}
                   <div className="glass-card-hero rounded-2xl p-5">
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-primary">
+                    {/* text-foreground, not text-primary — on Ultra/Voidglass
+                        this label's own theme color measured ~4.2:1 against
+                        .glass-card-hero's translucent surface, under WCAG
+                        AA's 4.5:1 floor for 10px text. --foreground stays
+                        theme-invariant at ~17.5:1+ margins on every theme
+                        (see index.css's theme-redesign comment), so this
+                        guarantees the fix without per-theme tuning. The
+                        card's own primary-tinted border/glow still carries
+                        the themed identity. */}
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-foreground">
                       COLLECTION SCORE
                     </p>
                     <p className="text-5xl font-mono font-black text-foreground neon-text">

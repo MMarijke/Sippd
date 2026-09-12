@@ -53,16 +53,21 @@ export default function PublicProfile() {
   const isPrivate = profileUser?.is_private;
   const canViewContent = !isPrivate || isFollowingTarget || currentUser?.id === userId;
 
-  // Server-side filtered — only this profile's own rows. RLS wouldn't allow
-  // reading anyone else's user_collection rows anyway; this replaces the old
-  // "load everyone's collection, filter by email client-side" pattern.
+  // Via get_public_collection, not a direct table query — user_collection's
+  // only RLS policy is owner-only (owner_id = auth.uid()), so a direct
+  // .from('user_collection') read here would silently return zero rows for
+  // every viewer except the profile's own owner, private or not. The RPC
+  // re-implements canViewContent's exact rule (public, or owner, or
+  // accepted follower) server-side and also works for a logged-out caller —
+  // p_caller_id: null there, which the function treats as "not the owner,
+  // not a follower" rather than raising. See the 2026-09-12 migration.
   const { data: profileItems = [], isLoading: loadingItems } = useQuery({
-    queryKey: ['profile-collection', userId],
+    queryKey: ['profile-collection', userId, currentUser?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_collection')
-        .select('*')
-        .eq('owner_id', userId);
+      const { data, error } = await supabase.rpc('get_public_collection', {
+        p_caller_id: currentUser?.id ?? null,
+        p_profile_id: userId,
+      });
       if (error) throw error;
       return data;
     },

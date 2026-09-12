@@ -179,7 +179,13 @@ export default function PublicProfile() {
           <Zap className="w-5 h-5 text-primary" />
           <div>
             <p className="text-base font-display font-black text-foreground tracking-widest">SIPPD</p>
-            <p className="text-[10px] font-mono text-muted-foreground -mt-0.5">Your Energy Drink Vault</p>
+            {/* Third person, not "Your Energy Drink Vault" — this route is
+                read by an owner, a follower, or a total stranger off a
+                shared link, never exclusively the account holder
+                addressing themselves. displayName already carries the
+                same profileUser?.full_name || 'Collector' fallback used
+                by the h1 below, so this stays correct during loading too. */}
+            <p className="text-[10px] font-mono text-muted-foreground -mt-0.5">{`${displayName}'s Energy Drink Vault`}</p>
           </div>
         </div>
       </div>

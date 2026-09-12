@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { Zap, Star, Flame, Package, Lock, ArrowRightLeft, GitCompare, ArrowLeft } from 'lucide-react';
+import { Zap, Star, Flame, Package, Lock, ArrowRightLeft, GitCompare, ArrowLeft, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CollectionCard from '@/components/shared/CollectionCard';
 import AchievementsSection from '@/components/shared/AchievementsSection';
@@ -202,26 +202,52 @@ export default function PublicProfile() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <FollowButton targetUser={profileUser} currentUser={currentUser} />
-                {currentUser && currentUser.id !== userId && (
-                <div className="flex items-center gap-1.5">
+                {currentUser ? (
+                  <>
+                    <FollowButton targetUser={profileUser} currentUser={currentUser} />
+                    {currentUser.id !== userId && (
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-11 font-mono text-xs gap-1.5 border-primary/20 text-primary hover:bg-primary/10"
+                          onClick={() => setShowTradeDialog(true)}
+                        >
+                          <ArrowRightLeft className="w-3.5 h-3.5" /> Trade
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-11 font-mono text-xs gap-1.5 border-border text-muted-foreground hover:text-foreground"
+                          onClick={() => navigate(`/compare?with=${userId}`)}
+                        >
+                          <GitCompare className="w-3.5 h-3.5" /> Compare
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  // The realistic default for this route: someone with no
+                  // session at all, here because a link was shared with
+                  // them. FollowButton and the Trade/Compare pair above
+                  // both render nothing for that visitor — this was the
+                  // page's actual growth loop (the reason a public,
+                  // shareable profile exists) dead-ending on its most
+                  // common path. Shaped like the Follow button it stands
+                  // in for (same primary fill, same UserPlus icon) so it
+                  // reads as "this is where following happens," not as a
+                  // generic auth wall. state.from sends Login.jsx back to
+                  // this exact profile after sign-in, not to the home
+                  // dashboard — losing the page they came to act on would
+                  // cost the conversion this button exists to create.
                   <Button
                     size="sm"
-                    variant="outline"
-                    className="h-11 font-mono text-xs gap-1.5 border-primary/20 text-primary hover:bg-primary/10"
-                    onClick={() => setShowTradeDialog(true)}
+                    className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 neon-glow"
+                    onClick={() => navigate('/login', { state: { from: `/u/${userId}` } })}
                   >
-                    <ArrowRightLeft className="w-3.5 h-3.5" /> Trade
+                    <UserPlus className="w-3.5 h-3.5" />
+                    Sign In to Follow
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-11 font-mono text-xs gap-1.5 border-border text-muted-foreground hover:text-foreground"
-                    onClick={() => navigate(`/compare?with=${userId}`)}
-                  >
-                    <GitCompare className="w-3.5 h-3.5" /> Compare
-                  </Button>
-                </div>
                 )}
               </div>
             </div>

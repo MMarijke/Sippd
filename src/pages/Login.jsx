@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Input } from '@/components/ui/input';
@@ -18,8 +18,11 @@ function GoogleIcon(props) {
   );
 }
 
+const POST_LOGIN_REDIRECT_KEY = 'sippd-post-login-redirect';
+
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
 
   const [mode, setMode] = useState('signin'); // 'signin' | 'signup'
@@ -31,10 +34,26 @@ export default function Login() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
 
+  // A page can send someone here via navigate('/login', { state: { from } })
+  // — e.g. PublicProfile.jsx's "Sign In to Follow" — expecting to land back
+  // where they actually wanted to act, not on the home dashboard having lost
+  // their place. router state doesn't survive Google's full-page redirect
+  // round trip, so this persists it to sessionStorage on arrival instead;
+  // the effect below reads it back regardless of which sign-in path was
+  // used, then clears it so a later, unrelated login doesn't reuse it.
+  useEffect(() => {
+    if (location.state?.from) {
+      sessionStorage.setItem(POST_LOGIN_REDIRECT_KEY, location.state.from);
+    }
+  }, [location.state]);
+
   // Once a session exists (password sign-in, or the OAuth redirect landing
   // back with one), leave the login page.
   useEffect(() => {
-    if (user) navigate('/', { replace: true });
+    if (!user) return;
+    const from = sessionStorage.getItem(POST_LOGIN_REDIRECT_KEY);
+    sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
+    navigate(from || '/', { replace: true });
   }, [user, navigate]);
 
   const handleGoogleSignIn = async () => {

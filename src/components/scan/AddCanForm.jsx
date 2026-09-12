@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
@@ -46,6 +46,23 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
   // here: voting on an existing catalog can whose community-sourced image
   // renders read-only in this same section.
   const [showPersonalize, setShowPersonalize] = useState(!!(prefillData?.id && prefillData.image_url));
+  const personalizeTriggerRef = useRef(null);
+
+  // Expanding reveals ~500px of new content (Taste Rating/Image/Background/
+  // Notes), but the trigger itself usually sits near the bottom of the
+  // visible viewport — without this, the newly-revealed fields render below
+  // the fold, behind the fixed bottom nav's screen position, so tapping
+  // "Personalize" visually appears to do almost nothing. Scrolling the
+  // trigger to the top of the scroll container brings the revealed content
+  // into the space below it instead.
+  const handlePersonalizeToggle = (open) => {
+    setShowPersonalize(open);
+    if (open) {
+      requestAnimationFrame(() => {
+        personalizeTriggerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  };
 
   const [form, setForm] = useState({
     name:       prefillData?.name    || '',
@@ -483,8 +500,9 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           log the can, so it's collapsed by default rather than standing
           between Status and Submit on a flow PRODUCT.md frames as
           in-the-moment capture. */}
-      <Collapsible open={showPersonalize} onOpenChange={setShowPersonalize}>
+      <Collapsible open={showPersonalize} onOpenChange={handlePersonalizeToggle}>
         <CollapsibleTrigger
+          ref={personalizeTriggerRef}
           type="button"
           className="flex items-center justify-between w-full h-11 group"
           aria-label={showPersonalize ? 'Hide personalize fields' : 'Show personalize fields'}

@@ -33,11 +33,28 @@ function describeCameraError(err) {
 export default function BarcodeScanner({ onDetected }) {
   const [status, setStatus] = useState('idle'); // idle | starting | scanning | error
   const [errorMessage, setErrorMessage] = useState('');
+  const [slowStart, setSlowStart] = useState(false);
   const videoRef = useRef(null);
   const readerRef = useRef(null);
   const controlsRef = useRef(null);
   const detectedRef = useRef(false);
   const mountedRef = useRef(true);
+
+  // decodeFromConstraints below has no built-in timeout — on some Android/
+  // WebView permission-prompt edge cases the underlying getUserMedia
+  // promise can simply never settle, leaving "Starting camera…" showing
+  // forever with no acknowledgment anything's off (the X button already
+  // works as an escape hatch either way; this only changes what the
+  // waiting screen says, it doesn't forcibly cancel a prompt still
+  // pending on the user's own response).
+  useEffect(() => {
+    if (status !== 'starting') {
+      setSlowStart(false);
+      return;
+    }
+    const timer = setTimeout(() => setSlowStart(true), 8000);
+    return () => clearTimeout(timer);
+  }, [status]);
 
   const stopScanning = () => {
     controlsRef.current?.stop();
@@ -112,8 +129,12 @@ export default function BarcodeScanner({ onDetected }) {
           <video ref={videoRef} muted playsInline autoPlay className="w-full h-full object-cover" />
 
           {status === 'starting' && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-              <p className="text-xs font-mono text-muted-foreground">Starting camera…</p>
+            <div className="absolute inset-0 flex items-center justify-center bg-black/60 px-8">
+              <p className="text-xs font-mono text-muted-foreground text-center leading-relaxed">
+                {slowStart
+                  ? 'Still waiting on your camera — tap the X to cancel and search manually instead.'
+                  : 'Starting camera…'}
+              </p>
             </div>
           )}
 

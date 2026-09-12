@@ -15,7 +15,9 @@ import RarityReveal from './RarityReveal';
 import AddedConfirmation from './AddedConfirmation';
 import { cn } from '@/lib/utils';
 import { RARITY_ORDER, getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
-import { CAN_BG_COLORS, DEFAULT_CAN_BG } from '@/lib/canBgColors';
+import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
+import CanBackgroundPicker from '@/components/shared/CanBackgroundPicker';
+import TasteRatingStars from '@/components/shared/TasteRatingStars';
 
 const RARITIES = RARITY_ORDER;
 
@@ -49,6 +51,11 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
     status:     'collected',
     date_added: format(new Date(), 'yyyy-MM-dd'),
     bg_color:   prefillData?.can_bg_color || DEFAULT_CAN_BG,
+    // Always null here, even when voting on an existing shared_can — that
+    // record is the global catalog entry, never this user's own
+    // user_collection row, so there's never a prior personal rating to
+    // prefill regardless of path.
+    taste_rating: null,
   });
 
   const update = (field, value) => {
@@ -125,6 +132,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
         can_edition:       form.edition   || sharedCan.edition,
         can_bg_color:      form.bg_color  || DEFAULT_CAN_BG,
         user_rarity_vote:  form.rarity,
+        taste_rating:      form.taste_rating,
       }).select().single();
       if (insertError) throw insertError;
 
@@ -463,46 +471,28 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
         </div>
       </div>
 
+      <div className="space-y-1.5">
+        <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Taste Rating (optional)</Label>
+        <TasteRatingStars value={form.taste_rating} onChange={v => update('taste_rating', v)} />
+      </div>
+
       {!prefillData?.id && (
         <div className="space-y-1.5">
           <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Image (optional)</Label>
           {form.image_url ? (
-            <div className="space-y-3">
-              <div className="relative w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.bg_color }}>
-                <img src={form.image_url} alt="Can" className="w-full h-full object-contain" />
-                <button
-                  onClick={() => update('image_url', '')}
-                  aria-label="Remove image"
-                  className="group absolute top-0 right-0 w-11 h-11 flex items-center justify-center"
-                >
-                  {/* Real tap target is the full 44px button above; this stays a
-                      small visual badge so it doesn't dominate the preview. */}
-                  <span className="w-7 h-7 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-border group-hover:bg-background">
-                    <X className="w-3.5 h-3.5" />
-                  </span>
-                </button>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Card Background</Label>
-                <div className="flex gap-2 flex-wrap">
-                  {CAN_BG_COLORS.map(({ label, hex }) => (
-                    <button
-                      key={hex}
-                      type="button"
-                      title={label}
-                      aria-label={label}
-                      aria-pressed={form.bg_color === hex}
-                      onClick={() => update('bg_color', hex)}
-                      className="w-11 h-11 rounded-lg border-2 transition-all"
-                      style={{
-                        backgroundColor: hex,
-                        borderColor: form.bg_color === hex ? 'hsl(var(--primary))' : 'hsl(var(--border))',
-                        boxShadow: form.bg_color === hex ? '0 0 0 2px hsl(var(--primary) / 0.3)' : 'none',
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
+            <div className="relative w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.bg_color }}>
+              <img src={form.image_url} alt="Can" className="w-full h-full object-contain" />
+              <button
+                onClick={() => update('image_url', '')}
+                aria-label="Remove image"
+                className="group absolute top-0 right-0 w-11 h-11 flex items-center justify-center"
+              >
+                {/* Real tap target is the full 44px button above; this stays a
+                    small visual badge so it doesn't dominate the preview. */}
+                <span className="w-7 h-7 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-border group-hover:bg-background">
+                  <X className="w-3.5 h-3.5" />
+                </span>
+              </button>
             </div>
           ) : (
             <div className="space-y-2">
@@ -551,10 +541,18 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
       )}
 
       {prefillData?.id && prefillData.image_url && (
-        <div className="w-full h-40 rounded-xl overflow-hidden bg-secondary">
+        <div className="w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.bg_color }}>
           <img src={prefillData.image_url} alt="Can" className="w-full h-full object-contain" />
         </div>
       )}
+
+      {/* Independent of whether an image exists — can_bg_color is also the
+          fallback tile background behind the generic can icon when a can
+          has no image at all (see CollectionCard.jsx), so it's worth
+          setting either way, and always available even when voting on an
+          existing catalog can whose community-sourced image can't be
+          replaced here. */}
+      <CanBackgroundPicker value={form.bg_color} onChange={v => update('bg_color', v)} />
 
       <div className="space-y-1.5">
         <Label htmlFor="addcan-notes" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Notes (optional)</Label>

@@ -1,16 +1,52 @@
-export const CAN_BG_COLORS = [
-  { label: 'Deep Teal',     hex: '#0D2B2B' },
-  { label: 'Midnight Navy', hex: '#0D1B2A' },
-  { label: 'Charcoal',      hex: '#1A1A2E' },
-  { label: 'Dark Plum',     hex: '#1E0A2E' },
-  { label: 'Forest Dark',   hex: '#0D1F0D' },
-  { label: 'Burnt Ember',   hex: '#2B0F0F' },
-  { label: 'Royal Indigo',  hex: '#170B33' },
-  { label: 'Golden Amber',  hex: '#2B1F0D' },
-  { label: 'Rose Wine',     hex: '#2B0D1F' },
-  { label: 'Slate Gray',    hex: '#1C1C1E' },
-  { label: 'Ocean Blue',    hex: '#0C1D38' },
-  { label: 'Sunset Coral',  hex: '#331A0D' },
-];
-
 export const DEFAULT_CAN_BG = '#0D2B2B';
+
+// Existing preset backgrounds (Deep Teal, Midnight Navy, etc.) all measured
+// 9-14% lightness — dark enough to keep white/light foreground text and can
+// art readable when used as a tile/card background across the app
+// (CanCard, CollectionCard, TradeHistory, MonthlyReport's recap card, ...).
+// Replaced by a free-hue color picker (CanBackgroundPicker.jsx); this clamp
+// is what keeps a user-picked color from landing somewhere that breaks that
+// same contrast guarantee — hue and saturation stay whatever the user
+// picked, only lightness gets pulled back into the same safe band the old
+// presets already lived in.
+const MIN_LIGHTNESS = 6;
+const MAX_LIGHTNESS = 18;
+
+function hexToHsl(hex) {
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0;
+  const l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      default: h = (r - g) / d + 4;
+    }
+    h /= 6;
+  }
+  return [h * 360, s * 100, l * 100];
+}
+
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  const toHex = n => Math.round(255 * f(n)).toString(16).padStart(2, '0');
+  return `#${toHex(0)}${toHex(8)}${toHex(4)}`;
+}
+
+// Takes any #rrggbb the native <input type="color"> can produce and pulls
+// its lightness back into the same dark-safe band the old fixed presets
+// occupied, so a freely-chosen hue can never end up too light to read
+// through as a card background.
+export function clampToDarkSafeBg(hex) {
+  const [h, s, l] = hexToHsl(hex);
+  const clampedL = Math.min(MAX_LIGHTNESS, Math.max(MIN_LIGHTNESS, l));
+  return hslToHex(h, s, clampedL);
+}

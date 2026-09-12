@@ -201,55 +201,63 @@ export default function PublicProfile() {
                   {isPrivate && <Lock className="w-4 h-4 text-muted-foreground flex-shrink-0" />}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                {currentUser ? (
-                  <>
-                    <FollowButton targetUser={profileUser} currentUser={currentUser} />
-                    {currentUser.id !== userId && (
-                      <div className="flex items-center gap-1.5">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-11 font-mono text-xs gap-1.5 border-primary/20 text-primary hover:bg-primary/10"
-                          onClick={() => setShowTradeDialog(true)}
-                        >
-                          <ArrowRightLeft className="w-3.5 h-3.5" /> Trade
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-11 font-mono text-xs gap-1.5 border-border text-muted-foreground hover:text-foreground"
-                          onClick={() => navigate(`/compare?with=${userId}`)}
-                        >
-                          <GitCompare className="w-3.5 h-3.5" /> Compare
-                        </Button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  // The realistic default for this route: someone with no
-                  // session at all, here because a link was shared with
-                  // them. FollowButton and the Trade/Compare pair above
-                  // both render nothing for that visitor — this was the
-                  // page's actual growth loop (the reason a public,
-                  // shareable profile exists) dead-ending on its most
-                  // common path. Shaped like the Follow button it stands
-                  // in for (same primary fill, same UserPlus icon) so it
-                  // reads as "this is where following happens," not as a
-                  // generic auth wall. state.from sends Login.jsx back to
-                  // this exact profile after sign-in, not to the home
-                  // dashboard — losing the page they came to act on would
-                  // cost the conversion this button exists to create.
-                  <Button
-                    size="sm"
-                    className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 neon-glow"
-                    onClick={() => navigate('/login', { state: { from: `/u/${userId}` } })}
-                  >
-                    <UserPlus className="w-3.5 h-3.5" />
-                    Sign In to Follow
-                  </Button>
-                )}
-              </div>
+              {/* Suppressed (not just empty) when the profile is private
+                  and this visitor can't see it — the gate card below owns
+                  that exact same action alone in that state. Rendering
+                  both here and there produced two identical-looking
+                  "Follow" (or "Sign In to Follow") buttons on screen at
+                  once, which reads as a duplication bug, not emphasis. */}
+              {canViewContent && (
+                <div className="flex items-center gap-2">
+                  {currentUser ? (
+                    <>
+                      <FollowButton targetUser={profileUser} currentUser={currentUser} />
+                      {currentUser.id !== userId && (
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-11 font-mono text-xs gap-1.5 border-primary/20 text-primary hover:bg-primary/10"
+                            onClick={() => setShowTradeDialog(true)}
+                          >
+                            <ArrowRightLeft className="w-3.5 h-3.5" /> Trade
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-11 font-mono text-xs gap-1.5 border-border text-muted-foreground hover:text-foreground"
+                            onClick={() => navigate(`/compare?with=${userId}`)}
+                          >
+                            <GitCompare className="w-3.5 h-3.5" /> Compare
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    // The realistic default for this route: someone with no
+                    // session at all, here because a link was shared with
+                    // them. FollowButton and the Trade/Compare pair above
+                    // both render nothing for that visitor — this was the
+                    // page's actual growth loop (the reason a public,
+                    // shareable profile exists) dead-ending on its most
+                    // common path. Shaped like the Follow button it stands
+                    // in for (same primary fill, same UserPlus icon) so it
+                    // reads as "this is where following happens," not as a
+                    // generic auth wall. state.from sends Login.jsx back to
+                    // this exact profile after sign-in, not to the home
+                    // dashboard — losing the page they came to act on would
+                    // cost the conversion this button exists to create.
+                    <Button
+                      size="sm"
+                      className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 neon-glow"
+                      onClick={() => navigate('/login', { state: { from: `/u/${userId}` } })}
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                      Sign In to Follow
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
 
             {isPrivate && !canViewContent && (
@@ -259,6 +267,26 @@ export default function PublicProfile() {
                   <p className="text-sm font-display font-semibold text-foreground">Private Account</p>
                   <p className="text-xs font-mono text-muted-foreground mt-1">Follow {displayName} to see their collection</p>
                 </div>
+                {/* The instruction above used to be the only thing on the
+                    page saying "Follow" with no Follow control anywhere
+                    near it for a logged-out visitor, and no control at
+                    all for a signed-in one — the header's own version of
+                    this exact action is now suppressed while this gate is
+                    showing (see canViewContent above), so this is the one
+                    and only place the action lives here, right next to
+                    the copy that names it. */}
+                {currentUser ? (
+                  <FollowButton targetUser={profileUser} currentUser={currentUser} />
+                ) : (
+                  <Button
+                    size="sm"
+                    className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 neon-glow"
+                    onClick={() => navigate('/login', { state: { from: `/u/${userId}` } })}
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    Sign In to Follow
+                  </Button>
+                )}
               </div>
             )}
 

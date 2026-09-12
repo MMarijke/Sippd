@@ -46,6 +46,8 @@ export default function ActivityCard({ item, user, myReactionSet, onReact }) {
   // the same kind of milestone here as it does on the Achievements page.
   const isMajorStreak = item.type === 'streak_milestone' && item.streak_days >= 30;
 
+  const hasReacted = ['fire', 'star', 'wow'].some(emoji => myReactionSet?.has(`${item.id}:${emoji}`));
+
   const renderAction = () => {
     switch (item.type) {
       case 'can_added':
@@ -166,7 +168,11 @@ export default function ActivityCard({ item, user, myReactionSet, onReact }) {
               <Button
                 variant="ghost"
                 onClick={() => onReact(item, emoji)}
-                aria-label={`React ${emoji}${count > 0 ? `, ${count} reactions` : ''}`}
+                aria-label={
+                  reacted
+                    ? `You reacted ${emoji} — locked, can't be removed${count > 0 ? ` (${count} total)` : ''}`
+                    : `React ${emoji}${count > 0 ? `, ${count} reactions` : ''}`
+                }
                 aria-pressed={reacted}
                 className={cn(
                   'h-11 min-w-11 px-2.5 gap-1 rounded-full text-xs font-mono border transition-all',
@@ -192,6 +198,20 @@ export default function ActivityCard({ item, user, myReactionSet, onReact }) {
           );
         })}
       </div>
+
+      {/* Only shown once the viewer has actually reacted — matching how
+          AddCanForm's own "You voted: X · vote locked" note only appears
+          after a vote is cast, not before. A persistent warning repeated
+          on every card in a scrolling feed (the way the pre-vote "Vote
+          locks once cast" caption works for a single, one-time control)
+          would be real clutter here; this answers "why won't this
+          un-tap?" exactly when it becomes the relevant question, not
+          before. (/impeccable critique) */}
+      {hasReacted && (
+        <p className="text-[11px] font-mono text-muted-foreground -mt-1">
+          Reactions lock in once cast.
+        </p>
+      )}
     </div>
   );
 }

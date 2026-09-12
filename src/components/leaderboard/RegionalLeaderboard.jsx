@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useJumpToHighlight } from '@/hooks/useJumpToHighlight';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 const MEDAL_COLORS = ['text-yellow-400', 'text-slate-300', 'text-amber-600'];
@@ -55,6 +56,55 @@ export default function RegionalLeaderboard() {
     if (isScoresError) toast.error('Could not load the regional leaderboard');
   }, [isProfileError, isScoresError]);
 
+  // /impeccable critique: Collectors has a "Your Rank" banner, Regional had
+  // no equivalent at all. Same query key as CollectorsLeaderboard's own
+  // myScoreRow fetch — react-query caches by key, so switching tabs reuses
+  // the already-fetched row instead of a redundant request.
+  const { data: myScoreRow } = useQuery({
+    queryKey: ['my-leaderboard-score', currentUser?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('leaderboard_scores')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .single();
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no row yet, not an error here
+      return data ?? null;
+    },
+    enabled: !!currentUser?.id,
+  });
+
+  const myScore = myScoreRow?.score ?? 0;
+
+  // Fetched directly (not derived from `scores`, capped at 50 above) for
+  // the same reason CollectorsLeaderboard.jsx's myRank query is — a real
+  // regional collector outside the top 50 still has a real rank.
+  const { data: myRegionalRank } = useQuery({
+    queryKey: ['my-regional-rank', profile?.region, currentUser?.id, myScore],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('leaderboard_scores')
+        .select('*', { count: 'exact', head: true })
+        .ilike('region', profile?.region || '')
+        .gt('score', myScore);
+      if (error) throw error;
+      return (count || 0) + 1;
+    },
+    enabled: !!currentUser?.id && !!profile?.region && myScore > 0,
+  });
+
+  const { targetRef: myRowRef, highlighted, jumpToTarget } = useJumpToHighlight();
+
+  const handleJumpToRank = () => {
+    if (myScore === 0) {
+      toast('Add cans to your vault to get ranked!');
+      return;
+    }
+    if (!jumpToTarget()) {
+      toast("You're outside the top 50 — keep climbing to see your row here!");
+    }
+  };
+
   if (isProfileError) {
     return (
       <div className="px-5">
@@ -96,6 +146,19 @@ export default function RegionalLeaderboard() {
 
   return (
     <div className="px-5">
+      {currentUser && (
+        <button
+          type="button"
+          onClick={handleJumpToRank}
+          aria-label="Jump to your rank"
+          className="w-full bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-between hover:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          <span className="text-xs font-mono text-muted-foreground">Your Rank</span>
+          <span className="text-sm font-display font-bold text-primary">
+            {isScoresError ? '—' : myScore > 0 ? (myRegionalRank ? `#${myRegionalRank}` : '…') : 'Not ranked yet'}
+          </span>
+        </button>
+      )}
       {isLoadingProfile || isLoading ? (
         <>
           {Array.from({ length: 5 }).map((_, i) => (
@@ -131,7 +194,12 @@ export default function RegionalLeaderboard() {
             return (
               <div
                 key={entry.user_id}
-                className={cn('flex items-center gap-3 px-4 py-3', isMe && 'bg-primary/5 border-l-2 border-primary')}
+                ref={isMe ? myRowRef : undefined}
+                className={cn(
+                  'flex items-center gap-3 px-4 py-3 transition-colors',
+                  isMe && 'bg-primary/5 border-l-2 border-primary',
+                  isMe && highlighted && 'bg-primary/15'
+                )}
               >
                 <div className="w-7 flex-shrink-0 text-center">
                   {isMedal ? (

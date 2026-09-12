@@ -32,7 +32,7 @@ export default function Leaderboard() {
             className="pl-9 bg-secondary border-border font-body"
           />
         </div>
-        {searchQuery.length >= 2 && <FindCollectors query={searchQuery} />}
+        {searchQuery.length >= 2 && <FindCollectors query={searchQuery} tab={tab} />}
       </div>
 
       {/* Tab toggle */}

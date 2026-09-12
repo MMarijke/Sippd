@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import FollowButton from '@/components/social/FollowButton';
 
-export default function FindCollectors({ query }) {
+export default function FindCollectors({ query, tab }) {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
 
@@ -104,7 +104,20 @@ export default function FindCollectors({ query }) {
 
   if (results.length === 0) {
     return (
-      <p className="text-xs font-mono text-muted-foreground text-center py-4">No collectors found for "{query}"</p>
+      <div className="py-4 text-center">
+        <p className="text-xs font-mono text-muted-foreground">No collectors found for "{query}"</p>
+        {/* This search bar stays visible across all three Ranks tabs, but
+            only ever searches people — on Most Wanted (cans) a can-name
+            query read as a broken search rather than a scoped one
+            (/impeccable critique). Only shown here, where the ambiguity
+            actually exists; Collectors/Regional never see this line since
+            there's no can-search expectation to correct there. */}
+        {tab === 'mostwanted' && (
+          <p className="text-[11px] font-mono text-muted-foreground/70 mt-1">
+            This searches people, not cans — check the list below instead.
+          </p>
+        )}
+      </div>
     );
   }
 

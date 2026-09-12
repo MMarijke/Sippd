@@ -38,7 +38,7 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
             <Lock className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
           </div>
         )}
-        <p className={cn('text-[9px] font-mono leading-tight truncate w-full', unlocked ? 'text-foreground' : 'text-muted-foreground')}>
+        <p className={cn('text-xs font-mono leading-tight truncate w-full', unlocked ? 'text-foreground' : 'text-muted-foreground')}>
           {title}
         </p>
         <span id={descriptionId} className="sr-only">{description}</span>
@@ -79,7 +79,7 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
       <p className={cn('text-xs font-display font-bold leading-tight mb-1 tracking-wide', unlocked ? 'text-foreground' : 'text-muted-foreground')}>
         {title}
       </p>
-      <p className={cn('text-[10px] font-mono leading-tight', 'text-muted-foreground')}>
+      <p className={cn('text-xs font-mono leading-tight', 'text-muted-foreground')}>
         {description}
       </p>
 
@@ -87,10 +87,10 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
       {showProgress && (
         <div className="w-full mt-2.5 space-y-1">
           <div className="flex justify-between items-center">
-            <span className="text-[9px] font-mono text-muted-foreground truncate">
+            <span className="text-xs font-mono text-muted-foreground truncate">
               {progress.current} / {progress.goal} {progress.label}
             </span>
-            <span className="text-[9px] font-mono text-primary/70">{Math.round(pct)}%</span>
+            <span className="text-xs font-mono text-primary/70">{Math.round(pct)}%</span>
           </div>
           <div className="h-1 bg-border/40 rounded-full overflow-hidden">
             <div
@@ -106,7 +106,7 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
           a real text signal that they're unlocked, not just color/opacity,
           so this doesn't stay conditional on unlockedAt being truthy. */}
       {unlocked && (
-        <p className="text-[9px] font-mono text-primary/60 mt-1.5 tracking-wider uppercase">
+        <p className="text-xs font-mono text-primary/60 mt-1.5 tracking-wider uppercase">
           {unlockedAt ? format(new Date(unlockedAt), 'MMM d, yyyy') : 'Unlocked'}
         </p>
       )}

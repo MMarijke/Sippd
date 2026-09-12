@@ -212,20 +212,32 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
             <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
               Your Rarity Vote <span className="normal-case text-muted-foreground">(locked)</span>
             </Label>
-            <div className="flex gap-2 flex-wrap opacity-60 pointer-events-none">
-              {RARITY_ORDER.map(r => (
-                <div
-                  key={r}
-                  className={cn(
-                    'px-3 py-1.5 rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider',
-                    myVote?.voted_rarity === r
-                      ? 'bg-primary border-primary text-primary-foreground'
-                      : 'border-border text-muted-foreground'
-                  )}
-                >
-                  {r}
-                </div>
-              ))}
+            {/* pointer-events-none, not a blanket opacity on the row — see
+                the matching fix in AddCanForm.jsx's own locked-vote block
+                (same duplicated pattern): a row-level opacity washes out
+                the SELECTED pill's own primary fill along with the
+                unselected ones, so only the unselected pills get muted
+                here, keeping the locked choice itself at full brightness. */}
+            <div className="grid grid-cols-3 gap-2 pointer-events-none" role="radiogroup" aria-label="Your rarity vote (locked)">
+              {RARITY_ORDER.map(r => {
+                const selected = myVote?.voted_rarity === r;
+                return (
+                  <div
+                    key={r}
+                    role="radio"
+                    aria-checked={selected}
+                    aria-disabled="true"
+                    className={cn(
+                      'px-3 py-1.5 flex items-center justify-center rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider',
+                      selected
+                        ? 'bg-primary border-primary text-primary-foreground'
+                        : 'border-border text-muted-foreground opacity-60'
+                    )}
+                  >
+                    {r}
+                  </div>
+                );
+              })}
             </div>
           </div>
 

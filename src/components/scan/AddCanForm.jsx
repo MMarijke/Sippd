@@ -437,24 +437,37 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           {alreadyVoted ? 'Your Vote (locked)' : prefillData?.id ? 'Cast Your Vote' : 'Your Rarity Vote'}
         </Label>
         {alreadyVoted ? (
-          <div className="flex gap-2 flex-wrap opacity-60 pointer-events-none">
-            {RARITIES.map(r => (
-              <div
-                key={r}
-                className={cn(
-                  'h-10 px-3 flex items-center rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider',
-                  existingVote?.voted_rarity === r
-                    ? 'bg-primary border-primary text-primary-foreground shadow'
-                    : 'border-border text-muted-foreground'
-                )}
-              >
-                {r}
-              </div>
-            ))}
+          // pointer-events-none, not a blanket opacity on the row — that
+          // used to wash out the SELECTED pill's own primary fill to 60%,
+          // reading as a dimmer, distinctly different teal-green next to
+          // the full-brightness "Collected" status pill just below. Only
+          // the unselected pills get the muted treatment now; the locked
+          // choice itself stays exactly as bright as any other confirmed
+          // selection in this form.
+          <div className="grid grid-cols-3 gap-2 pointer-events-none" role="radiogroup" aria-label="Your rarity vote (locked)">
+            {RARITIES.map(r => {
+              const selected = existingVote?.voted_rarity === r;
+              return (
+                <div
+                  key={r}
+                  role="radio"
+                  aria-checked={selected}
+                  aria-disabled="true"
+                  className={cn(
+                    'h-10 px-3 flex items-center justify-center rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider',
+                    selected
+                      ? 'bg-primary border-primary text-primary-foreground shadow'
+                      : 'border-border text-muted-foreground opacity-60'
+                  )}
+                >
+                  {r}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="space-y-1.5">
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-3 gap-2">
               {RARITIES.map(r => (
                 <button
                   key={r}
@@ -462,7 +475,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
                   onClick={() => update('rarity', r)}
                   aria-pressed={form.rarity === r}
                   className={cn(
-                    'h-10 px-3 flex items-center rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider transition-all',
+                    'h-10 px-3 flex items-center justify-center rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider transition-all',
                     form.rarity === r
                       ? 'bg-primary border-primary text-primary-foreground shadow'
                       : 'border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground'

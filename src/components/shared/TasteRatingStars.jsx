@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +19,7 @@ const RATING_VALUES = Array.from({ length: 10 }, (_, i) => i + 1);
 // exception rather than an oversight.
 export default function TasteRatingStars({ value, onChange, readOnly = false, size = 'default' }) {
   const starClass = size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4';
+  const buttonRefs = useRef([]);
 
   if (readOnly) {
     return (
@@ -37,21 +39,47 @@ export default function TasteRatingStars({ value, onChange, readOnly = false, si
     );
   }
 
+  // Roving tabindex (WAI-ARIA radiogroup pattern): only one star sits in
+  // the page's tab order at a time — the current value, or the first star
+  // when nothing's picked yet — instead of ten separate stops. Arrow keys
+  // move focus AND selection together between stars, matching how a native
+  // radio group behaves; Tab moves past the whole group in one step.
+  const activeValue = value || 1;
+
+  const handleKeyDown = (e, n) => {
+    let next = null;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') next = Math.min(10, n + 1);
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') next = Math.max(1, n - 1);
+    else if (e.key === 'Home') next = 1;
+    else if (e.key === 'End') next = 10;
+    if (next !== null) {
+      e.preventDefault();
+      onChange(next);
+      buttonRefs.current[next - 1]?.focus();
+    }
+  };
+
   return (
-    <div role="radiogroup" aria-label="Taste rating out of 10" className="flex gap-0.5 -m-1.5">
-      {RATING_VALUES.map(n => (
-        <button
-          key={n}
-          type="button"
-          role="radio"
-          aria-checked={value === n}
-          aria-label={`${n} out of 10`}
-          onClick={() => onChange(value === n ? null : n)}
-          className="w-7 h-7 flex items-center justify-center rounded-md transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <Star className={cn(starClass, n <= (value || 0) ? 'fill-primary text-primary' : 'text-border')} />
-        </button>
-      ))}
+    <div className="space-y-1">
+      <div role="radiogroup" aria-label="Taste rating out of 10" className="flex gap-0.5 -m-1.5">
+        {RATING_VALUES.map(n => (
+          <button
+            key={n}
+            ref={el => { buttonRefs.current[n - 1] = el; }}
+            type="button"
+            role="radio"
+            aria-checked={value === n}
+            aria-label={`${n} out of 10`}
+            tabIndex={n === activeValue ? 0 : -1}
+            onKeyDown={e => handleKeyDown(e, n)}
+            onClick={() => onChange(value === n ? null : n)}
+            className="w-7 h-7 flex items-center justify-center rounded-md transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <Star className={cn(starClass, n <= (value || 0) ? 'fill-primary text-primary' : 'text-border')} />
+          </button>
+        ))}
+      </div>
+      <p className="text-[11px] font-mono text-muted-foreground">1 = not for me · 10 = all-time favorite</p>
     </div>
   );
 }

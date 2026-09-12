@@ -41,6 +41,13 @@ function App() {
         <Router>
           <Routes>
             <Route path="/login" element={<Login />} />
+            {/* Public on purpose: a shared profile link has to work for
+                someone with no Sippd account at all, not just other
+                signed-in users. PublicProfile.jsx's own canViewContent
+                gate (private/owner/accepted-follower) still applies —
+                this only controls whether the page mounts, not what it
+                shows. See the 2026-09-12 public-profile migration. */}
+            <Route path="/u/:userId" element={<PublicProfile />} />
 
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
@@ -59,7 +66,6 @@ function App() {
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/crates" element={<Crates />} />
               <Route path="/pro" element={<Pro />} />
-              <Route path="/u/:userId" element={<PublicProfile />} />
               <Route path="/compare" element={<CompareCollection />} />
             </Route>
 

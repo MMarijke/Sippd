@@ -8,8 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Loader2, Upload, Zap, Link as LinkIcon, X, Users, ShieldCheck, ShieldAlert, Info } from 'lucide-react';
+import { Loader2, Upload, Zap, Link as LinkIcon, X, Users, ShieldCheck, ShieldAlert, Info, ChevronDown } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { format } from 'date-fns';
 import RarityReveal from './RarityReveal';
 import AddedConfirmation from './AddedConfirmation';
@@ -38,6 +39,13 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
   const [uploading, setUploading] = useState(false);
   const [imageMode, setImageMode] = useState('upload');
   const [errors, setErrors] = useState({});
+  // Collapsed by default so Submit is reachable right after Status without
+  // scrolling past four optional fields — this is a "log it fast" flow
+  // (PRODUCT.md: "the Scan flow implies logging a can at the point of
+  // acquisition"). Starts open only when there's already something to show
+  // here: voting on an existing catalog can whose community-sourced image
+  // renders read-only in this same section.
+  const [showPersonalize, setShowPersonalize] = useState(!!(prefillData?.id && prefillData.image_url));
 
   const [form, setForm] = useState({
     name:       prefillData?.name    || '',
@@ -471,99 +479,117 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Taste Rating (optional)</Label>
-        <TasteRatingStars value={form.taste_rating} onChange={v => update('taste_rating', v)} />
-      </div>
+      {/* Everything below is genuinely optional — nothing here is needed to
+          log the can, so it's collapsed by default rather than standing
+          between Status and Submit on a flow PRODUCT.md frames as
+          in-the-moment capture. */}
+      <Collapsible open={showPersonalize} onOpenChange={setShowPersonalize}>
+        <CollapsibleTrigger
+          type="button"
+          className="flex items-center justify-between w-full h-11 group"
+          aria-label={showPersonalize ? 'Hide personalize fields' : 'Show personalize fields'}
+        >
+          <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
+            Personalize <span className="normal-case text-muted-foreground/70">— taste, photo, background, notes</span>
+          </span>
+          <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform flex-shrink-0', showPersonalize && 'rotate-180')} />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-5 pt-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Taste Rating (optional)</Label>
+            <TasteRatingStars value={form.taste_rating} onChange={v => update('taste_rating', v)} />
+          </div>
 
-      {!prefillData?.id && (
-        <div className="space-y-1.5">
-          <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Image (optional)</Label>
-          {form.image_url ? (
-            <div className="relative w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.bg_color }}>
-              <img src={form.image_url} alt="Can" className="w-full h-full object-contain" />
-              <button
-                onClick={() => update('image_url', '')}
-                aria-label="Remove image"
-                className="group absolute top-0 right-0 w-11 h-11 flex items-center justify-center"
-              >
-                {/* Real tap target is the full 44px button above; this stays a
-                    small visual badge so it doesn't dominate the preview. */}
-                <span className="w-7 h-7 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-border group-hover:bg-background">
-                  <X className="w-3.5 h-3.5" />
-                </span>
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex bg-secondary rounded-lg border border-border p-0.5 w-fit gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => setImageMode('upload')}
-                  aria-pressed={imageMode === 'upload'}
-                  className={cn('h-10 px-3 rounded-md text-xs font-mono transition-all flex items-center gap-1.5',
-                    imageMode === 'upload' ? 'bg-card text-foreground' : 'text-muted-foreground')}
-                >
-                  <Upload className="w-3 h-3" /> Upload
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setImageMode('url')}
-                  aria-pressed={imageMode === 'url'}
-                  className={cn('h-10 px-3 rounded-md text-xs font-mono transition-all flex items-center gap-1.5',
-                    imageMode === 'url' ? 'bg-card text-foreground' : 'text-muted-foreground')}
-                >
-                  <LinkIcon className="w-3 h-3" /> Paste URL
-                </button>
-              </div>
-              {imageMode === 'upload' ? (
-                <label className="flex items-center justify-center gap-2 p-5 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/40 transition-colors">
-                  {uploading
-                    ? <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                    : <Upload className="w-5 h-5 text-muted-foreground" />}
-                  <span className="text-sm text-muted-foreground font-mono">
-                    {uploading ? 'Uploading...' : 'Tap to choose a photo'}
-                  </span>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                </label>
+          {!prefillData?.id && (
+            <div className="space-y-1.5">
+              <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Image (optional)</Label>
+              {form.image_url ? (
+                <div className="relative w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.bg_color }}>
+                  <img src={form.image_url} alt="Can" className="w-full h-full object-contain" />
+                  <button
+                    onClick={() => update('image_url', '')}
+                    aria-label="Remove image"
+                    className="group absolute top-0 right-0 w-11 h-11 flex items-center justify-center"
+                  >
+                    {/* Real tap target is the full 44px button above; this stays a
+                        small visual badge so it doesn't dominate the preview. */}
+                    <span className="w-7 h-7 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-border group-hover:bg-background">
+                      <X className="w-3.5 h-3.5" />
+                    </span>
+                  </button>
+                </div>
               ) : (
-                <Input
-                  aria-label="Image URL"
-                  value={form.image_url}
-                  onChange={e => update('image_url', e.target.value)}
-                  placeholder="https://example.com/can.jpg"
-                  className="bg-secondary border-border font-mono text-sm"
-                />
+                <div className="space-y-2">
+                  <div className="flex bg-secondary rounded-lg border border-border p-0.5 w-fit gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setImageMode('upload')}
+                      aria-pressed={imageMode === 'upload'}
+                      className={cn('h-10 px-3 rounded-md text-xs font-mono transition-all flex items-center gap-1.5',
+                        imageMode === 'upload' ? 'bg-card text-foreground' : 'text-muted-foreground')}
+                    >
+                      <Upload className="w-3 h-3" /> Upload
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageMode('url')}
+                      aria-pressed={imageMode === 'url'}
+                      className={cn('h-10 px-3 rounded-md text-xs font-mono transition-all flex items-center gap-1.5',
+                        imageMode === 'url' ? 'bg-card text-foreground' : 'text-muted-foreground')}
+                    >
+                      <LinkIcon className="w-3 h-3" /> Paste URL
+                    </button>
+                  </div>
+                  {imageMode === 'upload' ? (
+                    <label className="flex items-center justify-center gap-2 p-5 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/40 transition-colors">
+                      {uploading
+                        ? <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                        : <Upload className="w-5 h-5 text-muted-foreground" />}
+                      <span className="text-sm text-muted-foreground font-mono">
+                        {uploading ? 'Uploading...' : 'Tap to choose a photo'}
+                      </span>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                    </label>
+                  ) : (
+                    <Input
+                      aria-label="Image URL"
+                      value={form.image_url}
+                      onChange={e => update('image_url', e.target.value)}
+                      placeholder="https://example.com/can.jpg"
+                      className="bg-secondary border-border font-mono text-sm"
+                    />
+                  )}
+                </div>
               )}
             </div>
           )}
-        </div>
-      )}
 
-      {prefillData?.id && prefillData.image_url && (
-        <div className="w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.bg_color }}>
-          <img src={prefillData.image_url} alt="Can" className="w-full h-full object-contain" />
-        </div>
-      )}
+          {prefillData?.id && prefillData.image_url && (
+            <div className="w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.bg_color }}>
+              <img src={prefillData.image_url} alt="Can" className="w-full h-full object-contain" />
+            </div>
+          )}
 
-      {/* Independent of whether an image exists — can_bg_color is also the
-          fallback tile background behind the generic can icon when a can
-          has no image at all (see CollectionCard.jsx), so it's worth
-          setting either way, and always available even when voting on an
-          existing catalog can whose community-sourced image can't be
-          replaced here. */}
-      <CanBackgroundPicker value={form.bg_color} onChange={v => update('bg_color', v)} />
+          {/* Independent of whether an image exists — can_bg_color is also the
+              fallback tile background behind the generic can icon when a can
+              has no image at all (see CollectionCard.jsx), so it's worth
+              setting either way, and always available even when voting on an
+              existing catalog can whose community-sourced image can't be
+              replaced here. */}
+          <CanBackgroundPicker value={form.bg_color} onChange={v => update('bg_color', v)} />
 
-      <div className="space-y-1.5">
-        <Label htmlFor="addcan-notes" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Notes (optional)</Label>
-        <Textarea
-          id="addcan-notes"
-          value={form.notes}
-          onChange={e => update('notes', e.target.value)}
-          placeholder="Where you found it, condition, trade value..."
-          className="bg-secondary border-border font-body h-24 resize-none"
-        />
-      </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="addcan-notes" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Notes (optional)</Label>
+            <Textarea
+              id="addcan-notes"
+              value={form.notes}
+              onChange={e => update('notes', e.target.value)}
+              placeholder="Where you found it, condition, trade value..."
+              className="bg-secondary border-border font-body h-24 resize-none"
+            />
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       <div className="flex gap-3 pt-1">
         {onCancel && (

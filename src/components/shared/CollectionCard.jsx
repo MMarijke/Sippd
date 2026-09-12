@@ -1,6 +1,6 @@
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { Link } from 'react-router-dom';
-import { Pin, Share2, Zap, Star, CupSoda } from 'lucide-react';
+import { Pin, Share2, CupSoda } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { MAX_PINS } from '@/hooks/useTogglePin';
 import { cn } from '@/lib/utils';
@@ -20,49 +20,70 @@ const BREAKDOWN_VAR = {
   Legendary: '--rarity-legendary',
 };
 
-// Profile's live, interactive trophy case — pin/unpin, navigate to a can,
-// open the share flow. Sharing no longer exports an image of this card at
-// all: onShare (wired in Profile.jsx) hands out the real, always-current
-// /u/:userId link instead, so there's no capture source, no proxied
-// images, and no risk of a live control (the Pin button) getting baked
-// into an exported PNG the way it once did — that whole bug class is
-// gone because there's nothing left to capture.
+// The trophy-case presentation shared by Profile.jsx (your own, editable
+// collection) and PublicProfile.jsx (anyone's, read-only) — score hero,
+// stat row, rarity breakdown bar, and can-tile grid, one definition
+// instead of two that quietly drift. Before this, Profile rendered this
+// exact content through its own CollectionCard while PublicProfile
+// re-implemented an approximate version of the same idea (a differently
+// styled score box, a recharts pie chart instead of this bar, no pin
+// affordances) — the same visual-drift failure mode as the ShareCardTemplate/
+// CollectionCard split earlier this session, just between two live pages
+// instead of a live page and a capture template.
+//
+// `canEdit` is the one flag that changes what renders: pin buttons and
+// can-detail navigation only make sense when the viewer owns this
+// collection (CanDetail's own query is owner-scoped — linking a stranger
+// there would show either the viewer's unrelated copy of that can or
+// nothing at all). Profile.jsx always passes canEdit; PublicProfile never
+// does, even when you're viewing your own public link — /u/:userId is
+// deliberately the read-only view regardless of who's looking.
+//
+// Emptiness (zero cans) is deliberately NOT handled in here: what to show
+// instead — "scan your first can" for an owner with nothing yet, a
+// neutral message for a stranger's empty collection — is page-specific
+// messaging, so each page still decides whether to render this card at
+// all, exactly as Profile.jsx already did before this component existed.
 export default function CollectionCard({
-  top6,
+  headerTitle,
+  score,
+  rank,
+  stats,
   rarityBreakdown,
+  items,
   getEffectiveRarity,
-  pinnedCount,
+  canEdit = false,
   onTogglePin,
+  pinnedCount,
   pinPending,
   onShare,
-  rank,
-  userName,
-  score,
-  totalCans,
-  rarePulls,
 }) {
-  const displayName = userName || 'Collector';
-
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
-      <div className="flex items-center justify-between mb-4 gap-2">
-        <h2 className="text-sm font-display font-bold text-foreground tracking-wide truncate">
-          {displayName}&rsquo;s Collection
-        </h2>
-        <button
-          onClick={onShare}
-          aria-label="Share profile link"
-          className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
-        >
-          <Share2 className="w-4 h-4" />
-        </button>
-      </div>
+      {(headerTitle || onShare) && (
+        <div className="flex items-center justify-between mb-4 gap-2">
+          {headerTitle && (
+            <h2 className="text-sm font-display font-bold text-foreground tracking-wide truncate">
+              {headerTitle}
+            </h2>
+          )}
+          {onShare && (
+            <button
+              onClick={onShare}
+              aria-label="Share profile link"
+              className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      )}
 
-      {/* Score is the number this whole page (and the leaderboard/achievement
-          system) revolves around — .hero-card is the token index.css
+      {/* Score is the number this whole app (leaderboard/achievement system
+          included) revolves around — .hero-card is the token index.css
           reserves for exactly this spot, so it gets its own emphasis
-          instead of sitting as a third equal column next to Rare Pulls/
-          Cans. text-foreground, not text-primary/60 — that would land at
+          instead of sitting as a column next to the other stats.
+          text-foreground, not text-primary/60 — that would land at
           2.3-4.2:1 on 5 of 6 themes against .hero-card's opaque surface,
           the same class of WCAG failure already fixed on Home's equivalent
           label (text-foreground stays theme-invariant at 14.7-16.8:1). */}
@@ -76,11 +97,8 @@ export default function CollectionCard({
         )}
       </div>
 
-      <div className="grid grid-cols-2 divide-x divide-border mb-5">
-        {[
-          { icon: Star, label: 'Rare Pulls', value: rarePulls },
-          { icon: Zap, label: 'Cans', value: totalCans },
-        ].map(({ icon: Icon, label, value }) => (
+      <div className={cn('grid divide-x divide-border mb-5', stats.length === 3 ? 'grid-cols-3' : 'grid-cols-2')}>
+        {stats.map(({ icon: Icon, label, value }) => (
           <div key={label} className="flex flex-col items-center text-center px-1">
             <Icon className="w-3.5 h-3.5 text-primary mb-1" />
             <span className="text-xl font-mono font-bold text-foreground tabular-nums">{value}</span>
@@ -100,7 +118,7 @@ export default function CollectionCard({
               <div
                 key={rarity}
                 className="h-full"
-                style={{ width: `${pct}%`, backgroundColor: `hsl(var(${BREAKDOWN_VAR[rarity] || '--breakdown-legendary'}))` }}
+                style={{ width: `${pct}%`, backgroundColor: `hsl(var(${BREAKDOWN_VAR[rarity] || '--rarity-legendary'}))` }}
               />
             ))}
           </div>
@@ -115,19 +133,15 @@ export default function CollectionCard({
       )}
 
       <div className="grid grid-cols-3 gap-2">
-        {top6.map(item => {
+        {items.map(item => {
           // Proactively disables the button instead of relying on the
           // mutation's own thrown-error toast (useTogglePin.js) — that
           // still fires as a fallback for any race between two pin taps,
           // but the common case is now prevented, not just explained
           // after the fact.
-          const atCap = !item.pinned_at && pinnedCount >= MAX_PINS;
-          return (
-          <div
-            key={item.id}
-            className="relative rounded-xl overflow-hidden border border-primary/20 bg-black/20 hover:border-primary/40 transition-colors"
-          >
-            <Link to={`/can/${item.can_id}`} className="block">
+          const atCap = canEdit && !item.pinned_at && pinnedCount >= MAX_PINS;
+          const tile = (
+            <>
               <div className="aspect-square" style={{ backgroundColor: item.can_bg_color || DEFAULT_CAN_BG }}>
                 {item.can_image_url ? (
                   <>
@@ -162,40 +176,57 @@ export default function CollectionCard({
                 <p className="text-[10px] font-semibold text-foreground truncate">{item.can_name}</p>
                 <RarityBadge rarity={getEffectiveRarity(item)} size="sm" />
               </div>
-            </Link>
-            <button
-              onClick={() => onTogglePin(item)}
-              disabled={pinPending || atCap}
-              aria-label={
-                item.pinned_at
-                  ? 'Unpin from showcase'
-                  : atCap
-                    ? `Pin to showcase (${MAX_PINS} already pinned — unpin one first)`
-                    : 'Pin to showcase'
-              }
-              className={cn(
-                'absolute top-0 right-0 w-11 h-11 rounded-full flex items-center justify-center transition-colors',
-                atCap && 'cursor-not-allowed'
-              )}
+            </>
+          );
+
+          return (
+            <div
+              key={item.id}
+              className="relative rounded-xl overflow-hidden border border-primary/20 bg-black/20 hover:border-primary/40 transition-colors"
             >
-              {/* Real tap target is the full 44px button above; this stays a
-                  small visual badge so it doesn't dominate a ~100px tile. */}
-              <span
-                className={cn(
-                  'w-6 h-6 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center',
-                  atCap && 'opacity-40'
-                )}
-              >
-                <Pin className={`w-3 h-3 transition-colors ${item.pinned_at ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
-              </span>
-            </button>
-          </div>
+              {canEdit ? (
+                <Link to={`/can/${item.can_id}`} className="block">{tile}</Link>
+              ) : (
+                <div>{tile}</div>
+              )}
+              {canEdit && (
+                <button
+                  onClick={() => onTogglePin(item)}
+                  disabled={pinPending || atCap}
+                  aria-label={
+                    item.pinned_at
+                      ? 'Unpin from showcase'
+                      : atCap
+                        ? `Pin to showcase (${MAX_PINS} already pinned — unpin one first)`
+                        : 'Pin to showcase'
+                  }
+                  className={cn(
+                    'absolute top-0 right-0 w-11 h-11 rounded-full flex items-center justify-center transition-colors',
+                    atCap && 'cursor-not-allowed'
+                  )}
+                >
+                  {/* Real tap target is the full 44px button above; this
+                      stays a small visual badge so it doesn't dominate a
+                      ~100px tile. */}
+                  <span
+                    className={cn(
+                      'w-6 h-6 rounded-full bg-background/70 backdrop-blur-sm flex items-center justify-center',
+                      atCap && 'opacity-40'
+                    )}
+                  >
+                    <Pin className={`w-3 h-3 transition-colors ${item.pinned_at ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                  </span>
+                </button>
+              )}
+            </div>
           );
         })}
       </div>
-      <p className="text-[10px] font-mono text-muted-foreground mt-2">
-        {pinnedCount}/{MAX_PINS} pinned
-      </p>
+      {canEdit && (
+        <p className="text-[10px] font-mono text-muted-foreground mt-2">
+          {pinnedCount}/{MAX_PINS} pinned
+        </p>
+      )}
     </div>
   );
 }

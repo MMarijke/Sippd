@@ -4,18 +4,24 @@ import { X, ArrowLeft, Download, Loader2, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCardCapture } from '@/hooks/useCardCapture';
 
-// Generic full-screen share flow: owns the modal chrome, the capture
-// lifecycle, and the resulting image preview + Save/Share/Regenerate
-// actions. Knows nothing about what's being shared — the card itself is
-// passed in as `children` and rendered hidden/off-screen purely as the
-// html2canvas capture source, never shown to the user directly. This is
-// what makes it safe to reuse for any card shape (Profile's Top Pulls,
-// MonthlyReport's recap, anything future) without repeating the modal
-// chrome, and — more importantly — without repeating the bug class this
-// replaces: a *visible* live card doubling as the capture source, where
-// any of its own interactive icons could get baked into the exported
-// image as a dead pixel.
-export default function ShareCardModal({ title, onClose, cardSignature, filename, shareTitle, children }) {
+// MonthlyReport's own full-screen share flow: owns the modal chrome, the
+// capture lifecycle, and the resulting image preview + Save/Share/
+// Regenerate actions. Knows nothing about what's being shared — the card
+// itself is passed in as `children` and rendered hidden/off-screen purely
+// as the html2canvas capture source, never shown to the user directly.
+//
+// Monthly-Report-only on purpose, not shared with Profile: this recap is
+// a "wrapped"-style snapshot genuinely meant to be screenshotted and
+// shared as a static image of a month that's already over — a different
+// use case from Profile's live, ever-changing collection, which now
+// shares a link to itself instead (see Profile.jsx's onShare). The two
+// used to share this exact modal (as ShareCardModal) plus one
+// variant-switched card template, and that sharing was the mechanism
+// behind this session's font-corruption, rarity-color, and layout-overflow
+// bugs — a fix made for one page's needs silently changed the other's
+// rendering too. Don't reintroduce that: if another surface needs an
+// exportable image, give it its own modal + template pair.
+export default function RecapShareModal({ title, onClose, cardSignature, filename, shareTitle, children }) {
   const cardRef = useRef(null);
   const { generating, cardDataUrl, saving, generateCard, handleSave, handleShareImage } = useCardCapture(cardRef, cardSignature);
 

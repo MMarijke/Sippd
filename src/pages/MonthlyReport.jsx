@@ -11,8 +11,8 @@ import { RARITY_POINTS, RARITY_ORDER, RARITY_HEX as RARITY_COLORS, getEffectiveR
 import { useStreak } from '@/lib/useStreak';
 import RarityBadge from '@/components/shared/RarityBadge';
 import CanImageBox from '@/components/shared/CanImageBox';
-import ShareCardModal from '@/components/shared/ShareCardModal';
-import ShareCardTemplate from '@/components/shared/ShareCardTemplate';
+import RecapShareModal from '@/components/monthly-report/RecapShareModal';
+import RecapCardTemplate from '@/components/monthly-report/RecapCardTemplate';
 
 const RARITY_RANK = { Common: 1, Uncommon: 2, Rare: 3, 'Ultra Rare': 4, Legendary: 5 };
 
@@ -125,7 +125,7 @@ export default function MonthlyReport() {
     pct: collected.length ? (value / collected.length) * 100 : 0,
   })), [rarityChartData, collected.length]);
 
-  // Passed to ShareCardModal, which regenerates its capture whenever this
+  // Passed to RecapShareModal, which regenerates its capture whenever this
   // changes — mirrors every field the exported card actually shows.
   const cardSignature = useMemo(() => JSON.stringify({
     monthLabel,
@@ -334,15 +334,14 @@ export default function MonthlyReport() {
       )}
 
       {showShareCard && (
-        <ShareCardModal
+        <RecapShareModal
           title="Recap Card"
           onClose={() => setShowShareCard(false)}
           cardSignature={cardSignature}
           filename={`sippd-recap-${monthLabel.replace(/\s+/g, '-')}.png`}
           shareTitle={`My ${monthLabel} Sippd Recap`}
         >
-          <ShareCardTemplate
-            variant="monthly"
+          <RecapCardTemplate
             userName={user?.full_name}
             monthLabel={monthLabel}
             cansAdded={collected.length}
@@ -353,7 +352,7 @@ export default function MonthlyReport() {
             bestPullRarity={bestPullRarity}
             rarityBreakdown={monthlyRarityBreakdown}
           />
-        </ShareCardModal>
+        </RecapShareModal>
       )}
     </div>
   );

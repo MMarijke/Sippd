@@ -4,11 +4,10 @@ import { computeAchievements } from '@/lib/achievements';
 
 const RARITY_RANK = { Common: 1, Uncommon: 2, Rare: 3, 'Ultra Rare': 4, Legendary: 5 };
 
-// Shared between ShareCardModal's export card and Profile's live "Top Pulls"
-// hero — both surfaces need the same top-6/rarity-breakdown/latest-achievement
-// computation. Extracted because the two files' own getEffectiveRarity had
-// quietly diverged: Profile's local copy skipped the low-confidence fallback
-// ShareCardModal's always applied, and was unused dead code besides.
+// Feeds Profile's live "Top Pulls" hero (CollectionCard) — top-6,
+// rarity-breakdown, and latest-achievement computation in one place after
+// an earlier version of this logic lived duplicated inline in Profile.jsx
+// and had quietly diverged from the one other surface that needed it.
 export function useCollectionHighlights({ collection, sharedCansMap, streak = 0, voteCount = 0, userCreatedDate = null }) {
   const collected = useMemo(
     () => collection.filter(c => c.status === 'collected'),

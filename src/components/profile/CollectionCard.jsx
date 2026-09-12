@@ -11,9 +11,7 @@ import { cn } from '@/lib/utils';
 // rarity must look the same regardless of viewer theme). An earlier
 // version of this bar used a monochromatic single-hue ramp instead —
 // changed back after user feedback that losing the per-tier color
-// distinction made the bar unreadable as a breakdown at a glance. See
-// ShareCardTemplate.jsx's identical bar — kept in sync so the live view
-// and the exported card never disagree.
+// distinction made the bar unreadable as a breakdown at a glance.
 const BREAKDOWN_VAR = {
   Common: '--rarity-common',
   Uncommon: '--rarity-uncommon',
@@ -23,14 +21,12 @@ const BREAKDOWN_VAR = {
 };
 
 // Profile's live, interactive trophy case — pin/unpin, navigate to a can,
-// open the share flow. Purely a live view now: the exported share image is
-// a separate, purpose-built ShareCardTemplate (src/components/shared/),
-// captured hidden/off-screen by ShareCardModal. This card used to double as
-// the literal html2canvas capture source, which is what caused this app's
-// last two share-flow bugs (a live control's icon baked into the exported
-// PNG as a dead pixel; the card needing conditional un/mounting to avoid
-// visually duplicating itself). No ref, no `sharing` mode, no proxied
-// images — this component only ever has one job now.
+// open the share flow. Sharing no longer exports an image of this card at
+// all: onShare (wired in Profile.jsx) hands out the real, always-current
+// /u/:userId link instead, so there's no capture source, no proxied
+// images, and no risk of a live control (the Pin button) getting baked
+// into an exported PNG the way it once did — that whole bug class is
+// gone because there's nothing left to capture.
 export default function CollectionCard({
   top6,
   rarityBreakdown,
@@ -55,7 +51,7 @@ export default function CollectionCard({
         </h2>
         <button
           onClick={onShare}
-          aria-label="Share collection card"
+          aria-label="Share profile link"
           className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
         >
           <Share2 className="w-4 h-4" />

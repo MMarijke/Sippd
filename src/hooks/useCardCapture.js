@@ -12,10 +12,14 @@ function dataUrlToBlob(dataUrl) {
   return new Blob([arr], { type: mime });
 }
 
-// Shared by ShareCardModal's monthly recap card and Profile's Top Pulls
-// share flow: html2canvas capture of `cardRef`, regenerated whenever
-// `signature` changes, plus download and OS-share-sheet handoff for the
-// generated image.
+// Used by RecapShareModal (MonthlyReport's own share flow — see that
+// component's doc comment for why this pipeline is scoped to Monthly
+// Report only, not shared with Profile): html2canvas capture of
+// `cardRef`, regenerated whenever `signature` changes, plus download and
+// OS-share-sheet handoff for the generated image. Generic on purpose —
+// nothing here assumes a recap card's shape, just a ref and a change
+// signal — so it stays in shared hooks rather than moving into
+// components/monthly-report alongside the card itself.
 export function useCardCapture(cardRef, signature) {
   const [generating, setGenerating] = useState(false);
   const [cardDataUrl, setCardDataUrl] = useState(null);

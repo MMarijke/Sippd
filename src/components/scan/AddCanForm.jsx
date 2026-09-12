@@ -453,23 +453,34 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
             ))}
           </div>
         ) : (
-          <div className="flex gap-2 flex-wrap">
-            {RARITIES.map(r => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => update('rarity', r)}
-                aria-pressed={form.rarity === r}
-                className={cn(
-                  'h-10 px-3 flex items-center rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider transition-all',
-                  form.rarity === r
-                    ? 'bg-primary border-primary text-primary-foreground shadow'
-                    : 'border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground'
-                )}
-              >
-                {r}
-              </button>
-            ))}
+          <div className="space-y-1.5">
+            <div className="flex gap-2 flex-wrap">
+              {RARITIES.map(r => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => update('rarity', r)}
+                  aria-pressed={form.rarity === r}
+                  className={cn(
+                    'h-10 px-3 flex items-center rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider transition-all',
+                    form.rarity === r
+                      ? 'bg-primary border-primary text-primary-foreground shadow'
+                      : 'border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+            {/* The Community Rarity card above explains this same rule via a
+                tap-to-open Popover, but that card only renders when
+                prefillData?.id is set (existing catalog cans) — a brand-new
+                can has no explanation anywhere before this commits. This
+                stays visible unconditionally so the warning is never gated
+                behind an optional interaction. */}
+            <p className="text-[11px] font-mono text-muted-foreground">
+              Vote locks once cast — choose carefully.
+            </p>
           </div>
         )}
       </div>

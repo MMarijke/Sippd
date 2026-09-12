@@ -1,23 +1,25 @@
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { Link } from 'react-router-dom';
-import { Pin, Share2, Zap, Star } from 'lucide-react';
+import { Pin, Share2, Zap, Star, CupSoda } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { MAX_PINS } from '@/hooks/useTogglePin';
 import { cn } from '@/lib/utils';
 
-// Rarity Breakdown bar only — a monochromatic ramp built from the active
-// theme's own --primary hue (dim to vivid), so this proportion chart
-// complements whichever theme is active instead of five fixed rarity hues
-// clashing against it. Individual RarityBadge chips elsewhere keep the
-// theme-invariant --rarity-* tokens on purpose: a can's actual rarity must
-// still read the same regardless of viewer theme. See
-// .impeccable/critique/2026-09-11T08-11-49Z, Minor Observations.
+// Rarity Breakdown bar — theme-invariant --rarity-* tokens, the same ones
+// RarityBadge uses, so this proportion chart reads as the same rarity
+// language as every badge/gauge elsewhere in the app (a can's actual
+// rarity must look the same regardless of viewer theme). An earlier
+// version of this bar used a monochromatic single-hue ramp instead —
+// changed back after user feedback that losing the per-tier color
+// distinction made the bar unreadable as a breakdown at a glance. See
+// ShareCardTemplate.jsx's identical bar — kept in sync so the live view
+// and the exported card never disagree.
 const BREAKDOWN_VAR = {
-  Common: '--breakdown-common',
-  Uncommon: '--breakdown-uncommon',
-  Rare: '--breakdown-rare',
-  'Ultra Rare': '--breakdown-ultra',
-  Legendary: '--breakdown-legendary',
+  Common: '--rarity-common',
+  Uncommon: '--rarity-uncommon',
+  Rare: '--rarity-rare',
+  'Ultra Rare': '--rarity-ultra',
+  Legendary: '--rarity-legendary',
 };
 
 // Profile's live, interactive trophy case — pin/unpin, navigate to a can,
@@ -133,9 +135,12 @@ export default function CollectionCard({
               <div className="aspect-square" style={{ backgroundColor: item.can_bg_color || DEFAULT_CAN_BG }}>
                 {item.can_image_url ? (
                   <>
-                    {/* onError swaps to the same emoji fallback used for a
+                    {/* onError swaps to the same icon fallback used for a
                         missing/broken URL, rather than a browser
-                        broken-image glyph. */}
+                        broken-image glyph. A real SVG, not an emoji — 🥤
+                        has no reliable color glyph on every OS/browser and
+                        was rendering as an ambiguous monochrome box that
+                        read as a delete/trash icon. */}
                     <img
                       src={item.can_image_url}
                       alt={item.can_name}
@@ -148,12 +153,12 @@ export default function CollectionCard({
                       }}
                     />
                     <div className="w-full h-full items-center justify-center" style={{ display: 'none' }}>
-                      <span className="text-lg opacity-20">🥤</span>
+                      <CupSoda className="w-5 h-5 text-muted-foreground/40" />
                     </div>
                   </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-lg opacity-20">🥤</span>
+                    <CupSoda className="w-5 h-5 text-muted-foreground/40" />
                   </div>
                 )}
               </div>

@@ -88,10 +88,10 @@ export default function CollectionCard({
           the same class of WCAG failure already fixed on Home's equivalent
           label (text-foreground stays theme-invariant at 14.7-16.8:1). */}
       <div className="hero-card rounded-2xl p-5 mb-3 text-center">
-        <p className="text-[10px] font-mono uppercase tracking-widest text-foreground">Score</p>
+        <p className="text-xs font-mono uppercase tracking-widest text-foreground">Score</p>
         <p className="text-5xl font-mono font-black text-foreground tabular-nums">{score}</p>
         {rank && (
-          <span className="inline-block mt-1.5 px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-[9px] font-mono font-semibold text-primary">
+          <span className="inline-block mt-1.5 px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-xs font-mono font-semibold text-primary">
             #{rank}
           </span>
         )}
@@ -102,7 +102,7 @@ export default function CollectionCard({
           <div key={label} className="flex flex-col items-center text-center px-1">
             <Icon className="w-3.5 h-3.5 text-primary mb-1" />
             <span className="text-xl font-mono font-bold text-foreground tabular-nums">{value}</span>
-            <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">{label}</span>
+            <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{label}</span>
           </div>
         ))}
       </div>
@@ -112,7 +112,7 @@ export default function CollectionCard({
           {/* text-foreground, not text-primary/60 — same WCAG failure as
               Score's label above (2.3-4.2:1 on 5 of 6 themes), just never
               propagated here when that one was fixed. */}
-          <p className="text-[10px] font-mono uppercase tracking-widest text-foreground mb-2">Rarity Breakdown</p>
+          <p className="text-xs font-mono uppercase tracking-widest text-foreground mb-2">Rarity Breakdown</p>
           <div className="flex h-1.5 rounded-full overflow-hidden gap-px">
             {rarityBreakdown.map(({ rarity, pct }) => (
               <div
@@ -124,7 +124,7 @@ export default function CollectionCard({
           </div>
           <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
             {rarityBreakdown.map(({ rarity, count }) => (
-              <span key={rarity} className="text-[10px] font-mono text-muted-foreground">
+              <span key={rarity} className="text-xs font-mono text-muted-foreground">
                 {rarity} <span className="text-foreground">{count}</span>
               </span>
             ))}
@@ -173,7 +173,7 @@ export default function CollectionCard({
                 )}
               </div>
               <div className="p-1.5 space-y-0.5">
-                <p className="text-[10px] font-semibold text-foreground truncate">{item.can_name}</p>
+                <p className="text-xs font-semibold text-foreground truncate">{item.can_name}</p>
                 <RarityBadge rarity={getEffectiveRarity(item)} size="sm" />
               </div>
             </>
@@ -223,7 +223,7 @@ export default function CollectionCard({
         })}
       </div>
       {canEdit && (
-        <p className="text-[10px] font-mono text-muted-foreground mt-2">
+        <p className="text-xs font-mono text-muted-foreground mt-2">
           {pinnedCount}/{MAX_PINS} pinned
         </p>
       )}

@@ -19,7 +19,7 @@ export default function RarityBadge({ rarity, size = 'sm', className }) {
       className={cn(
         'inline-flex items-center font-mono font-semibold uppercase tracking-wider border rounded-md',
         config.color, config.bg, config.border, config.glow,
-        size === 'sm' ? 'text-[10px] px-2 py-0.5' : 'text-xs px-3 py-1',
+        size === 'sm' ? 'text-xs px-2 py-0.5' : 'text-xs px-3 py-1',
         className
       )}
     >

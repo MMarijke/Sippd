@@ -1,21 +1,22 @@
 import { forwardRef } from 'react';
-import { Zap, Star } from 'lucide-react';
+import { Zap, Star, CupSoda } from 'lucide-react';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { proxyImageUrl } from '@/lib/cardCapture';
 import RarityBadge from '@/components/shared/RarityBadge';
 
-// Rarity Breakdown bar only — see the identical note on CollectionCard.jsx.
-// A monochromatic ramp built from the active theme's own --primary hue
-// (dim to vivid), not the theme-invariant --rarity-* tokens RarityBadge
-// uses: a can's actual rarity must read the same in every theme, but this
-// bar is the same mood/proportion visualization as CollectionCard's, so it
-// gets the same theme-complementary treatment rather than clashing with it.
+// Rarity Breakdown bar — theme-invariant --rarity-* tokens, the same ones
+// RarityBadge uses, so this proportion chart reads as the same rarity
+// language as every badge/gauge elsewhere in the app (a can's actual
+// rarity must look the same regardless of viewer theme). An earlier
+// version of this bar used a monochromatic single-hue ramp instead —
+// changed back after user feedback that losing the per-tier color
+// distinction made the bar unreadable as a breakdown at a glance.
 const BREAKDOWN_VAR = {
-  Common: '--breakdown-common',
-  Uncommon: '--breakdown-uncommon',
-  Rare: '--breakdown-rare',
-  'Ultra Rare': '--breakdown-ultra',
-  Legendary: '--breakdown-legendary',
+  Common: '--rarity-common',
+  Uncommon: '--rarity-uncommon',
+  Rare: '--rarity-rare',
+  'Ultra Rare': '--rarity-ultra',
+  Legendary: '--rarity-legendary',
 };
 
 function CanTile({ image, bgColor, name, rarityBadge }) {
@@ -34,18 +35,28 @@ function CanTile({ image, bgColor, name, rarityBadge }) {
                 e.target.nextElementSibling.style.display = 'flex';
               }}
             />
+            {/* A real SVG icon, not an emoji: 🥤 has no reliable color-emoji
+                glyph on every OS/browser combination and was rendering as an
+                ambiguous monochrome box that read as a delete/trash icon —
+                confirmed in both the live DOM and the captured PNG, so this
+                wasn't an html2canvas quirk, it was the emoji itself. */}
             <div className="absolute inset-0 items-center justify-center" style={{ display: 'none' }}>
-              <span className="text-lg opacity-20">🥤</span>
+              <CupSoda className="w-5 h-5 text-muted-foreground/40" />
             </div>
           </>
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <span className="text-lg opacity-20">🥤</span>
+            <CupSoda className="w-5 h-5 text-muted-foreground/40" />
           </div>
         )}
       </div>
       <div className="p-1.5">
-        <p className="text-[10px] font-semibold text-foreground truncate">{name}</p>
+        {/* No `truncate` — overflow-hidden + white-space:nowrap on a text
+            node (with or without text-overflow:ellipsis) corrupts
+            html2canvas's rendering of this custom webfont text, the same
+            bug already fixed on the header (see the note below). The tile's
+            own overflow-hidden still contains it; a long name just wraps. */}
+        <p className="text-[10px] font-semibold text-foreground">{name}</p>
         {rarityBadge}
       </div>
     </div>
@@ -170,9 +181,11 @@ const ShareCardTemplate = forwardRef(function ShareCardTemplate(
                 <div className="w-16 h-16 flex-shrink-0">
                   <CanTile image={bestPullImage} bgColor={bestPull.can_bg_color} name="" rarityBadge={null} />
                 </div>
+                {/* No `truncate` — same html2canvas text-corruption bug as
+                    the header and CanTile's name, see those notes. */}
                 <div className="min-w-0">
-                  <p className="text-[10px] font-mono text-primary/70 uppercase tracking-wider truncate">{bestPull.can_brand}</p>
-                  <p className="text-sm font-semibold text-foreground truncate">{bestPull.can_name}</p>
+                  <p className="text-[10px] font-mono text-primary/70 uppercase tracking-wider">{bestPull.can_brand}</p>
+                  <p className="text-sm font-semibold text-foreground">{bestPull.can_name}</p>
                   <RarityBadge rarity={bestPullRarity} size="sm" className="mt-1" />
                 </div>
               </div>
@@ -193,7 +206,13 @@ const ShareCardTemplate = forwardRef(function ShareCardTemplate(
               <p className="text-[10px] font-mono uppercase tracking-widest text-foreground">Score</p>
               <p className="text-5xl font-mono font-black text-foreground tabular-nums">{score}</p>
               {rank && (
-                <span className="inline-block mt-1.5 px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-[9px] font-mono font-semibold text-primary">
+                // mt-3, not mt-1.5: html2canvas renders this font-black
+                // score number with more visual ink below its own line box
+                // than the live browser does, which at mt-1.5 was enough to
+                // visibly overlap the rank badge in the captured PNG (clean
+                // in the live DOM at the same gap) — extra clearance is a
+                // capture-safety margin, not a live-view change.
+                <span className="inline-block mt-3 px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-[9px] font-mono font-semibold text-primary">
                   #{rank}
                 </span>
               )}

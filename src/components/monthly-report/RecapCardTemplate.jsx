@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { Zap, Star, CupSoda } from 'lucide-react';
+import { Zap, CupSoda } from 'lucide-react';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { proxyImageUrl } from '@/lib/cardCapture';
 import RarityBadge from '@/components/shared/RarityBadge';
@@ -54,8 +54,8 @@ function CanTile({ image, bgColor, name, rarityBadge }) {
         {/* No `truncate` — overflow-hidden + white-space:nowrap on a text
             node (with or without text-overflow:ellipsis) corrupts
             html2canvas's rendering of this custom webfont text, the same
-            bug already fixed on the header (see the note below). The tile's
-            own overflow-hidden still contains it; a long name just wraps. */}
+            bug already fixed on the header below. The tile's own
+            overflow-hidden still contains it; a long name just wraps. */}
         <p className="text-[10px] font-semibold text-foreground">{name}</p>
         {rarityBadge}
       </div>
@@ -63,35 +63,31 @@ function CanTile({ image, bgColor, name, rarityBadge }) {
   );
 }
 
-// The dedicated, purpose-built html2canvas capture source for both Profile's
-// Top Pulls card and MonthlyReport's recap card — rendered hidden/off-screen
-// by ShareCardModal, never shown to the user directly. Deliberately separate
-// from CollectionCard (Profile's live, interactive trophy view): a shared
-// component that's BOTH the on-screen interactive card AND the capture
-// source is exactly what caused the two bugs this replaces (a live control's
-// icon getting baked into the exported image as a dead pixel, and the two
-// having to be conditionally un/mounted to avoid literally duplicating on
-// screen). This template has no interactive elements at all — nothing here
-// is ever clickable, so nothing here can end up as a fake control in the
-// exported PNG.
+// The dedicated, purpose-built html2canvas capture source for
+// MonthlyReport's recap card — rendered hidden/off-screen by
+// RecapShareModal, never shown to the user directly.
+//
+// Monthly-Report-only on purpose, not a generic ShareCardTemplate with a
+// variant switch: this used to also render Profile's Top Pulls card
+// behind a `variant` prop, and that sharing was the exact mechanism
+// behind this session's font-corruption, rarity-color, and layout-overflow
+// bugs — a fix made for one variant's needs (or a regression in one)
+// silently changed the other's rendering too. Profile now shares a live
+// collection link instead of exporting an image (see ShareCardModal's
+// removal from Profile.jsx and useShare.js's copyLink/shareLink), so
+// there is exactly one remaining consumer of this capture pipeline and
+// exactly one card shape to reason about. Keep it that way — if Profile
+// ever needs an exportable image again, give it its own template rather
+// than reintroducing a variant switch here.
 //
 // Real theme tokens throughout (hsl(var(--...))), not hardcoded hex — the
-// prior monthly-recap version was cyan-and-black regardless of the viewer's
-// actual Pro theme; this now reskins with Common/Verdant/Cobalt/Voidglass/
-// Aurora like every other themed surface in the app.
-const ShareCardTemplate = forwardRef(function ShareCardTemplate(
+// original monthly-recap version was cyan-and-black regardless of the
+// viewer's actual Pro theme; this reskins with Common/Verdant/Cobalt/
+// Voidglass/Aurora like every other themed surface in the app.
+const RecapCardTemplate = forwardRef(function RecapCardTemplate(
   {
-    variant, // 'collection' | 'monthly'
     userName,
     rarityBreakdown = [],
-    // collection variant
-    score,
-    rank,
-    rarePulls,
-    totalCans,
-    top6 = [],
-    getEffectiveRarity,
-    // monthly variant
     monthLabel,
     cansAdded,
     monthScore,
@@ -125,7 +121,7 @@ const ShareCardTemplate = forwardRef(function ShareCardTemplate(
       />
 
       <div className="relative z-10">
-        {/* Branding header — shared by both variants.
+        {/* Branding header.
             Deliberately NOT a flex row, and the tagline/username paragraphs
             deliberately have no overflow/white-space/ellipsis utility on
             them. Both were confirmed, via isolated html2canvas repro
@@ -152,96 +148,52 @@ const ShareCardTemplate = forwardRef(function ShareCardTemplate(
           </div>
           <div className="absolute right-0 top-0 text-right max-w-[55%]">
             <p className="text-sm font-display font-bold text-foreground leading-tight">{displayName}</p>
-            <p className="text-[11px] font-mono text-primary mt-0.5">
-              {variant === 'monthly' ? `${monthLabel} Recap` : 'Collection Score'}
-            </p>
+            <p className="text-[11px] font-mono text-primary mt-0.5">{monthLabel} Recap</p>
           </div>
         </div>
 
         <div className="h-px mb-4" style={{ background: 'linear-gradient(90deg, transparent, hsl(var(--primary) / 0.3), transparent)' }} />
 
-        {variant === 'monthly' ? (
-          <>
-            <div className="grid grid-cols-3 gap-2 mb-4">
-              {[
-                { label: 'Cans', value: cansAdded },
-                { label: 'Score', value: `+${monthScore}` },
-                { label: 'Streak', value: `${streak}d` },
-              ].map(({ label, value }) => (
-                <div key={label} className="rounded-xl p-3 text-center border border-border" style={{ backgroundColor: 'hsl(var(--background) / 0.35)' }}>
-                  <p className="text-xl font-mono font-black text-foreground tabular-nums">{value}</p>
-                  <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider mt-1">{label}</p>
-                </div>
-              ))}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {[
+            { label: 'Cans', value: cansAdded },
+            { label: 'Score', value: `+${monthScore}` },
+            { label: 'Streak', value: `${streak}d` },
+          ].map(({ label, value }) => (
+            <div key={label} className="rounded-xl p-3 text-center border border-border" style={{ backgroundColor: 'hsl(var(--background) / 0.35)' }}>
+              <p className="text-xl font-mono font-black text-foreground tabular-nums">{value}</p>
+              <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider mt-1">{label}</p>
             </div>
+          ))}
+        </div>
 
-            <p className="text-[10px] font-mono uppercase tracking-widest text-foreground mb-2">Best Pull of the Month</p>
-            {bestPull ? (
-              <div className="flex items-center gap-3 rounded-xl p-3 mb-4 border border-primary/20" style={{ backgroundColor: 'hsl(var(--background) / 0.35)' }}>
-                <div className="w-16 h-16 flex-shrink-0">
-                  <CanTile image={bestPullImage} bgColor={bestPull.can_bg_color} name="" rarityBadge={null} />
-                </div>
-                {/* No `truncate` — same html2canvas text-corruption bug as
-                    the header and CanTile's name, see those notes. */}
-                <div className="min-w-0">
-                  <p className="text-[10px] font-mono text-primary/70 uppercase tracking-wider">{bestPull.can_brand}</p>
-                  <p className="text-sm font-semibold text-foreground">{bestPull.can_name}</p>
-                  <RarityBadge rarity={bestPullRarity} size="sm" className="mt-1" />
-                </div>
-              </div>
-            ) : (
-              <p className="text-xs font-mono text-muted-foreground text-center py-4 mb-4">No pulls yet this month</p>
-            )}
-          </>
+        <p className="text-[10px] font-mono uppercase tracking-widest text-foreground mb-2">Best Pull of the Month</p>
+        {bestPull ? (
+          <div className="flex items-center gap-3 rounded-xl p-3 mb-4 border border-primary/20" style={{ backgroundColor: 'hsl(var(--background) / 0.35)' }}>
+            <div className="w-16 h-16 flex-shrink-0">
+              <CanTile image={bestPullImage} bgColor={bestPull.can_bg_color} name="" rarityBadge={null} />
+            </div>
+            {/* No `truncate` — same html2canvas text-corruption bug as
+                the header and CanTile's name, see those notes. */}
+            <div className="min-w-0">
+              <p className="text-[10px] font-mono text-primary/70 uppercase tracking-wider">{bestPull.can_brand}</p>
+              <p className="text-sm font-semibold text-foreground">{bestPull.can_name}</p>
+              <RarityBadge rarity={bestPullRarity} size="sm" className="mt-1" />
+            </div>
+          </div>
         ) : (
-          <>
-            <div
-              className="rounded-2xl p-5 mb-3 text-center border"
-              style={{
-                backgroundColor: 'hsl(var(--background) / 0.35)',
-                borderColor: 'hsl(var(--primary) / 0.3)',
-                boxShadow: '0 0 24px hsl(var(--primary) / calc(0.1 * var(--glow-intensity)))',
-              }}
-            >
-              <p className="text-[10px] font-mono uppercase tracking-widest text-foreground">Score</p>
-              <p className="text-5xl font-mono font-black text-foreground tabular-nums">{score}</p>
-              {rank && (
-                // mt-3, not mt-1.5: html2canvas renders this font-black
-                // score number with more visual ink below its own line box
-                // than the live browser does, which at mt-1.5 was enough to
-                // visibly overlap the rank badge in the captured PNG (clean
-                // in the live DOM at the same gap) — extra clearance is a
-                // capture-safety margin, not a live-view change.
-                <span className="inline-block mt-3 px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-[9px] font-mono font-semibold text-primary">
-                  #{rank}
-                </span>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 divide-x divide-border mb-5">
-              {[
-                { icon: Star, label: 'Rare Pulls', value: rarePulls },
-                { icon: Zap, label: 'Cans', value: totalCans },
-              ].map(({ icon: Icon, label, value }) => (
-                <div key={label} className="flex flex-col items-center text-center px-1">
-                  <Icon className="w-3.5 h-3.5 text-primary mb-1" />
-                  <span className="text-xl font-mono font-bold text-foreground tabular-nums">{value}</span>
-                  <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">{label}</span>
-                </div>
-              ))}
-            </div>
-          </>
+          <p className="text-xs font-mono text-muted-foreground text-center py-4 mb-4">No pulls yet this month</p>
         )}
 
         {rarityBreakdown.length > 0 && (
-          <div className={variant === 'collection' ? 'mb-5' : 'mb-1'}>
+          <div className="mb-1">
             <p className="text-[10px] font-mono uppercase tracking-widest text-foreground mb-2">Rarity Breakdown</p>
             <div className="flex h-1.5 rounded-full overflow-hidden gap-px">
               {rarityBreakdown.map(({ rarity, pct }) => (
                 <div
                   key={rarity}
                   className="h-full"
-                  style={{ width: `${pct}%`, backgroundColor: `hsl(var(${BREAKDOWN_VAR[rarity] || '--breakdown-legendary'}))` }}
+                  style={{ width: `${pct}%`, backgroundColor: `hsl(var(${BREAKDOWN_VAR[rarity] || '--rarity-legendary'}))` }}
                 />
               ))}
             </div>
@@ -255,20 +207,6 @@ const ShareCardTemplate = forwardRef(function ShareCardTemplate(
           </div>
         )}
 
-        {variant === 'collection' && top6.length > 0 && (
-          <div className="grid grid-cols-3 gap-2 mt-4">
-            {top6.map(item => (
-              <CanTile
-                key={item.id}
-                image={item.can_image_url}
-                bgColor={item.can_bg_color}
-                name={item.can_name}
-                rarityBadge={<RarityBadge rarity={getEffectiveRarity(item)} size="sm" />}
-              />
-            ))}
-          </div>
-        )}
-
         <div className="mt-4 pt-3 text-center" style={{ borderTop: '1px solid hsl(var(--border) / 0.5)' }}>
           <span className="text-[10px] font-mono text-primary/50 tracking-wide">
             {typeof window !== 'undefined' ? window.location.host : 'sippd.app'}
@@ -279,4 +217,4 @@ const ShareCardTemplate = forwardRef(function ShareCardTemplate(
   );
 });
 
-export default ShareCardTemplate;
+export default RecapCardTemplate;

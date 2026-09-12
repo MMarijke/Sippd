@@ -8,14 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Link, useNavigate } from 'react-router-dom';
 import PageHeader from '@/components/shared/PageHeader';
 import CollectionCard from '@/components/profile/CollectionCard';
-import ShareCardModal from '@/components/shared/ShareCardModal';
-import ShareCardTemplate from '@/components/shared/ShareCardTemplate';
 import AchievementBadge from '@/components/achievements/AchievementBadge';
 import { toast } from 'sonner';
 import { getItemScore } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
 import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
 import { useTogglePin } from '@/hooks/useTogglePin';
+import { useShare } from '@/hooks/useShare';
 import { computeAchievements, selectHighlightAchievements } from '@/lib/achievements';
 import TradeHistory from '@/components/profile/TradeHistory';
 import TradeLogDialog from '@/components/profile/TradeLogDialog';
@@ -186,7 +185,7 @@ export default function Profile() {
   const { togglePin, isPending: pinPending } = useTogglePin();
   const pinnedCount = collected.filter(c => c.pinned_at).length;
 
-  const [showShareCard, setShowShareCard] = useState(false);
+  const { copyLink, shareLink } = useShare();
 
   const { data: rank, isError: isRankError } = useQuery({
     queryKey: ['my-rank', user?.id, score],
@@ -205,16 +204,23 @@ export default function Profile() {
     if (isRankError) toast.error('Could not load your rank');
   }, [isRankError]);
 
-  // rank/profile?.full_name included even though the live card renders them
-  // straight from render-time props — rank resolves from its own,
-  // separately-timed query, so without this a card generated before it
-  // settles could permanently ship missing the rank badge. ShareCardModal's
-  // own useCardCapture regenerates whenever this signature changes.
-  const cardSignature = useMemo(() => {
-    const cans = top6.map(item => `${item.id}:${getEffectiveRarity(item)}:${item.pinned_at || ''}`).join('|');
-    const breakdown = rarityBreakdown.map(r => `${r.rarity}:${r.count}`).join(',');
-    return `${cans}__${breakdown}__${streak}__${score}__${rank || ''}__${profile?.full_name || ''}`;
-  }, [top6, rarityBreakdown, streak, score, getEffectiveRarity, rank, profile?.full_name]);
+  // Share the live profile link, not a generated image — /u/:userId is a
+  // real page now (Phase 1 of the public-profile migration), so there's
+  // nothing to render off-screen or capture. Native share sheet first
+  // (drops straight into Messages/WhatsApp/etc. on mobile); copyLink is
+  // the fallback everywhere that isn't supported (typically desktop),
+  // matching the same supported/fallback pattern MonthlyReport's own
+  // image share already uses.
+  const handleShareProfile = async () => {
+    const profileUrl = `${window.location.origin}/u/${user.id}`;
+    const title = `${profile?.full_name || 'My'} Sippd Collection`;
+    const result = await shareLink({ url: profileUrl, title });
+    if (result.supported) {
+      if (result.error) toast.error('Could not share profile link');
+      return;
+    }
+    copyLink(profileUrl, 'Profile link copied!');
+  };
 
   return (
     <div className="space-y-5">
@@ -298,12 +304,12 @@ export default function Profile() {
               page's trophy case (Score now gets a real .hero-card
               treatment), so the showcase should be the first thing a
               returning user sees, not a wall of mostly-locked grey
-              badges. Tapping Share opens a dedicated ShareCardModal — the
-              live card here is purely interactive (pin/unpin, navigate);
-              the exported image is a separate ShareCardTemplate captured
-              hidden off-screen, never this on-screen card. See both
-              components' own doc comments for why that separation
-              matters. */}
+              badges. Tapping Share hands out this profile's real,
+              always-current /u/:userId link (see handleShareProfile) —
+              no separate export step, no captured image to go stale;
+              MonthlyReport is the one surface left that shares a
+              generated snapshot, because a month that's already over
+              has nothing left to go stale. */}
           {contentLoading ? (
             <div className="px-5">
               <div className="h-64 rounded-2xl bg-card/40 border border-border/30 animate-pulse" />
@@ -335,7 +341,7 @@ export default function Profile() {
                 pinnedCount={pinnedCount}
                 onTogglePin={item => togglePin({ collectionItem: item, pinnedCount })}
                 pinPending={pinPending}
-                onShare={() => setShowShareCard(true)}
+                onShare={handleShareProfile}
                 score={score}
                 rarePulls={rarePulls}
                 totalCans={collected.length}
@@ -393,28 +399,6 @@ export default function Profile() {
 
       {showTradeLog && (
         <TradeLogDialog collection={collection} onClose={() => setShowTradeLog(false)} />
-      )}
-
-      {showShareCard && (
-        <ShareCardModal
-          title="Share Collection"
-          onClose={() => setShowShareCard(false)}
-          cardSignature={cardSignature}
-          filename="sippd-collection.png"
-          shareTitle="My Sippd Collection"
-        >
-          <ShareCardTemplate
-            variant="collection"
-            userName={profile?.full_name}
-            score={score}
-            rank={rank}
-            rarePulls={rarePulls}
-            totalCans={collected.length}
-            rarityBreakdown={rarityBreakdown}
-            top6={top6}
-            getEffectiveRarity={getEffectiveRarity}
-          />
-        </ShareCardModal>
       )}
     </div>
   );

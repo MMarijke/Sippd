@@ -3,7 +3,7 @@ import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 
 /**
  * Reusable image box that applies a background colour behind the can image.
- * Used on: CanCard, CanDetail, PublicProfile, MonthlyReport, ShareCardModal.
+ * Used on: CanCard, CanDetail, PublicProfile, MonthlyReport.
  *
  * Props:
  *   imageUrl   — can image URL (optional)

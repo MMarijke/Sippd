@@ -1,8 +1,9 @@
 import { toast } from 'sonner';
 
 /**
- * Shared sharing logic for Sippd's share surfaces (Profile's link copy,
- * ShareCardModal's image share).
+ * Shared sharing logic for Sippd's share surfaces: Profile's profile-link
+ * share (copyLink, shareLink) and MonthlyReport's RecapShareModal image
+ * share (shareFile).
  */
 export function useShare() {
   /**
@@ -53,5 +54,24 @@ export function useShare() {
     }
   };
 
-  return { copyLink, shareFile };
+  /**
+   * Attempt to share a URL (not a file) via the Web Share API — same
+   * supported/shared/aborted/error shape as shareFile, so callers use the
+   * same "if supported, this call owns the whole outcome; if not, fall
+   * back" pattern. navigator.canShare({ url }) is what actually
+   * distinguishes URL support from file support on a given platform.
+   */
+  const shareLink = async ({ url, title }) => {
+    if (!(navigator.canShare && navigator.share)) return { supported: false };
+    if (!navigator.canShare({ url })) return { supported: false };
+    try {
+      await navigator.share({ url, title });
+      return { supported: true, shared: true };
+    } catch (e) {
+      if (e.name === 'AbortError') return { supported: true, shared: false, aborted: true };
+      return { supported: true, shared: false, error: e };
+    }
+  };
+
+  return { copyLink, shareFile, shareLink };
 }

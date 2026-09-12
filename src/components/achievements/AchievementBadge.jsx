@@ -1,6 +1,7 @@
 import { Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 export default function AchievementBadge({ achievement, size = 'default' }) {
   const { title, description, icon, unlocked, unlockedAt, incremental, progress } = achievement;
@@ -8,41 +9,55 @@ export default function AchievementBadge({ achievement, size = 'default' }) {
   const pct = showProgress ? Math.min((progress.current / progress.goal) * 100, 100) : 0;
 
   if (size === 'compact') {
-    // description-id: title="..." only reaches desktop mouse-hover — invisible
-    // to touch and screen-reader users, who otherwise have no path to the
-    // description at all in this compact size (the default size renders it
-    // as real visible text below the title). aria-describedby + a visually-
-    // hidden span gets it to screen readers without changing the compact
-    // tile's layout; touch users can still reach the same text via "View
-    // All →" to the full Achievements grid, which shows it inline.
+    // The default size below renders description as real visible text under
+    // the title; this compact tile has no room for that, so it used to live
+    // only behind a desktop-hover title="..." tooltip — unreachable for the
+    // touch users who are this mobile-first app's actual majority (see
+    // PRODUCT.md). Now a real tap target: the same Popover pattern
+    // CanDetail already uses for "How Community Rarity works" opens the
+    // full title/description on tap, click, or keyboard activation alike,
+    // so every input method reaches the same information. aria-describedby
+    // + a persistent sr-only span still carries it to screen readers
+    // regardless of whether the popover is open.
+    //
+    // min-w-0 on the trigger: without it, the title <p>'s `truncate` did
+    // nothing — a flex/grid item's default min-width is its content's
+    // natural width, so an un-wrapped long title could force the tile wider
+    // than its grid column instead of actually clipping (flagged by the
+    // detector as a 33px overflow).
     const descriptionId = `achievement-desc-${achievement.key}`;
     return (
-      <div
-        aria-label={`${title}: ${unlocked ? 'unlocked' : 'locked'}`}
-        aria-describedby={descriptionId}
-        className="relative flex flex-col items-center text-center gap-1.5"
-        title={description}
-      >
-        <div
-          className={cn(
-            'w-11 h-11 rounded-xl flex items-center justify-center text-lg transition-all',
-            unlocked
-              ? 'bg-primary/10 border border-primary/30 shadow-[0_0_12px_hsl(var(--primary)/0.15)]'
-              : 'bg-muted/50 border border-border/30 grayscale opacity-40'
-          )}
+      <Popover>
+        <PopoverTrigger
+          aria-label={`${title}: ${unlocked ? 'unlocked' : 'locked'}`}
+          aria-describedby={descriptionId}
+          className="relative flex flex-col items-center text-center gap-1.5 w-full min-w-0 bg-transparent border-0 p-0 rounded-lg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
-          {icon}
-        </div>
-        {!unlocked && (
-          <div className="absolute -top-1 -right-1">
-            <Lock className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
+          <div
+            className={cn(
+              'w-11 h-11 rounded-xl flex items-center justify-center text-lg transition-all',
+              unlocked
+                ? 'bg-primary/10 border border-primary/30 shadow-[0_0_12px_hsl(var(--primary)/0.15)]'
+                : 'bg-muted/50 border border-border/30 grayscale opacity-40'
+            )}
+          >
+            {icon}
           </div>
-        )}
-        <p className={cn('text-xs font-mono leading-tight truncate w-full', unlocked ? 'text-foreground' : 'text-muted-foreground')}>
-          {title}
-        </p>
-        <span id={descriptionId} className="sr-only">{description}</span>
-      </div>
+          {!unlocked && (
+            <div className="absolute -top-1 -right-1">
+              <Lock className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
+            </div>
+          )}
+          <p className={cn('text-xs font-mono leading-tight truncate w-full', unlocked ? 'text-foreground' : 'text-muted-foreground')}>
+            {title}
+          </p>
+          <span id={descriptionId} className="sr-only">{description}</span>
+        </PopoverTrigger>
+        <PopoverContent className="w-64 text-xs font-mono leading-relaxed" align="center">
+          <p className="font-semibold text-foreground mb-1">{title}</p>
+          <p className="text-muted-foreground">{description}</p>
+        </PopoverContent>
+      </Popover>
     );
   }
 

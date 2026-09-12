@@ -2,20 +2,20 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { AlertCircle, LogOut, RefreshCw, Settings, Medal, Pencil, Check, X, ScanLine, Zap, Star, Flame } from 'lucide-react';
+import { AlertCircle, LogOut, RefreshCw, Settings, Pencil, Check, X, ScanLine, Zap, Star, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link, useNavigate } from 'react-router-dom';
 import PageHeader from '@/components/shared/PageHeader';
 import CollectionCard from '@/components/shared/CollectionCard';
-import AchievementBadge from '@/components/achievements/AchievementBadge';
+import AchievementsSection from '@/components/shared/AchievementsSection';
 import { toast } from 'sonner';
 import { getItemScore } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
 import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
 import { useTogglePin } from '@/hooks/useTogglePin';
 import { useShare } from '@/hooks/useShare';
-import { computeAchievements, selectHighlightAchievements } from '@/lib/achievements';
+import { computeAchievements } from '@/lib/achievements';
 import TradeHistory from '@/components/profile/TradeHistory';
 import TradeLogDialog from '@/components/profile/TradeLogDialog';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
@@ -175,11 +175,6 @@ export default function Profile() {
   const achievements = useMemo(
     () => computeAchievements(collection, streak, votes.length, user?.created_at),
     [collection, streak, votes.length, user?.created_at]
-  );
-  const unlockedCount = achievements.filter(a => a.unlocked).length;
-  const highlightAchievements = useMemo(
-    () => selectHighlightAchievements(achievements, 10),
-    [achievements]
   );
 
   const { togglePin, isPending: pinPending } = useTogglePin();
@@ -355,24 +350,11 @@ export default function Profile() {
             </div>
           )}
 
-          {/* Achievements strip */}
+          {/* Achievements strip — shared with PublicProfile.jsx, see
+              AchievementsSection's own doc comment. */}
           {!contentLoading && (
-            <div className="px-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Medal className="w-4 h-4 text-primary" />
-                  <h2 className="text-sm font-display font-bold text-foreground tracking-wide">Achievements</h2>
-                  <span className="text-xs font-mono text-muted-foreground">Unlocked {unlockedCount}/{achievements.length}</span>
-                </div>
-              </div>
-              <div className="grid grid-cols-5 gap-x-2 gap-y-4">
-                {highlightAchievements.map(a => (
-                  <AchievementBadge key={a.key} achievement={a} size="compact" />
-                ))}
-              </div>
-              <Link to="/achievements" className="block text-center text-xs font-mono text-primary hover:text-primary/80 transition-colors">
-                View All →
-              </Link>
+            <div className="px-5">
+              <AchievementsSection achievements={achievements} showViewAll />
             </div>
           )}
         </>

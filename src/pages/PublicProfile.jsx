@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Zap, Star, Flame, Package, Lock, ArrowRightLeft, GitCompare, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CollectionCard from '@/components/shared/CollectionCard';
+import AchievementsSection from '@/components/shared/AchievementsSection';
 import { getDisplayRarity, getConfidence, getItemScore, RARITY_ORDER } from '@/lib/rarityConsensus';
 import { computeAchievements } from '@/lib/achievements';
 import FollowButton from '@/components/social/FollowButton';
@@ -121,7 +122,6 @@ export default function PublicProfile() {
     () => computeAchievements(profileItems, streak, 0, profileUser?.created_at),
     [profileItems, streak, profileUser]
   );
-  const unlockedAchievements = userAchievements.filter(a => a.unlocked);
 
   // TODO: global rank needs a public leaderboard aggregate (see Leaderboard.jsx
   // slice) — the old client-side "load everyone's collection and rank" approach
@@ -265,19 +265,13 @@ export default function PublicProfile() {
                 </div>
               )}
 
-              {unlockedAchievements.length > 0 && (
-                <div>
-                  <h3 className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-3">Achievements</h3>
-                  <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                    {unlockedAchievements.map(a => (
-                      <div key={a.key} className="flex-shrink-0 flex flex-col items-center gap-1 bg-card border border-primary/20 rounded-xl p-3 w-20">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center text-xl">{a.icon}</div>
-                        <p className="text-[9px] font-mono text-center text-muted-foreground leading-tight">{a.title}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Same shared AchievementsSection Profile.jsx renders — see
+                  its own doc comment for why showing locked/near-unlock
+                  achievements to a stranger is fine (it's the same kind of
+                  gamification stat as Score, already fully public), and
+                  why showViewAll stays off here (/achievements has no
+                  per-profile mode). */}
+              <AchievementsSection achievements={userAchievements} />
 
               <div className="pt-4 border-t border-border text-center">
                 <p className="text-[11px] font-mono text-muted-foreground">

@@ -19,23 +19,34 @@ export default function CanBackgroundPicker({ value, onChange, label = 'Card Bac
         {label}
       </Label>
       <div className="flex items-center gap-3">
-        {/* The 44px label wrapper is the real tap target; the native color
-            input sits invisibly on top of it (opacity-0), so tapping
-            anywhere on the visible swatch opens the OS color dialog. */}
-        <label
-          htmlFor={inputId}
-          className="relative w-11 h-11 rounded-lg border-2 border-border cursor-pointer overflow-hidden flex-shrink-0"
-          style={{ backgroundColor: value }}
-        >
-          <input
-            id={inputId}
-            type="color"
-            value={value}
-            onChange={e => onChange(clampToDarkSafeBg(e.target.value))}
-            aria-label={label}
-            className="absolute inset-0 w-full h-full cursor-pointer opacity-0"
-          />
-        </label>
+        {/* Focus ring lives on this outer wrapper, not the label below it —
+            Tailwind's ring is a box-shadow, and a box-shadow gets clipped
+            by overflow-hidden on the SAME element it's drawn on (the
+            classic CSS gotcha). The label needs overflow-hidden to clip
+            the swatch color to its rounded corners, so the ring has to be
+            one level up on an element with no overflow of its own,
+            otherwise a focused keyboard user has no visible indicator
+            that this control is focused at all. */}
+        <div className="relative w-11 h-11 rounded-lg flex-shrink-0 focus-within:ring-2 focus-within:ring-ring">
+          {/* This label wrapper is the real 44px tap target; the native
+              color input sits invisibly on top of it (opacity-0), so
+              tapping anywhere on the visible swatch opens the OS color
+              dialog. */}
+          <label
+            htmlFor={inputId}
+            className="absolute inset-0 rounded-lg border-2 border-border cursor-pointer overflow-hidden"
+            style={{ backgroundColor: value }}
+          >
+            <input
+              id={inputId}
+              type="color"
+              value={value}
+              onChange={e => onChange(clampToDarkSafeBg(e.target.value))}
+              aria-label={label}
+              className="absolute inset-0 w-full h-full cursor-pointer opacity-0 focus:outline-none"
+            />
+          </label>
+        </div>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-mono font-semibold text-foreground uppercase">{value}</p>
           <p className="text-[11px] font-mono text-muted-foreground leading-snug">

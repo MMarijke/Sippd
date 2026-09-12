@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import DeleteConfirmDialog from '@/components/candetail/DeleteConfirmDialog';
 import EditEntrySheet from '@/components/candetail/EditEntrySheet';
 import CanImageBox from '@/components/shared/CanImageBox';
+import TasteRatingStars from '@/components/shared/TasteRatingStars';
 import { toast } from 'sonner';
 
 // Invert VOTE_FIELDS: field name → tier label
@@ -399,6 +400,23 @@ export default function CanDetail() {
             </div>
           )}
         </div>
+
+        {/* Taste Rating — personal, read-only here; editable via the Edit
+            sheet below. Always shown for an owned item (not just once
+            rated) so the "Tap Edit to rate" hint stays discoverable
+            rather than the feature having no trace until first used. */}
+        {item && (
+          <div className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Star className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Your Rating</span>
+            </div>
+            <TasteRatingStars value={item.taste_rating} readOnly />
+            {!item.taste_rating && (
+              <p className="text-[11px] font-mono text-muted-foreground mt-2">Tap Edit to rate this can</p>
+            )}
+          </div>
+        )}
 
         {/* Notes */}
         {item?.notes && (

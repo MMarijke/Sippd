@@ -11,7 +11,9 @@ import { Loader2, Save, Upload, Link as LinkIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { RARITY_ORDER } from '@/lib/rarityConsensus';
-import { CAN_BG_COLORS, DEFAULT_CAN_BG } from '@/lib/canBgColors';
+import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
+import CanBackgroundPicker from '@/components/shared/CanBackgroundPicker';
+import TasteRatingStars from '@/components/shared/TasteRatingStars';
 
 const STATUS_OPTIONS = [
   { value: 'collected', label: 'Collected' },
@@ -56,6 +58,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
     can_edition:  item?.can_edition  || '',
     can_image_url: item?.can_image_url || '',
     can_bg_color: item?.can_bg_color || DEFAULT_CAN_BG,
+    taste_rating: item?.taste_rating || null,
   });
 
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
@@ -135,42 +138,19 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
           <div className="space-y-1.5">
             <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Image</Label>
             {form.can_image_url ? (
-              <div className="space-y-3">
-                <div className="relative w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.can_bg_color }}>
-                  <img src={form.can_image_url} alt="Can" className="w-full h-full object-contain" />
-                  <button
-                    onClick={() => update('can_image_url', '')}
-                    aria-label="Remove image"
-                    className="group absolute top-0 right-0 w-11 h-11 flex items-center justify-center"
-                  >
-                    {/* Real tap target is the full 44px button above; this stays a
-                        small visual badge so it doesn't dominate the preview. */}
-                    <span className="w-7 h-7 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-border group-hover:bg-background">
-                      <X className="w-3.5 h-3.5" />
-                    </span>
-                  </button>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Card Background</Label>
-                  <div className="flex gap-2 flex-wrap">
-                    {CAN_BG_COLORS.map(({ label, hex }) => (
-                      <button
-                        key={hex}
-                        type="button"
-                        title={label}
-                        aria-label={label}
-                        aria-pressed={form.can_bg_color === hex}
-                        onClick={() => update('can_bg_color', hex)}
-                        className="w-11 h-11 rounded-lg border-2 transition-all"
-                        style={{
-                          backgroundColor: hex,
-                          borderColor: form.can_bg_color === hex ? 'hsl(var(--primary))' : 'hsl(var(--border))',
-                          boxShadow: form.can_bg_color === hex ? '0 0 0 2px hsl(var(--primary) / 0.3)' : 'none',
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
+              <div className="relative w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.can_bg_color }}>
+                <img src={form.can_image_url} alt="Can" className="w-full h-full object-contain" />
+                <button
+                  onClick={() => update('can_image_url', '')}
+                  aria-label="Remove image"
+                  className="group absolute top-0 right-0 w-11 h-11 flex items-center justify-center"
+                >
+                  {/* Real tap target is the full 44px button above; this stays a
+                      small visual badge so it doesn't dominate the preview. */}
+                  <span className="w-7 h-7 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-border group-hover:bg-background">
+                    <X className="w-3.5 h-3.5" />
+                  </span>
+                </button>
               </div>
             ) : (
               <div className="space-y-2">
@@ -217,6 +197,11 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
             )}
           </div>
 
+          {/* Independent of whether an image is set — can_bg_color also
+              backs the fallback tile shown behind the generic can icon
+              when there's no image at all (see CollectionCard.jsx). */}
+          <CanBackgroundPicker value={form.can_bg_color} onChange={v => update('can_bg_color', v)} />
+
           {/* Rarity vote — read only */}
           <div className="space-y-1.5">
             <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
@@ -260,6 +245,12 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Taste Rating */}
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Taste Rating</Label>
+            <TasteRatingStars value={form.taste_rating} onChange={v => update('taste_rating', v)} />
           </div>
 
           {/* Notes */}

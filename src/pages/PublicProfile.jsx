@@ -4,10 +4,8 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Zap, Star, Flame, Package, Lock, ArrowRightLeft, GitCompare, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import RarityBadge from '@/components/shared/RarityBadge';
-import CanImageBox from '@/components/shared/CanImageBox';
-import { getDisplayRarity, getConfidence, getItemScore, RARITY_ORDER, RARITY_HEX as RARITY_COLORS } from '@/lib/rarityConsensus';
+import CollectionCard from '@/components/shared/CollectionCard';
+import { getDisplayRarity, getConfidence, getItemScore, RARITY_ORDER } from '@/lib/rarityConsensus';
 import { computeAchievements } from '@/lib/achievements';
 import FollowButton from '@/components/social/FollowButton';
 import TradeRequestDialog from '@/components/social/TradeRequestDialog';
@@ -129,18 +127,20 @@ export default function PublicProfile() {
   // slice) — the old client-side "load everyone's collection and rank" approach
   // is impossible under owner-scoped RLS on user_collection.
 
-  const rarityCounts = useMemo(() => {
+  // Same shape (and same unrated-items-silently-excluded behavior) as
+  // Profile's useCollectionHighlights — kept in sync by hand since this
+  // page's data (a public RPC read, not the owner-scoped table query
+  // that hook wraps) can't reuse that hook directly.
+  const rarityBreakdown = useMemo(() => {
     const counts = {};
     myItems.forEach(item => {
-      const r = getEffectiveRarity(item) || 'Unrated';
+      const r = getEffectiveRarity(item);
       counts[r] = (counts[r] || 0) + 1;
     });
-    return counts;
+    return RARITY_ORDER
+      .filter(r => counts[r])
+      .map(r => ({ rarity: r, count: counts[r], pct: myItems.length ? (counts[r] / myItems.length) * 100 : 0 }));
   }, [myItems, sharedCansMap]);
-
-  const chartData = RARITY_ORDER
-    .filter(r => rarityCounts[r])
-    .map(r => ({ name: r, value: rarityCounts[r] }));
 
   const initial = profileUser?.full_name?.[0]?.toUpperCase() || '?';
   const displayName = profileUser?.full_name || 'Collector';
@@ -237,94 +237,31 @@ export default function PublicProfile() {
             )}
 
             {canViewContent && <>
-              <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-card to-card border border-primary/20 rounded-2xl p-5 neon-border">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-3xl" />
-                <div className="flex items-center gap-2 mb-1">
-                  <Zap className="w-4 h-4 text-primary" />
-                  <span className="text-[10px] font-mono text-primary uppercase tracking-widest">Collection Score</span>
-                </div>
-                <p className="text-4xl font-display font-black text-foreground neon-text">{score}</p>
-                <p className="text-xs font-mono text-muted-foreground mt-1">{myItems.length} cans in vault</p>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-card border border-border rounded-xl p-3 text-center">
-                  <Zap className="w-4 h-4 text-primary mx-auto mb-1" />
-                  <p className="text-xl font-display font-bold text-foreground">{myItems.length}</p>
-                  <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Cans</p>
-                </div>
-                <div className="bg-card border border-border rounded-xl p-3 text-center">
-                  <Star className="w-4 h-4 text-primary mx-auto mb-1" />
-                  <p className="text-xl font-display font-bold text-foreground">{rarePulls}</p>
-                  <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Rare</p>
-                </div>
-                <div className="bg-card border border-border rounded-xl p-3 text-center">
-                  <Flame className="w-4 h-4 text-primary mx-auto mb-1" />
-                  <p className="text-xl font-display font-bold text-foreground">{streak}</p>
-                  <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Streak</p>
-                </div>
-              </div>
-
-              {chartData.length > 0 && (
-                <div className="bg-card border border-border rounded-xl p-4">
-                  <h3 className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-3">Rarity Breakdown</h3>
-                  <div className="flex items-center gap-4">
-                    <div className="w-24 h-24 flex-shrink-0">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie data={chartData} cx="50%" cy="50%" innerRadius={22} outerRadius={40} paddingAngle={3} dataKey="value" stroke="none">
-                            {chartData.map(entry => (
-                              <Cell key={entry.name} fill={RARITY_COLORS[entry.name] || '#6B7280'} />
-                            ))}
-                          </Pie>
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div className="flex flex-col gap-1.5 flex-1">
-                      {chartData.map(({ name, value }) => (
-                        <div key={name} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: RARITY_COLORS[name] }} />
-                            <span className="text-xs font-mono text-muted-foreground">{name}</span>
-                          </div>
-                          <span className="text-xs font-mono font-semibold text-foreground">{value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {myItems.length > 0 && (
-                <div>
-                  <h3 className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-3">Collection</h3>
-                  <div className="grid grid-cols-3 gap-2">
-                    {myItems.map(item => {
-                      const sc = sharedCansMap[item.can_id];
-                      const conf = sc ? getConfidence(sc.total_votes) : 'unrated';
-                      const rarity = conf === 'unrated' ? null : getDisplayRarity(sc || item);
-                      const imageUrl = item.can_image_url || sc?.image_url;
-                      return (
-                        <div key={item.id} className="bg-card border border-border rounded-xl overflow-hidden">
-                          <CanImageBox imageUrl={imageUrl} bgColor={item.can_bg_color} alt={item.can_name} className="aspect-square" iconSize="w-7 h-7" />
-                          <div className="px-2 py-1.5 space-y-0.5">
-                            <p className="text-[10px] font-mono text-primary/70 truncate">{item.can_brand}</p>
-                            <p className="text-xs font-semibold text-foreground truncate leading-tight">{item.can_name}</p>
-                            <div className="pt-0.5">
-                              {rarity ? <RarityBadge rarity={rarity} size="sm" /> : <span className="text-[10px] font-mono text-muted-foreground">? ? ?</span>}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {myItems.length === 0 && (
+              {/* Same shared trophy-case CollectionCard Profile.jsx renders
+                  for your own collection — score hero, stat row, rarity
+                  breakdown bar, can grid — just with canEdit left off, so
+                  there's no pin button and no can-detail link (CanDetail's
+                  own query is owner-scoped; linking a stranger there would
+                  show nothing useful). Skipped entirely at zero cans,
+                  matching Profile.jsx's own pattern of replacing the whole
+                  card with a single empty message rather than showing a
+                  zero-score card with an empty grid underneath it. */}
+              {myItems.length > 0 ? (
+                <CollectionCard
+                  score={score}
+                  items={myItems}
+                  rarityBreakdown={rarityBreakdown}
+                  getEffectiveRarity={getEffectiveRarity}
+                  stats={[
+                    { icon: Zap, label: 'Cans', value: myItems.length },
+                    { icon: Star, label: 'Rare Pulls', value: rarePulls },
+                    { icon: Flame, label: 'Streak', value: streak },
+                  ]}
+                />
+              ) : (
                 <div className="flex flex-col items-center py-12 gap-3">
                   <Package className="w-12 h-12 text-muted-foreground/20" />
-                  <p className="text-sm font-mono text-muted-foreground">No cans collected yet</p>
+                  <p className="text-sm font-mono text-muted-foreground">{displayName} hasn&rsquo;t collected anything yet</p>
                 </div>
               )}
 

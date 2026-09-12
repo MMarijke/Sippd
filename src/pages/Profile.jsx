@@ -2,12 +2,12 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { AlertCircle, LogOut, RefreshCw, Settings, Medal, Pencil, Check, X, ScanLine } from 'lucide-react';
+import { AlertCircle, LogOut, RefreshCw, Settings, Medal, Pencil, Check, X, ScanLine, Zap, Star, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link, useNavigate } from 'react-router-dom';
 import PageHeader from '@/components/shared/PageHeader';
-import CollectionCard from '@/components/profile/CollectionCard';
+import CollectionCard from '@/components/shared/CollectionCard';
 import AchievementBadge from '@/components/achievements/AchievementBadge';
 import { toast } from 'sonner';
 import { getItemScore } from '@/lib/rarityConsensus';
@@ -335,7 +335,8 @@ export default function Profile() {
           ) : (
             <div className="px-5">
               <CollectionCard
-                top6={top6}
+                headerTitle={`${profile?.full_name || 'Collector'}’s Collection`}
+                items={top6}
                 rarityBreakdown={rarityBreakdown}
                 getEffectiveRarity={getEffectiveRarity}
                 pinnedCount={pinnedCount}
@@ -343,10 +344,13 @@ export default function Profile() {
                 pinPending={pinPending}
                 onShare={handleShareProfile}
                 score={score}
-                rarePulls={rarePulls}
-                totalCans={collected.length}
                 rank={rank}
-                userName={profile?.full_name}
+                canEdit
+                stats={[
+                  { icon: Zap, label: 'Cans', value: collected.length },
+                  { icon: Star, label: 'Rare Pulls', value: rarePulls },
+                  { icon: Flame, label: 'Streak', value: streak ?? 0 },
+                ]}
               />
             </div>
           )}

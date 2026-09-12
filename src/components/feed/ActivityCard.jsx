@@ -61,9 +61,12 @@ export default function ActivityCard({ item, user, myReactionSet, onReact }) {
           </span>
         );
       case 'achievement_unlocked':
+        // achievement_icon already renders once in the header's icon box
+        // below — repeating it here read as an oversight, not a choice,
+        // in an already-sparse card (/impeccable critique).
         return (
           <span className="text-foreground">
-            unlocked the <span className="font-semibold">{item.achievement_title}</span> achievement {item.achievement_icon}
+            unlocked the <span className="font-semibold">{item.achievement_title}</span> achievement
           </span>
         );
       case 'streak_milestone':

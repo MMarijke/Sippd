@@ -200,7 +200,12 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
           {/* Independent of whether an image is set — can_bg_color also
               backs the fallback tile shown behind the generic can icon
               when there's no image at all (see CollectionCard.jsx). */}
-          <CanBackgroundPicker value={form.can_bg_color} onChange={v => update('can_bg_color', v)} />
+          <CanBackgroundPicker
+            value={form.can_bg_color}
+            onChange={v => update('can_bg_color', v)}
+            imageUrl={form.can_image_url}
+            previewAlt={form.can_name || 'Can preview'}
+          />
 
           {/* Rarity vote — read only */}
           <div className="space-y-1.5">

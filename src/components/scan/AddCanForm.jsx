@@ -594,7 +594,12 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
               setting either way, and always available even when voting on an
               existing catalog can whose community-sourced image can't be
               replaced here. */}
-          <CanBackgroundPicker value={form.bg_color} onChange={v => update('bg_color', v)} />
+          <CanBackgroundPicker
+            value={form.bg_color}
+            onChange={v => update('bg_color', v)}
+            imageUrl={form.image_url || prefillData?.image_url}
+            previewAlt={form.name || 'Can preview'}
+          />
 
           <div className="space-y-1.5">
             <Label htmlFor="addcan-notes" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Notes (optional)</Label>

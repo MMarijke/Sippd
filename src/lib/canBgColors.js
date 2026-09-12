@@ -1,5 +1,23 @@
 export const DEFAULT_CAN_BG = '#0D2B2B';
 
+// Quick-pick presets for CanBackgroundPicker — sit alongside the free-hue
+// native picker rather than replacing it, so the app's own dark neon-glow
+// identity still shows up first at this moment instead of handing the whole
+// interaction to raw OS chrome. Hue isn't arbitrary: after "Signature" (the
+// app's own brand teal), the remaining six deliberately echo the five
+// --rarity-* hues in index.css in ascending order (Common's gray through
+// Legendary's pink), plus one warm bonus — so picking a background can
+// double as picking "the mood of my best pull," not just a random color.
+export const QUICK_PICK_BG_COLORS = [
+  { label: 'Signature',   hex: '#0D2B2B' },
+  { label: 'Common',      hex: '#1C1C1E' },
+  { label: 'Uncommon',    hex: '#0D1F0D' },
+  { label: 'Rare',        hex: '#0C1D38' },
+  { label: 'Ultra Rare',  hex: '#170B33' },
+  { label: 'Legendary',   hex: '#2B0D1F' },
+  { label: 'Ember',       hex: '#2B0F0F' },
+];
+
 // Existing preset backgrounds (Deep Teal, Midnight Navy, etc.) all measured
 // 9-14% lightness — dark enough to keep white/light foreground text and can
 // art readable when used as a tile/card background across the app

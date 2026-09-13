@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useJumpToHighlight } from '@/hooks/useJumpToHighlight';
+import { withCompetitionRank } from '@/lib/ranking';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 const MEDAL_COLORS = ['text-yellow-400', 'text-slate-300', 'text-amber-600'];
@@ -144,6 +145,13 @@ export default function RegionalLeaderboard() {
   const ranked = scores.filter(s => s.total_cans > 0);
   const isEmpty = !isLoading && !isScoresError && ranked.length === 0;
 
+  // Was plain array index (i + 1) — the same tie-disagreement bug already
+  // fixed on CollectorsLeaderboard's rows this cycle, just not ported here:
+  // two regional collectors tied on score got sequential row numbers that
+  // disagreed with what the tie-aware "Your Rank" banner above would tell
+  // either of them. (/impeccable critique)
+  const rankedWithRank = withCompetitionRank(ranked, 'score');
+
   return (
     <div className="px-5">
       {currentUser && (
@@ -186,9 +194,9 @@ export default function RegionalLeaderboard() {
         </div>
       ) : (
         <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
-          {ranked.map((entry, i) => {
+          {rankedWithRank.map((entry) => {
             const isMe = entry.user_id === currentUser?.id;
-            const isMedal = i < 3;
+            const isMedal = entry.rank <= 3;
             const name = entry.full_name || 'Collector';
             const initial = name.charAt(0).toUpperCase();
             return (
@@ -208,11 +216,11 @@ export default function RegionalLeaderboard() {
                     top of it rather than a replacement for it. */}
                 <div className="w-7 flex-shrink-0 flex flex-col items-center justify-center gap-0.5">
                   {isMedal && (
-                    <span className={cn('text-base leading-none', MEDAL_COLORS[i])} aria-hidden="true">
-                      {MEDAL[i]}
+                    <span className={cn('text-base leading-none', MEDAL_COLORS[entry.rank - 1])} aria-hidden="true">
+                      {MEDAL[entry.rank - 1]}
                     </span>
                   )}
-                  <span className="text-xs font-mono text-muted-foreground leading-none">#{i + 1}</span>
+                  <span className="text-xs font-mono text-muted-foreground leading-none">#{entry.rank}</span>
                 </div>
                 <div className={cn(
                   'w-8 h-8 rounded-full flex items-center justify-center text-xs font-display font-bold flex-shrink-0',

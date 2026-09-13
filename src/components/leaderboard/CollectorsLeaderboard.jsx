@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useJumpToHighlight } from '@/hooks/useJumpToHighlight';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 const MEDAL_COLORS = ['text-yellow-400', 'text-slate-300', 'text-amber-600'];
@@ -80,6 +81,22 @@ export default function CollectorsLeaderboard() {
   });
 
   const myMetric = myScoreRow?.[metricColumn] ?? 0;
+  const { targetRef: myRowRef, highlighted, jumpToTarget } = useJumpToHighlight();
+
+  // /impeccable critique: the banner announced a rank number with no way to
+  // act on it. myMetric === 0 means there's genuinely no row to jump to yet
+  // (a real "not ranked" state, not just "outside the visible list") —
+  // jumpToTarget()'s own false return covers the other real gap: ranked,
+  // but outside the top 50 this tab actually renders.
+  const handleJumpToRank = () => {
+    if (myMetric === 0) {
+      toast('Add cans to your vault to get ranked!');
+      return;
+    }
+    if (!jumpToTarget()) {
+      toast("You're outside the top 50 — keep climbing to see your row here!");
+    }
+  };
 
   const { data: myRank } = useQuery({
     queryKey: ['my-rank', sortBy, currentUser?.id, myMetric],
@@ -132,12 +149,17 @@ export default function CollectorsLeaderboard() {
       </div>
 
       {currentUser && (
-        <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={handleJumpToRank}
+          aria-label="Jump to your rank"
+          className="w-full bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-between hover:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
           <span className="text-xs font-mono text-muted-foreground">Your Rank</span>
           <span className={cn('text-sm font-display font-bold', sortBy === 'rare' ? 'text-rarity-ultra' : 'text-primary')}>
             {isScoresError ? '—' : myMetric > 0 ? (myRank ? `#${myRank}` : '…') : 'Not ranked yet'}
           </span>
-        </div>
+        </button>
       )}
 
       {isLoading ? (
@@ -176,7 +198,12 @@ export default function CollectorsLeaderboard() {
             return (
               <div
                 key={entry.user_id}
-                className={cn('flex items-center gap-3 px-4 py-3', isMe && 'bg-primary/5 border-l-2 border-primary')}
+                ref={isMe ? myRowRef : undefined}
+                className={cn(
+                  'flex items-center gap-3 px-4 py-3 transition-colors',
+                  isMe && 'bg-primary/5 border-l-2 border-primary',
+                  isMe && highlighted && 'bg-primary/15'
+                )}
               >
                 <div className="w-7 flex-shrink-0 text-center">
                   {isMedal ? (

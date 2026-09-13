@@ -38,6 +38,75 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
+// IP allowlist, defense-in-depth on top of signature verification below —
+// Paddle's own guidance is to allowlist their webhook IPs rather than trust
+// signature checking alone. The list is never hardcoded (Paddle can change
+// it); instead it's fetched from Paddle's own source-of-truth endpoint and
+// cached in memory for an hour so a burst of webhook deliveries against a
+// warm instance doesn't refetch on every single request.
+const PADDLE_IPS_ENDPOINT = "https://api.paddle.com/ips";
+const IP_CACHE_TTL_MS = 60 * 60 * 1000;
+let cachedCidrs: string[] | null = null;
+let cachedAt = 0;
+
+async function getAllowedCidrs(): Promise<string[]> {
+  const isStale = Date.now() - cachedAt > IP_CACHE_TTL_MS;
+  if (cachedCidrs && !isStale) return cachedCidrs;
+
+  try {
+    const res = await fetch(PADDLE_IPS_ENDPOINT);
+    if (!res.ok) throw new Error(`Paddle IPs endpoint returned ${res.status}`);
+    const body = await res.json();
+    const cidrs = body?.data?.ipv4_cidrs as string[] | undefined;
+    if (!Array.isArray(cidrs) || cidrs.length === 0) {
+      throw new Error("Paddle IPs endpoint returned no ipv4_cidrs");
+    }
+    cachedCidrs = cidrs;
+    cachedAt = Date.now();
+    return cachedCidrs;
+  } catch (err) {
+    // Keep serving the last known-good list rather than failing every
+    // webhook over a transient fetch hiccup against Paddle's own endpoint.
+    // Only truly fail closed (empty list -> every IP rejected below) if we
+    // have never successfully fetched it at all, e.g. a fresh cold start
+    // whose very first outbound fetch failed.
+    console.error("paddle-webhook: failed to refresh Paddle IP allowlist", err);
+    await captureException(err instanceof Error ? err : new Error(String(err)), {
+      where: "getAllowedCidrs",
+    });
+    return cachedCidrs ?? [];
+  }
+}
+
+function ipToUint32(ip: string): number | null {
+  const parts = ip.split(".");
+  if (parts.length !== 4) return null;
+  let value = 0;
+  for (const part of parts) {
+    const octet = Number(part);
+    if (!Number.isInteger(octet) || octet < 0 || octet > 255) return null;
+    value = (value << 8) | octet;
+  }
+  return value >>> 0;
+}
+
+function ipInCidr(ip: string, cidr: string): boolean {
+  const [rangeIp, prefixStr] = cidr.split("/");
+  const prefix = Number(prefixStr);
+  const ipNum = ipToUint32(ip);
+  const rangeNum = ipToUint32(rangeIp);
+  if (ipNum === null || rangeNum === null || !Number.isInteger(prefix)) return false;
+  if (prefix === 0) return true;
+  const mask = (0xffffffff << (32 - prefix)) >>> 0;
+  return (ipNum & mask) === (rangeNum & mask);
+}
+
+async function isAllowedPaddleIp(ip: string): Promise<boolean> {
+  if (ip === "unknown") return false;
+  const cidrs = await getAllowedCidrs();
+  return cidrs.some((cidr) => ipInCidr(ip, cidr));
+}
+
 function verifySignature(rawBody: string, header: string): boolean {
   // header format: "ts=<timestamp>;h1=<hash>"
   const parts = Object.fromEntries(header.split(";").map((p) => p.split("=")));
@@ -153,6 +222,18 @@ async function processEvent(event: { event_type: string; data: Record<string, un
 
 Deno.serve(async (req) => {
   try {
+    // Same client-IP extraction as image-proxy's rate limiter: first hop of
+    // x-forwarded-for, falling back to x-real-ip.
+    const forwardedFor = req.headers.get("x-forwarded-for");
+    const clientIp = (forwardedFor ? forwardedFor.split(",")[0].trim() : null)
+      ?? req.headers.get("x-real-ip")
+      ?? "unknown";
+
+    if (!(await isAllowedPaddleIp(clientIp))) {
+      console.error(`paddle-webhook: rejected request from non-Paddle IP ${clientIp}`);
+      return new Response("Forbidden", { status: 403 });
+    }
+
     const rawBody = await req.text();
     const signature = req.headers.get("paddle-signature") ?? "";
 

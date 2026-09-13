@@ -164,13 +164,16 @@ export default function ActivityCard({ item, user, myReactionSet, onReact }) {
             // imports) — reacting to a friend's pull is the Feed's one
             // direct, repeated interaction, so it's the one place motion
             // earns its keep here rather than being added everywhere.
-            <motion.div key={emoji} whileTap={reducedMotion ? undefined : { scale: 0.88 }}>
+            <motion.div key={emoji} whileTap={reducedMotion || (hasReacted && !reacted) ? undefined : { scale: 0.88 }}>
               <Button
                 variant="ghost"
                 onClick={() => onReact(item, emoji)}
+                disabled={hasReacted && !reacted}
                 aria-label={
                   reacted
                     ? `You reacted ${emoji} — locked, can't be removed${count > 0 ? ` (${count} total)` : ''}`
+                    : hasReacted
+                    ? `${emoji} unavailable — you already reacted to this post`
                     : `React ${emoji}${count > 0 ? `, ${count} reactions` : ''}`
                 }
                 aria-pressed={reacted}
@@ -178,6 +181,8 @@ export default function ActivityCard({ item, user, myReactionSet, onReact }) {
                   'h-11 min-w-11 px-2.5 gap-1 rounded-full text-xs font-mono border transition-all',
                   reacted
                     ? 'bg-primary/10 border-primary/30 text-primary hover:bg-primary/10 hover:text-primary'
+                    : hasReacted
+                    ? 'bg-secondary border-border text-muted-foreground/40 opacity-50'
                     : 'bg-secondary border-border text-muted-foreground hover:border-primary/20 hover:text-foreground'
                 )}
               >

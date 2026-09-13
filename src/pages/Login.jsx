@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import LegalFooter from '@/components/legal/LegalFooter';
 
 function GoogleIcon(props) {
   return (
@@ -205,6 +206,8 @@ export default function Login() {
             </button>
           </p>
         </div>
+
+        <LegalFooter />
       </div>
     </div>
   );

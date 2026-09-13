@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import LegalFooter from '@/components/legal/LegalFooter';
 
 const STATUSES = ['collected', 'wishlist'];
 const RARITIES = ['Common', 'Uncommon', 'Rare', 'Ultra Rare', 'Legendary'];
@@ -635,6 +636,8 @@ export default function Settings() {
             onClick={() => setShowDeleteConfirm(true)}
           />
         </div>
+
+        <LegalFooter className="pt-2" />
       </div>
 
       <ConfirmDialog

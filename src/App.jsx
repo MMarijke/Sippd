@@ -24,6 +24,9 @@ import Crates from './pages/Crates';
 import CompareCollection from './pages/CompareCollection';
 import Wishlist from './pages/Wishlist';
 import Pro from './pages/Pro';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import Refund from './pages/Refund';
 
 // Applies the signed-in user's saved theme to <html> for the whole app
 // lifetime, independent of which route is mounted — Settings' picker calls
@@ -48,6 +51,13 @@ function App() {
                 this only controls whether the page mounts, not what it
                 shows. See the 2026-09-12 public-profile migration. */}
             <Route path="/u/:userId" element={<PublicProfile />} />
+
+            {/* Public on purpose — required to be live and reachable without
+                an account for Paddle's business verification and for any
+                visitor deciding whether to sign up, not just existing users. */}
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/refund" element={<Refund />} />
 
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>

@@ -6,6 +6,7 @@ import { Radio, RefreshCw, Users } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import RarityBadge from '@/components/shared/RarityBadge';
+import { getStreakIcon } from '@/lib/streakIcon';
 
 function renderAction(item) {
   switch (item.type) {
@@ -30,7 +31,7 @@ function renderAction(item) {
     case 'streak_milestone':
       return (
         <span className="text-foreground">
-          🔥 reached a <span className="font-semibold">{item.streak_days} day</span> streak
+          {getStreakIcon(item.streak_days)} reached a <span className="font-semibold">{item.streak_days} day</span> streak
         </span>
       );
     default:

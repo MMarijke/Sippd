@@ -6,6 +6,7 @@ import RarityBadge from '@/components/shared/RarityBadge';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { getStreakIcon } from '@/lib/streakIcon';
 
 const EMOJI_MAP = { fire: '🔥', star: '⭐', wow: '😮' };
 
@@ -74,7 +75,7 @@ export default function ActivityCard({ item, user, myReactionSet, onReact }) {
       case 'streak_milestone':
         return (
           <span className="text-foreground">
-            {isMajorStreak ? '💥' : '🔥'} reached a <span className="font-semibold">{item.streak_days} day</span> streak
+            {getStreakIcon(item.streak_days)} reached a <span className="font-semibold">{item.streak_days} day</span> streak
           </span>
         );
       default:

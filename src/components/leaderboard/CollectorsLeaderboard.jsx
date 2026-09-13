@@ -8,6 +8,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useJumpToHighlight } from '@/hooks/useJumpToHighlight';
+import { withCompetitionRank } from '@/lib/ranking';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 const MEDAL_COLORS = ['text-yellow-400', 'text-slate-300', 'text-amber-600'];
@@ -50,16 +51,9 @@ export default function CollectorsLeaderboard() {
   // "Your Rank" banner's count query already uses. Previously each row used
   // its plain array index instead, so a tied score could show a different
   // number in a row than in the banner for the same person in the same view.
-  let lastScore = null;
-  let lastRank = 0;
-  const rankedWithRank = ranked.map((entry, i) => {
-    const score = entry[metricColumn];
-    if (score !== lastScore) {
-      lastRank = i + 1;
-      lastScore = score;
-    }
-    return { ...entry, rank: lastRank };
-  });
+  // Shared with RegionalLeaderboard.jsx (src/lib/ranking.js), which had the
+  // same bug and wasn't covered by this fix the first time (/impeccable critique).
+  const rankedWithRank = withCompetitionRank(ranked, metricColumn);
 
   // Fetched directly rather than derived from `scores` (capped at 50 rows
   // above) — deriving it from that capped list meant any real collector

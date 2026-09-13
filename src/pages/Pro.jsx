@@ -18,7 +18,7 @@ const FEATURES = [
 export default function Pro() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isPro } = useSubscription();
+  const { isPro, paddleCustomerId } = useSubscription();
   const [loadingPriceId, setLoadingPriceId] = useState(null);
 
   const handleCheckout = async (priceId) => {
@@ -29,7 +29,7 @@ export default function Pro() {
     if (loadingPriceId) return;
     setLoadingPriceId(priceId);
     try {
-      await openCheckout(priceId, user);
+      await openCheckout(priceId, user, paddleCustomerId);
     } catch (e) {
       toast.error('Could not open checkout: ' + (e.message || 'Unknown error'));
     } finally {

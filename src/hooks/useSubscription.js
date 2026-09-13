@@ -10,7 +10,7 @@ export function useSubscription() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('subscription_status')
+        .select('subscription_status, paddle_customer_id')
         .eq('id', user.id)
         .single();
       if (error) throw error;
@@ -21,5 +21,5 @@ export function useSubscription() {
 
   const status = data?.subscription_status || 'free';
 
-  return { isPro: status === 'pro', status, isLoading };
+  return { isPro: status === 'pro', status, paddleCustomerId: data?.paddle_customer_id ?? null, isLoading };
 }

@@ -201,12 +201,18 @@ export default function RegionalLeaderboard() {
                   isMe && highlighted && 'bg-primary/15'
                 )}
               >
-                <div className="w-7 flex-shrink-0 text-center">
-                  {isMedal ? (
-                    <span className={cn('text-base', MEDAL_COLORS[i])}>{MEDAL[i]}</span>
-                  ) : (
-                    <span className="text-xs font-mono text-muted-foreground">#{i + 1}</span>
+                {/* Medal rows used to drop the numeric rank entirely, leaving
+                    the one thing every row exists to convey (rank) less
+                    legible exactly for the top 3 (/impeccable critique) —
+                    "#N" now always renders, so the medal is decorative on
+                    top of it rather than a replacement for it. */}
+                <div className="w-7 flex-shrink-0 flex flex-col items-center justify-center gap-0.5">
+                  {isMedal && (
+                    <span className={cn('text-base leading-none', MEDAL_COLORS[i])} aria-hidden="true">
+                      {MEDAL[i]}
+                    </span>
                   )}
+                  <span className="text-xs font-mono text-muted-foreground leading-none">#{i + 1}</span>
                 </div>
                 <div className={cn(
                   'w-8 h-8 rounded-full flex items-center justify-center text-xs font-display font-bold flex-shrink-0',

@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { useEffect, useRef } from 'react';
 import { ScanLine } from 'lucide-react';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
@@ -46,22 +45,25 @@ const PARTICLES = Array.from({ length: 30 }, (_, i) => ({
 
 export default function RarityReveal({ rarity, canName, onComplete, onScanNext }) {
   const config = RARITY_CONFIG[rarity] || RARITY_CONFIG['Rare'];
-  const autoDismissRef = useRef(null);
   const reducedMotion = usePrefersReducedMotion();
 
-  useEffect(() => {
-    autoDismissRef.current = setTimeout(onComplete, 2500);
-    return () => clearTimeout(autoDismissRef.current);
-  }, [onComplete]);
-
+  // Used to force-navigate to "View Collection" on a 2.5s timer regardless
+  // of whether the user had acted — but the action buttons don't reach full
+  // opacity until 1.2s in, leaving well under a second of stable, tappable
+  // UI before the forced navigate. That silently defaulted away from "Scan
+  // Next," the flow Scan.jsx's own comment says exists specifically so
+  // logging several cans in one sitting doesn't require leaving and coming
+  // back each time — hardest exactly when a Legendary pull is the moment
+  // someone most wants to linger, not be rushed. Tap-anywhere-to-dismiss
+  // (handleTap, bound to the whole screen) already covers "I'm done here,"
+  // so there's nothing left for a timer to do that isn't actively working
+  // against the app's own stated common case. (/impeccable critique)
   const handleTap = () => {
-    clearTimeout(autoDismissRef.current);
     onComplete();
   };
 
   const handleScanNext = (e) => {
     e.stopPropagation();
-    clearTimeout(autoDismissRef.current);
     onScanNext();
   };
 

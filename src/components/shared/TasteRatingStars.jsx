@@ -9,14 +9,17 @@ const RATING_VALUES = Array.from({ length: 10 }, (_, i) => i + 1);
 // appears — the same one-definition-not-two lesson already applied to
 // CollectionCard/AchievementsSection this session.
 //
-// Tap targets are ~28px, not this app's usual 44px floor: ten individual
+// Tap targets are 32px, not this app's usual 44px floor: ten individual
 // targets can't each hit 44px in a single row at mobile width (10*44 alone
-// is already wider than most phone viewports before any gap). 28px still
-// clears WCAG 2.2 AA's 24x24 CSS px minimum (`web-target-size`) with a
-// small margin, and a mis-tap here just lands on the adjacent star — a
-// one-tap, no-cost correction, not a destructive or hard-to-reverse action,
-// so the usual HIG/Material 44px guidance is a documented, deliberate
-// exception rather than an oversight.
+// is already wider than most phone viewports before any gap). 32px clears
+// WCAG 2.2 AA's 24x24 CSS px minimum (`web-target-size`) with real margin,
+// and a mis-tap here just lands on the adjacent star — a one-tap, no-cost
+// correction, not a destructive or hard-to-reverse action, so the usual
+// HIG/Material 44px guidance is a documented, deliberate exception rather
+// than an oversight. Was previously 28px with a 2px gap despite ~52px of
+// unused horizontal room at 390px width — widened to close as much of that
+// gap to the 44px convention as ten-in-a-row actually allows, still with
+// room to spare (/impeccable critique).
 export default function TasteRatingStars({ value, onChange, readOnly = false, size = 'default' }) {
   const starClass = size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4';
   const buttonRefs = useRef([]);
@@ -61,7 +64,7 @@ export default function TasteRatingStars({ value, onChange, readOnly = false, si
 
   return (
     <div className="space-y-1">
-      <div role="radiogroup" aria-label="Taste rating out of 10" className="flex gap-0.5 -m-1.5">
+      <div role="radiogroup" aria-label="Taste rating out of 10" className="flex gap-1 -m-1.5">
         {RATING_VALUES.map(n => (
           <button
             key={n}
@@ -73,7 +76,7 @@ export default function TasteRatingStars({ value, onChange, readOnly = false, si
             tabIndex={n === activeValue ? 0 : -1}
             onKeyDown={e => handleKeyDown(e, n)}
             onClick={() => onChange(value === n ? null : n)}
-            className="w-7 h-7 flex items-center justify-center rounded-md transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="w-8 h-8 flex items-center justify-center rounded-md transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             <Star className={cn(starClass, n <= (value || 0) ? 'fill-primary text-primary' : 'text-border')} />
           </button>

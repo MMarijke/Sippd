@@ -17,7 +17,7 @@ export default function Feed() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: allActivity = [], isLoading, isError, refetch } = useQuery({
+  const { data: allActivity = [], isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['activity-feed'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -151,10 +151,15 @@ export default function Feed() {
             variant="ghost"
             size="icon"
             onClick={() => refetch()}
+            disabled={isFetching}
             aria-label="Refresh feed"
-            className="w-11 h-11 rounded-full bg-secondary border border-border text-muted-foreground hover:text-foreground"
+            className="w-11 h-11 rounded-full bg-secondary border border-border text-muted-foreground hover:text-foreground disabled:opacity-50"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
+            {/* Initial load already has its own full-page spinner below —
+                this only mattered for a manual re-tap, which previously
+                gave no feedback at all while in flight, unlike every other
+                async action on this page (/impeccable critique). */}
+            <RefreshCw className={cn('w-3.5 h-3.5', isFetching && 'animate-spin')} />
           </Button>
         }
       />

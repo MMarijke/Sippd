@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { useEffect, useRef } from 'react';
 import { Check, ScanLine } from 'lucide-react';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import CanImageBox from '@/components/shared/CanImageBox';
@@ -11,22 +10,21 @@ import CanImageBox from '@/components/shared/CanImageBox';
 // feedback for the habit-forming everyday case, without diluting what makes
 // a rare pull feel special.
 export default function AddedConfirmation({ canName, imageUrl, bgColor, onComplete, onScanNext }) {
-  const autoDismissRef = useRef(null);
   const reducedMotion = usePrefersReducedMotion();
 
-  useEffect(() => {
-    autoDismissRef.current = setTimeout(onComplete, 1100);
-    return () => clearTimeout(autoDismissRef.current);
-  }, [onComplete]);
-
+  // Used to auto-dismiss (defaulting to "View Collection") after 1.1s with
+  // no fade-in cushion on the action buttons at all — proportionally worse
+  // than RarityReveal's own version of this problem. Removed for the same
+  // reason: tap-anywhere-to-dismiss already exists, so a forced timer only
+  // ever works against whichever choice the user hadn't made yet, most
+  // often "Scan Next" on a page whose stated common case is logging
+  // several cans back-to-back. (/impeccable critique)
   const handleTap = () => {
-    clearTimeout(autoDismissRef.current);
     onComplete();
   };
 
   const handleScanNext = (e) => {
     e.stopPropagation();
-    clearTimeout(autoDismissRef.current);
     onScanNext();
   };
 

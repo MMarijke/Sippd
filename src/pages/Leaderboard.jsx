@@ -31,33 +31,39 @@ export default function Leaderboard() {
           scrollable list content beneath it, which is the same benign
           overlay pattern TradeLogDialog.jsx's own search already uses. */}
       <div className="px-5 pb-4">
+        {/* min-w-0 on each flex-1 Button lets it actually shrink below its
+            whitespace-nowrap content width instead of overflowing the
+            tablist — at 390px "Regional" previously spilled ~25px past the
+            container's right edge (/impeccable critique). The label itself
+            truncates rather than the Button, so the fixed-size icon next to
+            it never gets squeezed. */}
         <div role="tablist" aria-label="Leaderboard view" className="flex bg-secondary rounded-lg border border-border p-0.5">
           <Button
             variant="ghost"
             role="tab"
             aria-selected={tab === 'collectors'}
-            className={cn('flex-1 h-11 font-mono text-xs gap-1.5', tab === 'collectors' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            className={cn('flex-1 min-w-0 h-11 font-mono text-xs gap-1.5', tab === 'collectors' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setTab('collectors')}
           >
-            <Trophy className="w-3.5 h-3.5" /> Collectors
+            <Trophy className="w-3.5 h-3.5 shrink-0" /> <span className="truncate">Collectors</span>
           </Button>
           <Button
             variant="ghost"
             role="tab"
             aria-selected={tab === 'mostwanted'}
-            className={cn('flex-1 h-11 font-mono text-xs gap-1.5', tab === 'mostwanted' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            className={cn('flex-1 min-w-0 h-11 font-mono text-xs gap-1.5', tab === 'mostwanted' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setTab('mostwanted')}
           >
-            <Star className="w-3.5 h-3.5" /> Most Wanted
+            <Star className="w-3.5 h-3.5 shrink-0" /> <span className="truncate">Most Wanted</span>
           </Button>
           <Button
             variant="ghost"
             role="tab"
             aria-selected={tab === 'regional'}
-            className={cn('flex-1 h-11 font-mono text-xs gap-1.5', tab === 'regional' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            className={cn('flex-1 min-w-0 h-11 font-mono text-xs gap-1.5', tab === 'regional' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setTab('regional')}
           >
-            <MapPin className="w-3.5 h-3.5" /> Regional
+            <MapPin className="w-3.5 h-3.5 shrink-0" /> <span className="truncate">Regional</span>
           </Button>
         </div>
       </div>

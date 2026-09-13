@@ -121,8 +121,12 @@ export default function FindCollectors({ query, tab }) {
     );
   }
 
+  // No card/background here — the floating dropdown wrapper in
+  // Leaderboard.jsx now owns that chrome uniformly for every state
+  // (loading/error/empty/results), since it also has to stay opaque for
+  // the loading/error/empty states above, which have no card of their own.
   return (
-    <div className="mt-2 bg-card border border-border rounded-xl overflow-hidden divide-y divide-border">
+    <div className="divide-y divide-border">
       {results.map(u => {
         const initial = u.full_name?.[0]?.toUpperCase() || '?';
         const score = scoreByUserId[u.id] || 0;

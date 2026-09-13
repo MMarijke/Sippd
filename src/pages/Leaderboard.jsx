@@ -21,7 +21,13 @@ export default function Leaderboard() {
         'Community Most Wanted'
       } />
 
-      {/* Find Collectors search */}
+      {/* Find Collectors search — the dropdown is a floating overlay
+          (matching TradeLogDialog.jsx's own trade-partner search: same
+          absolute top-full/z-10/shadow-lg convention), not in normal
+          document flow. It used to push the tab toggle and whatever tab
+          was active downward while typing (/impeccable critique) —
+          exactly the moment a one-handed mobile user least wants the
+          layout moving under their thumb. */}
       <div className="px-5 pb-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -29,10 +35,14 @@ export default function Leaderboard() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Find Collectors by name..."
-            className="pl-9 bg-secondary border-border font-body"
+            className="h-11 pl-9 bg-secondary border-border font-body"
           />
+          {searchQuery.length >= 2 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl overflow-hidden z-10 max-h-80 overflow-y-auto shadow-lg">
+              <FindCollectors query={searchQuery} tab={tab} />
+            </div>
+          )}
         </div>
-        {searchQuery.length >= 2 && <FindCollectors query={searchQuery} tab={tab} />}
       </div>
 
       {/* Tab toggle */}

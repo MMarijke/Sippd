@@ -211,10 +211,14 @@ export default function ActivityCard({ item, user, myReactionSet, onReact }) {
           locks once cast" caption works for a single, one-time control)
           would be real clutter here; this answers "why won't this
           un-tap?" exactly when it becomes the relevant question, not
-          before. (/impeccable critique) */}
+          before. Wording previously said "Reactions lock in once cast,"
+          which reads as "this specific reaction can't be undone" — the
+          actual rule is "only one reaction total per post," which is why
+          the other two buttons are disabled above, not just this one
+          (/impeccable critique). */}
       {hasReacted && (
         <p className="text-[11px] font-mono text-muted-foreground -mt-1">
-          Reactions lock in once cast.
+          One reaction per post — choose carefully.
         </p>
       )}
     </div>

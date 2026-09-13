@@ -21,31 +21,15 @@ export default function Leaderboard() {
         'Community Most Wanted'
       } />
 
-      {/* Find Collectors search — the dropdown is a floating overlay
-          (matching TradeLogDialog.jsx's own trade-partner search: same
-          absolute top-full/z-10/shadow-lg convention), not in normal
-          document flow. It used to push the tab toggle and whatever tab
-          was active downward while typing (/impeccable critique) —
-          exactly the moment a one-handed mobile user least wants the
-          layout moving under their thumb. */}
-      <div className="px-5 pb-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Find Collectors by name..."
-            className="h-11 pl-9 bg-secondary border-border font-body"
-          />
-          {searchQuery.length >= 2 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl overflow-hidden z-10 max-h-80 overflow-y-auto shadow-lg">
-              <FindCollectors query={searchQuery} tab={tab} />
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Tab toggle */}
+      {/* Tab toggle — rendered above the search bar so the search dropdown
+          (which floats below the search input) never has to compete with
+          primary navigation for stacking order. It used to sit below the
+          search bar with the dropdown positioned on top of it: any open
+          result set fully occluded the tab row and blocked pointer events
+          to it, so switching tabs required first clearing the search text
+          (/impeccable critique). Now the dropdown only ever overlays the
+          scrollable list content beneath it, which is the same benign
+          overlay pattern TradeLogDialog.jsx's own search already uses. */}
       <div className="px-5 pb-4">
         <div role="tablist" aria-label="Leaderboard view" className="flex bg-secondary rounded-lg border border-border p-0.5">
           <Button
@@ -75,6 +59,30 @@ export default function Leaderboard() {
           >
             <MapPin className="w-3.5 h-3.5" /> Regional
           </Button>
+        </div>
+      </div>
+
+      {/* Find Collectors search — the dropdown is a floating overlay
+          (matching TradeLogDialog.jsx's own trade-partner search: same
+          absolute top-full/z-10/shadow-lg convention), not in normal
+          document flow. It used to push the tab toggle and whatever tab
+          was active downward while typing (/impeccable critique) —
+          exactly the moment a one-handed mobile user least wants the
+          layout moving under their thumb. */}
+      <div className="px-5 pb-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Find Collectors by name..."
+            className="h-11 pl-9 bg-secondary border-border font-body"
+          />
+          {searchQuery.length >= 2 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl overflow-hidden z-10 max-h-80 overflow-y-auto shadow-lg">
+              <FindCollectors query={searchQuery} tab={tab} />
+            </div>
+          )}
         </div>
       </div>
 

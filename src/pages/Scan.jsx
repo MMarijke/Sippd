@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
@@ -11,8 +11,8 @@ import AddCanForm from '@/components/scan/AddCanForm';
 import BarcodeScanner from '@/components/scan/BarcodeScanner';
 import { toast } from 'sonner';
 
-async function lookupOpenFoodFacts(barcode) {
-  const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+async function lookupOpenFoodFacts(barcode, signal) {
+  const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`, { signal });
   if (!res.ok) throw new Error(`Open Food Facts lookup failed (${res.status})`);
   const data = await res.json();
   if (data.status !== 1 || !data.product) return null;
@@ -32,6 +32,13 @@ export default function Scan() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCan, setSelectedCan] = useState(null);
   const [offLookup, setOffLookup] = useState(false);
+  // Escalation UI + cancel affordance for a lookup that's taking a while --
+  // this fetch previously had no timeout and no way out if it stalled
+  // (unlike BarcodeScanner's own "still waiting, tap X" pattern for a stuck
+  // camera permission prompt), trapping a user in an indefinite spinner on
+  // a slow connection. (/impeccable critique)
+  const [offLookupSlow, setOffLookupSlow] = useState(false);
+  const offLookupControllerRef = useRef(null);
 
   const {
     data: sharedCans = [],
@@ -70,15 +77,42 @@ export default function Scan() {
       return;
     }
     setOffLookup(true);
+    setOffLookupSlow(false);
+    const controller = new AbortController();
+    controller.barcode = barcode; // stashed so a mid-flight cancel can still prefill the manual form
+    offLookupControllerRef.current = controller;
+    const slowTimer = setTimeout(() => setOffLookupSlow(true), 5000);
+    // Client-side ceiling in case the fetch itself never settles (the
+    // browser's own connect/read timeouts can be far longer than a user
+    // would ever wait) -- aborts with a distinguishable reason so the catch
+    // block below can tell "timed out" apart from a user-initiated cancel.
+    const hardTimeout = setTimeout(() => controller.abort('timeout'), 12000);
     try {
-      const result = await lookupOpenFoodFacts(barcode);
+      const result = await lookupOpenFoodFacts(barcode, controller.signal);
       setSelectedCan(result || { barcode, _offMiss: true });
       setMode('add');
     } catch {
-      toast.error("Couldn't look up that barcode — check your connection and try again.");
+      if (controller.signal.aborted && controller.signal.reason === 'timeout') {
+        toast.error("Open Food Facts didn't respond in time — try again or add the can manually.");
+      } else if (controller.signal.aborted) {
+        // User tapped cancel — routes to manual entry below, nothing to report.
+      } else {
+        toast.error("Couldn't look up that barcode — check your connection and try again.");
+      }
     } finally {
+      clearTimeout(slowTimer);
+      clearTimeout(hardTimeout);
+      offLookupControllerRef.current = null;
       setOffLookup(false);
+      setOffLookupSlow(false);
     }
+  };
+
+  const cancelOffLookup = () => {
+    const pendingBarcode = offLookupControllerRef.current?.barcode ?? null;
+    offLookupControllerRef.current?.abort('user-cancelled');
+    setSelectedCan({ barcode: pendingBarcode, _offMiss: true });
+    setMode('add');
   };
 
   const filtered = useMemo(
@@ -175,9 +209,20 @@ export default function Scan() {
           // Not gated behind searchQuery.length — a camera-triggered scan
           // (the primary intended path) leaves the search box empty, and
           // this lookup still needs to show it's working either way.
-          <div className="flex items-center justify-center gap-2 py-6 text-muted-foreground font-mono">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Checking Open Food Facts...
+          <div className="flex flex-col items-center justify-center gap-2 py-6 text-muted-foreground font-mono text-center">
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {offLookupSlow ? 'Still checking Open Food Facts…' : 'Checking Open Food Facts...'}
+            </div>
+            {offLookupSlow && (
+              <button
+                type="button"
+                onClick={cancelOffLookup}
+                className="h-11 px-4 text-xs text-primary underline underline-offset-2"
+              >
+                Cancel and add manually instead
+              </button>
+            )}
           </div>
         )}
 

@@ -126,8 +126,15 @@ export default function Feed() {
 
   const handleReact = (item, emoji) => {
     if (!user) return;
-    const alreadyReacted = myReactionSet.has(`${item.id}:${emoji}`);
-    if (alreadyReacted) return; // no double react — react_to_activity() also enforces this
+    // The DB allows one reaction per post, not one per emoji
+    // (reactions_activity_id_reactor_id_key) — this used to only check the
+    // exact item:emoji pair, so tapping a *different* emoji after already
+    // reacting passed this guard and hit the RPC's own rejection instead,
+    // surfacing as a raw error toast (/impeccable critique). The buttons
+    // are disabled for this case too (ActivityCard.jsx), but the handler
+    // stays defensive against being called directly.
+    const hasAnyReaction = ['fire', 'star', 'wow'].some(e => myReactionSet.has(`${item.id}:${e}`));
+    if (hasAnyReaction) return;
     reactMutation.mutate({ activityId: item.id, emoji });
   };
 

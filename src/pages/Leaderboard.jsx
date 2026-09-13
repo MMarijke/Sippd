@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Trophy, Star, Search, MapPin } from 'lucide-react';
+import { Trophy, Star, Search, MapPin, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PageHeader from '@/components/shared/PageHeader';
@@ -76,8 +76,23 @@ export default function Leaderboard() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Find Collectors by name..."
-            className="h-11 pl-9 bg-secondary border-border font-body"
+            className="h-11 pl-9 pr-11 bg-secondary border-border font-body"
           />
+          {/* The only way to dismiss a search used to be manually deleting
+              every typed character — no visible affordance for it, and
+              (before the dropdown-occlusion fix) it was also the only way
+              to make the tab toggle clickable again while typing
+              (/impeccable critique). */}
+          {searchQuery.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              aria-label="Clear search"
+              className="absolute right-0 top-0 h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
           {searchQuery.length >= 2 && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl overflow-hidden z-10 max-h-80 overflow-y-auto shadow-lg">
               <FindCollectors query={searchQuery} tab={tab} />

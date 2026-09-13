@@ -44,27 +44,37 @@ export default function CanBackgroundPicker({ value, onChange, label = 'Card Bac
         </div>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
-        {QUICK_PICK_BG_COLORS.map(({ label: swatchLabel, hex }) => {
-          const selected = value === hex;
-          return (
-            <button
-              key={hex}
-              type="button"
-              title={swatchLabel}
-              aria-label={swatchLabel}
-              aria-pressed={selected}
-              onClick={() => onChange(hex)}
-              className={cn(
-                'w-10 h-10 rounded-lg border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                selected
-                  ? 'border-primary shadow-[0_0_0_2px_hsl(var(--primary)/0.3)]'
-                  : 'border-border hover:border-muted-foreground'
-              )}
-              style={{ backgroundColor: hex }}
-            />
-          );
-        })}
+      {/* Seven curated swatches presented as one visually undivided group
+          with Custom (/impeccable critique: 8 simultaneous options at a
+          single decision point, no distinction between "pick one of these"
+          and "or open the free-hue escape hatch"). A thin vertical divider
+          now separates the two groups so that distinction reads at a
+          glance instead of needing to be inferred from the rainbow icon. */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap">
+          {QUICK_PICK_BG_COLORS.map(({ label: swatchLabel, hex }) => {
+            const selected = value === hex;
+            return (
+              <button
+                key={hex}
+                type="button"
+                title={swatchLabel}
+                aria-label={swatchLabel}
+                aria-pressed={selected}
+                onClick={() => onChange(hex)}
+                className={cn(
+                  'w-10 h-10 rounded-lg border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  selected
+                    ? 'border-primary shadow-[0_0_0_2px_hsl(var(--primary)/0.3)]'
+                    : 'border-border hover:border-muted-foreground'
+                )}
+                style={{ backgroundColor: hex }}
+              />
+            );
+          })}
+        </div>
+
+        <div className="w-px h-8 bg-border flex-shrink-0" aria-hidden="true" />
 
         {/* Custom — the free-hue escape hatch. Ring lives on this outer
             wrapper, not the label below it: a box-shadow gets clipped by

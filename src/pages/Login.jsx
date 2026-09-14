@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import LegalFooter from '@/components/legal/LegalFooter';
+import AppDemoCarousel from '@/components/login/AppDemoCarousel';
 
 function GoogleIcon(props) {
   return (
@@ -113,14 +114,22 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-5">
-      <div className="w-full max-w-sm space-y-8">
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-4xl">⚡</span>
-          <h1 className="text-2xl font-display font-bold text-foreground tracking-wide">Sippd</h1>
-        </div>
+    <div className="min-h-screen bg-background">
+      {/* Compact brand row, not a centered hero — the demo below is the
+          opening statement now, a first-time visitor should recognize the
+          product without a full-screen title competing with it. */}
+      <div className="flex items-center justify-center gap-2 pt-6 pb-5">
+        <span className="text-xl" aria-hidden="true">⚡</span>
+        <h1 className="text-base font-display font-bold text-foreground tracking-wide">Sippd</h1>
+      </div>
 
-        <div className="space-y-5">
+      {/* Real feature previews, not marketing copy — a first-time visitor
+          sees the actual rarity-reveal moment, leaderboard, feed, and
+          collection view before deciding anything. (/impeccable) */}
+      <AppDemoCarousel />
+
+      <div className="px-5 pt-8 pb-10">
+        <div className="w-full max-w-sm mx-auto space-y-5">
           <Button
             type="button"
             variant="outline"
@@ -205,9 +214,9 @@ export default function Login() {
               {mode === 'signin' ? 'Sign up' : 'Sign in'}
             </button>
           </p>
-        </div>
 
-        <LegalFooter />
+          <LegalFooter />
+        </div>
       </div>
     </div>
   );

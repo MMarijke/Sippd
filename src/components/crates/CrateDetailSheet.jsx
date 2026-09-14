@@ -108,21 +108,25 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
           </button>
         </div>
 
-        {/* Tabs */}
-        <div role="tablist" aria-label="Crate view" className="flex px-5 pb-2 gap-2 flex-shrink-0">
+        {/* Segmented filter, not a tab set — standardized on aria-pressed
+            (see Feed.jsx/CompareCollection.jsx/Leaderboard.jsx for the same
+            change: role="tab"/tablist implies arrow-key navigation none of
+            these ever implemented). Bumped to h-11 to match the app's touch
+            target standard — was h-8 (32px). */}
+        <div aria-label="Crate view" className="flex px-5 pb-2 gap-2 flex-shrink-0">
           <button
-            role="tab"
-            aria-selected={tab === 'contents'}
+            type="button"
+            aria-pressed={tab === 'contents'}
             onClick={() => setTab('contents')}
-            className={`flex-1 h-8 rounded-lg font-mono text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${tab === 'contents' ? 'bg-primary/10 border-primary/30 text-primary' : 'border-border text-muted-foreground hover:text-foreground'}`}
+            className={`flex-1 h-11 rounded-lg font-mono text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${tab === 'contents' ? 'bg-primary/10 border-primary/30 text-primary' : 'border-border text-muted-foreground hover:text-foreground'}`}
           >
             In Crate ({contents.length})
           </button>
           <button
-            role="tab"
-            aria-selected={tab === 'add'}
+            type="button"
+            aria-pressed={tab === 'add'}
             onClick={() => { setTab('add'); setSearch(''); }}
-            className={`flex-1 h-8 rounded-lg font-mono text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${tab === 'add' ? 'bg-primary/10 border-primary/30 text-primary' : 'border-border text-muted-foreground hover:text-foreground'}`}
+            className={`flex-1 h-11 rounded-lg font-mono text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${tab === 'add' ? 'bg-primary/10 border-primary/30 text-primary' : 'border-border text-muted-foreground hover:text-foreground'}`}
           >
             <Plus className="w-3 h-3 inline mr-1" />Add Cans
           </button>

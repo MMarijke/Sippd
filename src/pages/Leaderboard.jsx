@@ -37,11 +37,14 @@ export default function Leaderboard() {
             container's right edge (/impeccable critique). The label itself
             truncates rather than the Button, so the fixed-size icon next to
             it never gets squeezed. */}
-        <div role="tablist" aria-label="Leaderboard view" className="flex bg-secondary rounded-lg border border-border p-0.5">
+        {/* Segmented filter, not a tab set — standardized on aria-pressed
+            (see Feed.jsx/CompareCollection.jsx for the same change and
+            reasoning: role="tab"/tablist implies arrow-key navigation none
+            of these ever implemented). */}
+        <div aria-label="Leaderboard view" className="flex bg-secondary rounded-lg border border-border p-0.5">
           <Button
             variant="ghost"
-            role="tab"
-            aria-selected={tab === 'collectors'}
+            aria-pressed={tab === 'collectors'}
             className={cn('flex-1 min-w-0 h-11 font-mono text-xs gap-1.5', tab === 'collectors' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setTab('collectors')}
           >
@@ -49,8 +52,7 @@ export default function Leaderboard() {
           </Button>
           <Button
             variant="ghost"
-            role="tab"
-            aria-selected={tab === 'mostwanted'}
+            aria-pressed={tab === 'mostwanted'}
             className={cn('flex-1 min-w-0 h-11 font-mono text-xs gap-1.5', tab === 'mostwanted' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setTab('mostwanted')}
           >
@@ -58,8 +60,7 @@ export default function Leaderboard() {
           </Button>
           <Button
             variant="ghost"
-            role="tab"
-            aria-selected={tab === 'regional'}
+            aria-pressed={tab === 'regional'}
             className={cn('flex-1 min-w-0 h-11 font-mono text-xs gap-1.5', tab === 'regional' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setTab('regional')}
           >

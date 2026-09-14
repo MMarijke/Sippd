@@ -169,10 +169,15 @@ export default function Feed() {
       />
 
       <div className="px-5 pb-4">
-        <div role="tablist" aria-label="Feed scope" className="flex bg-secondary rounded-lg border border-border p-0.5">
+        {/* Segmented filter, not a tab set — role="tab"/tablist implies
+            arrow-key navigation between options, which this never
+            implemented. Standardized on the aria-pressed pattern already
+            used correctly elsewhere (Home's brand filter,
+            CollectorsLeaderboard's metric toggle). */}
+        <div aria-label="Feed scope" className="flex bg-secondary rounded-lg border border-border p-0.5">
           <button
-            role="tab"
-            aria-selected={tab === 'global'}
+            type="button"
+            aria-pressed={tab === 'global'}
             className={cn('flex-1 h-11 font-mono text-xs rounded-md transition-colors gap-1.5 flex items-center justify-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
               tab === 'global' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
             )}
@@ -181,8 +186,8 @@ export default function Feed() {
             <Radio className="w-3.5 h-3.5" /> Global
           </button>
           <button
-            role="tab"
-            aria-selected={tab === 'following'}
+            type="button"
+            aria-pressed={tab === 'following'}
             className={cn('flex-1 h-11 font-mono text-xs rounded-md transition-colors gap-1.5 flex items-center justify-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
               tab === 'following' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
             )}

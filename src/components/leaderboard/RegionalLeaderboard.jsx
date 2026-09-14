@@ -181,7 +181,7 @@ export default function RegionalLeaderboard() {
           type="button"
           onClick={handleJumpToRank}
           aria-label="Jump to your rank"
-          className="w-full bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-between hover:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="w-full min-h-11 bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-between hover:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <span className="text-xs font-mono text-muted-foreground">Your Rank</span>
           <span className="flex items-center gap-1.5">

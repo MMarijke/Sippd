@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, ScanLine, PackageOpen, X, AlertCircle, RefreshCw } from 'lucide-react';
+import { Search, ScanLine, PackageOpen, X, AlertCircle, RefreshCw, CheckSquare, Star, PackagePlus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
@@ -40,10 +40,14 @@ export default function Collection() {
   }));
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [crateTarget, setCrateTarget] = useState(null);
+  const [bulkCrateTargets, setBulkCrateTargets] = useState(null);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(() => new Set());
   const { user } = useAuth();
   const streak = useStreak();
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Keep the URL in sync with search/filter/sort/view so back-navigation
   // (e.g. from a can's detail page) and bookmarked/shared links land back
@@ -238,6 +242,58 @@ export default function Collection() {
     },
   ].filter(Boolean);
 
+  // Selection mode: was one-item-at-a-time for every crate/favourite action,
+  // real friction for the "serious collector, hundreds of cans" persona this
+  // page is explicitly built for. Cleared whenever the filtered set changes
+  // (a selected item can scroll out of the current filter/search) so a
+  // stale selection never silently acts on cans no longer visible.
+  const selectedItems = useMemo(
+    () => collection.filter(item => selectedIds.has(item.id)),
+    [collection, selectedIds]
+  );
+  const toggleSelectionMode = () => {
+    setSelectionMode(prev => !prev);
+    setSelectedIds(new Set());
+  };
+  const toggleSelected = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [filters, searchQuery]);
+
+  const bulkFavouriteMutation = useMutation({
+    // Only calls toggle_favourite() for items not already favourited — a
+    // naive "toggle everything selected" would flip an already-favourited
+    // can back off, which reads as a bug ("I selected 5, favourited them,
+    // and one got un-favourited") rather than the "favourite all of these"
+    // action the button says it does.
+    mutationFn: async (items) => {
+      const targets = items.filter(item => !item.is_favourite);
+      await Promise.all(targets.map(item =>
+        supabase.rpc('toggle_favourite', { p_caller_id: user.id, p_collection_id: item.id })
+          .then(({ error }) => { if (error) throw error; })
+      ));
+      return targets.length;
+    },
+    onSuccess: (count) => {
+      queryClient.invalidateQueries({ queryKey: ['user-collection'] });
+      queryClient.invalidateQueries({ queryKey: ['shared-cans'] });
+      // Selection stays intact rather than auto-clearing — favouriting and
+      // adding-to-crate are both real, plausible actions on the exact same
+      // selection, and silently dropping it after the first one would force
+      // re-selecting everything to do the second.
+      toast.success(count > 0 ? `Favourited ${count} can${count === 1 ? '' : 's'}` : 'Already favourited');
+    },
+    onError: (error) => {
+      toast.error('Failed to favourite selection: ' + (error.message || 'Unknown error'));
+    },
+  });
+
   return (
     <div className="space-y-4">
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
@@ -255,30 +311,41 @@ export default function Collection() {
         <div className="relative z-10 space-y-4">
           <PageHeader
             title="Your Haul"
-            subtitle={`${collection.length} cans total`}
+            subtitle={selectionMode ? `${selectedIds.size} selected` : `${collection.length} cans total`}
             action={
-              <div className="flex items-center gap-2">
-                {/* asChild renders Link as the actual DOM element (via Radix's
-                    Slot) instead of nesting a <button> inside an <a> — see
-                    the sibling-overlay comment on CanCard/CanListItem for
-                    the same underlying reason. This exact fix was applied
-                    once already (fix/collection-button-link-nesting) but a
-                    later merge with a PR that also touched this header
-                    silently reverted these two sites — reapplying it. */}
-                <Button asChild size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
-                  <Link to="/crates">
-                    <PackageOpen className="w-4 h-4" /> Crates
-                  </Link>
+              selectionMode ? (
+                <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-border text-muted-foreground" onClick={toggleSelectionMode}>
+                  <X className="w-4 h-4" /> Cancel
                 </Button>
-                {/* Filled primary, not outline — matches Home's Scan
-                    button exactly (same destination, same weight as the
-                    app's other primary-nav Scan entry point). */}
-                <Button asChild size="sm" className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
-                  <Link to="/scan">
-                    <ScanLine className="w-4 h-4" /> Scan
-                  </Link>
-                </Button>
-              </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  {/* asChild renders Link as the actual DOM element (via Radix's
+                      Slot) instead of nesting a <button> inside an <a> — see
+                      the sibling-overlay comment on CanCard/CanListItem for
+                      the same underlying reason. This exact fix was applied
+                      once already (fix/collection-button-link-nesting) but a
+                      later merge with a PR that also touched this header
+                      silently reverted these two sites — reapplying it. */}
+                  {collection.length > 0 && (
+                    <Button size="sm" variant="outline" className="h-11 w-11 p-0 font-mono text-xs border-border text-muted-foreground hover:text-foreground" onClick={toggleSelectionMode} aria-label="Select multiple cans">
+                      <CheckSquare className="w-4 h-4" />
+                    </Button>
+                  )}
+                  <Button asChild size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
+                    <Link to="/crates">
+                      <PackageOpen className="w-4 h-4" /> Crates
+                    </Link>
+                  </Button>
+                  {/* Filled primary, not outline — matches Home's Scan
+                      button exactly (same destination, same weight as the
+                      app's other primary-nav Scan entry point). */}
+                  <Button asChild size="sm" className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Link to="/scan">
+                      <ScanLine className="w-4 h-4" /> Scan
+                    </Link>
+                  </Button>
+                </div>
+              )
             }
           />
 
@@ -327,10 +394,13 @@ export default function Collection() {
               className="inline-flex items-center gap-1 h-8 pl-3 pr-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[11px] font-mono"
             >
               {chip.label}
+              {/* p-4/-m-4 expands the invisible tap target to a full 44px
+                  without growing the pill itself — was p-1.5/-m-1 (~24px
+                  effective), the smallest interactive element on this page. */}
               <button
                 onClick={chip.onRemove}
                 aria-label={`Remove ${chip.label} filter`}
-                className="p-1.5 -m-1 rounded-full hover:bg-primary/20 transition-colors"
+                className="p-4 -m-4 rounded-full hover:bg-primary/20 transition-colors"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -338,7 +408,7 @@ export default function Collection() {
           ))}
           <button
             onClick={clearFilters}
-            className="h-8 px-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+            className="h-11 px-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors"
           >
             Clear all
           </button>
@@ -399,6 +469,9 @@ export default function Collection() {
                     showStatus
                     sharedCan={sharedCansMap[item.can_id]}
                     onAddToCrate={() => setCrateTarget(item)}
+                    selectable={selectionMode}
+                    selected={selectedIds.has(item.id)}
+                    onToggleSelect={() => toggleSelected(item.id)}
                   />
                 ))}
               </div>
@@ -410,6 +483,9 @@ export default function Collection() {
                     item={item}
                     sharedCan={sharedCansMap[item.can_id]}
                     onAddToCrate={() => setCrateTarget(item)}
+                    selectable={selectionMode}
+                    selected={selectedIds.has(item.id)}
+                    onToggleSelect={() => toggleSelected(item.id)}
                   />
                 ))}
               </div>
@@ -430,8 +506,45 @@ export default function Collection() {
         )}
       </div>
 
+      {/* Bulk action bar — sticky to the bottom of <main>'s own scroll
+          container (AppLayout.jsx), not position:fixed against the
+          viewport: BottomNav isn't fixed either, it's a normal-flow flex
+          sibling below <main>, so a fixed bar would need a guessed pixel
+          offset to sit above it instead of overlapping it. Sticky needs no
+          such guess — it naturally stops at <main>'s own bottom edge, right
+          above BottomNav, at any BottomNav height. Only the two actions the
+          audit specifically called out (favourite, add to crate) — bulk
+          status/delete weren't asked for and would need their own
+          confirm-before-destructive treatment. */}
+      {selectionMode && selectedIds.size > 0 && (
+        <div className="sticky bottom-0 z-30 pt-3 pb-3 px-5 bg-gradient-to-t from-background via-background to-transparent">
+          <div className="max-w-lg mx-auto bg-card border border-border rounded-2xl shadow-lg p-2 flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="flex-1 h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+              onClick={() => bulkFavouriteMutation.mutate(selectedItems)}
+              disabled={bulkFavouriteMutation.isPending}
+            >
+              <Star className="w-4 h-4" /> Favourite
+            </Button>
+            <Button
+              className="flex-1 h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => setBulkCrateTargets(selectedItems)}
+            >
+              <PackagePlus className="w-4 h-4" /> Add to Crate
+            </Button>
+          </div>
+        </div>
+      )}
+
       {crateTarget && (
         <AddToCrateSheet can={crateTarget} onClose={() => setCrateTarget(null)} />
+      )}
+      {bulkCrateTargets && (
+        <AddToCrateSheet
+          cans={bulkCrateTargets}
+          onClose={() => setBulkCrateTargets(null)}
+        />
       )}
     </div>
   );

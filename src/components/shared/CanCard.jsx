@@ -1,13 +1,13 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Star, CheckCircle, PackagePlus } from 'lucide-react';
+import { Star, CheckCircle, PackagePlus, Check } from 'lucide-react';
 import RarityBadge from './RarityBadge';
 import CanImageBox from './CanImageBox';
 import { getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
 import { useFavourite } from '@/hooks/useFavourite';
 import { cn } from '@/lib/utils';
 
-export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFavouriteToggle, onAddToCrate }) {
+export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFavouriteToggle, onAddToCrate, selectable, selected, onToggleSelect }) {
   const name = can.can_name || can.name;
   const brand = can.can_brand || can.brand;
   const imageUrl = can.can_image_url || can.image_url || sharedCan?.image_url;
@@ -32,23 +32,35 @@ export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFav
     onAddToCrate?.();
   };
 
+  const handleCardClick = (e) => {
+    if (selectable) {
+      onToggleSelect?.();
+      return;
+    }
+    onClick?.(e);
+  };
+
   return (
     // Navigation is a full-area overlay Link (absolute inset-0, sibling of
     // the star/add-to-crate buttons) rather than an ancestor <Link> wrapping
     // them — nesting <button> inside <a> is invalid HTML and produces
     // unpredictable focus/click behavior, the same bug class CanListItem's
-    // row was restructured to avoid.
+    // row was restructured to avoid. In selectable mode the Link is dropped
+    // entirely (a tap should select, not navigate) and the whole card
+    // becomes the tap target for toggling selection instead.
     <motion.div
       whileTap={{ scale: 0.97 }}
-      onClick={onClick}
+      onClick={handleCardClick}
       className={cn(
         'relative bg-card border rounded-xl overflow-hidden cursor-pointer transition-all group',
-        isFavourite
-          ? 'border-primary/50 favourite-glow'
-          : 'border-border hover:border-primary/30'
+        selectable && selected
+          ? 'border-primary ring-2 ring-primary/50'
+          : isFavourite
+            ? 'border-primary/50 favourite-glow'
+            : 'border-border hover:border-primary/30'
       )}
     >
-      {to && (
+      {to && !selectable && (
         <Link
           to={to}
           aria-label={name}
@@ -100,8 +112,26 @@ export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFav
         )}
       </div>
 
-      {/* Star button */}
-      {can.id && (
+      {/* Star button — replaced by a selection checkbox in selectable mode,
+          same corner/footprint so nothing shifts between the two modes. */}
+      {selectable ? (
+        can.id && (
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleSelect?.(); }}
+            aria-label={selected ? `Deselect ${name}` : `Select ${name}`}
+            aria-pressed={selected}
+            className="absolute top-0 right-0 z-10 w-11 h-11 rounded-full flex items-center justify-center"
+          >
+            <span className={cn(
+              'w-6 h-6 rounded-full border-2 flex items-center justify-center backdrop-blur-sm transition-colors',
+              selected ? 'bg-primary border-primary' : 'bg-background/70 border-border'
+            )}>
+              {selected && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
+            </span>
+          </button>
+        )
+      ) : can.id && (
         <button
           onClick={handleStar}
           disabled={isPending}
@@ -125,7 +155,7 @@ export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFav
             <p className="text-xs text-muted-foreground truncate mt-0.5">{flavour}</p>
           )}
         </div>
-        {onAddToCrate && can.id && (
+        {!selectable && onAddToCrate && can.id && (
           <button
             onClick={handleAddToCrate}
             aria-label="Add to crate"

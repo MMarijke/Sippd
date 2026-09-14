@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -7,7 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import LegalFooter from '@/components/legal/LegalFooter';
-import AppDemoCarousel from '@/components/login/AppDemoCarousel';
+import HeroReveal from '@/components/login/HeroReveal';
+import { LeaderboardProof, FeedProof, CollectionProof } from '@/components/login/ProofSections';
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 function GoogleIcon(props) {
   return (
@@ -26,8 +28,16 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const reducedMotion = usePrefersReducedMotion();
+  const formSectionRef = useRef(null);
 
-  const [mode, setMode] = useState('signin'); // 'signin' | 'signup'
+  // Defaults to 'signup', not 'signin' — this page's job is now persuading
+  // a first-time visitor (the whole scroll above builds toward exactly
+  // that), so a reader who scrolls all the way down without tapping a
+  // specific CTA should land on the form built for them. The compact "Sign
+  // in" link in the hero explicitly switches this back for a returning
+  // user skipping the tour. (/impeccable)
+  const [mode, setMode] = useState('signup'); // 'signin' | 'signup'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -113,23 +123,39 @@ export default function Login() {
     setConfirmPassword('');
   };
 
+  // Scrolls to the sign-in/sign-up form rather than a separate route or
+  // modal — the form doesn't move, so nothing about how it already works
+  // (Google OAuth, the post-login redirect above, email confirmation) needs
+  // to change. "Get Started" additionally sets signup mode: a first-time
+  // visitor tapping it from the hero clearly wants an account, not to sign
+  // into one they don't have yet.
+  const scrollToForm = (targetMode) => {
+    if (targetMode) setMode(targetMode);
+    formSectionRef.current?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Compact brand row, not a centered hero — the demo below is the
-          opening statement now, a first-time visitor should recognize the
-          product without a full-screen title competing with it. */}
-      <div className="flex items-center justify-center gap-2 pt-6 pb-5">
-        <span className="text-xl" aria-hidden="true">⚡</span>
-        <h1 className="text-base font-display font-bold text-foreground tracking-wide">Sippd</h1>
-      </div>
+      <HeroReveal
+        onGetStarted={() => scrollToForm('signup')}
+        onJumpToSignIn={() => scrollToForm('signin')}
+      />
 
-      {/* Real feature previews, not marketing copy — a first-time visitor
-          sees the actual rarity-reveal moment, leaderboard, feed, and
-          collection view before deciding anything. (/impeccable) */}
-      <AppDemoCarousel />
+      <LeaderboardProof />
+      <FeedProof />
+      <CollectionProof />
 
-      <div className="px-5 pt-8 pb-10">
+      <div ref={formSectionRef} className="px-5 py-16 border-t border-border scroll-mt-4">
         <div className="w-full max-w-sm mx-auto space-y-5">
+          <div className="text-center mb-2">
+            <h2 className="font-display font-black text-2xl text-foreground mb-1">
+              {mode === 'signin' ? 'Welcome back' : 'Start your vault'}
+            </h2>
+            <p className="text-sm font-body text-muted-foreground">
+              {mode === 'signin' ? 'Sign in to pick up where you left off.' : 'Free to join, free to collect.'}
+            </p>
+          </div>
+
           <Button
             type="button"
             variant="outline"

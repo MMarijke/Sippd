@@ -68,14 +68,18 @@ export default function Feed() {
     follows.filter(f => f.follower_id === user?.id && f.status === 'accepted').map(f => f.following_id)
   );
 
-  // RLS (activity_items_select_visible) already restricts allActivity to rows
-  // this user is allowed to see — private users' posts are never fetched
-  // unless we're an accepted follower or it's our own. No is_private_user
-  // check needed here anymore; the "global" tab only needs to exclude our
-  // own posts, which is a display choice, not a privacy one.
+  // RLS (activity_items_select_visible) already restricts allActivity to
+  // rows this user is allowed to see — a private account's posts are never
+  // fetched here unless we're an accepted follower or it's our own, and a
+  // public account's posts are visible to everyone. Global used to also
+  // exclude our own posts client-side, so a poster never saw their own pull
+  // land among strangers' reactions on the tab most people check first —
+  // that's now dropped: Global shows everything RLS already returned,
+  // self included. Following still narrows further to just the people we
+  // follow (plus ourselves). (/impeccable critique)
   const filtered = allActivity.filter(item => {
     if (tab === 'global') {
-      return item.user_id !== user?.id;
+      return true;
     } else {
       return followingIds.has(item.user_id) || item.user_id === user?.id;
     }
@@ -165,10 +169,15 @@ export default function Feed() {
       />
 
       <div className="px-5 pb-4">
-        <div role="tablist" aria-label="Feed scope" className="flex bg-secondary rounded-lg border border-border p-0.5">
+        {/* Segmented filter, not a tab set — role="tab"/tablist implies
+            arrow-key navigation between options, which this never
+            implemented. Standardized on the aria-pressed pattern already
+            used correctly elsewhere (Home's brand filter,
+            CollectorsLeaderboard's metric toggle). */}
+        <div aria-label="Feed scope" className="flex bg-secondary rounded-lg border border-border p-0.5">
           <button
-            role="tab"
-            aria-selected={tab === 'global'}
+            type="button"
+            aria-pressed={tab === 'global'}
             className={cn('flex-1 h-11 font-mono text-xs rounded-md transition-colors gap-1.5 flex items-center justify-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
               tab === 'global' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
             )}
@@ -177,8 +186,8 @@ export default function Feed() {
             <Radio className="w-3.5 h-3.5" /> Global
           </button>
           <button
-            role="tab"
-            aria-selected={tab === 'following'}
+            type="button"
+            aria-pressed={tab === 'following'}
             className={cn('flex-1 h-11 font-mono text-xs rounded-md transition-colors gap-1.5 flex items-center justify-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
               tab === 'following' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
             )}

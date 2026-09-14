@@ -2,12 +2,14 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { MapPin, Crown, AlertCircle, RefreshCw } from 'lucide-react';
+import { MapPin, Crown, AlertCircle, RefreshCw, Info, TrendingUp, TrendingDown } from 'lucide-react';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useJumpToHighlight } from '@/hooks/useJumpToHighlight';
+import { useRankDelta } from '@/hooks/useRankDelta';
 import { withCompetitionRank } from '@/lib/ranking';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
@@ -95,6 +97,7 @@ export default function RegionalLeaderboard() {
   });
 
   const { targetRef: myRowRef, highlighted, jumpToTarget } = useJumpToHighlight();
+  const rankDelta = useRankDelta('regional', myRegionalRank, currentUser?.id);
 
   const handleJumpToRank = () => {
     if (myScore === 0) {
@@ -154,16 +157,49 @@ export default function RegionalLeaderboard() {
 
   return (
     <div className="px-5">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wide truncate">
+          {profile?.region}
+        </span>
+        <Popover>
+          <PopoverTrigger
+            className="w-11 h-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 -mr-3.5"
+            aria-label="How regional ranking works"
+          >
+            <Info className="w-4 h-4" />
+          </PopoverTrigger>
+          <PopoverContent className="w-64 text-xs font-mono leading-relaxed" side="bottom" align="end">
+            <p className="font-semibold text-foreground mb-1">How regional ranking works</p>
+            <p className="text-muted-foreground">
+              Regional ranks by your Collection Score (the same number shown on your profile, weighting rarity into one figure) — not raw can count or Rare Pulls, which is what the Global tab ranks by instead.
+            </p>
+          </PopoverContent>
+        </Popover>
+      </div>
       {currentUser && (
         <button
           type="button"
           onClick={handleJumpToRank}
           aria-label="Jump to your rank"
-          className="w-full bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-between hover:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="w-full min-h-11 bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-between hover:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <span className="text-xs font-mono text-muted-foreground">Your Rank</span>
-          <span className="text-sm font-display font-bold text-primary">
-            {isScoresError ? '—' : myScore > 0 ? (myRegionalRank ? `#${myRegionalRank}` : '…') : 'Not ranked yet'}
+          <span className="flex items-center gap-1.5">
+            {rankDelta != null && rankDelta !== 0 && (
+              <span
+                className={cn(
+                  'flex items-center gap-0.5 text-[10px] font-mono font-semibold',
+                  rankDelta > 0 ? 'text-success' : 'text-muted-foreground'
+                )}
+                title={`${rankDelta > 0 ? 'Up' : 'Down'} ${Math.abs(rankDelta)} rank${Math.abs(rankDelta) === 1 ? '' : 's'} since your last visit`}
+              >
+                {rankDelta > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                {Math.abs(rankDelta)}
+              </span>
+            )}
+            <span className="text-sm font-display font-bold text-primary">
+              {isScoresError ? '—' : myScore > 0 ? (myRegionalRank ? `#${myRegionalRank}` : '…') : 'Not ranked yet'}
+            </span>
           </span>
         </button>
       )}

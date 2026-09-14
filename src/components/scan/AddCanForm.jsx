@@ -88,6 +88,29 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: false }));
   };
 
+  // Rarity votes lock once cast, but the only warning used to be a small
+  // static line below a 6-button grid — the same visual weight as any other
+  // field label, for the single highest-stakes tap in this form. A first
+  // tap now only stages the choice (pendingRarity); a second tap on the
+  // same pill is what actually commits it to form.rarity. Tapping a
+  // different pill just re-stages instead of committing, so changing your
+  // mind mid-decision never accidentally locks the wrong tier.
+  // (/impeccable critique)
+  const [pendingRarity, setPendingRarity] = useState(null);
+  const selectRarity = (r) => {
+    if (pendingRarity === r) {
+      update('rarity', r);
+      setPendingRarity(null);
+    } else if (form.rarity === r) {
+      // Tapping the already-confirmed pill while a different one is
+      // pending reads as "actually, keep this one" — clear the pending
+      // change instead of leaving it stuck showing "Confirm?".
+      setPendingRarity(null);
+    } else {
+      setPendingRarity(r);
+    }
+  };
+
   // Check if user already voted on this can
   const { data: existingVote } = useQuery({
     queryKey: ['rarity-vote', prefillData?.id, currentUser?.id],
@@ -200,6 +223,13 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
   });
 
   const handleSubmit = () => {
+    // An unconfirmed rarity tap shouldn't silently submit the previous
+    // value — that would look to the user like their tap did nothing,
+    // when really it just never got confirmed.
+    if (pendingRarity && !alreadyVoted) {
+      toast(`Tap ${pendingRarity} again to lock in your rarity vote before submitting.`);
+      return;
+    }
     const e = validate();
     if (Object.keys(e).length === 0) {
       createMutation.mutate();
@@ -468,22 +498,29 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
         ) : (
           <div className="space-y-1.5">
             <div className="grid grid-cols-3 gap-2">
-              {RARITIES.map(r => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => update('rarity', r)}
-                  aria-pressed={form.rarity === r}
-                  className={cn(
-                    'h-10 px-3 flex items-center justify-center rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider transition-all',
-                    form.rarity === r
-                      ? 'bg-primary border-primary text-primary-foreground shadow'
-                      : 'border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  {r}
-                </button>
-              ))}
+              {RARITIES.map(r => {
+                const isPending = pendingRarity === r;
+                const isConfirmed = form.rarity === r && !isPending;
+                return (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => selectRarity(r)}
+                    aria-pressed={isConfirmed}
+                    aria-label={isPending ? `Confirm ${r}` : r}
+                    className={cn(
+                      'h-10 px-3 flex items-center justify-center rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider transition-all',
+                      isConfirmed
+                        ? 'bg-primary border-primary text-primary-foreground shadow'
+                        : isPending
+                          ? 'bg-primary/15 border-primary text-primary ring-2 ring-primary/40'
+                          : 'border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    {isPending ? 'Confirm?' : r}
+                  </button>
+                );
+              })}
             </div>
             {/* The Community Rarity card above explains this same rule via a
                 tap-to-open Popover, but that card only renders when
@@ -491,8 +528,10 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
                 can has no explanation anywhere before this commits. This
                 stays visible unconditionally so the warning is never gated
                 behind an optional interaction. */}
-            <p className="text-[11px] font-mono text-muted-foreground">
-              Vote locks once cast — choose carefully.
+            <p className="text-[11px] font-mono text-muted-foreground" aria-live="polite">
+              {pendingRarity
+                ? `Tap ${pendingRarity} again to lock it in.`
+                : 'Vote locks once cast — choose carefully.'}
             </p>
           </div>
         )}

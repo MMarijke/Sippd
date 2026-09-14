@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import RarityBadge from '../shared/RarityBadge';
-import { Package, PackagePlus, ChevronRight } from 'lucide-react';
+import { Package, PackagePlus, ChevronRight, Check } from 'lucide-react';
 import { getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
+import { cn } from '@/lib/utils';
 
-export default function CanListItem({ item, sharedCan, onAddToCrate }) {
+export default function CanListItem({ item, sharedCan, onAddToCrate, selectable, selected, onToggleSelect }) {
   const confidence = sharedCan ? getConfidence(sharedCan.total_votes) : 'confirmed';
   const rarity = confidence === 'unrated' ? '???' : (sharedCan ? getDisplayRarity(sharedCan) : (item.can_rarity || 'Common'));
 
@@ -12,13 +13,24 @@ export default function CanListItem({ item, sharedCan, onAddToCrate }) {
     // rather than wrapping every child in an <a>, so the "Add to crate"
     // button below can be a real sibling instead of a <button> nested
     // inside an <a> — nesting interactive elements is invalid HTML and
-    // produces unpredictable focus/click behavior.
-    <div className="relative flex items-center gap-3 p-3 bg-card border border-border rounded-xl hover:border-primary/30 transition-all">
-      <Link
-        to={`/can/${item.can_id}`}
-        aria-label={item.can_name}
-        className="absolute inset-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      />
+    // produces unpredictable focus/click behavior. In selectable mode the
+    // Link is dropped (a tap should select, not navigate) and the row
+    // itself becomes the tap target for toggling selection.
+    <div
+      onClick={selectable ? onToggleSelect : undefined}
+      className={cn(
+        'relative flex items-center gap-3 p-3 bg-card border rounded-xl transition-all',
+        selectable ? 'cursor-pointer' : 'hover:border-primary/30',
+        selectable && selected ? 'border-primary ring-1 ring-primary' : 'border-border'
+      )}
+    >
+      {!selectable && (
+        <Link
+          to={`/can/${item.can_id}`}
+          aria-label={item.can_name}
+          className="absolute inset-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+      )}
       <div className="w-12 h-12 rounded-lg bg-secondary overflow-hidden flex-shrink-0 pointer-events-none">
         {item.can_image_url ? (
           <img src={item.can_image_url} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
@@ -54,16 +66,35 @@ export default function CanListItem({ item, sharedCan, onAddToCrate }) {
           </span>
         )}
       </div>
-      {onAddToCrate && (
+      {selectable ? (
         <button
-          onClick={onAddToCrate}
-          aria-label="Add to crate"
-          className="relative z-10 w-11 h-11 rounded-lg bg-secondary/60 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors flex-shrink-0"
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onToggleSelect?.(); }}
+          aria-label={selected ? `Deselect ${item.can_name}` : `Select ${item.can_name}`}
+          aria-pressed={selected}
+          className="relative z-10 w-11 h-11 flex items-center justify-center flex-shrink-0"
         >
-          <PackagePlus className="w-3.5 h-3.5" />
+          <span className={cn(
+            'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors',
+            selected ? 'bg-primary border-primary' : 'bg-background border-border'
+          )}>
+            {selected && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
+          </span>
         </button>
+      ) : (
+        <>
+          {onAddToCrate && (
+            <button
+              onClick={onAddToCrate}
+              aria-label="Add to crate"
+              className="relative z-10 w-11 h-11 rounded-lg bg-secondary/60 border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 transition-colors flex-shrink-0"
+            >
+              <PackagePlus className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 pointer-events-none" />
+        </>
       )}
-      <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 pointer-events-none" />
     </div>
   );
 }

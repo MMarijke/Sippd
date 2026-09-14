@@ -138,7 +138,7 @@ export default function Notifications() {
                     <div className="flex gap-2 mt-2">
                       <Button
                         size="sm"
-                        className="h-7 font-mono text-xs bg-primary text-primary-foreground hover:bg-primary/90"
+                        className="h-11 font-mono text-xs bg-primary text-primary-foreground hover:bg-primary/90"
                         onClick={() => handleTradeRequest.mutate({ notif: n, accept: true })}
                       >
                         <Check className="w-3 h-3 mr-1" /> Accept
@@ -146,7 +146,7 @@ export default function Notifications() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 font-mono text-xs border-border text-muted-foreground"
+                        className="h-11 font-mono text-xs border-border text-muted-foreground"
                         onClick={() => handleTradeRequest.mutate({ notif: n, accept: false })}
                       >
                         <X className="w-3 h-3 mr-1" /> Decline
@@ -164,7 +164,7 @@ export default function Notifications() {
                     <div className="flex gap-2 mt-2">
                       <Button
                         size="sm"
-                        className="h-7 font-mono text-xs bg-primary text-primary-foreground hover:bg-primary/90"
+                        className="h-11 font-mono text-xs bg-primary text-primary-foreground hover:bg-primary/90"
                         onClick={() => handleFollowRequest.mutate({ notif: n, accept: true })}
                       >
                         <Check className="w-3 h-3 mr-1" /> Accept
@@ -172,7 +172,7 @@ export default function Notifications() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 font-mono text-xs border-border text-muted-foreground"
+                        className="h-11 font-mono text-xs border-border text-muted-foreground"
                         onClick={() => handleFollowRequest.mutate({ notif: n, accept: false })}
                       >
                         <X className="w-3 h-3 mr-1" /> Deny

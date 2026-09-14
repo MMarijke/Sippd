@@ -1,36 +1,44 @@
 import { motion } from 'framer-motion';
 import { ScanLine } from 'lucide-react';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
+import { RARITY_HEX, rarityHexToRgba } from '@/lib/rarityConsensus';
 
-const RARITY_CONFIG = {
-  'Rare': {
-    label: 'RARE PULL',
-    accent: '#00FFFF',
-    glow: 'rgba(0,255,255,0.6)',
-    burst: 'rgba(0,255,255,0.15)',
-    shimmer: '#00FFFF',
-    particles: ['#00FFFF', '#00c8d4', '#7ff7ff', '#ffffff'],
-    icon: '★',
-  },
-  'Ultra Rare': {
-    label: 'ULTRA RARE',
-    accent: '#FFD700',
-    glow: 'rgba(255,215,0,0.7)',
-    burst: 'rgba(255,215,0,0.12)',
-    shimmer: '#FFD700',
-    particles: ['#FFD700', '#FFA500', '#fff7aa', '#ffffff'],
-    icon: '✦',
-  },
-  'Legendary': {
-    label: 'LEGENDARY',
-    accent: '#FF00FF',
-    glow: 'rgba(255,0,255,0.7)',
-    burst: 'rgba(255,0,255,0.15)',
-    shimmer: '#FF00FF',
-    particles: ['#FF00FF', '#cc00cc', '#ff99ff', '#ffffff'],
-    icon: '👑',
-  },
-};
+const RARITY_LABELS = { 'Rare': 'RARE PULL', 'Ultra Rare': 'ULTRA RARE', 'Legendary': 'LEGENDARY' };
+const RARITY_ICONS = { 'Rare': '★', 'Ultra Rare': '✦', 'Legendary': '👑' };
+
+// Lighten (positive) or darken (negative) a hex color toward white/black, for
+// particle color variety derived from one accent rather than hand-picked hex.
+function shade(hex, percent) {
+  const num = parseInt(hex.slice(1), 16);
+  const r = (num >> 16) & 0xff;
+  const g = (num >> 8) & 0xff;
+  const b = num & 0xff;
+  const target = percent < 0 ? 0 : 255;
+  const p = Math.abs(percent);
+  const mix = (channel) => Math.round((target - channel) * p) + channel;
+  return `#${[mix(r), mix(g), mix(b)].map(c => c.toString(16).padStart(2, '0')).join('')}`;
+}
+
+// Every color below derives from RARITY_HEX — the same source RarityBadge and
+// every other rarity surface in the app reads from — instead of an
+// independently hand-picked palette. A prior version hardcoded this screen's
+// own cyan/gold/magenta hex literals, so an Ultra Rare pull flashed gold here
+// and then showed purple everywhere else the same can appears. (/impeccable
+// critique)
+const RARITY_CONFIG = Object.fromEntries(
+  ['Rare', 'Ultra Rare', 'Legendary'].map((rarity) => {
+    const accent = RARITY_HEX[rarity];
+    return [rarity, {
+      label: RARITY_LABELS[rarity],
+      accent,
+      glow: rarityHexToRgba(rarity, 0.6),
+      burst: rarityHexToRgba(rarity, 0.15),
+      shimmer: accent,
+      particles: [accent, shade(accent, -0.25), shade(accent, 0.45), '#ffffff'],
+      icon: RARITY_ICONS[rarity],
+    }];
+  })
+);
 
 // Generate random particles once
 const PARTICLES = Array.from({ length: 30 }, (_, i) => ({
@@ -69,6 +77,9 @@ export default function RarityReveal({ rarity, canName, onComplete, onScanNext }
 
   return (
     <motion.div
+      role="status"
+      aria-live="polite"
+      aria-label={`${config.label}: ${canName} added to your vault`}
       className="fixed inset-0 z-50 flex items-center justify-center cursor-pointer select-none overflow-hidden"
       style={{ backgroundColor: '#05050A' }}
       initial={{ opacity: 0 }}

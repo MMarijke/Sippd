@@ -180,16 +180,20 @@ export default function CompareCollection() {
           </div>
         )}
 
-        {/* Tabs */}
-        <div role="tablist" aria-label="Compare view" className="flex gap-2">
+        {/* Segmented filter, not a tab set — matches the aria-pressed
+            pattern the rest of the app uses for this exact interaction
+            (Home's brand filter, CollectorsLeaderboard's metric toggle),
+            not role="tab"/tablist, which implies arrow-key navigation
+            between options that none of these buttons actually implement. */}
+        <div aria-label="Compare view" className="flex gap-2">
           {TABS.map(t => (
             <button
               key={t.key}
-              role="tab"
-              aria-selected={tab === t.key}
+              type="button"
+              aria-pressed={tab === t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                'flex-1 py-2 rounded-xl border text-[11px] font-mono transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                'flex-1 h-11 flex items-center justify-center rounded-xl border text-[11px] font-mono transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 tab === t.key ? activeTabColors[t.key] : tabColors[t.key]
               )}
             >

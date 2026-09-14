@@ -58,14 +58,18 @@ export default function Profile() {
     if (!nameInput.trim()) return;
     setSaving(true);
     const { error } = await supabase.from('profiles').update({ full_name: nameInput.trim() }).eq('id', user.id);
-    if (error) {
-      toast.error('Failed to update name');
-    } else {
-      queryClient.invalidateQueries({ queryKey: ['my-profile', user.id] });
-      queryClient.invalidateQueries({ queryKey: ['user-collection'] });
-      toast.success('Display name updated!');
-    }
     setSaving(false);
+    if (error) {
+      // Leave editing open with the typed value intact — closing the field
+      // here would silently discard what the user typed, leaving only a
+      // toast (easy to miss) as the only trace anything went wrong.
+      // (/impeccable critique)
+      toast.error('Failed to update name — try again');
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ['my-profile', user.id] });
+    queryClient.invalidateQueries({ queryKey: ['user-collection'] });
+    toast.success('Display name updated!');
     setEditing(false);
   };
 

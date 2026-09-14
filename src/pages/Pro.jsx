@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { openCheckout, PADDLE_MONTHLY_PRICE_ID, PADDLE_ANNUAL_PRICE_ID } from '@/lib/paddle';
 import { toast } from 'sonner';
+import LegalFooter from '@/components/legal/LegalFooter';
 
 const FEATURES = [
   'Unlimited crates (free: 5 crates, 10 cans each)',
@@ -88,6 +89,11 @@ export default function Pro() {
                   : 'Annual — $19.99/yr'}
               </Button>
             </div>
+
+            {/* Right where the purchase decision is made — Paddle's own
+                verification checks for Terms/Refund being reachable from
+                the checkout flow, not just buried in a footer elsewhere. */}
+            <LegalFooter className="pt-2" />
           </>
         )}
       </div>

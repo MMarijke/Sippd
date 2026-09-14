@@ -68,14 +68,18 @@ export default function Feed() {
     follows.filter(f => f.follower_id === user?.id && f.status === 'accepted').map(f => f.following_id)
   );
 
-  // RLS (activity_items_select_visible) already restricts allActivity to rows
-  // this user is allowed to see — private users' posts are never fetched
-  // unless we're an accepted follower or it's our own. No is_private_user
-  // check needed here anymore; the "global" tab only needs to exclude our
-  // own posts, which is a display choice, not a privacy one.
+  // RLS (activity_items_select_visible) already restricts allActivity to
+  // rows this user is allowed to see — a private account's posts are never
+  // fetched here unless we're an accepted follower or it's our own, and a
+  // public account's posts are visible to everyone. Global used to also
+  // exclude our own posts client-side, so a poster never saw their own pull
+  // land among strangers' reactions on the tab most people check first —
+  // that's now dropped: Global shows everything RLS already returned,
+  // self included. Following still narrows further to just the people we
+  // follow (plus ourselves). (/impeccable critique)
   const filtered = allActivity.filter(item => {
     if (tab === 'global') {
-      return item.user_id !== user?.id;
+      return true;
     } else {
       return followingIds.has(item.user_id) || item.user_id === user?.id;
     }

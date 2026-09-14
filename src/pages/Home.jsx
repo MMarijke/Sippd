@@ -213,9 +213,11 @@ export default function Home() {
                 </div>
               )}
 
-              <div className="px-5 mt-5">
-                <RarityHero collected={collected} sharedCansMap={sharedCansMap} isLoading={isLoading} />
-              </div>
+              {!isNewUser && (
+                <div className="px-5 mt-5">
+                  <RarityHero collected={collected} sharedCansMap={sharedCansMap} isLoading={isLoading} />
+                </div>
+              )}
 
               {!isNewUser && (
                 <div className="px-5 mt-5">

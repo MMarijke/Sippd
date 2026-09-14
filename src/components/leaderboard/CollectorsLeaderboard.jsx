@@ -1,13 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { Trophy, Zap, Crown, Info, AlertCircle, RefreshCw } from 'lucide-react';
+import { Trophy, Zap, Crown, Info, AlertCircle, RefreshCw, TrendingUp, TrendingDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useJumpToHighlight } from '@/hooks/useJumpToHighlight';
+import { useRankDelta } from '@/hooks/useRankDelta';
 import { withCompetitionRank } from '@/lib/ranking';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
@@ -105,6 +106,8 @@ export default function CollectorsLeaderboard() {
     enabled: !!currentUser?.id && myMetric > 0,
   });
 
+  const rankDelta = useRankDelta(`collectors:${sortBy}`, myRank, currentUser?.id);
+
   return (
     <div className="px-5">
       <div className="flex items-center gap-1.5 mb-3">
@@ -136,7 +139,7 @@ export default function CollectorsLeaderboard() {
           <PopoverContent className="w-64 text-xs font-mono leading-relaxed" side="bottom" align="end">
             <p className="font-semibold text-foreground mb-1">How ranking works</p>
             <p className="text-muted-foreground">
-              Total Cans ranks by raw can count. Rare Pulls ranks by how many Rare, Ultra Rare, and Legendary cans you've logged. Your Collection Score (on your profile) weights rarity into one number, but isn't a ranking tab here.
+              Total Cans ranks by raw can count. Rare Pulls ranks by how many Rare, Ultra Rare, and Legendary cans you've logged. Your Collection Score (on your profile) weights rarity into one number — that's what the Regional tab ranks by instead, not a metric here on Global.
             </p>
           </PopoverContent>
         </Popover>
@@ -150,8 +153,22 @@ export default function CollectorsLeaderboard() {
           className="w-full bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-between hover:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <span className="text-xs font-mono text-muted-foreground">Your Rank</span>
-          <span className={cn('text-sm font-display font-bold', sortBy === 'rare' ? 'text-rarity-ultra' : 'text-primary')}>
-            {isScoresError ? '—' : myMetric > 0 ? (myRank ? `#${myRank}` : '…') : 'Not ranked yet'}
+          <span className="flex items-center gap-1.5">
+            {rankDelta != null && rankDelta !== 0 && (
+              <span
+                className={cn(
+                  'flex items-center gap-0.5 text-[10px] font-mono font-semibold',
+                  rankDelta > 0 ? 'text-success' : 'text-muted-foreground'
+                )}
+                title={`${rankDelta > 0 ? 'Up' : 'Down'} ${Math.abs(rankDelta)} rank${Math.abs(rankDelta) === 1 ? '' : 's'} since your last visit`}
+              >
+                {rankDelta > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                {Math.abs(rankDelta)}
+              </span>
+            )}
+            <span className={cn('text-sm font-display font-bold', sortBy === 'rare' ? 'text-rarity-ultra' : 'text-primary')}>
+              {isScoresError ? '—' : myMetric > 0 ? (myRank ? `#${myRank}` : '…') : 'Not ranked yet'}
+            </span>
           </span>
         </button>
       )}

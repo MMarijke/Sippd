@@ -7,6 +7,7 @@ import { AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import FollowButton from '@/components/social/FollowButton';
+import { useMyFollows } from '@/hooks/useFollow';
 
 export default function FindCollectors({ query, tab }) {
   const navigate = useNavigate();
@@ -26,20 +27,7 @@ export default function FindCollectors({ query, tab }) {
     },
   });
 
-  const { data: follows = [], isError: isFollowsError } = useQuery({
-    queryKey: ['my-follows', currentUser?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('follows')
-        .select('*')
-        .eq('follower_id', currentUser.id)
-        .order('created_at', { ascending: false })
-        .limit(200);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!currentUser?.id,
-  });
+  const { data: follows = [], isError: isFollowsError } = useMyFollows(currentUser?.id);
 
   const { data: scores = [], isError: isScoresError } = useQuery({
     queryKey: ['leaderboard-scores-lookup'],

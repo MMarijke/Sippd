@@ -8,6 +8,7 @@ import { Radio, RefreshCw, Users, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
 import ActivityCard from '@/components/feed/ActivityCard';
+import { useMyFollows } from '@/hooks/useFollow';
 import { cn } from '@/lib/utils';
 
 export default function Feed() {
@@ -32,20 +33,7 @@ export default function Feed() {
     refetchOnMount: true,
   });
 
-  const { data: follows = [] } = useQuery({
-    queryKey: ['my-follows', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('follows')
-        .select('*')
-        .eq('follower_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(200);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  const { data: follows = [] } = useMyFollows(user?.id);
 
   const { data: myReactions = [] } = useQuery({
     queryKey: ['my-reactions', user?.id],

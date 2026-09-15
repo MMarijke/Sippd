@@ -10,6 +10,7 @@ import { getDisplayRarity, getConfidence, getItemScore, RARITY_ORDER } from '@/l
 import { computeAchievements } from '@/lib/achievements';
 import FollowButton from '@/components/social/FollowButton';
 import TradeRequestDialog from '@/components/social/TradeRequestDialog';
+import { useMyFollows } from '@/hooks/useFollow';
 import { useNavigate } from 'react-router-dom';
 
 export default function PublicProfile() {
@@ -35,19 +36,18 @@ export default function PublicProfile() {
     enabled: !!userId,
   });
 
-  const { data: follows = [] } = useQuery({
-    queryKey: ['my-follows', currentUser?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('follows').select('*');
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!currentUser?.id,
-  });
+  // Was an unscoped select('*') of the entire follows table — RLS
+  // (follows_select_participant) kept it from leaking anything, but it
+  // shared the same react-query cache key ('my-follows', userId) as the
+  // properly-scoped query FollowButton/FindCollectors/Feed each used
+  // independently, so whichever shape ran last effectively decided what
+  // every consumer of that key saw. Now the one canonical, scoped query.
+  // (/impeccable critique)
+  const { data: follows = [] } = useMyFollows(currentUser?.id);
 
   const isFollowingTarget = useMemo(() => {
-    return follows.some(f => f.follower_id === currentUser?.id && f.following_id === userId && f.status === 'accepted');
-  }, [follows, currentUser, userId]);
+    return follows.some(f => f.following_id === userId && f.status === 'accepted');
+  }, [follows, userId]);
 
   const isPrivate = profileUser?.is_private;
   const canViewContent = !isPrivate || isFollowingTarget || currentUser?.id === userId;

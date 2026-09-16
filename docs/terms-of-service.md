@@ -1,10 +1,9 @@
 # Sippd Terms of Service
 
-**Effective date:** [NEEDS REVIEW — set an effective date before publishing]
+**Effective date:** 2026-09-16
 
 These Terms of Service ("Terms") govern your use of Sippd (the "App"), available on the Google Play Store (Android) and on the web at sippd-beta.vercel.app. By creating an account or otherwise using the App, you agree to these Terms.
 
-[NEEDS REVIEW — confirm the legal entity offering the App ("we", "us", "Sippd") and add its full name and registered address here and in the Privacy Policy.]
 
 ## 1. Acceptable Use
 

@@ -223,10 +223,11 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
       }
     },
     onError: (error) => {
-      if (error?.message?.includes('already_collected')) {
-        toast('You already have this can in your vault');
-        onSuccess?.();
-      } else if (error?.message?.includes('rate_limit_exceeded')) {
+      // vote_on_can() no longer raises already_collected — re-voting on a
+      // can this user already voted on (e.g. logging a duplicate) is now
+      // silently skipped server-side instead of blocking the
+      // user_collection insert below it. See its migration's doc comment.
+      if (error?.message?.includes('rate_limit_exceeded')) {
         toast.error('You are adding cans too quickly — try again in an hour');
       } else if (error?.message?.includes('daily_scan_limit_reached')) {
         toast.error('Daily scan limit reached — upgrade to Pro for unlimited scans', {

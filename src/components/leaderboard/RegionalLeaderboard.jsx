@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { MapPin, Crown, AlertCircle, RefreshCw, Info, TrendingUp, TrendingDown } from 'lucide-react';
@@ -268,19 +268,25 @@ export default function RegionalLeaderboard() {
                   )}
                   <span className="text-xs font-mono text-muted-foreground leading-none">#{entry.rank}</span>
                 </div>
-                <div className={cn(
-                  'w-8 h-8 rounded-full flex items-center justify-center text-xs font-display font-bold flex-shrink-0',
-                  isMe ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'
-                )}>
-                  {initial}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={cn('flex items-center gap-1 text-sm font-semibold truncate', isMe ? 'text-primary' : 'text-foreground')}>
-                    <span className="truncate">{name}</span>
-                    {proUserIds.has(entry.user_id) && <ProBadge />}
-                    {isMe && <span className="ml-0.5 text-[10px] font-mono text-primary/70">(you)</span>}
-                  </p>
-                </div>
+                {/* See CollectorsLeaderboard.jsx's matching row for why this
+                    is now a Link — same fix, same reasoning, ported here so
+                    Regional doesn't stay the one tab still requiring a
+                    Find Collectors search just to reach a Follow option. */}
+                <Link to={`/u/${entry.user_id}`} className="group/row flex items-center gap-3 flex-1 min-w-0">
+                  <div className={cn(
+                    'w-8 h-8 rounded-full flex items-center justify-center text-xs font-display font-bold flex-shrink-0',
+                    isMe ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'
+                  )}>
+                    {initial}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={cn('flex items-center gap-1 text-sm font-semibold truncate group-hover/row:underline', isMe ? 'text-primary' : 'text-foreground')}>
+                      <span className="truncate">{name}</span>
+                      {proUserIds.has(entry.user_id) && <ProBadge />}
+                      {isMe && <span className="ml-0.5 text-[10px] font-mono text-primary/70">(you)</span>}
+                    </p>
+                  </div>
+                </Link>
                 <div className="flex-shrink-0 text-right">
                   <p className={cn('text-sm font-display font-bold tabular-nums', isMe ? 'text-primary' : 'text-foreground')}>
                     {entry.score}

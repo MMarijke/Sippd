@@ -20,6 +20,11 @@ import { exportUserData, downloadJson } from '@/lib/exportUserData';
 const STATUSES = ['collected', 'wishlist'];
 const RARITIES = ['Common', 'Uncommon', 'Rare', 'Ultra Rare', 'Legendary'];
 const PREFS_KEY = 'canvolt_prefs';
+const FOLLOW_NOTIFY_OPTIONS = [
+  { value: 'off', label: 'Off' },
+  { value: 'rare_only', label: 'Rare Only' },
+  { value: 'all', label: 'Every Can' },
+];
 
 function loadPrefs() {
   try { return JSON.parse(localStorage.getItem(PREFS_KEY)) || {}; } catch { return {}; }
@@ -222,24 +227,32 @@ function ChangePasswordPanel({ user }) {
 }
 
 // ─── Chip Toggle ─────────────────────────────────────────────────────────────
-function ChipToggle({ options, value, onChange }) {
+// Options are plain strings (Status/Rarity below, where the value IS the
+// label) or {value, label} pairs, for a preference like notify_follows_pref
+// whose stored values ('rare_only') aren't fit to display as-is.
+function ChipToggle({ options, value, onChange, disabled }) {
   return (
     <div className="flex flex-wrap gap-2 px-4 pb-3">
-      {options.map(opt => (
-        <button
-          key={opt}
-          onClick={() => onChange(opt)}
-          aria-pressed={value === opt}
-          className={cn(
-            'h-10 px-3 flex items-center rounded-full text-xs font-mono border transition-colors',
-            value === opt
-              ? 'bg-primary/10 border-primary/40 text-primary'
-              : 'bg-secondary border-border text-muted-foreground hover:border-primary/20'
-          )}
-        >
-          {opt}
-        </button>
-      ))}
+      {options.map(opt => {
+        const optValue = typeof opt === 'string' ? opt : opt.value;
+        const optLabel = typeof opt === 'string' ? opt : opt.label;
+        return (
+          <button
+            key={optValue}
+            onClick={() => onChange(optValue)}
+            aria-pressed={value === optValue}
+            disabled={disabled}
+            className={cn(
+              'h-10 px-3 flex items-center rounded-full text-xs font-mono border transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
+              value === optValue
+                ? 'bg-primary/10 border-primary/40 text-primary'
+                : 'bg-secondary border-border text-muted-foreground hover:border-primary/20'
+            )}
+          >
+            {optLabel}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -348,17 +361,17 @@ export default function Settings() {
     savePrefs(next);
   };
 
-  const toggleNotifyRareFollows = async () => {
+  const updateFollowNotifyPref = async (next) => {
+    if (next === profile?.notify_follows_pref) return;
     setNotifyPending(true);
-    const next = !profile?.notify_rare_follows;
-    const { error } = await supabase.from('profiles').update({ notify_rare_follows: next }).eq('id', user.id);
+    const { error } = await supabase.from('profiles').update({ notify_follows_pref: next }).eq('id', user.id);
     setNotifyPending(false);
     if (error) {
-      toast.error('Failed to update rare pull alerts: ' + (error.message || 'Unknown error'));
+      toast.error('Failed to update pull alerts: ' + (error.message || 'Unknown error'));
       return;
     }
     refetchProfile();
-    toast.success(next ? 'Rare pull alerts enabled' : 'Rare pull alerts disabled');
+    toast.success('Pull alerts updated');
   };
 
   const togglePrivate = async () => {
@@ -576,38 +589,28 @@ export default function Settings() {
 
         <SectionHeader title="Notifications" />
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
-          <div className="px-4 py-3.5 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground">Rare Pull Alerts</p>
-              <p className="text-xs font-mono text-muted-foreground mt-0.5">Notify me when someone I follow adds an Ultra Rare or Legendary can</p>
-            </div>
-            {profileLoading ? (
-              // Not a real switch reading the actual saved value yet — the
-              // profile query hasn't resolved, and asserting an aria-checked
-              // "off" state (which is what !!undefined would render below)
-              // would momentarily lie about the user's real setting.
-              <div className="w-11 h-6 rounded-full bg-secondary/60 animate-pulse flex-shrink-0" />
-            ) : (
-              <button
-                onClick={toggleNotifyRareFollows}
-                role="switch"
-                aria-checked={!!profile?.notify_rare_follows}
-                aria-label="Rare Pull Alerts"
-                disabled={notifyPending}
-                className={cn(
-                  'relative w-11 h-6 rounded-full transition-colors flex-shrink-0',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-                  'disabled:opacity-50 disabled:cursor-not-allowed',
-                  profile?.notify_rare_follows ? 'bg-primary' : 'bg-secondary border border-border'
-                )}
-              >
-                <div className={cn(
-                  'absolute top-0.5 w-5 h-5 rounded-full bg-foreground shadow transition-all',
-                  profile?.notify_rare_follows ? 'left-5' : 'left-0.5'
-                )} />
-              </button>
-            )}
+          <div className="px-4 pt-3.5 pb-1">
+            <p className="text-sm font-medium text-foreground">Pull Alerts</p>
+            <p className="text-xs font-mono text-muted-foreground mt-0.5">Notify me when someone I follow adds a can</p>
           </div>
+          {profileLoading ? (
+            // Not real chips reading the actual saved value yet — the
+            // profile query hasn't resolved, and asserting a pressed state
+            // (whichever chip !!undefined would match below) would
+            // momentarily lie about the user's real setting.
+            <div className="flex gap-2 px-4 pb-3.5">
+              {FOLLOW_NOTIFY_OPTIONS.map(o => (
+                <div key={o.value} className="h-10 w-20 rounded-full bg-secondary/60 animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <ChipToggle
+              options={FOLLOW_NOTIFY_OPTIONS}
+              value={profile?.notify_follows_pref || 'off'}
+              onChange={updateFollowNotifyPref}
+              disabled={notifyPending}
+            />
+          )}
         </div>
 
         <SectionHeader title="Privacy" />

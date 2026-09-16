@@ -49,10 +49,10 @@ We use the following third-party services to operate Sippd. Each processes a lim
 
 You have the following rights over your personal information:
 
-- **Access.** [NEEDS REVIEW — confirm and describe the process. Today, you can view your own account and collection data directly within the App; decide whether that's sufficient or whether a formal access-request process is also needed.]
+- **Access.** You can view your own account and collection data directly within the App, and download a complete copy of it at any time — see Export below.
 - **Correction.** You can update your display name, region, and password directly from Settings within the App.
 - **Deletion.** You can delete your account from Settings within the App. [NEEDS REVIEW — confirm this description matches current behavior, and disclose whether any data is retained after deletion (for example, anonymized activity records or historical leaderboard entries) rather than removed entirely.]
-- **Export.** Sippd does not currently have a self-service data export feature. [NEEDS REVIEW — decide how export requests will be handled (for example, a contact-based request with a stated turnaround time) and document it here.]
+- **Export.** You can download a self-service export of your data — your profile, collection, votes, follows, trades, crates, notifications, activity, and reactions — as a JSON file from Settings > Your Data within the App, at any time and free of charge.
 
 [NEEDS REVIEW — POPIA requires organizations to designate an Information Officer, register them with the Information Regulator, and provide a way for users to lodge a complaint with both your organization and the Regulator. Add that information here once available.]
 

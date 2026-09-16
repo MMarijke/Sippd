@@ -11,6 +11,9 @@ import { computeAchievements } from '@/lib/achievements';
 import FollowButton from '@/components/social/FollowButton';
 import TradeRequestDialog from '@/components/social/TradeRequestDialog';
 import { useMyFollows } from '@/hooks/useFollow';
+import { useProStatus } from '@/hooks/useProStatus';
+import { sortPinnedFirst } from '@/hooks/useCollectionHighlights';
+import ProBadge from '@/components/shared/ProBadge';
 import { useNavigate } from 'react-router-dom';
 
 export default function PublicProfile() {
@@ -51,6 +54,14 @@ export default function PublicProfile() {
 
   const isPrivate = profileUser?.is_private;
   const canViewContent = !isPrivate || isFollowingTarget || currentUser?.id === userId;
+
+  // Trophy Case badge — the OWNER's Pro status (not the viewer's), so
+  // strangers see the same badge/showcase the owner sees on their own
+  // Profile. Batched via useProStatus even though this page only ever
+  // needs one id, so it shares the same RPC/hook every other badge surface
+  // uses rather than a bespoke single-id query.
+  const proUserIds = useProStatus(userId ? [userId] : []);
+  const isOwnerPro = proUserIds.has(userId);
 
   // rarity_votes' only RLS policy is owner-only (voter_id = auth.uid()), so
   // a direct query for someone else's votes always returns zero rows — this
@@ -117,9 +128,14 @@ export default function PublicProfile() {
     return conf === 'unrated' ? null : getDisplayRarity(sc);
   };
 
+  // Sorted pinned-first (not just filtered) so the Trophy Case hero slot
+  // (always index 0 in CollectionCard) lands on a genuinely showcased item
+  // when the owner has pinned one, rather than an arbitrary query-order
+  // item — get_public_collection() has no ORDER BY, so the order coming
+  // back is otherwise undefined.
   const myItems = useMemo(
-    () => profileItems.filter(i => i.status === 'collected'),
-    [profileItems]
+    () => sortPinnedFirst(profileItems.filter(i => i.status === 'collected'), getEffectiveRarity),
+    [profileItems, sharedCansMap]
   );
 
   const score = useMemo(
@@ -225,6 +241,7 @@ export default function PublicProfile() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <h1 className="text-xl font-display font-bold text-foreground truncate">{displayName}</h1>
+                  {isOwnerPro && <ProBadge />}
                   {isPrivate && <Lock className="w-4 h-4 text-muted-foreground flex-shrink-0" />}
                 </div>
               </div>
@@ -331,6 +348,7 @@ export default function PublicProfile() {
                 <CollectionCard
                   score={score}
                   items={myItems}
+                  isPro={isOwnerPro}
                   rarityBreakdown={rarityBreakdown}
                   getEffectiveRarity={getEffectiveRarity}
                   stats={[

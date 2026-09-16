@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
 import ActivityCard from '@/components/feed/ActivityCard';
 import { useMyFollows } from '@/hooks/useFollow';
+import { useProStatus } from '@/hooks/useProStatus';
 import { cn } from '@/lib/utils';
 
 export default function Feed() {
@@ -72,6 +73,10 @@ export default function Feed() {
       return followingIds.has(item.user_id) || item.user_id === user?.id;
     }
   });
+
+  // Trophy Case badge — one batched lookup per page for every poster
+  // currently visible, not one query per card.
+  const proUserIds = useProStatus(filtered.map(item => item.user_id));
 
   const REACTION_COUNT_FIELD = { fire: 'reactions_fire', star: 'reactions_star', wow: 'reactions_wow' };
 
@@ -244,6 +249,7 @@ export default function Feed() {
               user={user}
               myReactionSet={myReactionSet}
               onReact={handleReact}
+              isPro={proUserIds.has(item.user_id)}
             />
           ))}
         </div>

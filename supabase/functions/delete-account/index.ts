@@ -22,8 +22,18 @@
 // injected automatically into every deployed Edge Function by the platform
 // — no secrets to set manually for this one. PADDLE_API_KEY and
 // PADDLE_API_ENVIRONMENT are the same ones get-subscription-status uses.
+//
+// Sentry + rate limiting were both missing here despite being present on
+// the other edge functions that need them — this is a destructive,
+// security-sensitive endpoint (permanently deletes an account and cancels
+// live billing) that had zero monitoring or throttling. (/impeccable critique)
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { Ratelimit } from 'npm:@upstash/ratelimit@2.0.8';
+import { Redis } from 'npm:@upstash/redis@1.38.3';
+import { initSentry, captureException } from '../_shared/sentry.ts';
+
+initSentry('delete-account');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -40,6 +50,19 @@ if (!PADDLE_API_ENVIRONMENT) {
 const PADDLE_API_BASE = PADDLE_API_ENVIRONMENT === 'production'
   ? 'https://api.paddle.com'
   : 'https://sandbox-api.paddle.com';
+
+const redis = new Redis({
+  url: Deno.env.get('UPSTASH_REDIS_REST_URL')!,
+  token: Deno.env.get('UPSTASH_REDIS_REST_TOKEN')!,
+});
+// Tighter than get-subscription-status's 30/hour (a read) — this is a
+// destructive action nobody legitimately calls often, but still generous
+// enough to allow a retry after a transient Paddle-cancel failure.
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, '1 h'),
+  analytics: false,
+});
 
 function jsonResponse(body: unknown, status: number) {
   return new Response(JSON.stringify(body), {
@@ -104,6 +127,11 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Not authenticated' }, 401);
     }
 
+    const { success } = await ratelimit.limit(user.id);
+    if (!success) {
+      return jsonResponse({ error: 'Rate limit exceeded' }, 429);
+    }
+
     const { data: profile, error: profileError } = await callerClient
       .from('profiles')
       .select('paddle_subscription_id')
@@ -119,6 +147,7 @@ Deno.serve(async (req) => {
         await cancelPaddleSubscription(profile.paddle_subscription_id);
       } catch (err) {
         console.error('delete-account: failed to cancel Paddle subscription', err);
+        await captureException(err, { where: 'cancelPaddleSubscription' });
         return jsonResponse({ error: 'Failed to cancel your subscription — please try again, or contact support if this persists.' }, 502);
       }
     }
@@ -139,6 +168,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ success: true }, 200);
   } catch (err) {
     console.error('delete-account: unexpected error', err);
+    await captureException(err, { where: 'top-level handler' });
     return jsonResponse({ error: 'Unexpected error' }, 500);
   }
 });

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Trophy, Star, Search, MapPin, X } from 'lucide-react';
+import { Trophy, Star, Search, MapPin, X, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PageHeader from '@/components/shared/PageHeader';
@@ -8,6 +8,7 @@ import CollectorsLeaderboard from '@/components/leaderboard/CollectorsLeaderboar
 import MostWanted from './MostWanted';
 import RegionalLeaderboard from '@/components/leaderboard/RegionalLeaderboard';
 import FindCollectors from '@/components/leaderboard/FindCollectors';
+import FeedContent from '@/components/feed/FeedContent';
 
 export default function Leaderboard() {
   const [tab, setTab] = useState('collectors');
@@ -18,6 +19,7 @@ export default function Leaderboard() {
       <PageHeader title="Ranks" subtitle={
         tab === 'collectors' ? 'Global Collector Leaderboard' :
         tab === 'regional' ? 'Regional Leaderboard' :
+        tab === 'feed' ? 'Community Activity' :
         'Community Most Wanted'
       } />
 
@@ -66,6 +68,17 @@ export default function Leaderboard() {
           >
             <MapPin className="w-3.5 h-3.5 shrink-0" /> <span className="truncate">Regional</span>
           </Button>
+          {/* Feed merged in here (/impeccable critique: bottom nav was
+              crowded at 6 items) — same segmented-tab pattern as the three
+              tabs above it, not a new interaction to learn. */}
+          <Button
+            variant="ghost"
+            aria-pressed={tab === 'feed'}
+            className={cn('flex-1 min-w-0 h-11 font-mono text-xs gap-1.5', tab === 'feed' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            onClick={() => setTab('feed')}
+          >
+            <Activity className="w-3.5 h-3.5 shrink-0" /> <span className="truncate">Feed</span>
+          </Button>
         </div>
       </div>
 
@@ -108,7 +121,10 @@ export default function Leaderboard() {
         </div>
       </div>
 
-      {tab === 'collectors' ? <CollectorsLeaderboard /> : tab === 'regional' ? <RegionalLeaderboard /> : <MostWanted />}
+      {tab === 'collectors' ? <CollectorsLeaderboard />
+        : tab === 'regional' ? <RegionalLeaderboard />
+        : tab === 'feed' ? <FeedContent />
+        : <MostWanted />}
     </div>
   );
 }

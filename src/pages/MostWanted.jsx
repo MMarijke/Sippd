@@ -162,7 +162,7 @@ export default function MostWanted() {
       <div className="px-5 pt-4">
         <div className="bg-card border border-border rounded-2xl p-10 flex flex-col items-center text-center">
           <Star className="w-10 h-10 text-primary mb-3" />
-          <p className="text-sm font-display font-semibold text-foreground">No favourites yet</p>
+          <p className="text-sm font-display font-semibold text-foreground">Nothing's trending yet</p>
           <p className="text-xs font-mono text-muted-foreground mt-1">Be the first to favourite a can!</p>
         </div>
       </div>

@@ -323,7 +323,7 @@ export default function Profile() {
                 <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-3">
                   <ScanLine className="w-6 h-6 text-primary" />
                 </div>
-                <p className="text-sm font-display font-bold text-foreground">No cans yet</p>
+                <p className="text-sm font-display font-bold text-foreground">Your vault is empty</p>
                 <p className="text-xs font-mono text-muted-foreground mt-1 max-w-[240px]">
                   Scan your first can to start tracking your score, rare pulls, and collection stats.
                 </p>

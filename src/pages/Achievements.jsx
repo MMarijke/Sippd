@@ -3,10 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, ChevronLeft, RefreshCw } from 'lucide-react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import PageHeader from '@/components/shared/PageHeader';
 import AchievementBadge from '@/components/achievements/AchievementBadge';
 import AchievementUnlockAnimation from '@/components/achievements/AchievementUnlockAnimation';
 import { ACHIEVEMENT_DEFINITIONS, computeAchievements, sortAchievementsForGallery } from '@/lib/achievements';
@@ -81,28 +82,17 @@ export default function Achievements() {
   const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements, user?.id);
 
   return (
-    <div className="bg-background">
+    <div className="min-h-screen bg-background">
       {toAnimate && (
         <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />
       )}
 
-      {/* Header */}
-      <div className="flex items-center gap-3 px-5 pt-6 pb-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="w-11 h-11 rounded-xl text-muted-foreground hover:text-foreground"
-          onClick={() => navigate('/profile')}
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
-        <div>
-          <h1 className="text-xl font-display font-bold text-foreground tracking-wide">Achievements</h1>
-          <p className="text-xs font-mono text-muted-foreground mt-0.5">
-            {isLoading ? '...' : isError ? '—' : `${unlocked} / ${achievements.length} unlocked`}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Achievements"
+        subtitle={isLoading ? '...' : isError ? '—' : `${unlocked} / ${achievements.length} unlocked`}
+        onBack={() => navigate('/profile')}
+        showBell={false}
+      />
 
       {/* Progress bar */}
       <div className="px-5 mb-5">

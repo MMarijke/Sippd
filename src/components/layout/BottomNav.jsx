@@ -1,11 +1,24 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, ScanLine, Grid3X3, Trophy, User, Activity } from 'lucide-react';
+import { Home, ScanLine, Grid3X3, Trophy, User } from 'lucide-react';
 
+// Feed used to be a 6th item here. /impeccable critique: six items
+// with mono-uppercase labels don't fit a common ~375px phone width without
+// being at or past their layout floor ("PROFILE" alone is wider than its
+// own icon box) — genuinely crowded, not just visually busy. Feed now
+// lives as a tab inside Leaderboard/Ranks (src/pages/Leaderboard.jsx),
+// reusing the same segmented-tab pattern already proven there for
+// Collectors/Regional/Most Wanted, rather than losing it from the app —
+// it's one level deeper, not gone (Home's FeedPreview still surfaces it
+// on the primary dashboard too).
+//
+// Scan and Profile stay unrenamed on purpose, not by oversight — Scan is
+// a verb/action rather than a place, and Profile is unambiguous; inventing
+// slang for either risked hurting clarity for the sake of voice
+// consistency with Vault/Haul/Ranks.
 const navItems = [
   { path: '/', icon: Home, label: 'Vault' },
   { path: '/scan', icon: ScanLine, label: 'Scan' },
   { path: '/collection', icon: Grid3X3, label: 'Haul' },
-  { path: '/feed', icon: Activity, label: 'Feed' },
   { path: '/leaderboard', icon: Trophy, label: 'Ranks' },
   { path: '/profile', icon: User, label: 'Profile' },
 ];
@@ -28,9 +41,20 @@ export default function BottomNav() {
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <div className={`p-1.5 rounded-lg transition-all ${isActive ? 'bg-primary/10 neon-glow' : ''}`}>
-                <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.5} />
-              </div>
+              {/* Padded box only for the active state's glow pill now —
+                  every item carrying its own box on top of the label
+                  (three stacked visual layers) read busier than icon+label
+                  alone, compounding the density problem independent of
+                  width (/impeccable critique). Inactive items are now a
+                  plain icon, so the active state reads as distinct by
+                  contrast rather than by addition. */}
+              {isActive ? (
+                <div className="p-1.5 rounded-lg bg-primary/10 neon-glow">
+                  <Icon className="w-5 h-5" strokeWidth={2.5} />
+                </div>
+              ) : (
+                <Icon className="w-5 h-5 m-1.5" strokeWidth={1.5} />
+              )}
               <span className="text-[10px] font-mono font-medium tracking-wider uppercase">
                 {label}
               </span>

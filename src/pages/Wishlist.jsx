@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Search, ScanLine, CheckCircle2, Trash2, ChevronDown, ChevronRight, Bookmark } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PageHeader from '@/components/shared/PageHeader';
 import CanImageBox from '@/components/shared/CanImageBox';
 import RarityBadge from '@/components/shared/RarityBadge';
@@ -16,6 +16,7 @@ import RecommendedCans from '@/components/wishlist/RecommendedCans';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
 export default function Wishlist() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [collectedIds, setCollectedIds] = useState(new Set());
@@ -129,10 +130,12 @@ export default function Wishlist() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="min-h-screen bg-background space-y-4">
       <PageHeader
         title="Wishlist"
         subtitle={`${wishlist.length} cans wanted`}
+        onBack={() => navigate(-1)}
+        showBell={false}
         action={
           <Link to="/scan">
             <Button size="sm" variant="outline" className="font-mono text-xs gap-1.5">

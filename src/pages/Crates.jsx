@@ -123,7 +123,7 @@ export default function Crates() {
       ) : crates.length === 0 ? (
         <div className="flex flex-col items-center gap-4 py-24 px-8 text-center">
           <PackageOpen className="w-14 h-14 text-muted-foreground/20" />
-          <p className="text-sm font-display font-semibold text-foreground">No crates yet</p>
+          <p className="text-sm font-display font-semibold text-foreground">Start your first crate</p>
           <p className="text-xs font-mono text-muted-foreground">Create a crate to organise your collection — e.g. "Rare Finds" or "Summer Editions"</p>
           <Button
             size="sm"

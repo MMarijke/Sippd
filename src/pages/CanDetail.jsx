@@ -364,7 +364,7 @@ export default function CanDetail() {
               </p>
             </div>
           ) : (
-            <p className="text-xs font-mono text-muted-foreground">No votes yet</p>
+            <p className="text-xs font-mono text-muted-foreground">Not rated yet</p>
           )}
 
           {/* User's own vote */}

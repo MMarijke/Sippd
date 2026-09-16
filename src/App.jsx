@@ -68,21 +68,29 @@ function App() {
             <Route path="/refund" element={<Refund />} />
 
             <Route element={<ProtectedRoute />}>
+              {/* The five primary tab-bar destinations only — every other
+                  route below is reached contextually (a link, not a nav
+                  item) and owns its own back-chevron header instead of
+                  the bottom nav. Achievements/Wishlist/Feed used to live
+                  in here despite not being nav items, which meant the nav
+                  rendered with zero items highlighted on all three — a
+                  real "where am I" bug, not just a stylistic one.
+                  (/impeccable critique) */}
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Home />} />
                 <Route path="/scan" element={<Scan />} />
                 <Route path="/collection" element={<Collection />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/achievements" element={<Achievements />} />
-                <Route path="/feed" element={<Feed />} />
-                <Route path="/wishlist" element={<Wishlist />} />
               </Route>
               <Route path="/can/*" element={<CanDetail />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/monthly-report" element={<MonthlyReport />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/crates" element={<Crates />} />
+              <Route path="/achievements" element={<Achievements />} />
+              <Route path="/feed" element={<Feed />} />
+              <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/pro" element={<Pro />} />
               <Route path="/compare" element={<CompareCollection />} />
             </Route>

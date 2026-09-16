@@ -83,8 +83,6 @@ export default function Notifications() {
       case 'new_follower': return `${n.actor_name} started following you`;
       case 'follow_request': return `${n.actor_name} wants to follow you`;
       case 'reaction': return `${n.actor_name} reacted ${n.emoji === 'fire' ? '🔥' : n.emoji === 'star' ? '⭐' : '😮'} to your ${n.can_name} addition`;
-      case 'can_rated': return `${n.can_name} has been rated ${n.can_rarity} by the community`;
-      case 'can_confirmed': return `${n.can_name} is now community verified as ${n.can_rarity}`;
       case 'trade_request': return `${n.actor_name} wants to trade — offering ${n.trade_offer_can_name} for your ${n.trade_want_can_name}`;
       case 'trade_response': return `${n.actor_name} ${n.trade_response_text} your trade request for ${n.trade_want_can_name}`;
       case 'trade_status_update': return `Trade updated to ${n.trade_new_status}: ${n.trade_offer_can_name} ↔ ${n.trade_want_can_name}`;

@@ -63,13 +63,12 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }) => {
-      const { error } = await supabase
-        .from('trades')
-        .update({ status })
-        .eq('id', id)
-        .eq('owner_id', userId);
+      const { error } = await supabase.rpc('update_trade_status', {
+        p_caller_id: userId,
+        p_trade_id: id,
+        p_status: status,
+      });
       if (error) throw error;
-      // TODO: notify trade partner via RPC (deferred)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trades'] });

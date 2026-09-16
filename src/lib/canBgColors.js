@@ -31,10 +31,15 @@ export const QUICK_PICK_BG_COLORS = [
 // Replaced by a free-hue color picker (CanBackgroundPicker.jsx); this clamp
 // is what keeps a user-picked color from landing somewhere that breaks that
 // same contrast guarantee — hue and saturation stay whatever the user
-// picked, only lightness gets pulled back into the same safe band the old
-// presets already lived in.
+// picked, only lightness gets pulled back into a safe band.
+//
+// MAX_LIGHTNESS was originally 18 (matching the old presets almost
+// exactly) — user feedback was that this made a picked color darken far
+// more than expected the moment you chose it. Loosened to 35: still keeps
+// white/light foreground text and can art readable, but a picked color now
+// reads much closer to what was actually chosen in the native picker.
 const MIN_LIGHTNESS = 6;
-const MAX_LIGHTNESS = 18;
+const MAX_LIGHTNESS = 35;
 
 function hexToHsl(hex) {
   const r = parseInt(hex.slice(1, 3), 16) / 255;

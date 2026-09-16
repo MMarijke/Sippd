@@ -23,7 +23,7 @@ const STATUS_OPTIONS = [
   { value: 'duplicate', label: 'Duplicate' },
 ];
 
-export default function EditEntrySheet({ open, onClose, item, myVote }) {
+export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan, onBarcodeAdded }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -66,6 +66,37 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
   });
 
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
+
+  // Barcode lives on shared_cans (the community catalog), not on this
+  // user_collection row, so it can't just be another field in `form` — it's
+  // its own RPC (set_can_barcode), separate from saveMutation below. Only
+  // addable while missing: the RPC itself rejects overwriting a barcode
+  // that's already set, so once one exists this renders read-only instead
+  // of a form control that would just reject the save.
+  const [barcodeInput, setBarcodeInput] = useState('');
+
+  const addBarcodeMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('set_can_barcode', {
+        p_caller_id: user.id,
+        p_can_id: item.can_id,
+        p_barcode: barcodeInput,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success('Barcode added');
+      setBarcodeInput('');
+      onBarcodeAdded?.();
+    },
+    onError: (error) => {
+      if (error.message?.includes('barcode_already_used')) {
+        toast.error('That barcode is already used by a different can');
+      } else {
+        toast.error('Failed to add barcode: ' + (error.message || 'Unknown error'));
+      }
+    },
+  });
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -136,6 +167,38 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
               onChange={e => update('can_edition', e.target.value)}
               className="bg-secondary border-border font-body"
             />
+          </div>
+
+          {/* Barcode — previously had no field here at all, so a can added
+              without one (manual entry, or a scan that didn't resolve)
+              could never get one added later. */}
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-can-barcode" className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Barcode</Label>
+            {sharedCan?.barcode ? (
+              <p className="h-11 flex items-center px-3 rounded-lg bg-secondary border border-border font-mono text-sm text-foreground">
+                {sharedCan.barcode}
+              </p>
+            ) : (
+              <div className="flex gap-2">
+                <Input
+                  id="edit-can-barcode"
+                  value={barcodeInput}
+                  onChange={e => setBarcodeInput(e.target.value.replace(/\D/g, ''))}
+                  placeholder="Scan or type the barcode"
+                  inputMode="numeric"
+                  className="bg-secondary border-border font-mono text-sm flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => addBarcodeMutation.mutate()}
+                  disabled={!barcodeInput.trim() || addBarcodeMutation.isPending}
+                  className="h-11 font-mono text-xs px-4 border-primary/30 text-primary hover:bg-primary/10 flex-shrink-0"
+                >
+                  {addBarcodeMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Add'}
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Image */}

@@ -458,6 +458,8 @@ export default function CanDetail() {
           onClose={() => setShowEdit(false)}
           item={item}
           myVote={myVote}
+          sharedCan={can}
+          onBarcodeAdded={refetchCan}
         />
       )}
     </div>

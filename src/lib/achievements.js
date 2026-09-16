@@ -86,7 +86,7 @@ export const ACHIEVEMENT_DEFINITIONS = [
     check: ({ voteCount }) => voteCount >= 20, getDate: () => null,
   },
   {
-    key: 'vault_hunter', title: 'Vault Hunter', description: 'Push 5 cans from Unrated to Low Confidence by voting', icon: '🔍', incremental: true, goal: 5,
+    key: 'vault_hunter', title: 'Vault Hunter', description: 'Cast your first 5 rarity votes', icon: '🔍', incremental: true, goal: 5,
     getProgress: ({ voteCount }) => ({ current: Math.min(voteCount, 5), goal: 5, label: 'cans rated' }),
     check: ({ voteCount }) => voteCount >= 5, getDate: () => null,
   },

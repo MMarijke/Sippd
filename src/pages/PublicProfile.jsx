@@ -14,6 +14,7 @@ import { useMyFollows } from '@/hooks/useFollow';
 import { useProStatus } from '@/hooks/useProStatus';
 import { sortPinnedFirst } from '@/hooks/useCollectionHighlights';
 import ProBadge from '@/components/shared/ProBadge';
+import SippdBranding from '@/components/shared/SippdBranding';
 import { useNavigate } from 'react-router-dom';
 
 export default function PublicProfile() {
@@ -372,12 +373,7 @@ export default function PublicProfile() {
                   per-profile mode). */}
               <AchievementsSection achievements={userAchievements} />
 
-              <div className="pt-4 border-t border-border text-center">
-                <p className="text-[11px] font-mono text-muted-foreground">
-                  Track your energy drink collection at{' '}
-                  <a href="/" className="text-primary underline">Sippd</a>
-                </p>
-              </div>
+              <SippdBranding />
             </>}
           </>
         )}

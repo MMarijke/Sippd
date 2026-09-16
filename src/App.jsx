@@ -18,6 +18,7 @@ import Achievements from './pages/Achievements';
 import Settings from './pages/Settings';
 import MonthlyReport from './pages/MonthlyReport';
 import PublicProfile from './pages/PublicProfile';
+import SharedCrate from './pages/SharedCrate';
 import Feed from './pages/Feed';
 import Notifications from './pages/Notifications';
 import Crates from './pages/Crates';
@@ -51,6 +52,13 @@ function App() {
                 this only controls whether the page mounts, not what it
                 shows. See the 2026-09-12 public-profile migration. */}
             <Route path="/u/:userId" element={<PublicProfile />} />
+
+            {/* Public on purpose — a "capability link" (see get_public_crate's
+                migration comment): sharing one crate is a scoped, active
+                choice its owner makes, independent of the account's
+                is_private setting, so this must work for a visitor with no
+                Sippd account at all. */}
+            <Route path="/crate/:crateId" element={<SharedCrate />} />
 
             {/* Public on purpose — required to be live and reachable without
                 an account for Paddle's business verification and for any

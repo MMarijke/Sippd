@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
-import { X, Plus, Minus } from 'lucide-react';
+import { X, Plus, Minus, Share2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { RARITY_ORDER } from '@/lib/rarityConsensus';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useShare } from '@/hooks/useShare';
 import ProGate from '@/components/shared/ProGate';
 
 const FREE_CRATE_CAN_LIMIT = 10;
@@ -17,6 +18,7 @@ const FREE_CRATE_CAN_LIMIT = 10;
 export default function CrateDetailSheet({ crate, collection, onClose, onCrateUpdated }) {
   const queryClient = useQueryClient();
   const { isPro } = useSubscription();
+  const { copyLink, shareLink } = useShare();
   const [tab, setTab] = useState('contents'); // 'contents' | 'add'
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('date_desc');
@@ -83,6 +85,20 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
     });
   };
 
+  // Same supported/fallback pattern Profile.jsx's own share button already
+  // uses for /u/:userId — native share sheet first, clipboard copy as the
+  // fallback everywhere that isn't supported (typically desktop).
+  const handleShareCrate = async () => {
+    const crateUrl = `${window.location.origin}/crate/${crate.id}`;
+    const title = `${crate.name} — a Sippd crate`;
+    const result = await shareLink({ url: crateUrl, title });
+    if (result.supported) {
+      if (result.error) toast.error('Could not share crate link');
+      return;
+    }
+    copyLink(crateUrl, 'Crate link copied!');
+  };
+
   return (
     <Sheet open onOpenChange={o => !o && onClose()}>
       <SheetContent
@@ -103,9 +119,18 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
               {crate.description && <p className="text-[11px] font-mono text-muted-foreground">{crate.description}</p>}
             </div>
           </div>
-          <button onClick={onClose} aria-label="Close" className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground flex-shrink-0">
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={handleShareCrate}
+              aria-label="Share crate link"
+              className="w-11 h-11 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
+            <button onClick={onClose} aria-label="Close" className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Segmented filter, not a tab set — standardized on aria-pressed

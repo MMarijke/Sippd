@@ -104,18 +104,31 @@ export default function CanDetail() {
 
   const item = collectionItems.find(c => c.can_id === canId);
 
+  // delete_collection_entry(), not a plain table delete — a plain delete
+  // only ever unlinked the caller's own row, leaving no way to actually
+  // clean up a test/junk/duplicate shared_cans catalog entry once every
+  // collector who had it removed their copy. The RPC still does exactly
+  // that same row delete first; it additionally removes the now-
+  // unreferenced shared_cans row (and its votes) only when this caller
+  // was its last owner — a can six other people also collect is
+  // untouched beyond this caller's own copy.
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from('user_collection')
-        .delete()
-        .eq('id', item.id)
-        .eq('owner_id', user.id);
+      const { data, error } = await supabase.rpc('delete_collection_entry', {
+        p_caller_id: user.id,
+        p_entry_id: item.id,
+      });
       if (error) throw error;
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['user-collection'] });
       setShowDelete(false);
+      toast.success(
+        data?.catalog_deleted
+          ? 'Removed — no one else had this can, so it was also deleted from the shared catalog'
+          : 'Removed from your vault'
+      );
       navigate('/collection');
     },
     onError: (error) => {

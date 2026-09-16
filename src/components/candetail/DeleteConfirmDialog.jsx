@@ -17,7 +17,7 @@ export default function DeleteConfirmDialog({ open, onCancel, onConfirm, isPendi
         <AlertDialogHeader>
           <AlertDialogTitle className="font-display text-foreground">Remove from Collection?</AlertDialogTitle>
           <AlertDialogDescription className="font-mono text-muted-foreground text-xs">
-            <span className="text-foreground font-semibold">{canName}</span> will be removed from your vault. This cannot be undone.
+            <span className="text-foreground font-semibold">{canName}</span> will be removed from your vault. If no other collector has this can, it'll also be permanently deleted from the shared catalog. This cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

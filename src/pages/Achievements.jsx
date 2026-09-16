@@ -78,7 +78,7 @@ export default function Achievements() {
     [achievements]
   );
 
-  const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements);
+  const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements, user?.id);
 
   return (
     <div className="bg-background">

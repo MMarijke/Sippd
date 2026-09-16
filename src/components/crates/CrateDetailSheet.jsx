@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { RARITY_ORDER } from '@/lib/rarityConsensus';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useShare } from '@/hooks/useShare';
+import { cn } from '@/lib/utils';
 import ProGate from '@/components/shared/ProGate';
 
 const FREE_CRATE_CAN_LIMIT = 10;
@@ -23,6 +24,13 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('date_desc');
   const [canIds, setCanIds] = useState(crate.can_ids || []);
+  // /impeccable critique: get_public_crate originally made every crate
+  // shareable the moment Share was tapped, silently bypassing Private
+  // Account with no disclosure. Local state (not crate.is_shareable read
+  // live) for the same reason canIds is local — this sheet's parent
+  // (Crates.jsx) doesn't refresh its `crate` prop after a mutation, only
+  // its list query.
+  const [isShareable, setIsShareable] = useState(crate.is_shareable || false);
 
   const crateCanIds = useMemo(() => new Set(canIds), [canIds]);
   const atCanLimit = canIds.length >= FREE_CRATE_CAN_LIMIT && !isPro;
@@ -85,10 +93,35 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
     });
   };
 
+  // The toggle below is the one and only opt-in — flipping it on is also
+  // the disclosure moment (its own label says exactly what it does), so
+  // this only ever runs once sharing is already on; no separate confirm
+  // step needed here.
+  const toggleShareable = useMutation({
+    mutationFn: async (next) => {
+      const { error } = await supabase.from('crates').update({ is_shareable: next }).eq('id', crate.id);
+      if (error) throw error;
+    },
+    onMutate: async (next) => {
+      const previous = isShareable;
+      setIsShareable(next);
+      return { previous };
+    },
+    onSuccess: (_data, next) => {
+      queryClient.invalidateQueries({ queryKey: ['crates'] });
+      toast.success(next ? 'Crate is now shareable' : 'Sharing turned off');
+    },
+    onError: (error, _next, context) => {
+      if (context) setIsShareable(context.previous);
+      toast.error('Failed to update sharing: ' + (error.message || 'Unknown error'));
+    },
+  });
+
   // Same supported/fallback pattern Profile.jsx's own share button already
   // uses for /u/:userId — native share sheet first, clipboard copy as the
   // fallback everywhere that isn't supported (typically desktop).
   const handleShareCrate = async () => {
+    if (!isShareable) return;
     const crateUrl = `${window.location.origin}/crate/${crate.id}`;
     const title = `${crate.name} — a Sippd crate`;
     const result = await shareLink({ url: crateUrl, title });
@@ -122,8 +155,14 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={handleShareCrate}
-              aria-label="Share crate link"
-              className="w-11 h-11 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center"
+              disabled={!isShareable}
+              aria-label={isShareable ? 'Share crate link' : 'Turn on Shareable Link below to share'}
+              className={cn(
+                'w-11 h-11 rounded-full border flex items-center justify-center transition-colors',
+                isShareable
+                  ? 'bg-primary/10 border-primary/30 text-primary hover:bg-primary/20'
+                  : 'bg-secondary border-border text-muted-foreground/40 cursor-not-allowed'
+              )}
             >
               <Share2 className="w-4 h-4" />
             </button>
@@ -131,6 +170,36 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
               <X className="w-4 h-4" />
             </button>
           </div>
+        </div>
+
+        {/* Opt-in, not a silent default — this toggle's label is the one
+            disclosure that sharing a crate bypasses Private Account, and
+            flipping it on is the only way a crate ever becomes reachable
+            via /crate/:crateId (get_public_crate rejects a non-shareable
+            crate identically to a nonexistent one). */}
+        <div className="flex items-center justify-between px-5 pb-3 flex-shrink-0">
+          <div>
+            <p className="text-xs font-medium text-foreground">Shareable Link</p>
+            <p className="text-[11px] font-mono text-muted-foreground">Anyone with the link can view this crate, even if your account is private</p>
+          </div>
+          <button
+            onClick={() => toggleShareable.mutate(!isShareable)}
+            role="switch"
+            aria-checked={isShareable}
+            aria-label="Shareable Link"
+            disabled={toggleShareable.isPending}
+            className={cn(
+              'relative w-11 h-6 rounded-full transition-colors flex-shrink-0',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+              isShareable ? 'bg-primary' : 'bg-secondary border border-border'
+            )}
+          >
+            <div className={cn(
+              'absolute top-0.5 w-5 h-5 rounded-full bg-foreground shadow transition-all',
+              isShareable ? 'left-5' : 'left-0.5'
+            )} />
+          </button>
         </div>
 
         {/* Segmented filter, not a tab set — standardized on aria-pressed

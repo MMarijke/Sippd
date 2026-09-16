@@ -52,6 +52,27 @@ export default function PublicProfile() {
   const isPrivate = profileUser?.is_private;
   const canViewContent = !isPrivate || isFollowingTarget || currentUser?.id === userId;
 
+  // rarity_votes' only RLS policy is owner-only (voter_id = auth.uid()), so
+  // a direct query for someone else's votes always returns zero rows — this
+  // used to be hardcoded to 0 below instead, meaning every visitor's
+  // vote-based achievement badges (community_pillar, vault_hunter) always
+  // showed as locked on someone else's public profile regardless of the
+  // real value. get_public_vote_count re-implements canViewContent's exact
+  // rule server-side, same as get_public_collection does for the
+  // collection itself. (/impeccable critique)
+  const { data: voteCount = 0 } = useQuery({
+    queryKey: ['profile-vote-count', userId, currentUser?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_public_vote_count', {
+        p_caller_id: currentUser?.id ?? null,
+        p_profile_id: userId,
+      });
+      if (error) throw error;
+      return data ?? 0;
+    },
+    enabled: !!userId,
+  });
+
   // Via get_public_collection, not a direct table query — user_collection's
   // only RLS policy is owner-only (owner_id = auth.uid()), so a direct
   // .from('user_collection') read here would silently return zero rows for
@@ -119,8 +140,8 @@ export default function PublicProfile() {
   // Achievements use the full item set (all statuses), not just collected —
   // profileItems already is this profile's own rows, no further filtering needed.
   const userAchievements = useMemo(
-    () => computeAchievements(profileItems, streak, 0, profileUser?.created_at),
-    [profileItems, streak, profileUser]
+    () => computeAchievements(profileItems, streak, voteCount, profileUser?.created_at),
+    [profileItems, streak, profileUser, voteCount]
   );
 
   // TODO: global rank needs a public leaderboard aggregate (see Leaderboard.jsx

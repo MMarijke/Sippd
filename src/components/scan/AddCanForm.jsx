@@ -28,6 +28,19 @@ const STATUS_OPTIONS = [
   { value: 'duplicate', label: 'Duplicate' },
 ];
 
+// Settings.jsx writes defaultStatus/defaultRarity to this same key
+// ('canvolt_prefs') via its own loadPrefs()/savePrefs() -- a private,
+// unexported pair local to that page, so this reads the key directly
+// rather than importing page-local state logic. Was saved successfully but
+// never read anywhere, so the Settings toggles did nothing. (/impeccable critique)
+function loadSavedDefaults() {
+  try {
+    return JSON.parse(localStorage.getItem('canvolt_prefs')) || {};
+  } catch {
+    return {};
+  }
+}
+
 export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCancel }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -64,23 +77,26 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
     }
   };
 
-  const [form, setForm] = useState({
-    name:       prefillData?.name    || '',
-    brand:      prefillData?.brand   || '',
-    flavour:    prefillData?.flavour || '',
-    edition:    prefillData?.edition || '',
-    rarity:     prefillData?.consensus_rarity || prefillData?.rarity || 'Common',
-    image_url:  prefillData?.image_url || '',
-    barcode:    prefillData?.barcode || '',
-    notes:      '',
-    status:     'collected',
-    date_added: format(new Date(), 'yyyy-MM-dd'),
-    bg_color:   prefillData?.can_bg_color || DEFAULT_CAN_BG,
-    // Always null here, even when voting on an existing shared_can — that
-    // record is the global catalog entry, never this user's own
-    // user_collection row, so there's never a prior personal rating to
-    // prefill regardless of path.
-    taste_rating: null,
+  const [form, setForm] = useState(() => {
+    const savedDefaults = loadSavedDefaults();
+    return {
+      name:       prefillData?.name    || '',
+      brand:      prefillData?.brand   || '',
+      flavour:    prefillData?.flavour || '',
+      edition:    prefillData?.edition || '',
+      rarity:     prefillData?.consensus_rarity || prefillData?.rarity || savedDefaults.defaultRarity || 'Common',
+      image_url:  prefillData?.image_url || '',
+      barcode:    prefillData?.barcode || '',
+      notes:      '',
+      status:     savedDefaults.defaultStatus || 'collected',
+      date_added: format(new Date(), 'yyyy-MM-dd'),
+      bg_color:   prefillData?.can_bg_color || DEFAULT_CAN_BG,
+      // Always null here, even when voting on an existing shared_can — that
+      // record is the global catalog entry, never this user's own
+      // user_collection row, so there's never a prior personal rating to
+      // prefill regardless of path.
+      taste_rating: null,
+    };
   });
 
   const update = (field, value) => {

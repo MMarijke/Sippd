@@ -8,6 +8,8 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import FollowButton from '@/components/social/FollowButton';
 import { useMyFollows } from '@/hooks/useFollow';
+import { useProStatus } from '@/hooks/useProStatus';
+import ProBadge from '@/components/shared/ProBadge';
 
 export default function FindCollectors({ query, tab }) {
   const navigate = useNavigate();
@@ -65,6 +67,11 @@ export default function FindCollectors({ query, tab }) {
       return accessible && u.full_name.toLowerCase().includes(q);
     }).slice(0, 8);
   }, [users, query, currentUser?.id, myFollowingIds]);
+
+  // Trophy Case badge — one batched lookup per search result set, not one
+  // query per row. Called unconditionally here, before this component's
+  // early returns below (hooks can't be called conditionally).
+  const proUserIds = useProStatus(results.map(u => u.id));
 
   if (isLoadingUsers) {
     return (
@@ -128,7 +135,10 @@ export default function FindCollectors({ query, tab }) {
               {initial}
             </button>
             <Link to={`/u/${u.id}`} className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground truncate">{u.full_name}</p>
+              <p className="flex items-center gap-1 text-sm font-semibold text-foreground truncate">
+                <span className="truncate">{u.full_name}</span>
+                {proUserIds.has(u.id) && <ProBadge />}
+              </p>
               <p className="text-[11px] font-mono text-muted-foreground">{score} pts</p>
             </Link>
             <FollowButton targetUser={u} currentUser={currentUser} />

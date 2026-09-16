@@ -2,7 +2,7 @@ import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { Link } from 'react-router-dom';
 import { Pin, Share2, CupSoda } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
-import { MAX_PINS } from '@/hooks/useTogglePin';
+import { getMaxPins } from '@/hooks/useTogglePin';
 import { cn } from '@/lib/utils';
 
 // Rarity Breakdown bar — theme-invariant --rarity-* tokens, the same ones
@@ -57,7 +57,13 @@ export default function CollectionCard({
   pinnedCount,
   pinPending,
   onShare,
+  // Whether the COLLECTION OWNER (not the viewer) has Pro — Trophy Case's
+  // bigger pin cap and hero spotlight tile are a perk of the showcase
+  // itself, so a stranger viewing a Pro collector's PublicProfile sees the
+  // same larger, spotlighted grid the owner sees on their own Profile.
+  isPro = false,
 }) {
+  const maxPins = getMaxPins(isPro);
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
       {(headerTitle || onShare) && (
@@ -132,14 +138,21 @@ export default function CollectionCard({
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-2">
-        {items.map(item => {
+      {/* grid-flow-row-dense so the hero tile's 2x2 span doesn't leave a
+          hole for auto-placement to skip past — later tiles backfill the
+          gap next to/below it instead of only ever flowing after it. */}
+      <div className={cn('grid grid-cols-3 gap-2', isPro && 'grid-flow-row-dense')}>
+        {items.map((item, index) => {
           // Proactively disables the button instead of relying on the
           // mutation's own thrown-error toast (useTogglePin.js) — that
           // still fires as a fallback for any race between two pin taps,
           // but the common case is now prevented, not just explained
           // after the fact.
-          const atCap = canEdit && !item.pinned_at && pinnedCount >= MAX_PINS;
+          const atCap = canEdit && !item.pinned_at && pinnedCount >= maxPins;
+          // Trophy Case: the showcase's first tile gets a spotlight
+          // treatment when its owner is Pro — genuinely new layout, not a
+          // toggle, since every tile rendered identically before this.
+          const isHero = isPro && index === 0;
           const tile = (
             <>
               <div className="aspect-square" style={{ backgroundColor: item.can_bg_color || DEFAULT_CAN_BG }}>
@@ -173,8 +186,8 @@ export default function CollectionCard({
                 )}
               </div>
               <div className="p-1.5 space-y-0.5">
-                <p className="text-xs font-semibold text-foreground truncate">{item.can_name}</p>
-                <RarityBadge rarity={getEffectiveRarity(item)} size="sm" />
+                <p className={cn('font-semibold text-foreground truncate', isHero ? 'text-sm' : 'text-xs')}>{item.can_name}</p>
+                <RarityBadge rarity={getEffectiveRarity(item)} size={isHero ? undefined : 'sm'} />
               </div>
             </>
           );
@@ -182,7 +195,12 @@ export default function CollectionCard({
           return (
             <div
               key={item.id}
-              className="relative rounded-xl overflow-hidden border border-primary/20 bg-black/20 hover:border-primary/40 transition-colors"
+              className={cn(
+                'relative rounded-xl overflow-hidden border bg-black/20 transition-colors',
+                isHero
+                  ? 'col-span-2 row-span-2 border-primary/50 shadow-[0_0_24px_-4px_hsl(var(--primary)/0.4)]'
+                  : 'border-primary/20 hover:border-primary/40'
+              )}
             >
               {canEdit ? (
                 <Link to={`/can/${item.can_id}`} className="block">{tile}</Link>
@@ -197,7 +215,7 @@ export default function CollectionCard({
                     item.pinned_at
                       ? 'Unpin from showcase'
                       : atCap
-                        ? `Pin to showcase (${MAX_PINS} already pinned — unpin one first)`
+                        ? `Pin to showcase (${maxPins} already pinned — unpin one first)`
                         : 'Pin to showcase'
                   }
                   className={cn(
@@ -224,7 +242,7 @@ export default function CollectionCard({
       </div>
       {canEdit && (
         <p className="text-xs font-mono text-muted-foreground mt-2">
-          {pinnedCount}/{MAX_PINS} pinned
+          {pinnedCount}/{maxPins} pinned
         </p>
       )}
     </div>

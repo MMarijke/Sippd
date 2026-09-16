@@ -9,6 +9,8 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useJumpToHighlight } from '@/hooks/useJumpToHighlight';
 import { useRankDelta } from '@/hooks/useRankDelta';
+import { useProStatus } from '@/hooks/useProStatus';
+import ProBadge from '@/components/shared/ProBadge';
 import { withCompetitionRank } from '@/lib/ranking';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
@@ -55,6 +57,10 @@ export default function CollectorsLeaderboard() {
   // Shared with RegionalLeaderboard.jsx (src/lib/ranking.js), which had the
   // same bug and wasn't covered by this fix the first time (/impeccable critique).
   const rankedWithRank = withCompetitionRank(ranked, metricColumn);
+
+  // Trophy Case badge — one batched lookup per page for every collector
+  // currently visible, not one query per row.
+  const proUserIds = useProStatus(rankedWithRank.map(entry => entry.user_id));
 
   // Fetched directly rather than derived from `scores` (capped at 50 rows
   // above) — deriving it from that capped list meant any real collector
@@ -236,9 +242,10 @@ export default function CollectorsLeaderboard() {
                   {initial}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className={cn('text-sm font-semibold truncate', isMe ? 'text-primary' : 'text-foreground')}>
-                    {name}
-                    {isMe && <span className="ml-1.5 text-[10px] font-mono text-primary/70">(you)</span>}
+                  <p className={cn('flex items-center gap-1 text-sm font-semibold truncate', isMe ? 'text-primary' : 'text-foreground')}>
+                    <span className="truncate">{name}</span>
+                    {proUserIds.has(entry.user_id) && <ProBadge />}
+                    {isMe && <span className="ml-0.5 text-[10px] font-mono text-primary/70">(you)</span>}
                   </p>
                 </div>
                 <div className="flex-shrink-0 text-right">

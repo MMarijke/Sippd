@@ -15,6 +15,7 @@ import { useStreak } from '@/lib/useStreak';
 import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
 import { useTogglePin } from '@/hooks/useTogglePin';
 import { useShare } from '@/hooks/useShare';
+import { useSubscription } from '@/hooks/useSubscription';
 import { computeAchievements } from '@/lib/achievements';
 import TradeHistory from '@/components/profile/TradeHistory';
 import TradeLogDialog from '@/components/profile/TradeLogDialog';
@@ -168,12 +169,15 @@ export default function Profile() {
     [collected, sharedCansMap]
   );
 
-  const { top6, rarityBreakdown, getEffectiveRarity } = useCollectionHighlights({
+  const { isPro } = useSubscription();
+
+  const { topPulls, rarityBreakdown, getEffectiveRarity } = useCollectionHighlights({
     collection,
     sharedCansMap,
     streak,
     voteCount: votes.length,
     userCreatedDate: user?.created_at,
+    isPro,
   });
 
   const achievements = useMemo(
@@ -335,11 +339,12 @@ export default function Profile() {
             <div className="px-5">
               <CollectionCard
                 headerTitle={`${profile?.full_name || 'Collector'}’s Collection`}
-                items={top6}
+                items={topPulls}
+                isPro={isPro}
                 rarityBreakdown={rarityBreakdown}
                 getEffectiveRarity={getEffectiveRarity}
                 pinnedCount={pinnedCount}
-                onTogglePin={item => togglePin({ collectionItem: item, pinnedCount })}
+                onTogglePin={item => togglePin({ collectionItem: item, pinnedCount, isPro })}
                 pinPending={pinPending}
                 onShare={handleShareProfile}
                 score={score}

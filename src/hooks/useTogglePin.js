@@ -2,7 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 
-export const MAX_PINS = 6;
+export const MAX_PINS_FREE = 6;
+export const MAX_PINS_PRO = 10;
+
+export function getMaxPins(isPro) {
+  return isPro ? MAX_PINS_PRO : MAX_PINS_FREE;
+}
 
 /**
  * Hook to pin/unpin a UserCollection item for the Profile page's Top Pulls
@@ -14,10 +19,11 @@ export function useTogglePin() {
   const queryClient = useQueryClient();
 
   const { mutate: togglePin, isPending } = useMutation({
-    mutationFn: async ({ collectionItem, pinnedCount }) => {
+    mutationFn: async ({ collectionItem, pinnedCount, isPro }) => {
       const isPinned = !!collectionItem.pinned_at;
-      if (!isPinned && pinnedCount >= MAX_PINS) {
-        throw new Error(`You can pin up to ${MAX_PINS} cans — unpin one first.`);
+      const maxPins = getMaxPins(isPro);
+      if (!isPinned && pinnedCount >= maxPins) {
+        throw new Error(`You can pin up to ${maxPins} cans — unpin one first.`);
       }
       const { error } = await supabase
         .from('user_collection')

@@ -19,6 +19,7 @@ import { RARITY_ORDER, getDisplayRarity, getConfidence } from '@/lib/rarityConse
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import CanBackgroundPicker from '@/components/shared/CanBackgroundPicker';
 import TasteRatingStars from '@/components/shared/TasteRatingStars';
+import { useSubscription } from '@/hooks/useSubscription';
 
 const RARITIES = RARITY_ORDER;
 
@@ -45,6 +46,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user: currentUser } = useAuth();
+  const { isPro } = useSubscription();
   const [showReveal, setShowReveal] = useState(false);
   const [showAddedConfirmation, setShowAddedConfirmation] = useState(false);
   const [revealRarity, setRevealRarity] = useState('');
@@ -677,6 +679,8 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
             onChange={v => update('bg_color', v)}
             imageUrl={form.image_url || prefillData?.image_url}
             previewAlt={form.name || 'Can preview'}
+            isPro={isPro}
+            onLockedTap={() => navigate('/pro')}
           />
 
           <div className="space-y-1.5">

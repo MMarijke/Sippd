@@ -7,6 +7,7 @@ import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { getStreakIcon } from '@/lib/streakIcon';
+import ProBadge from '@/components/shared/ProBadge';
 
 const EMOJI_MAP = { fire: '🔥', star: '⭐', wow: '😮' };
 
@@ -24,7 +25,7 @@ const CARD_RARITY_STYLES = {
   'Legendary': 'border-rarity-legendary/40 bg-rarity-legendary/5 rarity-glow-legendary',
 };
 
-export default function ActivityCard({ item, user, myReactionSet, onReact }) {
+export default function ActivityCard({ item, user, myReactionSet, onReact, isPro = false }) {
   const navigate = useNavigate();
   const reducedMotion = usePrefersReducedMotion();
 
@@ -96,8 +97,9 @@ export default function ActivityCard({ item, user, myReactionSet, onReact }) {
           {item.user_name?.[0]?.toUpperCase() || '?'}
         </Button>
         <div className="flex-1 min-w-0">
-          <button onClick={openProfile} className="text-sm font-semibold text-foreground hover:text-primary transition-colors text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded">
+          <button onClick={openProfile} className="inline-flex items-center gap-1 text-sm font-semibold text-foreground hover:text-primary transition-colors text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded">
             {item.user_name || 'Collector'}
+            {isPro && <ProBadge />}
           </button>
           <p className="text-[11px] font-mono text-muted-foreground">{timeAgo}</p>
         </div>

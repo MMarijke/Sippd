@@ -10,6 +10,8 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useJumpToHighlight } from '@/hooks/useJumpToHighlight';
 import { useRankDelta } from '@/hooks/useRankDelta';
+import { useProStatus } from '@/hooks/useProStatus';
+import ProBadge from '@/components/shared/ProBadge';
 import { withCompetitionRank } from '@/lib/ranking';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
@@ -53,6 +55,14 @@ export default function RegionalLeaderboard() {
     },
     enabled: !!profile?.region,
   });
+
+  // Trophy Case badge — one batched lookup per page for every collector
+  // currently visible, not one query per row. Called unconditionally here
+  // (before this component's early returns below) since hooks can't be
+  // called conditionally — derived from the raw `scores` query rather than
+  // the later rankedWithRank, which needs data only available past those
+  // early returns.
+  const proUserIds = useProStatus(scores.map(s => s.user_id));
 
   useEffect(() => {
     if (isProfileError) toast.error('Could not load your profile');
@@ -265,9 +275,10 @@ export default function RegionalLeaderboard() {
                   {initial}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className={cn('text-sm font-semibold truncate', isMe ? 'text-primary' : 'text-foreground')}>
-                    {name}
-                    {isMe && <span className="ml-1.5 text-[10px] font-mono text-primary/70">(you)</span>}
+                  <p className={cn('flex items-center gap-1 text-sm font-semibold truncate', isMe ? 'text-primary' : 'text-foreground')}>
+                    <span className="truncate">{name}</span>
+                    {proUserIds.has(entry.user_id) && <ProBadge />}
+                    {isMe && <span className="ml-0.5 text-[10px] font-mono text-primary/70">(you)</span>}
                   </p>
                 </div>
                 <div className="flex-shrink-0 text-right">

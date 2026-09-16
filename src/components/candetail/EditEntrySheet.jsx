@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +25,9 @@ const STATUS_OPTIONS = [
 
 export default function EditEntrySheet({ open, onClose, item, myVote }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { user } = useAuth();
+  const { isPro } = useSubscription();
 
   const [imageMode, setImageMode] = useState('upload');
   const [uploading, setUploading] = useState(false);
@@ -205,6 +209,8 @@ export default function EditEntrySheet({ open, onClose, item, myVote }) {
             onChange={v => update('can_bg_color', v)}
             imageUrl={form.can_image_url}
             previewAlt={form.can_name || 'Can preview'}
+            isPro={isPro}
+            onLockedTap={() => navigate('/pro')}
           />
 
           {/* Rarity vote — read only */}

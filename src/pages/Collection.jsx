@@ -169,7 +169,7 @@ export default function Collection() {
   );
 
   const achievements = computeAchievements(collection, streak, votes.length, user?.created_at);
-  const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements);
+  const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements, user?.id);
 
   const getEffectiveRarity = (item) => {
     const sc = sharedCansMap[item.can_id];

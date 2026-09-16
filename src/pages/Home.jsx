@@ -105,7 +105,7 @@ export default function Home() {
     () => computeAchievements(collection, streak, votes.length, user?.created_at),
     [collection, streak, votes.length, user?.created_at]
   );
-  const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements);
+  const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements, user?.id);
 
   const sharedCansMap = useMemo(
     () => Object.fromEntries(sharedCans.map(c => [c.id, c])),

@@ -189,7 +189,6 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
     onSuccess: ({ displayRarity, insertedRow }) => {
       queryClient.invalidateQueries({ queryKey: ['user-collection'] });
       queryClient.invalidateQueries({ queryKey: ['shared-cans'] });
-      // TODO: server-side rare pull notification fan-out (deferred to edge function)
       if (['Rare', 'Ultra Rare', 'Legendary'].includes(displayRarity)) {
         setRevealRarity(displayRarity);
         setPendingCan(insertedRow);

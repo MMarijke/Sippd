@@ -64,7 +64,7 @@ export default function CanBackgroundPicker({ value, onChange, label = 'Card Bac
                 aria-pressed={selected}
                 onClick={() => (locked ? onLockedTap?.() : onChange(hex))}
                 className={cn(
-                  'relative w-10 h-10 rounded-lg border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  'relative w-11 h-11 rounded-lg border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   selected
                     ? 'border-primary shadow-[0_0_0_2px_hsl(var(--primary)/0.3)]'
                     : 'border-border hover:border-muted-foreground'
@@ -88,7 +88,7 @@ export default function CanBackgroundPicker({ value, onChange, label = 'Card Bac
             overflow-hidden on the SAME element it's drawn on, and the
             label needs overflow-hidden to clip its own fill to its rounded
             corners, so the focus ring has to sit one level up. */}
-        <div className="relative w-10 h-10 rounded-lg flex-shrink-0 focus-within:ring-2 focus-within:ring-ring">
+        <div className="relative w-11 h-11 rounded-lg flex-shrink-0 focus-within:ring-2 focus-within:ring-ring">
           <label
             htmlFor={inputId}
             title="Custom color"

@@ -1,11 +1,14 @@
 import { useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { Zap, Star, Package, ArrowLeft } from 'lucide-react';
+import { Zap, Star, Package, ArrowLeft, UserPlus, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import CollectionCard from '@/components/shared/CollectionCard';
 import SippdBranding from '@/components/shared/SippdBranding';
+import ProBadge from '@/components/shared/ProBadge';
+import { useProStatus } from '@/hooks/useProStatus';
 import { getDisplayRarity, getConfidence, getItemScore, RARITY_ORDER } from '@/lib/rarityConsensus';
 
 // Standalone, no-AppLayout page for a single shared crate — same shape as
@@ -37,6 +40,12 @@ export default function SharedCrate() {
 
   const crate = data?.crate;
   const cans = useMemo(() => data?.cans ?? [], [data]);
+
+  // /impeccable critique: Trophy Case's badge/hero tile never rendered here
+  // despite this being the app's most externally-visible surface — fixed
+  // the same way PublicProfile.jsx does it, off the crate owner's id.
+  const proUserIds = useProStatus(crate?.owner_id ? [crate.owner_id] : []);
+  const isOwnerPro = crate ? proUserIds.has(crate.owner_id) : false;
 
   const { data: sharedCans = [] } = useQuery({
     queryKey: ['shared-cans-public'],
@@ -128,8 +137,18 @@ export default function SharedCrate() {
                 {crate.description && (
                   <p className="text-xs font-mono text-muted-foreground truncate">{crate.description}</p>
                 )}
-                <p className="text-[11px] font-mono text-muted-foreground/70 mt-0.5">
-                  Curated by {crate.owner_name}
+                {/* text-muted-foreground, not a diluted /70 — same WCAG
+                    failure class CollectionCard.jsx already caught and
+                    fixed twice for its own labels; this line just hadn't
+                    inherited that fix yet. Owner name links to their public
+                    profile — previously plain text, the page's only path
+                    toward the actual growth loop it exists to create. */}
+                <p className="text-[11px] font-mono text-muted-foreground mt-0.5 flex items-center gap-1">
+                  Curated by{' '}
+                  <Link to={`/u/${crate.owner_id}`} className="text-primary underline inline-flex items-center gap-1">
+                    {crate.owner_name}
+                    {isOwnerPro && <ProBadge />}
+                  </Link>
                 </p>
               </div>
             </div>
@@ -138,6 +157,7 @@ export default function SharedCrate() {
               <CollectionCard
                 score={score}
                 items={cans}
+                isPro={isOwnerPro}
                 rarityBreakdown={rarityBreakdown}
                 getEffectiveRarity={getEffectiveRarity}
                 stats={[
@@ -151,6 +171,38 @@ export default function SharedCrate() {
                 <p className="text-sm font-mono text-muted-foreground">This crate is empty</p>
               </div>
             )}
+
+            {/* The actual growth loop this feature exists to create —
+                previously the only CTA on the whole page was a small
+                underlined "Sippd" wordmark in the footer below. Mirrors
+                PublicProfile.jsx's own Sign-In-to-Follow pattern exactly
+                (same button shape, same state.from redirect) rather than
+                inventing a second one. */}
+            <div className="bg-card border border-border rounded-2xl p-5 flex flex-col items-center text-center gap-3">
+              <p className="text-xs font-mono text-muted-foreground">
+                {currentUser
+                  ? `See more of ${crate.owner_name}'s collection`
+                  : `${crate.owner_name} collects on Sippd — see their full vault`}
+              </p>
+              {currentUser ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-11 font-mono text-xs gap-1.5 border-primary/20 text-primary hover:bg-primary/10"
+                  onClick={() => navigate(`/u/${crate.owner_id}`)}
+                >
+                  <Users className="w-3.5 h-3.5" /> View Full Collection
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 neon-glow"
+                  onClick={() => navigate('/login', { state: { from: `/crate/${crateId}` } })}
+                >
+                  <UserPlus className="w-3.5 h-3.5" /> Sign In to Follow
+                </Button>
+              )}
+            </div>
 
             <SippdBranding />
           </>

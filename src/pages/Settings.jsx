@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useTheme, THEMES } from '@/hooks/useTheme';
-import { ArrowLeft, ChevronRight, Lock } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Lock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -646,9 +646,9 @@ export default function Settings() {
         <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
           <SettingsRow
             label="Export My Data"
-            sub="Download everything Sippd has on you"
-            onClick={handleExportData}
-            right={isExporting ? <span className="text-[10px] font-mono text-muted-foreground">Exporting…</span> : undefined}
+            sub="Includes your collection, votes, trades, and account info — keep the file safe"
+            onClick={isExporting ? undefined : handleExportData}
+            right={isExporting ? <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" /> : undefined}
           />
         </div>
 

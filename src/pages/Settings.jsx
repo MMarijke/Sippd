@@ -15,6 +15,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import LegalFooter from '@/components/legal/LegalFooter';
+import { exportUserData, downloadJson } from '@/lib/exportUserData';
 
 const STATUSES = ['collected', 'wishlist'];
 const RARITIES = ['Common', 'Uncommon', 'Rare', 'Ultra Rare', 'Legendary'];
@@ -290,6 +291,7 @@ export default function Settings() {
   const [prefs, setPrefs] = useState(loadPrefs);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [notifyPending, setNotifyPending] = useState(false);
   const [privatePending, setPrivatePending] = useState(false);
 
@@ -374,6 +376,19 @@ export default function Settings() {
 
   const defaultStatus = prefs.defaultStatus || 'collected';
   const defaultRarity = prefs.defaultRarity || 'Common';
+
+  const handleExportData = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      const data = await exportUserData(user.id);
+      downloadJson(data, `sippd-data-export-${format(new Date(), 'yyyy-MM-dd')}.json`);
+      toast.success('Your data has been downloaded');
+    } catch (error) {
+      toast.error('Failed to export your data: ' + (error.message || 'Unknown error'));
+    }
+    setIsExporting(false);
+  };
 
   const handleDeleteAccount = async () => {
     setDeletingAccount(true);
@@ -625,6 +640,16 @@ export default function Settings() {
               </button>
             )}
           </div>
+        </div>
+
+        <SectionHeader title="Your Data" />
+        <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
+          <SettingsRow
+            label="Export My Data"
+            sub="Download everything Sippd has on you"
+            onClick={handleExportData}
+            right={isExporting ? <span className="text-[10px] font-mono text-muted-foreground">Exporting…</span> : undefined}
+          />
         </div>
 
         <SectionHeader title="Danger Zone" />

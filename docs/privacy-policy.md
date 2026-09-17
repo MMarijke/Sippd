@@ -1,12 +1,18 @@
 # Sippd Privacy Policy
 
-**Effective date:** [NEEDS REVIEW — set an effective date before publishing]
+**Effective date:** 17-09-2026
 
 This policy explains what personal information Sippd ("the App", "we", "us") collects, why we collect it, how it is stored and protected, who we share it with, how long we keep it, and the rights you have over it.
 
-Sippd is distributed on the Google Play Store (Android) and on the web at sippd-beta.vercel.app. Our users are global, with our primary market in South Africa. This policy is written to comply with South Africa's Protection of Personal Information Act (POPIA), and the rights described in Section 5 are structured to align with GDPR-equivalent protections for users elsewhere.
+Sippd is distributed on the Google Play Store (Android) and on the web at sippd-beta.vercel.app. Our users are global, with our primary market in South Africa. This policy is written to comply with South Africa's Protection of Personal Information Act (POPIA), and, per the note below, is also likely subject to the GDPR/UK GDPR for users in those regions.
 
-[NEEDS REVIEW — confirm whether GDPR applies to Sippd as a matter of law (for example, if EU/UK residents use the App) rather than only as a voluntary alignment. This affects which of the obligations below are mandatory versus best-practice, and may require additional sections (e.g. a lawful-basis statement, an EU representative).]
+**On GDPR applicability — this is a legal-fact question, not a style choice.** Under Article 3(2) of the GDPR, the regulation applies extraterritorially to any business processing the personal data of individuals located in the EU where the processing relates to offering goods or services to those individuals — regardless of whether payment is involved — or to monitoring their behaviour within the EU. Sippd is a publicly available app/web service with no geographic restriction excluding EU users, so it likely falls within GDPR's scope as a matter of law, not merely as a voluntary best-practice alignment. This has real consequences beyond wording:
+
+[TODO — LEGAL REVIEW RECOMMENDED. If GDPR applies as a matter of law rather than voluntarily:
+- You need a documented lawful basis (GDPR Article 6) for each processing purpose listed in Section 1 below, not just a description of what's collected.
+- EU/UK users have the right to lodge a complaint with a supervisory authority in their own country, in addition to South Africa's Information Regulator — this should be added to Section 5.
+- Article 27 may require appointing an EU representative if your processing isn't "occasional" — Sippd's ongoing social/profile features arguably aren't occasional, so this needs a real decision, not an assumption either way.
+A lawyer familiar with both POPIA and GDPR can confirm how far this actually needs to go given your current scale — this doesn't need to block launch, but it shouldn't be silently skipped either.]
 
 ## 1. What we collect and why
 
@@ -20,14 +26,17 @@ We collect the following categories of personal information:
 | Streak and usage data — last active date, current streak | Powers the streak and gamification features that track your ongoing engagement with the App. |
 | Region (optional) | Only collected if you choose to set it in your profile; used for the regional leaderboard feature. |
 | Trade history | Recorded when you log a trade with another collector. This is entered by you manually — Sippd does not automatically detect or track trades. |
+| Subscription/billing data (Sippd Pro) | Your Paddle subscription ID, customer ID, and subscription status, stored once you subscribe — see Section 3 for how this is shared with Paddle. |
 
-[NEEDS REVIEW — confirm this list is exhaustive. If the App or its infrastructure collects anything beyond what's listed here (for example, IP addresses logged by hosting infrastructure, or diagnostic data beyond what Sentry captures per Section 3), add it above.]
 
 ## 2. How data is stored and protected
 
 Your data is stored with Supabase, hosted in the EU West (Ireland) region. Access to your data is controlled using Postgres Row Level Security (RLS) policies at the database level, so by default you can only read and write your own data — other users' private data is not directly accessible to you outside of the App's intended social features (for example, public profiles and the activity feed, which are visible by design).
 
-[NEEDS REVIEW — decide and add any further security claims you want to make: encryption at rest/in transit, backup policy, breach-notification process, and how access by Sippd's own team is controlled and audited. Do not state a specific security certification or guarantee unless it has been verified for this project.]
+Data in transit to and from Sippd is encrypted (TLS), and Supabase encrypts stored data at rest by default as part of its own infrastructure. 
+
+In the event of a data breach affecting your personal information, we will notify affected users and South Africa's Information Regulator without undue delay, as required under POPIA. 
+
 
 ## 3. Third-party processors
 
@@ -39,11 +48,22 @@ We use the following third-party services to operate Sippd. Each processes a lim
 - **Sentry** — error monitoring. Personally identifiable information is stripped from error reports before they are sent to Sentry.
 - **Paddle** — billing for Sippd Pro, our optional paid subscription. Acts as Merchant of Record: your payment details are handled directly by Paddle, not by Sippd. We receive and store your email, your Paddle subscription and customer IDs, and your subscription status. See our [Refund & Cancellation Policy](./refund-policy.md) for billing terms.
 
-[NEEDS REVIEW — confirm whether any further processors need to be listed here, and whether a documented safeguard is needed for transferring South African users' data to a processor located in the EU (Supabase) or elsewhere (Paddle).]
+**On international data transfers:** because Supabase hosts your data in the EU (Ireland) and Paddle is a UK-headquartered company, personal information about South African users is transferred outside South Africa. POPIA (Section 72) requires that such a transfer only happen where the recipient country has adequate data protection law, or where an appropriate safeguard (such as a binding data processing agreement) is in place. The EU's GDPR is broadly recognized as providing an adequate standard of protection, which supports this transfer, but the specific safeguard should be documented rather than assumed.
+
 
 ## 4. Data retention
 
-[NEEDS REVIEW — no retention periods have been set for any data category described in Section 1. Decide, for each category, how long it is kept — including what happens to it after you delete your account or after a period of inactivity — and document it here before publishing this policy.]
+No retention periods have been finalized yet. Below is a proposed default for each data category — a reasonable starting point, not a final decision. Adjust and confirm each line, then remove this note once set:
+
+| Data category | Proposed retention |
+|---|---|
+| Account/profile data | Retained while your account is active. Deleted or anonymized within 30 days of account deletion. |
+| Collection data (cans, photos, trade history) | Deleted within the same window as account data above, following account deletion. |
+| Rarity votes | Your individual vote is deleted with your account. The aggregated consensus count it contributed to is retained, since it's pooled across many users and is no longer personally identifiable once your individual vote is removed. |
+| Subscription/billing data | Retained for as long as required by tax/accounting record-keeping law, which may be longer than your account remains active. |
+| Crash/error logs (Sentry) | Retained per Sentry's own default retention period unless configured otherwise. |
+| Backups | Deleted data may persist in routine backups for a limited additional period after deletion, until normal backup rotation removes it. |
+
 
 ## 5. Your rights
 
@@ -51,15 +71,18 @@ You have the following rights over your personal information:
 
 - **Access.** You can view your own account and collection data directly within the App, and download a complete copy of it at any time — see Export below.
 - **Correction.** You can update your display name, region, and password directly from Settings within the App.
-- **Deletion.** You can delete your account from Settings within the App. [NEEDS REVIEW — confirm this description matches current behavior, and disclose whether any data is retained after deletion (for example, anonymized activity records or historical leaderboard entries) rather than removed entirely.]
+- **Deletion.** You can delete your account from Settings within the App. 
 - **Export.** You can download a self-service export of your data — your profile, collection, votes, follows, trades, crates, notifications, activity, and reactions — as a JSON file from Settings > Your Data within the App, at any time and free of charge.
+- **Complain to a regulator.** You have the right to lodge a complaint with South Africa's Information Regulator if you believe your personal information has been processed unlawfully. 
 
-[NEEDS REVIEW — POPIA requires organizations to designate an Information Officer, register them with the Information Regulator, and provide a way for users to lodge a complaint with both your organization and the Regulator. Add that information here once available.]
+**On the Information Officer requirement:** under POPIA, every organization processing personal information (a "responsible party") automatically has a default Information Officer — for a sole-operator project like Sippd, that is you by default — and POPIA requires that this Information Officer be registered with the Information Regulator via its eServices portal before taking up IO duties. [TODO: complete this registration at the Information Regulator's website (search "Information Regulator South Africa eServices Portal" for the current link, since portal URLs have moved before) and insert your registration details/contact information here once done. This is a real, outstanding compliance step, not just a documentation gap.]
 
 ## 6. How to contact us
 
-[NEEDS REVIEW — add: the legal entity operating Sippd, its registered address, a contact email for privacy-related requests, and (if applicable) your designated Information Officer's details as required under POPIA.]
+You can contact us via email at seedstackstudio@gmail.com 
 
 ## 7. Changes to this policy
 
-We may update this policy from time to time. [NEEDS REVIEW — decide and document how changes will be communicated to users (for example, an in-app notice, an email, or simply an updated "Effective date" above), and whether continued use of the App after a change constitutes acceptance of it.]
+We may update this policy from time to time. If we make a material change, we'll update the effective date above and, where practical, notify you — for example, through an in-App notice or by email. Continuing to use the App after a change takes effect means you accept the updated policy.
+
+

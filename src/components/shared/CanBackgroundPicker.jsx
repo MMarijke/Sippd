@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { Palette, Lock } from 'lucide-react';
+import { Palette } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { clampToDarkSafeBg, QUICK_PICK_BG_COLORS } from '@/lib/canBgColors';
 import CanImageBox from '@/components/shared/CanImageBox';
@@ -17,7 +17,13 @@ import { cn } from '@/lib/utils';
 // any hue, all previewed live through CanImageBox — the exact component
 // CanCard/CanDetail/PublicProfile/MonthlyReport already use, so this shows
 // precisely what the real collection tile will look like.
-export default function CanBackgroundPicker({ value, onChange, label = 'Card Background', imageUrl, previewAlt, isPro = false, onLockedTap }) {
+//
+// Two swatches (Gilded, Voidglass) were briefly Pro-locked as a Trophy
+// Case perk. Removed: the Custom swatch already opens a free-hue native
+// picker for any hex, so a "locked" preset color was never actually
+// restricting anything — a free user could reproduce the identical hex
+// in two taps, making the lock theater rather than a real gate.
+export default function CanBackgroundPicker({ value, onChange, label = 'Card Background', imageUrl, previewAlt }) {
   const inputId = useId();
   const isCustomActive = !QUICK_PICK_BG_COLORS.some(p => p.hex === value);
 
@@ -52,17 +58,16 @@ export default function CanBackgroundPicker({ value, onChange, label = 'Card Bac
           glance instead of needing to be inferred from the rainbow icon. */}
       <div className="flex items-center gap-2 flex-wrap">
         <div className="flex gap-2 flex-wrap">
-          {QUICK_PICK_BG_COLORS.map(({ label: swatchLabel, hex, pro }) => {
-            const locked = pro && !isPro;
+          {QUICK_PICK_BG_COLORS.map(({ label: swatchLabel, hex }) => {
             const selected = value === hex;
             return (
               <button
                 key={hex}
                 type="button"
                 title={swatchLabel}
-                aria-label={locked ? `${swatchLabel} — Pro only, tap to upgrade` : swatchLabel}
+                aria-label={swatchLabel}
                 aria-pressed={selected}
-                onClick={() => (locked ? onLockedTap?.() : onChange(hex))}
+                onClick={() => onChange(hex)}
                 className={cn(
                   'relative w-11 h-11 rounded-lg border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   selected
@@ -70,13 +75,7 @@ export default function CanBackgroundPicker({ value, onChange, label = 'Card Bac
                     : 'border-border hover:border-muted-foreground'
                 )}
                 style={{ backgroundColor: hex }}
-              >
-                {locked && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-background/90 border border-border flex items-center justify-center">
-                    <Lock className="w-2 h-2 text-muted-foreground" />
-                  </span>
-                )}
-              </button>
+              />
             );
           })}
         </div>

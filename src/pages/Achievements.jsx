@@ -89,7 +89,7 @@ export default function Achievements() {
 
       <PageHeader
         title="Achievements"
-        subtitle={isLoading ? '...' : isError ? '—' : `${unlocked} / ${achievements.length} unlocked`}
+        subtitle={isLoading ? '...' : isError ? 'Unavailable' : `${unlocked} / ${achievements.length} unlocked`}
         onBack={() => navigate('/profile')}
         showBell={false}
       />

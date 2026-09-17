@@ -439,7 +439,7 @@ export default function Settings() {
         <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
           <SettingsRow
             label="Display Name"
-            sub={profile?.full_name || '—'}
+            sub={profile?.full_name || 'Not set'}
             onClick={() => setPanel(panel === 'name' ? null : 'name')}
           />
           {panel === 'name' && (
@@ -449,7 +449,7 @@ export default function Settings() {
           )}
           <SettingsRow
             label="Region"
-            sub={profile?.region || '—'}
+            sub={profile?.region || 'Not set'}
             onClick={() => setPanel(panel === 'region' ? null : 'region')}
           />
           {panel === 'region' && (
@@ -459,7 +459,7 @@ export default function Settings() {
           )}
           <SettingsRow
             label="Email"
-            sub={user?.email || '—'}
+            sub={user?.email || 'Not set'}
             right={<span className="text-[10px] font-mono text-muted-foreground">read-only</span>}
           />
           <SettingsRow
@@ -500,7 +500,7 @@ export default function Settings() {
                         ? `Cancels ${format(new Date(subscriptionDetails.cancel_at), 'MMM d, yyyy')}`
                         : subscriptionDetails?.next_billing_date
                           ? format(new Date(subscriptionDetails.next_billing_date), 'MMM d, yyyy')
-                          : '—'
+                          : 'Not available'
                 }
               />
               <SettingsRow

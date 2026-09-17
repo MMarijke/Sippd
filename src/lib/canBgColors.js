@@ -16,12 +16,13 @@ export const QUICK_PICK_BG_COLORS = [
   { label: 'Ultra Rare',  hex: '#170B33' },
   { label: 'Legendary',   hex: '#2B0D1F' },
   { label: 'Ember',       hex: '#2B0F0F' },
-  // Trophy Case exclusives — same dark-safe lightness band as the free
-  // swatches above, just hues none of those touch (a warm gold and a cool
-  // violet-black), so a Pro card visibly stands out in a mixed grid without
-  // reading as an obviously different "locked" style.
-  { label: 'Gilded',      hex: '#2B2408', pro: true },
-  { label: 'Voidglass',   hex: '#0F0D2B', pro: true },
+  // Two more hues none of the above touch (a warm gold and a cool
+  // violet-black) — briefly Pro-locked as a Trophy Case perk, unlocked for
+  // everyone since the Custom swatch already lets any user reproduce
+  // either exact hex via the free-hue picker, making the lock theater
+  // rather than a real restriction.
+  { label: 'Gilded',      hex: '#2B2408' },
+  { label: 'Voidglass',   hex: '#0F0D2B' },
 ];
 
 // Existing preset backgrounds (Deep Teal, Midnight Navy, etc.) all measured

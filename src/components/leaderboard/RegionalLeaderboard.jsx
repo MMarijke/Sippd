@@ -208,7 +208,7 @@ export default function RegionalLeaderboard() {
               </span>
             )}
             <span className="text-sm font-display font-bold text-primary">
-              {isScoresError ? '—' : myScore > 0 ? (myRegionalRank ? `#${myRegionalRank}` : '…') : 'Not ranked yet'}
+              {isScoresError ? 'Unavailable' : myScore > 0 ? (myRegionalRank ? `#${myRegionalRank}` : '…') : 'Not ranked yet'}
             </span>
           </span>
         </button>

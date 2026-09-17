@@ -146,7 +146,7 @@ function CanChip({ name, brand, imageUrl, rarity, label }) {
           {imageUrl && <img src={imageUrl} alt={name} loading="lazy" decoding="async" className="w-full h-full object-contain" />}
         </div>
         <div className="min-w-0">
-          <p className="text-xs font-body font-medium text-foreground truncate leading-tight">{name || '—'}</p>
+          <p className="text-xs font-body font-medium text-foreground truncate leading-tight">{name || 'Unknown can'}</p>
           {rarity && (
             <p className={`text-[10px] font-mono leading-tight ${RARITY_TEXT_CLASS[rarity] || 'text-muted-foreground'}`}>{rarity}</p>
           )}

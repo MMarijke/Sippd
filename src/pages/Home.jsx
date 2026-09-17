@@ -239,7 +239,9 @@ export default function Home() {
                       COLLECTION SCORE
                     </p>
                     <p className="text-5xl font-mono font-black text-foreground neon-text">
-                      {isLoading ? '—' : score}
+                      {isLoading ? (
+                        <span className="inline-block h-10 w-24 rounded bg-foreground/10 animate-pulse align-middle" />
+                      ) : score}
                     </p>
                     <p className="text-xs font-mono text-muted-foreground">
                       Your Energy Drink Vault
@@ -256,9 +258,12 @@ export default function Home() {
       {!hasCollectionError && (
         <div className="mt-5">
           <StatsRow
-            rarePulls={isLoading ? '—' : rarePulls}
-            streak={(isLoading || streakLoading) ? '—' : `${streak}d`}
-            wishlistCount={isLoading ? '—' : wishlistCount}
+            rarePulls={rarePulls}
+            streak={`${streak}d`}
+            wishlistCount={wishlistCount}
+            isLoadingRarePulls={isLoading}
+            isLoadingStreak={isLoading || streakLoading}
+            isLoadingWishlist={isLoading}
           />
         </div>
       )}

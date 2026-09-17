@@ -14,7 +14,6 @@ const FEATURES = [
   '5 exclusive themes — Steel, Verdant, Cobalt, Voidglass, Aurora',
   'Pro badge on your profile, leaderboard, and feed posts',
   'Bigger pinned showcase (10 vs. 6) with a hero spotlight slot',
-  'Exclusive card backgrounds',
   'Support indie development',
 ];
 

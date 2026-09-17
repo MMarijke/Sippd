@@ -174,7 +174,7 @@ export default function CollectorsLeaderboard() {
               </span>
             )}
             <span className={cn('text-sm font-display font-bold', sortBy === 'rare' ? 'text-rarity-ultra' : 'text-primary')}>
-              {isScoresError ? '—' : myMetric > 0 ? (myRank ? `#${myRank}` : '…') : 'Not ranked yet'}
+              {isScoresError ? 'Unavailable' : myMetric > 0 ? (myRank ? `#${myRank}` : '…') : 'Not ranked yet'}
             </span>
           </span>
         </button>

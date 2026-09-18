@@ -5,12 +5,15 @@ import remarkGfm from 'remark-gfm';
 import { cn } from '@/lib/utils';
 
 // Flattens a react-markdown children tree to plain text, just enough to
-// detect a "[NEEDS REVIEW — ...]" marker so it can be styled as a visible
-// callout instead of reading as finished legal copy. The docs/*.md source
-// files use this exact bracket convention deliberately (see docs/*.md) to
-// flag content that still needs real review/legal input before publishing —
-// this only makes that existing convention visible on the live page, it
-// doesn't invent new markup in the source markdown itself.
+// detect a "[NEEDS REVIEW — ...]" or "[TODO ...]" marker so it can be
+// styled as a visible callout instead of reading as finished legal copy.
+// The docs/*.md source files use both bracket conventions to flag content
+// that still needs real review/legal input before publishing — this only
+// makes that existing convention visible on the live page, it doesn't
+// invent new markup in the source markdown itself. Widened to also match
+// "[TODO" after a legal-content pass introduced that phrasing alongside
+// the original "[NEEDS REVIEW" one; a marker in either form was rendering
+// as plain, unflagged body text before this.
 function flattenText(node) {
   if (typeof node === 'string') return node;
   if (Array.isArray(node)) return node.map(flattenText).join('');
@@ -19,7 +22,7 @@ function flattenText(node) {
 }
 
 function isNeedsReview(children) {
-  return /^\[NEEDS REVIEW/i.test(flattenText(children).trim());
+  return /^\[(NEEDS REVIEW|TODO)/i.test(flattenText(children).trim());
 }
 
 const markdownComponents = {

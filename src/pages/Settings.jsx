@@ -167,7 +167,18 @@ function ChangePasswordPanel({ user }) {
       password: form.current,
     });
     if (verifyError) {
-      toast.error('Current password is incorrect');
+      // Every verification failure used to show "Current password is
+      // incorrect," even a network error or Supabase's own sign-in
+      // rate-limit after several attempts — misleading someone whose
+      // password actually was correct. invalid_credentials is the one
+      // case that's genuinely about the password typed here.
+      if (verifyError.code === 'invalid_credentials' || verifyError.status === 400) {
+        toast.error('Current password is incorrect');
+      } else if (verifyError.status === 429 || verifyError.code === 'over_request_rate_limit') {
+        toast.error('Too many attempts — please wait a moment and try again');
+      } else {
+        toast.error('Could not verify your current password: ' + (verifyError.message || 'Unknown error'));
+      }
       setSaving(false);
       return;
     }
@@ -307,6 +318,16 @@ export default function Settings() {
   const [isExporting, setIsExporting] = useState(false);
   const [notifyPending, setNotifyPending] = useState(false);
   const [privatePending, setPrivatePending] = useState(false);
+
+  // Google-only accounts have no password credential at all — ChangePasswordPanel's
+  // "verify current password" step would always fail for them with a
+  // confusing "Current password is incorrect," when the real issue is
+  // there's no password to enter in the first place. Defaults to true
+  // (show the normal password flow) if identities is ever unavailable,
+  // so a data gap never hides a real feature by mistake.
+  const hasPasswordAuth = user?.identities
+    ? user.identities.some(i => i.provider === 'email')
+    : true;
 
   const {
     data: profile,
@@ -462,14 +483,23 @@ export default function Settings() {
             sub={user?.email || 'Not set'}
             right={<span className="text-[10px] font-mono text-muted-foreground">read-only</span>}
           />
-          <SettingsRow
-            label="Change Password"
-            onClick={() => setPanel(panel === 'password' ? null : 'password')}
-          />
-          {panel === 'password' && (
-            <div className="bg-secondary/30">
-              <ChangePasswordPanel user={user} />
-            </div>
+          {hasPasswordAuth ? (
+            <>
+              <SettingsRow
+                label="Change Password"
+                onClick={() => setPanel(panel === 'password' ? null : 'password')}
+              />
+              {panel === 'password' && (
+                <div className="bg-secondary/30">
+                  <ChangePasswordPanel user={user} />
+                </div>
+              )}
+            </>
+          ) : (
+            <SettingsRow
+              label="Change Password"
+              sub="You sign in with Google — no password to change"
+            />
           )}
         </div>
 

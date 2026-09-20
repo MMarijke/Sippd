@@ -37,7 +37,7 @@ export default function Login() {
   // specific CTA should land on the form built for them. The compact "Sign
   // in" link in the hero explicitly switches this back for a returning
   // user skipping the tour. (/impeccable)
-  const [mode, setMode] = useState('signup'); // 'signin' | 'signup'
+  const [mode, setMode] = useState('signup'); // 'signin' | 'signup' | 'forgot'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -45,6 +45,7 @@ export default function Login() {
   const [infoMessage, setInfoMessage] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
+  const [resetSending, setResetSending] = useState(false);
 
   // A page can send someone here via navigate('/login', { state: { from } })
   // — e.g. PublicProfile.jsx's "Sign In to Follow" — expecting to land back
@@ -123,6 +124,39 @@ export default function Login() {
     setConfirmPassword('');
   };
 
+  const enterForgotMode = () => {
+    setMode('forgot');
+    setError('');
+    setInfoMessage('');
+    setPassword('');
+    setConfirmPassword('');
+  };
+
+  const backToSignIn = () => {
+    setMode('signin');
+    setError('');
+    setInfoMessage('');
+  };
+
+  const handleForgotSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setInfoMessage('');
+    setResetSending(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setResetSending(false);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    // Same message whether or not the email is actually registered —
+    // confirming "no account with that address" to whoever typed it would
+    // let anyone probe which emails have a Sippd account.
+    setInfoMessage("If an account exists for that email, we've sent a password reset link.");
+  };
+
   // Scrolls to the sign-in/sign-up form rather than a separate route or
   // modal — the form doesn't move, so nothing about how it already works
   // (Google OAuth, the post-login redirect above, email confirmation) needs
@@ -149,96 +183,153 @@ export default function Login() {
         <div className="w-full max-w-sm mx-auto space-y-5">
           <div className="text-center mb-2">
             <h2 className="font-display font-black text-2xl text-foreground mb-1">
-              {mode === 'signin' ? 'Welcome back' : 'Start your vault'}
+              {mode === 'signin' ? 'Welcome back' : mode === 'forgot' ? 'Reset your password' : 'Start your vault'}
             </h2>
             <p className="text-sm font-body text-muted-foreground">
-              {mode === 'signin' ? 'Sign in to pick up where you left off.' : 'Free to join, free to collect.'}
+              {mode === 'signin' ? 'Sign in to pick up where you left off.'
+                : mode === 'forgot' ? "Enter your email and we'll send you a reset link."
+                : 'Free to join, free to collect.'}
             </p>
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleGoogleSignIn}
-            disabled={googleLoading || emailLoading}
-            className="w-full font-mono text-sm gap-2 border-border bg-secondary hover:bg-secondary/80"
-          >
-            {googleLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <GoogleIcon />}
-            Continue with Google
-          </Button>
+          {mode !== 'forgot' && (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleGoogleSignIn}
+                disabled={googleLoading || emailLoading}
+                className="w-full font-mono text-sm gap-2 border-border bg-secondary hover:bg-secondary/80"
+              >
+                {googleLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <GoogleIcon />}
+                Continue with Google
+              </Button>
 
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-border" />
-            <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest">or</span>
-            <div className="flex-1 h-px bg-border" />
-          </div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest">or</span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+            </>
+          )}
 
-          <form onSubmit={handleEmailSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="login-email" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Email</Label>
-              <Input
-                id="login-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className="bg-secondary border-border font-body"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="login-password" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Password</Label>
-              <Input
-                id="login-password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-                className="bg-secondary border-border font-body"
-              />
-            </div>
-
-            {mode === 'signup' && (
+          {mode === 'forgot' ? (
+            <form onSubmit={handleForgotSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="login-confirm-password" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Confirm Password</Label>
+                <Label htmlFor="login-email" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Email</Label>
                 <Input
-                  id="login-confirm-password"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  id="login-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
-                  minLength={6}
-                  autoComplete="new-password"
+                  autoComplete="email"
                   className="bg-secondary border-border font-body"
                 />
               </div>
-            )}
 
-            {error && <p className="text-xs font-mono text-destructive">{error}</p>}
-            {infoMessage && <p className="text-xs font-mono text-primary">{infoMessage}</p>}
+              {error && <p className="text-xs font-mono text-destructive">{error}</p>}
+              {infoMessage && <p className="text-xs font-mono text-primary">{infoMessage}</p>}
 
-            <Button
-              type="submit"
-              disabled={emailLoading || googleLoading}
-              className="w-full font-mono text-sm gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 neon-glow"
-            >
-              {emailLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {mode === 'signin' ? 'Sign In' : 'Sign Up'}
-            </Button>
-          </form>
+              <Button
+                type="submit"
+                disabled={resetSending}
+                className="w-full font-mono text-sm gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 neon-glow"
+              >
+                {resetSending && <Loader2 className="w-4 h-4 animate-spin" />}
+                Send Reset Link
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleEmailSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="login-email" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Email</Label>
+                <Input
+                  id="login-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  className="bg-secondary border-border font-body"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="login-password" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Password</Label>
+                <Input
+                  id="login-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+                  className="bg-secondary border-border font-body"
+                />
+              </div>
+
+              {mode === 'signin' && (
+                <button
+                  type="button"
+                  onClick={enterForgotMode}
+                  className="block text-xs font-mono text-primary hover:underline underline-offset-2 -mt-2"
+                >
+                  Forgot password?
+                </button>
+              )}
+
+              {mode === 'signup' && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="login-confirm-password" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Confirm Password</Label>
+                  <Input
+                    id="login-confirm-password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    autoComplete="new-password"
+                    className="bg-secondary border-border font-body"
+                  />
+                </div>
+              )}
+
+              {error && <p className="text-xs font-mono text-destructive">{error}</p>}
+              {infoMessage && <p className="text-xs font-mono text-primary">{infoMessage}</p>}
+
+              <Button
+                type="submit"
+                disabled={emailLoading || googleLoading}
+                className="w-full font-mono text-sm gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 neon-glow"
+              >
+                {emailLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                {mode === 'signin' ? 'Sign In' : 'Sign Up'}
+              </Button>
+            </form>
+          )}
 
           <p className="text-center text-xs font-mono text-muted-foreground">
-            {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
-            <button
-              type="button"
-              onClick={toggleMode}
-              className="text-primary hover:underline underline-offset-2"
-            >
-              {mode === 'signin' ? 'Sign up' : 'Sign in'}
-            </button>
+            {mode === 'forgot' ? (
+              <button
+                type="button"
+                onClick={backToSignIn}
+                className="text-primary hover:underline underline-offset-2"
+              >
+                Back to sign in
+              </button>
+            ) : (
+              <>
+                {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
+                <button
+                  type="button"
+                  onClick={toggleMode}
+                  className="text-primary hover:underline underline-offset-2"
+                >
+                  {mode === 'signin' ? 'Sign up' : 'Sign in'}
+                </button>
+              </>
+            )}
           </p>
 
           <LegalFooter />

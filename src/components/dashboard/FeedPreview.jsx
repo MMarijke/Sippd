@@ -43,8 +43,12 @@ export default function FeedPreview() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Scoped by user id — same reasoning as FeedContent.jsx's own
+  // activity-feed query: activity_items' RLS visibility varies per
+  // viewer, so an unscoped cache key risks showing a stale previous
+  // account's feed preview on a fast account swap on the same device.
   const { data: items = [], isLoading, refetch } = useQuery({
-    queryKey: ['feed-preview'],
+    queryKey: ['feed-preview', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('activity_items')

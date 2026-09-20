@@ -26,8 +26,13 @@ export default function FeedContent({ defaultTab = 'global' }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  // Scoped by user id, not just ['activity-feed'] — activity_items' RLS
+  // visibility genuinely varies per viewer (a private account's posts are
+  // only visible to accepted followers or the poster), so an unscoped key
+  // risked a stale cache entry fetched under one account being served to
+  // a different one on a fast account swap on the same device.
   const { data: allActivity = [], isLoading, isError, isFetching, refetch } = useQuery({
-    queryKey: ['activity-feed'],
+    queryKey: ['activity-feed', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('activity_items')
@@ -97,14 +102,14 @@ export default function FeedContent({ defaultTab = 'global' }) {
     // refetch — rolled back in onError, reconciled with the server in
     // onSettled either way.
     onMutate: async ({ activityId, emoji }) => {
-      await queryClient.cancelQueries({ queryKey: ['activity-feed'] });
+      await queryClient.cancelQueries({ queryKey: ['activity-feed', user?.id] });
       await queryClient.cancelQueries({ queryKey: ['my-reactions', user?.id] });
 
-      const previousActivity = queryClient.getQueryData(['activity-feed']);
+      const previousActivity = queryClient.getQueryData(['activity-feed', user?.id]);
       const previousReactions = queryClient.getQueryData(['my-reactions', user?.id]);
       const field = REACTION_COUNT_FIELD[emoji];
 
-      queryClient.setQueryData(['activity-feed'], (old = []) =>
+      queryClient.setQueryData(['activity-feed', user?.id], (old = []) =>
         old.map(item => item.id === activityId ? { ...item, [field]: (item[field] || 0) + 1 } : item)
       );
       queryClient.setQueryData(['my-reactions', user?.id], (old = []) => [
@@ -115,12 +120,12 @@ export default function FeedContent({ defaultTab = 'global' }) {
       return { previousActivity, previousReactions };
     },
     onError: (error, variables, context) => {
-      if (context?.previousActivity) queryClient.setQueryData(['activity-feed'], context.previousActivity);
+      if (context?.previousActivity) queryClient.setQueryData(['activity-feed', user?.id], context.previousActivity);
       if (context?.previousReactions) queryClient.setQueryData(['my-reactions', user?.id], context.previousReactions);
       toast.error(error.message || 'Failed to react');
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['activity-feed'] });
+      queryClient.invalidateQueries({ queryKey: ['activity-feed', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['my-reactions'] });
     },
   });

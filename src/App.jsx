@@ -8,6 +8,7 @@ import { useTheme } from '@/hooks/useTheme';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
 import Login from './pages/Login';
+import ResetPassword from './pages/ResetPassword';
 import Home from './pages/Home';
 import Scan from './pages/Scan';
 import Collection from './pages/Collection';
@@ -45,6 +46,12 @@ function App() {
         <Router>
           <Routes>
             <Route path="/login" element={<Login />} />
+            {/* Public on purpose — reached from the link in a password-reset
+                email, before the visitor has any normal session at all.
+                Supabase's own recovery tokens in the URL are what actually
+                authorize setting a new password here, not this route's
+                placement outside ProtectedRoute. */}
+            <Route path="/reset-password" element={<ResetPassword />} />
             {/* Public on purpose: a shared profile link has to work for
                 someone with no Sippd account at all, not just other
                 signed-in users. PublicProfile.jsx's own canViewContent

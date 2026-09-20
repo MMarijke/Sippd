@@ -34,14 +34,20 @@ export default function TradeLogDialog({ collection, onClose }) {
   );
 
   // RLS already scopes this to rows the current user participates in
-  // (follower or followee) — no explicit filter needed.
+  // (follower or followee) — no explicit filter needed. The cache key is
+  // scoped by user id anyway, unlike before — RLS means the *data* was
+  // never wrong, but an unscoped key risked a stale cache entry fetched
+  // under one account being served to a different one on a fast account
+  // swap on the same device, matching every other per-user query key in
+  // this codebase.
   const { data: follows = [], isError: isFollowsError } = useQuery({
-    queryKey: ['follows-for-trade'],
+    queryKey: ['follows-for-trade', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.from('follows').select('*');
       if (error) throw error;
       return data;
     },
+    enabled: !!user?.id,
   });
 
   const { data: allUsers = [], isError: isAllUsersError } = useQuery({

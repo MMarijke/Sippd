@@ -15,7 +15,7 @@ import { useProStatus } from '@/hooks/useProStatus';
 import { sortPinnedFirst } from '@/hooks/useCollectionHighlights';
 import ProBadge from '@/components/shared/ProBadge';
 import SippdBranding from '@/components/shared/SippdBranding';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export default function PublicProfile() {
   const urlParts = window.location.pathname.split('/u/');
@@ -23,6 +23,15 @@ export default function PublicProfile() {
   const { user: currentUser } = useAuth();
   const [showTradeDialog, setShowTradeDialog] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // ?preview=true is how Settings' "Preview Public Profile" link works: an
+  // owner viewing their own profile normally always sees full access via
+  // the isSelf clause below, which is exactly right for the real page but
+  // wrong for a preview meant to show what a STRANGER sees. This param
+  // suppresses only that one short-circuit — a private account previewing
+  // itself now genuinely hits the locked state, same as any other
+  // non-owner, non-follower visitor would.
+  const isPreview = searchParams.get('preview') === 'true';
 
   // Narrow public view — id, full_name, is_private, current_streak, created_at only.
   // No email, no role, no raw profiles table read for another user.
@@ -54,7 +63,8 @@ export default function PublicProfile() {
   }, [follows, userId]);
 
   const isPrivate = profileUser?.is_private;
-  const canViewContent = !isPrivate || isFollowingTarget || currentUser?.id === userId;
+  const isSelf = currentUser?.id === userId;
+  const canViewContent = !isPrivate || isFollowingTarget || (isSelf && !isPreview);
 
   // Trophy Case badge — the OWNER's Pro status (not the viewer's), so
   // strangers see the same badge/showcase the owner sees on their own

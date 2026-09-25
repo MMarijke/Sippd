@@ -644,7 +644,7 @@ export default function Settings() {
         </div>
 
         <SectionHeader title="Privacy" />
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
           <div className="px-4 py-3.5 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-foreground">Private Account</p>
@@ -673,6 +673,11 @@ export default function Settings() {
               </button>
             )}
           </div>
+          <SettingsRow
+            label="Preview Public Profile"
+            sub="See exactly what a stranger or follower sees"
+            onClick={() => navigate(`/u/${user.id}?preview=true`)}
+          />
         </div>
 
         <SectionHeader title="Your Data" />

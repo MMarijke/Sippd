@@ -1,6 +1,6 @@
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { Link } from 'react-router-dom';
-import { Pin, Share2, CupSoda } from 'lucide-react';
+import { Pin, Link2, CupSoda } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { getMaxPins } from '@/hooks/useTogglePin';
 import { cn } from '@/lib/utils';
@@ -79,7 +79,7 @@ export default function CollectionCard({
               aria-label="Share profile link"
               className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
             >
-              <Share2 className="w-4 h-4" />
+              <Link2 className="w-4 h-4" />
             </button>
           )}
         </div>

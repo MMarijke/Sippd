@@ -1,7 +1,7 @@
 {
-  "name": "Sippd: Energy Drink Collection Tracker",
+  "name": "Sippd: Can Collection Tracker",
   "short_name": "Sippd",
-  "description": "Track, showcase, and compete over your energy drink can collection.",
+  "description": "Track, showcase, and compete over your can collection.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#08080c",

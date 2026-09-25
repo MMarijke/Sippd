@@ -1,6 +1,6 @@
 # Sippd
 
-Mobile-first energy drink can collection tracker — log, catalog, and show off
+Mobile-first can collection tracker — log, catalog, and show off
 your collection, with a social/competitive layer (leaderboards, feed,
 achievements) on top.
 

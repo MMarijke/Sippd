@@ -23,6 +23,7 @@ const PAGE_SIZE = 60;
 
 // Matches FilterBar's own SelectItem labels for Status.
 const STATUS_LABELS = { collected: 'In Vault', wishlist: 'Wishlist', duplicate: 'Duplicates' };
+const BEVERAGE_TYPE_LABELS = { energy_drink: 'Energy Drink', soft_drink: 'Soft Drink' };
 
 export default function Collection() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -35,6 +36,7 @@ export default function Collection() {
   const [filters, setFilters] = useState(() => ({
     status: searchParams.get('status') || 'all',
     rarity: searchParams.get('rarity') || 'all',
+    beverageType: searchParams.get('type') || 'all',
     favourites: searchParams.get('fav') === '1',
     sort: searchParams.get('sort') || 'date_desc',
   }));
@@ -60,6 +62,7 @@ export default function Collection() {
     if (searchQuery) next.q = searchQuery;
     if (filters.status !== 'all') next.status = filters.status;
     if (filters.rarity !== 'all') next.rarity = filters.rarity;
+    if (filters.beverageType !== 'all') next.type = filters.beverageType;
     if (filters.favourites) next.fav = '1';
     if (filters.sort !== 'date_desc') next.sort = filters.sort;
     if (viewMode !== 'grid') next.view = viewMode;
@@ -184,6 +187,7 @@ export default function Collection() {
     .filter(item => {
       if (filters.status !== 'all' && item.status !== filters.status) return false;
       if (filters.rarity !== 'all' && getEffectiveRarity(item) !== filters.rarity) return false;
+      if (filters.beverageType !== 'all' && item.can_beverage_type !== filters.beverageType) return false;
       if (filters.favourites && !item.is_favourite) return false;
       if (searchQuery.length >= 2) {
         const q = searchQuery.toLowerCase();
@@ -208,9 +212,9 @@ export default function Collection() {
   // Sort is excluded on purpose — it reorders results, it never excludes
   // them, so it can't be the reason a search+filter combination landed on
   // zero results and doesn't need a "clear" affordance of its own.
-  const hasActiveFilters = filters.status !== 'all' || filters.rarity !== 'all' || filters.favourites || searchQuery.length >= 2;
+  const hasActiveFilters = filters.status !== 'all' || filters.rarity !== 'all' || filters.beverageType !== 'all' || filters.favourites || searchQuery.length >= 2;
   const clearFilters = () => {
-    setFilters(prev => ({ ...prev, status: 'all', rarity: 'all', favourites: false }));
+    setFilters(prev => ({ ...prev, status: 'all', rarity: 'all', beverageType: 'all', favourites: false }));
     setSearchQuery('');
   };
 
@@ -229,6 +233,11 @@ export default function Collection() {
       key: 'rarity',
       label: filters.rarity,
       onRemove: () => setFilters(prev => ({ ...prev, rarity: 'all' })),
+    },
+    filters.beverageType !== 'all' && {
+      key: 'beverageType',
+      label: BEVERAGE_TYPE_LABELS[filters.beverageType] || filters.beverageType,
+      onRemove: () => setFilters(prev => ({ ...prev, beverageType: 'all' })),
     },
     filters.favourites && {
       key: 'favourites',

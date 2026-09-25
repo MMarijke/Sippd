@@ -168,7 +168,7 @@ export default function Home() {
         <div className="relative z-10">
           <PageHeader
             title="SIPPD"
-            subtitle={profile?.full_name ? `${profile.full_name}'s vault` : 'Your Energy Drink Vault'}
+            subtitle={profile?.full_name ? `${profile.full_name}'s vault` : 'Your Vault'}
             action={
               <Link to="/scan">
                 <Button size="sm" className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
@@ -244,7 +244,7 @@ export default function Home() {
                       ) : score}
                     </p>
                     <p className="text-xs font-mono text-muted-foreground">
-                      Your Energy Drink Vault
+                      Your Vault
                     </p>
                   </div>
                 </div>

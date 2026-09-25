@@ -19,6 +19,7 @@ import { RARITY_ORDER, getDisplayRarity, getConfidence } from '@/lib/rarityConse
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import CanBackgroundPicker from '@/components/shared/CanBackgroundPicker';
 import TasteRatingStars from '@/components/shared/TasteRatingStars';
+import BeverageTypeToggle from '@/components/shared/BeverageTypeToggle';
 
 const RARITIES = RARITY_ORDER;
 
@@ -87,6 +88,12 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
       rarity:     prefillData?.consensus_rarity || prefillData?.rarity || savedDefaults.defaultRarity || 'Common',
       image_url:  prefillData?.image_url || '',
       barcode:    prefillData?.barcode || '',
+      // Existing catalog can: its own established beverage_type (read-only
+      // below, same as name/brand). New can: whatever OFF's category guess
+      // landed on (see Scan.jsx's guessBeverageType), or energy_drink by
+      // default -- either way, always shown and always editable before
+      // submit (never silently trusted).
+      beverage_type: prefillData?.beverage_type || 'energy_drink',
       notes:      '',
       status:     savedDefaults.defaultStatus || 'collected',
       date_added: format(new Date(), 'yyyy-MM-dd'),
@@ -176,6 +183,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           p_edition: form.edition || null,
           p_image_url: form.image_url || null,
           p_barcode: form.barcode || null,
+          p_beverage_type: form.beverage_type,
         });
         if (error) throw error;
         sharedCan = data;
@@ -194,6 +202,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
         can_rarity:        displayRarity,
         can_flavour:       form.flavour   || sharedCan.flavour,
         can_edition:       form.edition   || sharedCan.edition,
+        can_beverage_type: form.beverage_type || sharedCan.beverage_type,
         can_bg_color:      form.bg_color  || DEFAULT_CAN_BG,
         user_rarity_vote:  form.rarity,
         taste_rating:      form.taste_rating,
@@ -550,6 +559,18 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
                 : 'Vote locks once cast — choose carefully.'}
             </p>
           </div>
+        )}
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Beverage Type</Label>
+        <BeverageTypeToggle
+          value={form.beverage_type}
+          onChange={v => update('beverage_type', v)}
+          disabled={!!prefillData?.id}
+        />
+        {prefillData?.id && (
+          <p className="text-[11px] font-mono text-muted-foreground">Set by this can's catalog entry.</p>
         )}
       </div>
 

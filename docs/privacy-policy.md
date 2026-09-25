@@ -21,7 +21,7 @@ We collect the following categories of personal information:
 | Data we collect | Why we collect it |
 |---|---|
 | Email address and display name | Collected via Supabase Auth when you create an account; used to let you log in, identify your account, and display your name to other users where relevant (e.g. leaderboards, the activity feed, your profile). |
-| Can collection data — names, brands, barcodes, and photos you upload | This is the core function of the App: logging, cataloging, and showcasing your energy drink can collection. |
+| Can collection data — names, brands, barcodes, and photos you upload | This is the core function of the App: logging, cataloging, and showcasing your can collection. |
 | Rarity votes and community activity — feed posts, reactions, follows | Powers Sippd's social and competitive features: the activity feed, community rarity consensus on cans, and following other collectors. |
 | Streak and usage data — last active date, current streak | Powers the streak and gamification features that track your ongoing engagement with the App. |
 | Region (optional) | Only collected if you choose to set it in your profile; used for the regional leaderboard feature. |

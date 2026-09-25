@@ -14,6 +14,7 @@ import { RARITY_ORDER } from '@/lib/rarityConsensus';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import CanBackgroundPicker from '@/components/shared/CanBackgroundPicker';
 import TasteRatingStars from '@/components/shared/TasteRatingStars';
+import BeverageTypeToggle from '@/components/shared/BeverageTypeToggle';
 
 const STATUS_OPTIONS = [
   { value: 'collected', label: 'Collected' },
@@ -56,6 +57,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
     can_brand: item?.can_brand || '',
     can_flavour:  item?.can_flavour  || '',
     can_edition:  item?.can_edition  || '',
+    can_beverage_type: item?.can_beverage_type || 'energy_drink',
     can_image_url: item?.can_image_url || '',
     can_bg_color: item?.can_bg_color || DEFAULT_CAN_BG,
     taste_rating: item?.taste_rating || null,
@@ -162,6 +164,18 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
               value={form.can_edition}
               onChange={e => update('can_edition', e.target.value)}
               className="bg-secondary border-border font-body"
+            />
+          </div>
+
+          {/* Beverage Type — a personal snapshot like can_name/can_brand
+              above, not locked, always editable here even though this
+              can's shared_cans.beverage_type is the canonical, first-
+              contributor-only value elsewhere (AddCanForm.jsx). */}
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Beverage Type</Label>
+            <BeverageTypeToggle
+              value={form.can_beverage_type}
+              onChange={v => update('can_beverage_type', v)}
             />
           </div>
 

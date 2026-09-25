@@ -11,6 +11,20 @@ import AddCanForm from '@/components/scan/AddCanForm';
 import BarcodeScanner from '@/components/scan/BarcodeScanner';
 import { toast } from 'sonner';
 
+// Heuristic only, not authoritative -- this just pre-selects
+// AddCanForm.jsx's beverage type toggle, which stays fully editable either
+// way (a user always confirms or corrects it before submitting). Tag
+// strings match OFF's own `categories_tags` values (e.g. "en:sodas"),
+// hence the substring check rather than an exact match.
+const SOFT_DRINK_OFF_TAGS = ['sodas', 'colas', 'sparkling-waters', 'lemonades', 'carbonated-drinks', 'iced-teas'];
+const ENERGY_DRINK_OFF_TAGS = ['energy-drinks'];
+
+function guessBeverageType(categoriesTags = []) {
+  if (categoriesTags.some(t => ENERGY_DRINK_OFF_TAGS.some(tag => t.includes(tag)))) return 'energy_drink';
+  if (categoriesTags.some(t => SOFT_DRINK_OFF_TAGS.some(tag => t.includes(tag)))) return 'soft_drink';
+  return null;
+}
+
 async function lookupOpenFoodFacts(barcode, signal) {
   const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`, { signal });
   if (!res.ok) throw new Error(`Open Food Facts lookup failed (${res.status})`);
@@ -22,6 +36,7 @@ async function lookupOpenFoodFacts(barcode, signal) {
     brand:     p.brands       || '',
     image_url: p.image_front_url || '',
     barcode,
+    beverage_type: guessBeverageType(p.categories_tags),
     _offSource: true,
   };
 }

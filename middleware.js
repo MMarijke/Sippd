@@ -64,8 +64,8 @@ export default async function middleware(request) {
 
   const title = `${displayName}’s Sippd Collection`;
   const description = isPrivate
-    ? `${displayName} keeps a private energy drink collection on Sippd.`
-    : `Check out ${displayName}’s energy drink can collection on Sippd.`;
+    ? `${displayName} keeps a private can collection on Sippd.`
+    : `Check out ${displayName}’s can collection on Sippd.`;
   const imageUrl = `${url.origin}/api/og/${encodeURIComponent(userId)}`;
   const pageUrl = `${url.origin}/u/${encodeURIComponent(userId)}`;
 

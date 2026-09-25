@@ -20,11 +20,11 @@ Migrated off the original Base44 implementation (React + Vite + `@base44/sdk`) t
 
 ## Users
 
-Serious collectors/traders of energy drink cans — people for whom collecting is a primary hobby, not incidental. They actively hunt rare or hard-to-find cans, trade with other collectors, and are motivated by competing (leaderboards) as much as by cataloging.
+Serious collectors/traders of cans (energy drinks and soft drinks) — people for whom collecting is a primary hobby, not incidental. They actively hunt rare or hard-to-find cans, trade with other collectors, and are motivated by competing (leaderboards) as much as by cataloging.
 
 ## Product Purpose
 
-Sippd is a mobile-first energy drink can collection tracker. It lets collectors log, catalog, and showcase their collections, and turns collecting into a social, competitive activity rather than a private list.
+Sippd is a mobile-first can collection tracker, covering energy drinks and soft drinks (alcohol is explicitly out of scope, pending its own age-verification work). It lets collectors log, catalog, and showcase their collections, and turns collecting into a social, competitive activity rather than a private list.
 
 ## Positioning
 
@@ -66,7 +66,7 @@ Mobile-first, in-the-moment usage — the Scan flow implies logging a can at the
 
 ## Brand Commitments
 
-Product name is **Sippd**. The stale pre-rename "Canvolt" title and Base44-hosted favicon in `index.html` have been fixed — the title now reads "Sippd — Energy Drink Collection Tracker" with a self-contained inline favicon.
+Product name is **Sippd**. The stale pre-rename "Canvolt" title and Base44-hosted favicon in `index.html` have been fixed — the title now reads "Sippd: Can Collection Tracker" with a self-contained inline favicon.
 
 ## Evidence on Hand
 

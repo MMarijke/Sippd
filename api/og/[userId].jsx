@@ -63,7 +63,7 @@ export default async function handler(request) {
   const statLine = isPrivate
     ? 'Private Collection'
     : cansCount === null
-      ? 'Energy Drink Collector'
+      ? 'Can Collector'
       : `${cansCount} can${cansCount === 1 ? '' : 's'} collected`;
 
   return new ImageResponse(

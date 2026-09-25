@@ -17,15 +17,26 @@ import { withCompetitionRank } from '@/lib/ranking';
 const MEDAL = ['🥇', '🥈', '🥉'];
 const MEDAL_COLORS = ['text-yellow-400', 'text-slate-300', 'text-amber-600'];
 
+const CATEGORY_OPTIONS = [
+  { value: 'all',          label: 'All'          },
+  { value: 'energy_drink', label: 'Energy Drinks' },
+  { value: 'soft_drink',   label: 'Soft Drinks'  },
+];
+
 export default function CollectorsLeaderboard() {
   const [sortBy, setSortBy] = useState('total'); // 'total' | 'rare'
+  // Query-time filter, not a schema split or a second leaderboard system:
+  // 'all' reads the existing denormalized leaderboard_scores table exactly
+  // as before; any other category calls get_category_leaderboard() to
+  // compute a live, filtered ranking on demand instead.
+  const [category, setCategory] = useState('all');
   const { user: currentUser } = useAuth();
 
   const metricColumn = sortBy === 'total' ? 'total_cans' : 'rare_pulls';
 
   const {
     data: scores = [],
-    isLoading,
+    isLoading: isLoadingAll,
     isError: isScoresError,
     refetch: refetchScores,
   } = useQuery({
@@ -39,17 +50,45 @@ export default function CollectorsLeaderboard() {
       if (error) throw error;
       return data;
     },
+    enabled: category === 'all',
   });
 
+  // get_category_leaderboard() returns every collector for that category,
+  // not capped at 50 — unlike the 'all' branch above, there's no separate
+  // myScoreRow/myRank query needed below; both are derived from this same
+  // full result set once it's in, instead of two extra round trips.
+  const {
+    data: categoryScores = [],
+    isLoading: isLoadingCategory,
+    isError: isCategoryError,
+    refetch: refetchCategoryScores,
+  } = useQuery({
+    queryKey: ['category-leaderboard', category],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_category_leaderboard', { p_beverage_type: category });
+      if (error) throw error;
+      return data;
+    },
+    enabled: category !== 'all',
+  });
+
+  const isLoading = category === 'all' ? isLoadingAll : isLoadingCategory;
+  const isFilteredError = category === 'all' ? isScoresError : isCategoryError;
+  const refetchFiltered = category === 'all' ? refetchScores : refetchCategoryScores;
+
   useEffect(() => {
-    if (isScoresError) toast.error('Could not load the leaderboard');
-  }, [isScoresError]);
+    if (isFilteredError) toast.error('Could not load the leaderboard');
+  }, [isFilteredError]);
 
-  // Ordering comes from the DB query above (per active tab) — this only
-  // hides collectors with nothing in their vault yet.
-  const ranked = scores.filter(s => s.total_cans > 0);
+  // Ordering comes from the DB for the 'all' branch (already sorted +
+  // capped there); the category branch sorts client-side since
+  // get_category_leaderboard() returns every collector unsorted.
+  const activeScores = category === 'all' ? scores : categoryScores;
+  const ranked = category === 'all'
+    ? activeScores.filter(s => s.total_cans > 0)
+    : [...activeScores].filter(s => s[metricColumn] > 0).sort((a, b) => b[metricColumn] - a[metricColumn]);
 
-  const isEmpty = !isLoading && !isScoresError && ranked.length === 0;
+  const isEmpty = !isLoading && !isFilteredError && ranked.length === 0;
 
   // Competition-style ranking (ties share a rank) — the same algorithm the
   // "Your Rank" banner's count query already uses. Previously each row used
@@ -57,18 +96,26 @@ export default function CollectorsLeaderboard() {
   // number in a row than in the banner for the same person in the same view.
   // Shared with RegionalLeaderboard.jsx (src/lib/ranking.js), which had the
   // same bug and wasn't covered by this fix the first time (/impeccable critique).
+  // Ranked over the FULL result set (uncapped for a category filter, capped
+  // at 50 for 'all') so rank numbers are correct even for rows outside the
+  // rendered slice below.
   const rankedWithRank = withCompetitionRank(ranked, metricColumn);
+  // Render only ever shows the top 50, same as 'all' always has (its query
+  // itself is capped there) — a category filter's own RPC is uncapped
+  // precisely so "Your Rank"/"Your Score" below can resolve correctly for
+  // someone outside that slice, not so the list itself grows unbounded.
+  const displayedRows = rankedWithRank.slice(0, 50);
 
   // Trophy Case badge — one batched lookup per page for every collector
   // currently visible, not one query per row.
-  const proUserIds = useProStatus(rankedWithRank.map(entry => entry.user_id));
+  const proUserIds = useProStatus(displayedRows.map(entry => entry.user_id));
 
-  // Fetched directly rather than derived from `scores` (capped at 50 rows
-  // above) — deriving it from that capped list meant any real collector
-  // outside the top 50 had no matching entry, so their own metric silently
-  // read as 0 and they were told "Not ranked yet" despite having a real,
-  // just-not-top-50 rank.
-  const { data: myScoreRow } = useQuery({
+  // 'all': fetched directly rather than derived from `scores` (capped at 50
+  // rows above) — deriving it from that capped list meant any real
+  // collector outside the top 50 had no matching entry, so their own metric
+  // silently read as 0 and they were told "Not ranked yet" despite having a
+  // real, just-not-top-50 rank.
+  const { data: myScoreRowAll } = useQuery({
     queryKey: ['my-leaderboard-score', currentUser?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -79,10 +126,30 @@ export default function CollectorsLeaderboard() {
       if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no row yet, not an error here
       return data ?? null;
     },
-    enabled: !!currentUser?.id,
+    enabled: !!currentUser?.id && category === 'all',
   });
 
-  const myMetric = myScoreRow?.[metricColumn] ?? 0;
+  const { data: myRankAll } = useQuery({
+    queryKey: ['my-rank', sortBy, currentUser?.id, myScoreRowAll?.[metricColumn] ?? 0],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('leaderboard_scores')
+        .select('*', { count: 'exact', head: true })
+        .gt(metricColumn, myScoreRowAll?.[metricColumn] ?? 0);
+      if (error) throw error;
+      return (count || 0) + 1;
+    },
+    enabled: !!currentUser?.id && category === 'all' && (myScoreRowAll?.[metricColumn] ?? 0) > 0,
+  });
+
+  // category !== 'all': get_category_leaderboard() already returned every
+  // collector (uncapped), and rankedWithRank above computed a real rank for
+  // all of them — no separate row/count query needed, just find the caller.
+  const myCategoryEntry = category !== 'all' ? rankedWithRank.find(entry => entry.user_id === currentUser?.id) : null;
+
+  const myMetric = category === 'all' ? (myScoreRowAll?.[metricColumn] ?? 0) : (myCategoryEntry?.[metricColumn] ?? 0);
+  const myRank = category === 'all' ? myRankAll : (myCategoryEntry?.rank ?? null);
+
   const { targetRef: myRowRef, highlighted, jumpToTarget } = useJumpToHighlight();
 
   // /impeccable critique: the banner announced a rank number with no way to
@@ -100,20 +167,7 @@ export default function CollectorsLeaderboard() {
     }
   };
 
-  const { data: myRank } = useQuery({
-    queryKey: ['my-rank', sortBy, currentUser?.id, myMetric],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from('leaderboard_scores')
-        .select('*', { count: 'exact', head: true })
-        .gt(metricColumn, myMetric);
-      if (error) throw error;
-      return (count || 0) + 1;
-    },
-    enabled: !!currentUser?.id && myMetric > 0,
-  });
-
-  const rankDelta = useRankDelta(`collectors:${sortBy}`, myRank, currentUser?.id);
+  const rankDelta = useRankDelta(`collectors:${sortBy}:${category}`, myRank, currentUser?.id);
 
   return (
     <div className="px-5">
@@ -152,6 +206,22 @@ export default function CollectorsLeaderboard() {
         </Popover>
       </div>
 
+      <div className="flex bg-secondary rounded-lg border border-border p-0.5 mb-3" aria-label="Filter by beverage type">
+        {CATEGORY_OPTIONS.map(opt => (
+          <button
+            key={opt.value}
+            type="button"
+            aria-pressed={category === opt.value}
+            className={cn('flex-1 h-11 font-mono text-xs rounded-md transition-colors',
+              category === opt.value ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
+            )}
+            onClick={() => setCategory(opt.value)}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
       {currentUser && (
         <button
           type="button"
@@ -174,7 +244,7 @@ export default function CollectorsLeaderboard() {
               </span>
             )}
             <span className={cn('text-sm font-display font-bold', sortBy === 'rare' ? 'text-rarity-ultra' : 'text-primary')}>
-              {isScoresError ? 'Unavailable' : myMetric > 0 ? (myRank ? `#${myRank}` : '…') : 'Not ranked yet'}
+              {isFilteredError ? 'Unavailable' : myMetric > 0 ? (myRank ? `#${myRank}` : '…') : 'Not ranked yet'}
             </span>
           </span>
         </button>
@@ -186,7 +256,7 @@ export default function CollectorsLeaderboard() {
             <div key={i} className="h-16 rounded-xl bg-card/40 border border-border/30 animate-pulse mb-2" />
           ))}
         </>
-      ) : isScoresError ? (
+      ) : isFilteredError ? (
         <div className="bg-card border border-destructive/30 rounded-2xl p-8 flex flex-col items-center text-center">
           <AlertCircle className="w-10 h-10 text-destructive mb-3" />
           <p className="text-sm font-display font-semibold text-foreground">Couldn't load the leaderboard</p>
@@ -194,7 +264,7 @@ export default function CollectorsLeaderboard() {
             variant="outline"
             size="sm"
             className="h-11 mt-4 font-mono text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
-            onClick={() => refetchScores()}
+            onClick={() => refetchFiltered()}
           >
             <RefreshCw className="w-3.5 h-3.5" /> Retry
           </Button>
@@ -207,7 +277,7 @@ export default function CollectorsLeaderboard() {
         </div>
       ) : (
         <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
-          {rankedWithRank.map((entry) => {
+          {displayedRows.map((entry) => {
             const isMe = entry.user_id === currentUser?.id;
             const isMedal = entry.rank <= 3;
             const score = entry[metricColumn];

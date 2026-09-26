@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { Link } from 'react-router-dom';
-import { Pin, Link2, CupSoda } from 'lucide-react';
+import { Pin, Link2, CupSoda, X } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { getMaxPins } from '@/hooks/useTogglePin';
 import { cn } from '@/lib/utils';
@@ -64,6 +65,33 @@ export default function CollectionCard({
   isPro = false,
 }) {
   const maxPins = getMaxPins(isPro);
+  // First-use hint for the Share icon — it used to export an image, now it
+  // shares a live link, and a bare chain-link glyph carries none of that
+  // history on its own. Only ever relevant when onShare is passed (Profile
+  // is the only caller today), and clears itself the first time it's read
+  // or the button is actually tapped, whichever comes first — same
+  // localStorage "seen" pattern as the theme-family New badges.
+  // (/impeccable critique)
+  const [shareHintSeen, setShareHintSeen] = useState(() => {
+    try {
+      return localStorage.getItem('sippd_share_hint_seen') === '1';
+    } catch {
+      return true;
+    }
+  });
+  const dismissShareHint = () => {
+    try {
+      localStorage.setItem('sippd_share_hint_seen', '1');
+    } catch {
+      // Best-effort — a blocked localStorage just means the hint reappears.
+    }
+    setShareHintSeen(true);
+  };
+  const handleShareClick = () => {
+    dismissShareHint();
+    onShare();
+  };
+
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
       {(headerTitle || onShare) && (
@@ -75,13 +103,28 @@ export default function CollectionCard({
           )}
           {onShare && (
             <button
-              onClick={onShare}
+              onClick={handleShareClick}
               aria-label="Share profile link"
               className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
             >
               <Link2 className="w-4 h-4" />
             </button>
           )}
+        </div>
+      )}
+
+      {onShare && !shareHintSeen && (
+        <div className="flex items-start justify-between gap-2 -mt-2 mb-4 px-0.5">
+          <p className="text-[11px] font-mono text-muted-foreground leading-snug">
+            New: tap the link icon above to share your live profile — no more downloading an image.
+          </p>
+          <button
+            onClick={dismissShareHint}
+            aria-label="Dismiss"
+            className="p-2 -m-2 text-muted-foreground hover:text-foreground flex-shrink-0"
+          >
+            <X className="w-3 h-3" />
+          </button>
         </div>
       )}
 

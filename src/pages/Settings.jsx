@@ -275,23 +275,33 @@ function ChipToggle({ options, value, onChange, disabled }) {
 // independent of `theme` (the actually *applied* palette) — so tapping
 // around families to look at them never changes what's live until a swatch
 // is actually tapped.
-function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily }) {
+function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies }) {
   return (
     <div className="grid grid-cols-3 gap-3 p-4">
       {THEME_FAMILIES.map(family => {
         const freeTheme = family.themes.find(t => !t.pro);
         const selected = viewedFamilyId === family.id;
+        // Clears itself the first time this tile is actually opened
+        // (Settings' onSelectFamily marks it seen), not on a timer or a
+        // manual dismiss — a launch that only ever shows up if you already
+        // knew to look defeats the point of a "New" badge.
+        const showNewBadge = family.isNew && !seenFamilies.has(family.id);
         return (
           <button
             key={family.id}
             onClick={() => onSelectFamily(family.id)}
-            aria-label={`Browse ${family.label} themes`}
+            aria-label={showNewBadge ? `Browse ${family.label} themes — new` : `Browse ${family.label} themes`}
             aria-pressed={selected}
             className={cn(
               'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors',
               selected ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/20'
             )}
           >
+            {showNewBadge && (
+              <span className="absolute top-1.5 right-1.5 px-1.5 h-4 rounded-full bg-primary text-primary-foreground text-[9px] font-mono font-bold uppercase tracking-wider flex items-center justify-center">
+                New
+              </span>
+            )}
             <div
               className="w-9 h-9 rounded-full border border-white/10"
               style={{ background: freeTheme?.swatch }}
@@ -368,6 +378,34 @@ export default function Settings() {
   const [viewedFamilyId, setViewedFamilyId] = useState(
     () => THEME_FAMILIES.find(f => f.themes.some(t => t.id === theme))?.id ?? null
   );
+  // Tracks which theme families this browser has ever opened, purely to
+  // clear the "New" badge on Field Guide/Origami Fold's tiles once seen —
+  // per-device is fine for a one-time UI hint like this, same reasoning as
+  // any other localStorage-backed "seen" flag. A family whose theme is
+  // already applied (e.g. already on a Field Guide palette) counts as seen
+  // immediately, not just once its tile is tapped.
+  const [seenFamilies, setSeenFamilies] = useState(() => {
+    let stored = [];
+    try {
+      stored = JSON.parse(localStorage.getItem('sippd_seen_theme_families') || '[]');
+    } catch {
+      stored = [];
+    }
+    return new Set(viewedFamilyId ? [...stored, viewedFamilyId] : stored);
+  });
+  const markFamilySeen = (id) => {
+    setSeenFamilies(prev => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev).add(id);
+      try {
+        localStorage.setItem('sippd_seen_theme_families', JSON.stringify([...next]));
+      } catch {
+        // Best-effort only — a blocked/full localStorage just means the
+        // badge may reappear next visit, not a functional failure.
+      }
+      return next;
+    });
+  };
   const [panel, setPanel] = useState(null); // 'name' | 'region' | 'password'
   const [prefs, setPrefs] = useState(loadPrefs);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -640,7 +678,8 @@ export default function Settings() {
           ) : (
             <ThemeFamilyTiles
               viewedFamilyId={viewedFamilyId}
-              onSelectFamily={setViewedFamilyId}
+              onSelectFamily={id => { setViewedFamilyId(id); markFamilySeen(id); }}
+              seenFamilies={seenFamilies}
             />
           )}
         </div>

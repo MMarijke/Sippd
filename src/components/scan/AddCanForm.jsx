@@ -522,7 +522,12 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           </div>
         ) : (
           <div className="space-y-1.5">
-            <div className="grid grid-cols-3 gap-2">
+            {/* role="group", not "radiogroup" -- matches the locked sibling
+                block's intent (these buttons together are one rarity vote)
+                without claiming role="radio"/arrow-key nav this never
+                implements, same reasoning as BeverageTypeToggle.jsx.
+                (/impeccable critique) */}
+            <div className="grid grid-cols-3 gap-2" role="group" aria-label="Your rarity vote">
               {RARITIES.map(r => {
                 const isPending = pendingRarity === r;
                 const isConfirmed = form.rarity === r && !isPending;

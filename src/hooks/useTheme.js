@@ -32,6 +32,13 @@ export const THEME_FAMILIES = [
   {
     id: 'field-guide',
     label: 'Field Guide',
+    // isNew drives a "New" badge on this tile in Settings until the user
+    // has actually opened it once (see Settings.jsx's seenFamilies
+    // tracking) — added after the launch made the two new families nearly
+    // invisible to existing users, who default straight past the family
+    // picker into whichever palette their theme already belongs to.
+    // (/impeccable critique)
+    isNew: true,
     themes: [
       { id: 'herbarium', label: 'Herbarium', pro: false, swatch: '#a68259' },
       { id: 'monarch', label: 'Monarch', pro: true, swatch: '#ed8326' },
@@ -44,6 +51,7 @@ export const THEME_FAMILIES = [
   {
     id: 'origami-fold',
     label: 'Origami Fold',
+    isNew: true,
     themes: [
       { id: 'washi', label: 'Washi', pro: false, swatch: '#9a8f7e' },
       { id: 'shu', label: 'Shu', pro: true, swatch: '#e5472e' },

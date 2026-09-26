@@ -243,7 +243,15 @@
     --background: 271 30% 6%;
     --card: 271 28% 13%;
     --popover: 271 28% 13%;
-    --primary: 271 90% 64%;
+    /* Revised via /impeccable critique: pushed darker/more electric-violet
+       (was 271/90/64, #A855F7) -- it's the only purple in Neon Grid and
+       should feel distinct/special. Contrast vs this theme's own --card
+       is 3.17:1 (was already 4.16:1 pre-revision, i.e. already short of
+       strict 4.5:1 AA-small-text before this change) -- accepted as-is
+       per explicit sign-off, same reasoning as Ume above: this risk tier
+       already existed live, not a new blocker, flagged as a separate
+       future accessibility pass across the original 18. */
+    --primary: 271 81% 56%;
     --primary-foreground: 240 20% 4%;
     --secondary: 271 22% 22%;
     --muted: 271 18% 12%;
@@ -252,7 +260,7 @@
     --accent-foreground: 240 20% 4%;
     --border: 271 24% 24%;
     --input: 271 24% 24%;
-    --ring: 271 90% 64%;
+    --ring: 271 81% 56%;
     --glow-intensity: 1.2;
     --breakdown-common: 271 35% 28%;
     --breakdown-uncommon: 271 50% 38%;
@@ -352,7 +360,11 @@
     --background: 212 30% 6%;
     --card: 212 26% 11%;
     --popover: 212 26% 11%;
-    --primary: 210 80% 56%;
+    /* Revised via /impeccable critique: 210/80/56 (#358FE9) sat 7deg from
+       Cobalt's own 217/88/60 -- close enough at swatch-dot size to read as
+       a duplicate. Pushed to iridescent teal-blue; contrast vs this
+       theme's own --card improves 5.12 -> 6.00. */
+    --primary: 186 86% 39%;
     --primary-foreground: 240 20% 4%;
     --secondary: 212 20% 20%;
     --muted: 212 16% 11%;
@@ -361,7 +373,7 @@
     --accent-foreground: 240 20% 4%;
     --border: 212 22% 20%;
     --input: 212 22% 20%;
-    --ring: 210 80% 56%;
+    --ring: 186 86% 39%;
     --glow-intensity: 0;
     --card-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
     --breakdown-common: 210 35% 26%;
@@ -374,7 +386,13 @@
     --background: 168 24% 6%;
     --card: 168 22% 11%;
     --popover: 168 22% 11%;
-    --primary: 165 50% 50%;
+    /* Revised via /impeccable critique: 165/50/50 (#40BF9F) sat only 23deg
+       from Verdant's 142/75/50 -- same broad green family, too close at
+       swatch-dot size. Pushed to pale seafoam/mint, this app's first
+       genuinely light theme color; contrast vs this theme's own --card
+       improves 7.15 -> 10.76 (background/card themselves stay dark and
+       unchanged -- only the accent goes pale). */
+    --primary: 156 72% 67%;
     --primary-foreground: 240 20% 4%;
     --secondary: 168 16% 20%;
     --muted: 168 14% 11%;
@@ -383,7 +401,7 @@
     --accent-foreground: 240 20% 4%;
     --border: 168 18% 20%;
     --input: 168 18% 20%;
-    --ring: 165 50% 50%;
+    --ring: 156 72% 67%;
     --glow-intensity: 0;
     --card-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
     --breakdown-common: 165 28% 26%;
@@ -454,7 +472,14 @@
     --background: 35 8% 7%;
     --card: 35 7% 11%;
     --popover: 35 7% 11%;
-    --primary: 35 12% 55%;
+    /* Revised via /impeccable critique: 35/12/55 (#9A8F7E) shared
+       Herbarium's own hue (32deg) at lower saturation, real closeness at
+       swatch-dot size even though the desaturation itself was deliberate
+       (see "most neutral of the six" above). Pushed to pale warm
+       cream/ivory; contrast vs this theme's own --card improves 5.31 ->
+       10.59 (background/card stay dark and unchanged -- only the accent
+       goes pale). */
+    --primary: 44 42% 75%;
     --primary-foreground: 240 20% 4%;
     --secondary: 35 8% 19%;
     --muted: 35 6% 11%;
@@ -464,7 +489,7 @@
     --accent-foreground: 240 20% 4%;
     --border: 35 8% 19%;
     --input: 35 8% 19%;
-    --ring: 35 12% 55%;
+    --ring: 44 42% 75%;
     --glow-intensity: 0;
     --card-texture: none;
     --breakdown-common: 35 15% 25%;
@@ -499,7 +524,18 @@
     --background: 228 32% 7%;
     --card: 228 28% 12%;
     --popover: 228 28% 12%;
-    --primary: 228 55% 55%;
+    /* Revised via /impeccable critique: 228/55/55 (#4D66CB) sat in an
+       18deg band with Cobalt (217deg) and Morpho's pre-revision hue
+       (210deg) -- a real 3-way blue collision across all 18 themes.
+       Pushed toward deep indigo-navy (231deg, desaturated to 54% vs
+       Cobalt's 88%) -- the originally-requested #2B3A8F (36% L) failed
+       contrast outright (1.72:1 vs this theme's own --card, under even
+       the 3:1 large-text/icon floor); this lands at 58% L, clearing 3:1
+       with real margin (3.68:1) while staying visibly darker/more muted
+       than Cobalt/Morpho. Still short of strict 4.5:1 small-text AA --
+       same risk tier as Ume/Voidglass below, flagged as a separate
+       future accessibility pass, not blocking here. */
+    --primary: 231 54% 58%;
     --primary-foreground: 240 20% 4%;
     --secondary: 228 22% 21%;
     --muted: 228 18% 12%;
@@ -508,7 +544,7 @@
     --accent-foreground: 240 20% 4%;
     --border: 228 24% 21%;
     --input: 228 24% 21%;
-    --ring: 228 55% 55%;
+    --ring: 231 54% 58%;
     --glow-intensity: 0;
     --card-texture: none;
     --breakdown-common: 228 35% 27%;
@@ -543,7 +579,15 @@
     --background: 320 24% 7%;
     --card: 320 22% 12%;
     --popover: 320 22% 12%;
-    --primary: 322 55% 55%;
+    /* Revised via /impeccable critique: 322/55/55 (#CB4D9D) sat only 8deg
+       from Aurora's 330/96/68. Pushed to true orchid/purple-pink.
+       Contrast vs this theme's own --card is 3.80:1 (was already 4.14:1
+       pre-revision, i.e. already short of strict 4.5:1 AA-small-text
+       before this change) -- accepted as-is per explicit sign-off: this
+       risk tier already exists in a live theme (see Voidglass below),
+       so it's not a blocker here, flagged as a separate future
+       accessibility pass across the original 18. */
+    --primary: 319 50% 52%;
     --primary-foreground: 240 20% 4%;
     --secondary: 320 17% 21%;
     --muted: 320 14% 12%;
@@ -552,7 +596,7 @@
     --accent-foreground: 240 20% 4%;
     --border: 320 18% 21%;
     --input: 320 18% 21%;
-    --ring: 322 55% 55%;
+    --ring: 319 50% 52%;
     --glow-intensity: 0;
     --card-texture: none;
     --breakdown-common: 322 30% 27%;
@@ -565,7 +609,12 @@
     --background: 42 26% 6%;
     --card: 42 23% 11%;
     --popover: 42 23% 11%;
-    --primary: 42 75% 55%;
+    /* Revised via /impeccable critique: 42/75/55 (#E2AF36) shared
+       Hornet's exact hue (42deg) -- the strongest collision of the seven
+       revised themes. Pushed warmer/darker toward amber-honey. Contrast
+       vs this theme's own --card is still comfortable at 4.63:1 (was
+       8.17:1 pre-revision -- less headroom, still clears AA-small-text). */
+    --primary: 33 62% 45%;
     --primary-foreground: 240 20% 4%;
     --secondary: 42 17% 20%;
     --muted: 42 14% 11%;
@@ -574,7 +623,7 @@
     --accent-foreground: 240 20% 4%;
     --border: 42 18% 20%;
     --input: 42 18% 20%;
-    --ring: 42 75% 55%;
+    --ring: 33 62% 45%;
     --glow-intensity: 0;
     --card-texture: none;
     --breakdown-common: 42 30% 26%;

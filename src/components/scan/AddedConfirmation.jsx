@@ -44,7 +44,13 @@ export default function AddedConfirmation({ canName, imageUrl, bgColor, onComple
         animate={{ scale: 1, opacity: 1 }}
         transition={reducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 20 }}
       >
-        <div className="relative mb-4">
+        {/* animate-origami-unfold is a visual no-op under every theme
+            except the 6 Origami Fold palettes (see index.css) — safe to
+            apply unconditionally here, on this plain child div rather
+            than the framer-motion-controlled parent above, so its CSS
+            keyframe doesn't fight framer-motion's own transform/opacity
+            animation on the same element. (/impeccable critique) */}
+        <div className="relative mb-4 animate-origami-unfold">
           <CanImageBox
             imageUrl={imageUrl}
             bgColor={bgColor}

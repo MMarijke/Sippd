@@ -133,13 +133,17 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
         />
       ))}
 
-      {/* Gold burst glow */}
+      {/* Gold burst glow -- alphas now multiplied by --glow-intensity, same
+          as every other glow surface in index.css (.neon-glow, .hero-card,
+          .rarity-glow-*). Was fixed-alpha, quietly contradicting Field
+          Guide/Origami Fold's "zero glow" promise (--glow-intensity: 0)
+          at the app's other dopamine-spike moment. (/impeccable critique) */}
       <div style={{
         position: 'absolute',
         width: 240,
         height: 240,
         borderRadius: '50%',
-        background: 'radial-gradient(circle, hsl(var(--primary) / 0.25) 0%, hsl(var(--primary) / 0.05) 50%, transparent 70%)',
+        background: 'radial-gradient(circle, hsl(var(--primary) / calc(0.25 * var(--glow-intensity))) 0%, hsl(var(--primary) / calc(0.05 * var(--glow-intensity))) 50%, transparent 70%)',
         opacity: isExit ? 0 : 1,
         transform: isExit ? 'scale(0.5)' : 'scale(1)',
         transition: stateTransition,
@@ -163,7 +167,7 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
           color: 'hsl(var(--primary))',
-          textShadow: '0 0 12px hsl(var(--primary) / 0.6)',
+          textShadow: '0 0 12px hsl(var(--primary) / calc(0.6 * var(--glow-intensity)))',
         }}>
           Achievement Unlocked
         </p>
@@ -175,7 +179,7 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
           borderRadius: 28,
           background: 'hsl(var(--primary) / 0.12)',
           border: '2px solid hsl(var(--primary) / 0.5)',
-          boxShadow: '0 0 32px hsl(var(--primary) / 0.3), 0 0 64px hsl(var(--primary) / 0.1)',
+          boxShadow: '0 0 32px hsl(var(--primary) / calc(0.3 * var(--glow-intensity))), 0 0 64px hsl(var(--primary) / calc(0.1 * var(--glow-intensity)))',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -185,14 +189,20 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
         </div>
 
         {/* Title */}
+        {/* var(--font-display), not a hardcoded 'Orbitron' -- this was the
+            one place in the app where the active theme's font system
+            silently didn't apply. Resolves to Orbitron under Neon Grid,
+            Fraunces under Field Guide, Outfit under Origami Fold, same as
+            every className="font-display" surface elsewhere (see
+            tailwind.config.js's fontFamily wiring). (/impeccable critique) */}
         <p id="achievement-unlock-title" style={{
           fontSize: 22,
           fontWeight: 900,
-          fontFamily: "'Orbitron', sans-serif",
+          fontFamily: 'var(--font-display)',
           letterSpacing: '0.08em',
           textTransform: 'uppercase',
           color: 'hsl(var(--primary))',
-          textShadow: '0 0 20px hsl(var(--primary) / 0.5)',
+          textShadow: '0 0 20px hsl(var(--primary) / calc(0.5 * var(--glow-intensity)))',
           textAlign: 'center',
           maxWidth: 280,
           lineHeight: 1.2,

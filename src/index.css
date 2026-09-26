@@ -766,6 +766,13 @@ body {
    (short) container rather than the whole page. Alphas were tuned
    against Legendary (the brightest primary in the system) so header text
    stays legible in every theme, not just the calmer ones. */
+/* Alphas multiplied by --glow-intensity -- was fixed-alpha, quietly
+   contradicting Field Guide/Origami Fold's "zero glow" invariant
+   (--glow-intensity: 0) on the app's own hero surface. Alpha coefficients
+   themselves (0.45/0.22/0.18) are unchanged from the original legibility
+   tuning against Legendary noted below; only the escalation multiplier is
+   new, matching every other glow surface in this file. (/impeccable
+   critique) */
 .home-gradient-bg-layer {
   position: absolute;
   inset: 0;
@@ -773,9 +780,9 @@ body {
   pointer-events: none;
   background-color: hsl(var(--background));
   background-image:
-    radial-gradient(circle at 92% 2%, hsl(var(--primary) / 0.45) 0%, transparent 32%),
-    radial-gradient(circle at 8% 14%, hsl(var(--accent) / 0.22) 0%, transparent 34%),
-    linear-gradient(180deg, hsl(var(--primary) / 0.18) 0%, hsl(var(--background)) 100%);
+    radial-gradient(circle at 92% 2%, hsl(var(--primary) / calc(0.45 * var(--glow-intensity))) 0%, transparent 32%),
+    radial-gradient(circle at 8% 14%, hsl(var(--accent) / calc(0.22 * var(--glow-intensity))) 0%, transparent 34%),
+    linear-gradient(180deg, hsl(var(--primary) / calc(0.18 * var(--glow-intensity))) 0%, hsl(var(--background)) 100%);
   transition: background-color 300ms ease;
 }
 
@@ -843,13 +850,17 @@ body {
   background-repeat: repeat;
 }
 
-/* Origami Fold's signature motion: a fold/unfold reveal on card mount,
-   standing in for Neon Grid's glow as this family's one place to feel
-   distinct in motion, not just palette. Opt-in via this class (not applied
-   globally) since it's a mount animation, not a persistent state — call
-   sites decide where a "reveal" moment actually happens (RarityReveal,
-   achievement unlocks, a newly-added card), same as .animate-pulse-neon
-   already is opt-in rather than automatic on every card. */
+/* Origami Fold's signature motion: a fold/unfold reveal on mount, standing
+   in for Neon Grid's glow as this family's one place to feel distinct in
+   motion, not just palette. Inert by default (no animation at all) and
+   only turned on under the 6 Origami Fold [data-theme] selectors below —
+   same value-based, not per-component-conditional, pattern already
+   established for --glow-intensity/--card-texture: call sites apply this
+   class unconditionally wherever a real "reveal" moment happens
+   (AddedConfirmation's can image, wired below), and it's a visual no-op
+   under every other family automatically, no JS theme check needed.
+   Previously defined but wired nowhere — Origami Fold had no
+   differentiator beyond palette. (/impeccable critique) */
 @keyframes origami-unfold {
   0% { transform: scaleY(0.4) rotateX(35deg); opacity: 0; }
   60% { transform: scaleY(1.03) rotateX(-4deg); opacity: 1; }
@@ -857,6 +868,14 @@ body {
 }
 .animate-origami-unfold {
   transform-origin: top center;
+  animation: none;
+}
+[data-theme="washi"] .animate-origami-unfold,
+[data-theme="shu"] .animate-origami-unfold,
+[data-theme="ai"] .animate-origami-unfold,
+[data-theme="matcha"] .animate-origami-unfold,
+[data-theme="ume"] .animate-origami-unfold,
+[data-theme="kohaku"] .animate-origami-unfold {
   animation: origami-unfold 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 @media (prefers-reduced-motion: reduce) {

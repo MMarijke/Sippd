@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useTheme, THEMES } from '@/hooks/useTheme';
-import { ArrowLeft, ChevronRight, Lock, Loader2 } from 'lucide-react';
+import { useTheme, THEME_FAMILIES } from '@/hooks/useTheme';
+import { ArrowLeft, ChevronRight, ChevronLeft, Lock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -269,18 +269,23 @@ function ChipToggle({ options, value, onChange, disabled }) {
 }
 
 // ─── Theme Picker ────────────────────────────────────────────────────────────
-function ThemePicker({ theme, setTheme, isPro, isPending, onLockedTap }) {
+// Two-step now that there are 3 families × 6 palettes (18 total, up from one
+// flat list of 6): Step 1 picks a family, Step 2 picks a palette within it.
+// `viewedFamilyId` is which family the picker is currently *browsing* —
+// independent of `theme` (the actually *applied* palette) — so tapping
+// around families to look at them never changes what's live until a swatch
+// is actually tapped.
+function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily }) {
   return (
     <div className="grid grid-cols-3 gap-3 p-4">
-      {THEMES.map(({ id, label, pro, swatch }) => {
-        const locked = pro && !isPro;
-        const selected = theme === id;
+      {THEME_FAMILIES.map(family => {
+        const freeTheme = family.themes.find(t => !t.pro);
+        const selected = viewedFamilyId === family.id;
         return (
           <button
-            key={id}
-            onClick={() => (locked ? onLockedTap() : setTheme(id))}
-            disabled={isPending}
-            aria-label={locked ? `${label} — Pro only, tap to upgrade` : `Use ${label} theme`}
+            key={family.id}
+            onClick={() => onSelectFamily(family.id)}
+            aria-label={`Browse ${family.label} themes`}
             aria-pressed={selected}
             className={cn(
               'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors',
@@ -289,17 +294,55 @@ function ThemePicker({ theme, setTheme, isPro, isPending, onLockedTap }) {
           >
             <div
               className="w-9 h-9 rounded-full border border-white/10"
-              style={{ background: swatch }}
+              style={{ background: freeTheme?.swatch }}
             />
-            <span className="text-[10px] font-mono text-muted-foreground text-center leading-tight">{label}</span>
-            {locked && (
-              <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-background/80 border border-border flex items-center justify-center">
-                <Lock className="w-2.5 h-2.5 text-muted-foreground" />
-              </span>
-            )}
+            <span className="text-[10px] font-mono text-muted-foreground text-center leading-tight">{family.label}</span>
           </button>
         );
       })}
+    </div>
+  );
+}
+
+function ThemePalettePicker({ family, theme, setTheme, isPro, isPending, onLockedTap, onBack }) {
+  return (
+    <div className="p-4 space-y-3">
+      <button
+        onClick={onBack}
+        className="flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ChevronLeft className="w-3.5 h-3.5" /> All families
+      </button>
+      <div className="grid grid-cols-3 gap-3">
+        {family.themes.map(({ id, label, pro, swatch }) => {
+          const locked = pro && !isPro;
+          const selected = theme === id;
+          return (
+            <button
+              key={id}
+              onClick={() => (locked ? onLockedTap() : setTheme(id))}
+              disabled={isPending}
+              aria-label={locked ? `${label} — Pro only, tap to upgrade` : `Use ${label} theme`}
+              aria-pressed={selected}
+              className={cn(
+                'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors',
+                selected ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/20'
+              )}
+            >
+              <div
+                className="w-9 h-9 rounded-full border border-white/10"
+                style={{ background: swatch }}
+              />
+              <span className="text-[10px] font-mono text-muted-foreground text-center leading-tight">{label}</span>
+              {locked && (
+                <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-background/80 border border-border flex items-center justify-center">
+                  <Lock className="w-2.5 h-2.5 text-muted-foreground" />
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -311,6 +354,13 @@ export default function Settings() {
   const { user, signOut } = useAuth();
   const { isPro, isLoading: isProLoading } = useSubscription();
   const { theme, setTheme, isPending: themePending } = useTheme();
+  // Which family the theme picker is currently browsing — defaults to
+  // whichever family the actually-applied `theme` belongs to, so opening
+  // Settings always lands on a step-2 view of your real theme rather than
+  // step 1 every time. null once explicitly backed out to "all families".
+  const [viewedFamilyId, setViewedFamilyId] = useState(
+    () => THEME_FAMILIES.find(f => f.themes.some(t => t.id === theme))?.id ?? null
+  );
   const [panel, setPanel] = useState(null); // 'name' | 'region' | 'password'
   const [prefs, setPrefs] = useState(loadPrefs);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -559,22 +609,31 @@ export default function Settings() {
             // Same reasoning as the Subscription section above: locked is
             // computed from isPro, so rendering real tiles here would briefly
             // lock every theme — including a Pro user's own already-selected
-            // one — until the subscription query resolves.
+            // one — until the subscription query resolves. Matches step 1's
+            // 3-tile shape (not all 18 palettes) so there's no layout jump
+            // once the real picker mounts.
             <div className="grid grid-cols-3 gap-3 p-4">
-              {THEMES.map(({ id }) => (
+              {THEME_FAMILIES.map(({ id }) => (
                 <div key={id} className="flex flex-col items-center gap-2 rounded-xl border border-border p-3">
                   <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
                   <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
                 </div>
               ))}
             </div>
-          ) : (
-            <ThemePicker
+          ) : viewedFamilyId ? (
+            <ThemePalettePicker
+              family={THEME_FAMILIES.find(f => f.id === viewedFamilyId)}
               theme={theme}
               setTheme={setTheme}
               isPro={isPro}
               isPending={themePending}
               onLockedTap={() => navigate('/pro')}
+              onBack={() => setViewedFamilyId(null)}
+            />
+          ) : (
+            <ThemeFamilyTiles
+              viewedFamilyId={viewedFamilyId}
+              onSelectFamily={setViewedFamilyId}
             />
           )}
         </div>

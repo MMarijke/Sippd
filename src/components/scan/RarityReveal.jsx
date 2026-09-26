@@ -75,13 +75,20 @@ export default function RarityReveal({ rarity, canName, onComplete, onScanNext }
     onScanNext();
   };
 
+  // bg-background, not a hardcoded hex -- this was the one thing in the
+  // whole reveal that wasn't theme-invariant BY DESIGN (unlike the rarity
+  // accent/particle colors below, which correctly are). A Field Guide/
+  // Origami Fold user got slammed into Neon Grid's exact near-black on
+  // every Rare+ pull -- the app's single most emotionally loaded moment
+  // contradicting whichever calmer identity they'd actually chosen.
+  // AddedConfirmation.jsx (the common-case sibling) already did this
+  // correctly one file over. (/impeccable critique)
   return (
     <motion.div
       role="status"
       aria-live="polite"
       aria-label={`${config.label}: ${canName} added to your vault`}
-      className="fixed inset-0 z-50 flex items-center justify-center cursor-pointer select-none overflow-hidden"
-      style={{ backgroundColor: '#05050A' }}
+      className="fixed inset-0 z-50 flex items-center justify-center cursor-pointer select-none overflow-hidden bg-background"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.15 }}

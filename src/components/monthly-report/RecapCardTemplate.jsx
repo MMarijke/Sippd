@@ -110,14 +110,18 @@ const RecapCardTemplate = forwardRef(function RecapCardTemplate(
       }}
     >
       {/* Corner glow accents — same primary/accent pairing as Home's
-          hero-zone gradient, at card scale rather than page scale. */}
+          hero-zone gradient, at card scale rather than page scale.
+          Alphas now multiplied by --glow-intensity, matching that same
+          gating on .home-gradient-bg-layer -- these were the two glow
+          surfaces in the app quietly contradicting Field Guide/Origami
+          Fold's "zero glow" invariant. (/impeccable critique) */}
       <div
         className="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, hsl(var(--primary) / 0.14) 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, hsl(var(--primary) / calc(0.14 * var(--glow-intensity))) 0%, transparent 70%)' }}
       />
       <div
         className="absolute -bottom-14 -left-14 w-48 h-48 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, hsl(var(--accent) / 0.1) 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, hsl(var(--accent) / calc(0.1 * var(--glow-intensity))) 0%, transparent 70%)' }}
       />
 
       <div className="relative z-10">
@@ -143,7 +147,14 @@ const RecapCardTemplate = forwardRef(function RecapCardTemplate(
             </div>
             <div className="min-w-0">
               <p className="text-xs font-display font-black text-primary tracking-[0.15em] leading-none">SIPPD</p>
-              <p className="text-[8px] font-mono text-primary/50 tracking-wide mt-0.5">ENERGY DRINK TRACKER</p>
+              {/* Genericized -- Sippd covers soft drinks too now, not just
+                  energy drinks, matching the same tagline update already
+                  made to index.html/manifest.json. This template feeds a
+                  one-way-door html2canvas export (see the doc comment
+                  above), so this couldn't be fixed retroactively in
+                  already-shared recap images, only in new ones going
+                  forward. (/impeccable critique) */}
+              <p className="text-[8px] font-mono text-primary/50 tracking-wide mt-0.5">CAN COLLECTION TRACKER</p>
             </div>
           </div>
           <div className="absolute right-0 top-0 text-right max-w-[55%]">

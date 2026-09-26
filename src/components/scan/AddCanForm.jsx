@@ -567,6 +567,16 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
         )}
       </div>
 
+      {/* A plain hairline, the only one in this form — everywhere else a
+          field is separated from the next by the same space-y-5 rhythm and
+          nothing else. Rarity is the one irreversible tap in this whole
+          form and just rendered a hard lock; Beverage Type sits directly
+          below it using near-identical pill chrome, with nothing signaling
+          "the permanence ends here." A visual reset plus the explicit
+          "change this anytime" line below answer that without inventing a
+          second divider style anywhere else in the app. (/impeccable critique) */}
+      <div className="h-px bg-border" />
+
       <div className="space-y-1.5">
         <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Beverage Type</Label>
         <BeverageTypeToggle
@@ -574,6 +584,9 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           onChange={v => update('beverage_type', v)}
           disabled={!!prefillData?.id}
         />
+        {!prefillData?.id && !prefillData?._offSource && (
+          <p className="text-[11px] font-mono text-muted-foreground">You can change this anytime.</p>
+        )}
         {/* Three distinct states a silent value can't tell apart on its own:
             an existing catalog can (locked, someone already decided this);
             a real OFF category guess (worth trusting more, but still just a

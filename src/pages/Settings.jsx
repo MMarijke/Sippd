@@ -652,19 +652,49 @@ export default function Settings() {
           </div>
           {isProLoading ? (
             // Same reasoning as the Subscription section above: locked is
-            // computed from isPro, so rendering real tiles here would briefly
-            // lock every theme — including a Pro user's own already-selected
-            // one — until the subscription query resolves. Matches step 1's
-            // 3-tile shape (not all 18 palettes) so there's no layout jump
-            // once the real picker mounts.
-            <div className="grid grid-cols-3 gap-3 p-4">
-              {THEME_FAMILIES.map(({ id }) => (
-                <div key={id} className="flex flex-col items-center gap-2 rounded-xl border border-border p-3">
-                  <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
-                  <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
-                </div>
-              ))}
-            </div>
+            // computed from isPro, so rendering real tiles here would
+            // briefly lock every theme — including a Pro user's own
+            // already-selected one — until the subscription query
+            // resolves. Shaped to match whichever step will actually
+            // resolve once loading finishes, not always step 1 — for most
+            // returning users viewedFamilyId is already non-null (it
+            // defaults to the family containing their current theme), so
+            // the real resolved view is step 2's 6-swatch grid, and a
+            // step-1 skeleton there was a real layout jump, not the
+            // "no jump" the old comment here claimed. (/impeccable critique)
+            viewedFamilyId ? (
+              (() => {
+                const loadingFamily = THEME_FAMILIES.find(f => f.id === viewedFamilyId);
+                return (
+                  <div className="p-4 space-y-3">
+                    <button
+                      onClick={() => setViewedFamilyId(null)}
+                      className="flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" /> All families
+                    </button>
+                    <p className="text-sm font-medium text-foreground">{loadingFamily?.label}</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {loadingFamily?.themes.map(({ id }) => (
+                        <div key={id} className="flex flex-col items-center gap-2 rounded-xl border border-border p-3">
+                          <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
+                          <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()
+            ) : (
+              <div className="grid grid-cols-3 gap-3 p-4">
+                {THEME_FAMILIES.map(({ id }) => (
+                  <div key={id} className="flex flex-col items-center gap-2 rounded-xl border border-border p-3">
+                    <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
+                    <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            )
           ) : viewedFamilyId ? (
             <ThemePalettePicker
               family={THEME_FAMILIES.find(f => f.id === viewedFamilyId)}

@@ -275,23 +275,33 @@ function ChipToggle({ options, value, onChange, disabled }) {
 // independent of `theme` (the actually *applied* palette) — so tapping
 // around families to look at them never changes what's live until a swatch
 // is actually tapped.
-function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily }) {
+function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies }) {
   return (
     <div className="grid grid-cols-3 gap-3 p-4">
       {THEME_FAMILIES.map(family => {
         const freeTheme = family.themes.find(t => !t.pro);
         const selected = viewedFamilyId === family.id;
+        // Clears itself the first time this tile is actually opened
+        // (Settings' onSelectFamily marks it seen), not on a timer or a
+        // manual dismiss — a launch that only ever shows up if you already
+        // knew to look defeats the point of a "New" badge.
+        const showNewBadge = family.isNew && !seenFamilies.has(family.id);
         return (
           <button
             key={family.id}
             onClick={() => onSelectFamily(family.id)}
-            aria-label={`Browse ${family.label} themes`}
+            aria-label={showNewBadge ? `Browse ${family.label} themes — new` : `Browse ${family.label} themes`}
             aria-pressed={selected}
             className={cn(
               'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors',
               selected ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/20'
             )}
           >
+            {showNewBadge && (
+              <span className="absolute top-1.5 right-1.5 px-1.5 h-4 rounded-full bg-primary text-primary-foreground text-[9px] font-mono font-bold uppercase tracking-wider flex items-center justify-center">
+                New
+              </span>
+            )}
             <div
               className="w-9 h-9 rounded-full border border-white/10"
               style={{ background: freeTheme?.swatch }}
@@ -313,6 +323,13 @@ function ThemePalettePicker({ family, theme, setTheme, isPro, isPending, onLocke
       >
         <ChevronLeft className="w-3.5 h-3.5" /> All families
       </button>
+      {/* The whole point of a two-step picker is orientation at 18 options
+          — landing on 6 swatches with nothing naming which family they
+          belong to defeated that, especially since this step is usually
+          reached by the picker's own default (viewedFamilyId starts on the
+          family containing your current theme), not a tap the user just
+          made themselves. (/impeccable critique) */}
+      <p className="text-sm font-medium text-foreground">{family.label}</p>
       <div className="grid grid-cols-3 gap-3">
         {family.themes.map(({ id, label, pro, swatch }) => {
           const locked = pro && !isPro;
@@ -361,6 +378,34 @@ export default function Settings() {
   const [viewedFamilyId, setViewedFamilyId] = useState(
     () => THEME_FAMILIES.find(f => f.themes.some(t => t.id === theme))?.id ?? null
   );
+  // Tracks which theme families this browser has ever opened, purely to
+  // clear the "New" badge on Field Guide/Origami Fold's tiles once seen —
+  // per-device is fine for a one-time UI hint like this, same reasoning as
+  // any other localStorage-backed "seen" flag. A family whose theme is
+  // already applied (e.g. already on a Field Guide palette) counts as seen
+  // immediately, not just once its tile is tapped.
+  const [seenFamilies, setSeenFamilies] = useState(() => {
+    let stored = [];
+    try {
+      stored = JSON.parse(localStorage.getItem('sippd_seen_theme_families') || '[]');
+    } catch {
+      stored = [];
+    }
+    return new Set(viewedFamilyId ? [...stored, viewedFamilyId] : stored);
+  });
+  const markFamilySeen = (id) => {
+    setSeenFamilies(prev => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev).add(id);
+      try {
+        localStorage.setItem('sippd_seen_theme_families', JSON.stringify([...next]));
+      } catch {
+        // Best-effort only — a blocked/full localStorage just means the
+        // badge may reappear next visit, not a functional failure.
+      }
+      return next;
+    });
+  };
   const [panel, setPanel] = useState(null); // 'name' | 'region' | 'password'
   const [prefs, setPrefs] = useState(loadPrefs);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -607,19 +652,49 @@ export default function Settings() {
           </div>
           {isProLoading ? (
             // Same reasoning as the Subscription section above: locked is
-            // computed from isPro, so rendering real tiles here would briefly
-            // lock every theme — including a Pro user's own already-selected
-            // one — until the subscription query resolves. Matches step 1's
-            // 3-tile shape (not all 18 palettes) so there's no layout jump
-            // once the real picker mounts.
-            <div className="grid grid-cols-3 gap-3 p-4">
-              {THEME_FAMILIES.map(({ id }) => (
-                <div key={id} className="flex flex-col items-center gap-2 rounded-xl border border-border p-3">
-                  <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
-                  <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
-                </div>
-              ))}
-            </div>
+            // computed from isPro, so rendering real tiles here would
+            // briefly lock every theme — including a Pro user's own
+            // already-selected one — until the subscription query
+            // resolves. Shaped to match whichever step will actually
+            // resolve once loading finishes, not always step 1 — for most
+            // returning users viewedFamilyId is already non-null (it
+            // defaults to the family containing their current theme), so
+            // the real resolved view is step 2's 6-swatch grid, and a
+            // step-1 skeleton there was a real layout jump, not the
+            // "no jump" the old comment here claimed. (/impeccable critique)
+            viewedFamilyId ? (
+              (() => {
+                const loadingFamily = THEME_FAMILIES.find(f => f.id === viewedFamilyId);
+                return (
+                  <div className="p-4 space-y-3">
+                    <button
+                      onClick={() => setViewedFamilyId(null)}
+                      className="flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" /> All families
+                    </button>
+                    <p className="text-sm font-medium text-foreground">{loadingFamily?.label}</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {loadingFamily?.themes.map(({ id }) => (
+                        <div key={id} className="flex flex-col items-center gap-2 rounded-xl border border-border p-3">
+                          <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
+                          <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()
+            ) : (
+              <div className="grid grid-cols-3 gap-3 p-4">
+                {THEME_FAMILIES.map(({ id }) => (
+                  <div key={id} className="flex flex-col items-center gap-2 rounded-xl border border-border p-3">
+                    <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
+                    <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            )
           ) : viewedFamilyId ? (
             <ThemePalettePicker
               family={THEME_FAMILIES.find(f => f.id === viewedFamilyId)}
@@ -633,7 +708,8 @@ export default function Settings() {
           ) : (
             <ThemeFamilyTiles
               viewedFamilyId={viewedFamilyId}
-              onSelectFamily={setViewedFamilyId}
+              onSelectFamily={id => { setViewedFamilyId(id); markFamilySeen(id); }}
+              seenFamilies={seenFamilies}
             />
           )}
         </div>

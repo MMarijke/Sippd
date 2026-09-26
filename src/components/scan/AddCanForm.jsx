@@ -348,7 +348,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           <div className="flex-1 min-w-0">
             <p className="text-xs font-mono text-primary font-semibold">Found on Open Food Facts</p>
             <p className="text-[11px] font-mono text-muted-foreground mt-0.5">
-              Verify the details below before saving — select rarity, status & flavour manually.
+              Verify the details below before saving — select rarity, status, beverage type & flavour manually.
             </p>
           </div>
         </div>
@@ -522,7 +522,12 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           </div>
         ) : (
           <div className="space-y-1.5">
-            <div className="grid grid-cols-3 gap-2">
+            {/* role="group", not "radiogroup" -- matches the locked sibling
+                block's intent (these buttons together are one rarity vote)
+                without claiming role="radio"/arrow-key nav this never
+                implements, same reasoning as BeverageTypeToggle.jsx.
+                (/impeccable critique) */}
+            <div className="grid grid-cols-3 gap-2" role="group" aria-label="Your rarity vote">
               {RARITIES.map(r => {
                 const isPending = pendingRarity === r;
                 const isConfirmed = form.rarity === r && !isPending;
@@ -562,6 +567,16 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
         )}
       </div>
 
+      {/* A plain hairline, the only one in this form — everywhere else a
+          field is separated from the next by the same space-y-5 rhythm and
+          nothing else. Rarity is the one irreversible tap in this whole
+          form and just rendered a hard lock; Beverage Type sits directly
+          below it using near-identical pill chrome, with nothing signaling
+          "the permanence ends here." A visual reset plus the explicit
+          "change this anytime" line below answer that without inventing a
+          second divider style anywhere else in the app. (/impeccable critique) */}
+      <div className="h-px bg-border" />
+
       <div className="space-y-1.5">
         <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Beverage Type</Label>
         <BeverageTypeToggle
@@ -569,9 +584,25 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           onChange={v => update('beverage_type', v)}
           disabled={!!prefillData?.id}
         />
-        {prefillData?.id && (
-          <p className="text-[11px] font-mono text-muted-foreground">Set by this can's catalog entry.</p>
+        {!prefillData?.id && !prefillData?._offSource && (
+          <p className="text-[11px] font-mono text-muted-foreground">You can change this anytime.</p>
         )}
+        {/* Three distinct states a silent value can't tell apart on its own:
+            an existing catalog can (locked, someone already decided this);
+            a real OFF category guess (worth trusting more, but still just a
+            guess); and OFF returning no usable category at all, where
+            'energy_drink' below is a plain fallback, not a detection —
+            without this line that case was indistinguishable from a real
+            guess, so a wrong default could ship into the shared catalog
+            with nothing telling the one person able to catch it that it
+            was ever in question. (/impeccable critique) */}
+        {prefillData?.id ? (
+          <p className="text-[11px] font-mono text-muted-foreground">Set by this can's catalog entry.</p>
+        ) : prefillData?._offSource && prefillData?.beverage_type ? (
+          <p className="text-[11px] font-mono text-primary">Guessed from Open Food Facts — tap to change if wrong.</p>
+        ) : prefillData?._offSource ? (
+          <p className="text-[11px] font-mono text-warning">Open Food Facts didn't specify a category — defaulted to Energy Drink, please confirm.</p>
+        ) : null}
       </div>
 
       <div className="space-y-1.5">

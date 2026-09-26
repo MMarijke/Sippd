@@ -219,7 +219,14 @@ export default function Profile() {
     const title = `${profile?.full_name || 'My'} Sippd Collection`;
     const result = await shareLink({ url: profileUrl, title });
     if (result.supported) {
+      // The native share sheet closing gives no reliable visual cue of its
+      // own — some OSes dismiss it silently even on success — so this was
+      // the one branch of this function with zero feedback at all: a
+      // cancel stayed silent (correctly, nothing went wrong), an error
+      // toasted, but an actual successful share told the user nothing.
+      // (/impeccable critique)
       if (result.error) toast.error('Could not share profile link');
+      else if (result.shared) toast.success('Profile link shared!');
       return;
     }
     copyLink(profileUrl, 'Profile link copied!');

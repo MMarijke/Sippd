@@ -348,7 +348,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           <div className="flex-1 min-w-0">
             <p className="text-xs font-mono text-primary font-semibold">Found on Open Food Facts</p>
             <p className="text-[11px] font-mono text-muted-foreground mt-0.5">
-              Verify the details below before saving — select rarity, status & flavour manually.
+              Verify the details below before saving — select rarity, status, beverage type & flavour manually.
             </p>
           </div>
         </div>
@@ -569,9 +569,22 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           onChange={v => update('beverage_type', v)}
           disabled={!!prefillData?.id}
         />
-        {prefillData?.id && (
+        {/* Three distinct states a silent value can't tell apart on its own:
+            an existing catalog can (locked, someone already decided this);
+            a real OFF category guess (worth trusting more, but still just a
+            guess); and OFF returning no usable category at all, where
+            'energy_drink' below is a plain fallback, not a detection —
+            without this line that case was indistinguishable from a real
+            guess, so a wrong default could ship into the shared catalog
+            with nothing telling the one person able to catch it that it
+            was ever in question. (/impeccable critique) */}
+        {prefillData?.id ? (
           <p className="text-[11px] font-mono text-muted-foreground">Set by this can's catalog entry.</p>
-        )}
+        ) : prefillData?._offSource && prefillData?.beverage_type ? (
+          <p className="text-[11px] font-mono text-primary">Guessed from Open Food Facts — tap to change if wrong.</p>
+        ) : prefillData?._offSource ? (
+          <p className="text-[11px] font-mono text-warning">Open Food Facts didn't specify a category — defaulted to Energy Drink, please confirm.</p>
+        ) : null}
       </div>
 
       <div className="space-y-1.5">

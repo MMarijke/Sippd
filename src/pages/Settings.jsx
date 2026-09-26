@@ -313,6 +313,13 @@ function ThemePalettePicker({ family, theme, setTheme, isPro, isPending, onLocke
       >
         <ChevronLeft className="w-3.5 h-3.5" /> All families
       </button>
+      {/* The whole point of a two-step picker is orientation at 18 options
+          — landing on 6 swatches with nothing naming which family they
+          belong to defeated that, especially since this step is usually
+          reached by the picker's own default (viewedFamilyId starts on the
+          family containing your current theme), not a tap the user just
+          made themselves. (/impeccable critique) */}
+      <p className="text-sm font-medium text-foreground">{family.label}</p>
       <div className="grid grid-cols-3 gap-3">
         {family.themes.map(({ id, label, pro, swatch }) => {
           const locked = pro && !isPro;

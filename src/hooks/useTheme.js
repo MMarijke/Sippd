@@ -10,14 +10,54 @@ import { useAuth } from '@/lib/AuthContext';
 // CSS variables only describe *one* theme at a time, so a swatch can't be
 // drawn from var(--primary) directly without every dot showing the same
 // color. Matches RARITY_HEX in rarityConsensus.js for the 5 rarity themes.
-export const THEMES = [
-  { id: 'cyan', label: 'Signal Cyan', pro: false, swatch: '#00E5FF' },
-  { id: 'common', label: 'Steel', pro: true, swatch: '#6B7280' },
-  { id: 'uncommon', label: 'Verdant', pro: true, swatch: '#22C55E' },
-  { id: 'rare', label: 'Cobalt', pro: true, swatch: '#3B82F6' },
-  { id: 'ultra', label: 'Voidglass', pro: true, swatch: '#A855F7' },
-  { id: 'legendary', label: 'Aurora', pro: true, swatch: '#EC4899' },
+//
+// Three families, six palettes each (1 free + 5 Pro per family, same split
+// Neon Grid already used before the other two existed) — see index.css's
+// own "Field Guide family"/"Origami Fold family" comment blocks for the
+// font/glow/texture decisions each family makes once for all six of its
+// palettes.
+export const THEME_FAMILIES = [
+  {
+    id: 'neon-grid',
+    label: 'Neon Grid',
+    themes: [
+      { id: 'cyan', label: 'Signal Cyan', pro: false, swatch: '#00E5FF' },
+      { id: 'common', label: 'Steel', pro: true, swatch: '#6B7280' },
+      { id: 'uncommon', label: 'Verdant', pro: true, swatch: '#22C55E' },
+      { id: 'rare', label: 'Cobalt', pro: true, swatch: '#3B82F6' },
+      { id: 'ultra', label: 'Voidglass', pro: true, swatch: '#A855F7' },
+      { id: 'legendary', label: 'Aurora', pro: true, swatch: '#EC4899' },
+    ],
+  },
+  {
+    id: 'field-guide',
+    label: 'Field Guide',
+    themes: [
+      { id: 'herbarium', label: 'Herbarium', pro: false, swatch: '#a68259' },
+      { id: 'monarch', label: 'Monarch', pro: true, swatch: '#ed8326' },
+      { id: 'morpho', label: 'Morpho', pro: true, swatch: '#358fe9' },
+      { id: 'luna', label: 'Luna', pro: true, swatch: '#40bf9f' },
+      { id: 'cochineal', label: 'Cochineal', pro: true, swatch: '#d03952' },
+      { id: 'hornet', label: 'Hornet', pro: true, swatch: '#f0b019' },
+    ],
+  },
+  {
+    id: 'origami-fold',
+    label: 'Origami Fold',
+    themes: [
+      { id: 'washi', label: 'Washi', pro: false, swatch: '#9a8f7e' },
+      { id: 'shu', label: 'Shu', pro: true, swatch: '#e5472e' },
+      { id: 'ai', label: 'Ai', pro: true, swatch: '#4d66cb' },
+      { id: 'matcha', label: 'Matcha', pro: true, swatch: '#6daa41' },
+      { id: 'ume', label: 'Ume', pro: true, swatch: '#cb4d9d' },
+      { id: 'kohaku', label: 'Kohaku', pro: true, swatch: '#e2af36' },
+    ],
+  },
 ];
+
+// Flat list for anything that just needs to validate/iterate every theme id
+// regardless of family (e.g. Settings' loading skeleton).
+export const THEMES = THEME_FAMILIES.flatMap(f => f.themes);
 
 const DEFAULT_THEME = 'cyan';
 

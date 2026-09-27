@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X, ArrowLeft, Download, Loader2, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCardCapture } from '@/hooks/useCardCapture';
@@ -35,18 +35,11 @@ export default function RecapShareModal({ title, onClose, cardSignature, filenam
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Escape to close (keyboard-only users have two close buttons — Back and
-  // X — both wired to the same onClose; this is the third, keyboard path).
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
-
   const content = (
-    <div role="dialog" aria-modal="true" aria-labelledby="share-card-title" className="fixed inset-0 z-[100] flex flex-col bg-background overflow-y-auto">
+    <DialogPrimitive.Content
+      aria-labelledby="share-card-title"
+      aria-describedby={undefined}
+      className="fixed inset-0 z-[100] flex flex-col bg-background overflow-y-auto outline-none">
       <div className="flex items-center justify-between px-4 py-4 border-b border-border flex-shrink-0">
         <Button size="sm" variant="ghost" className="gap-1.5 text-muted-foreground hover:text-foreground" onClick={onClose}>
           <ArrowLeft className="w-4 h-4" />
@@ -114,8 +107,19 @@ export default function RecapShareModal({ title, onClose, cardSignature, filenam
           {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : '↻'} Regenerate
         </Button>
       </div>
-    </div>
+    </DialogPrimitive.Content>
   );
 
-  return createPortal(content, document.body);
+  // Root/Portal (not the raw createPortal this replaced) is what gives this
+  // its focus trap and focus-return-to-trigger for free — the same behavior
+  // every other dialog/sheet in the app gets from ui/dialog.jsx and
+  // ui/sheet.jsx, which are thin wrappers over this same primitive. Escape-
+  // to-close is Radix's default too, so the manual keydown listener this
+  // component used to have is gone — Radix's Content already calls
+  // onOpenChange(false) on Escape.
+  return (
+    <DialogPrimitive.Root open onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+      <DialogPrimitive.Portal>{content}</DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
+  );
 }

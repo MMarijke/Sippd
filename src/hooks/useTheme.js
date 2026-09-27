@@ -9,56 +9,43 @@ import { useAuth } from '@/lib/AuthContext';
 // as a static hex, purely for the picker preview — the active theme's own
 // CSS variables only describe *one* theme at a time, so a swatch can't be
 // drawn from var(--primary) directly without every dot showing the same
-// color. Matches RARITY_HEX in rarityConsensus.js for the 5 rarity themes.
+// color. `background` is that theme's --background hex, used only to set
+// the <meta name="theme-color"> tag (see the effect below) — browser chrome
+// can't read a CSS variable either, so this is the one other place a raw
+// hex has to be duplicated outside index.css.
 //
-// Three families, six palettes each (1 free + 5 Pro per family, same split
-// Neon Grid already used before the other two existed) — see index.css's
-// own "Field Guide family"/"Origami Fold family" comment blocks for the
-// font/glow/texture decisions each family makes once for all six of its
-// palettes.
+// Phase 1: two families, six palettes each (1 free + 5 Pro per family).
+// Vintage Pastel's main/supporting are deliberately NOT the pale pastel
+// hex first proposed for this family — those failed background-vs-main
+// contrast (as low as 1.36:1) because main/supporting render bare (icon,
+// stat number, link, label) directly on --background at 120+ call sites
+// app-wide, not just inside a filled chip. Every value below is exactly
+// what's live in index.css — the swatch shows the same color the rest of
+// the app renders, not a separate "true pastel" preview.
 export const THEME_FAMILIES = [
   {
-    id: 'neon-grid',
-    label: 'Neon Grid',
+    id: 'neon-arcade',
+    label: 'Neon Arcade',
     themes: [
-      { id: 'cyan', label: 'Signal Cyan', pro: false, swatch: '#00E5FF' },
-      { id: 'common', label: 'Steel', pro: true, swatch: '#6B7280' },
-      { id: 'uncommon', label: 'Verdant', pro: true, swatch: '#22C55E' },
-      { id: 'rare', label: 'Cobalt', pro: true, swatch: '#3B82F6' },
-      { id: 'ultra', label: 'Voidglass', pro: true, swatch: '#9333EA' },
-      { id: 'legendary', label: 'Aurora', pro: true, swatch: '#EC4899' },
+      { id: 'power-up', label: 'Power-Up', pro: false, swatch: '#00FF87', background: '#0B1018' },
+      { id: 'cyberpunk', label: 'Cyberpunk', pro: true, swatch: '#FF2BD6', background: '#100914' },
+      { id: 'plasma', label: 'Plasma', pro: true, swatch: '#00E5FF', background: '#071016' },
+      { id: 'boss-fight', label: 'Boss Fight', pro: true, swatch: '#FF3864', background: '#12090C' },
+      { id: 'xp-gold', label: 'XP Gold', pro: true, swatch: '#FFD43B', background: '#12100A' },
+      { id: 'synthwave', label: 'Synthwave', pro: true, swatch: '#B93FE8', background: '#0D0718' },
     ],
   },
   {
-    id: 'field-guide',
-    label: 'Field Guide',
-    // isNew drives a "New" badge on this tile in Settings until the user
-    // has actually opened it once (see Settings.jsx's seenFamilies
-    // tracking) — added after the launch made the two new families nearly
-    // invisible to existing users, who default straight past the family
-    // picker into whichever palette their theme already belongs to.
-    // (/impeccable critique)
+    id: 'vintage-pastel',
+    label: 'Vintage Pastel',
     isNew: true,
     themes: [
-      { id: 'herbarium', label: 'Herbarium', pro: false, swatch: '#a68259' },
-      { id: 'monarch', label: 'Monarch', pro: true, swatch: '#ed8326' },
-      { id: 'morpho', label: 'Morpho', pro: true, swatch: '#0EA5B7' },
-      { id: 'luna', label: 'Luna', pro: true, swatch: '#6EE7B7' },
-      { id: 'cochineal', label: 'Cochineal', pro: true, swatch: '#d03952' },
-      { id: 'hornet', label: 'Hornet', pro: true, swatch: '#f0b019' },
-    ],
-  },
-  {
-    id: 'origami-fold',
-    label: 'Origami Fold',
-    isNew: true,
-    themes: [
-      { id: 'washi', label: 'Washi', pro: false, swatch: '#D9CBA3' },
-      { id: 'shu', label: 'Shu', pro: true, swatch: '#e5472e' },
-      { id: 'ai', label: 'Ai', pro: true, swatch: '#5A6BCE' },
-      { id: 'matcha', label: 'Matcha', pro: true, swatch: '#6daa41' },
-      { id: 'ume', label: 'Ume', pro: true, swatch: '#C2469B' },
-      { id: 'kohaku', label: 'Kohaku', pro: true, swatch: '#B8792B' },
+      { id: 'mint-fizz', label: 'Mint Fizz', pro: false, swatch: '#4C9486', background: '#FFF8E9' },
+      { id: 'strawberry-cream', label: 'Strawberry Cream', pro: true, swatch: '#BF707E', background: '#FFF5F0' },
+      { id: 'blue-raspberry', label: 'Blue Raspberry', pro: true, swatch: '#538EB9', background: '#F4FAFC' },
+      { id: 'lemon-pop', label: 'Lemon Pop', pro: true, swatch: '#AF8133', background: '#FFFBEA' },
+      { id: 'peach-soda', label: 'Peach Soda', pro: true, swatch: '#C96E47', background: '#FFF5EC' },
+      { id: 'grape-float', label: 'Grape Float', pro: true, swatch: '#A874B4', background: '#FAF5FC' },
     ],
   },
 ];
@@ -67,7 +54,7 @@ export const THEME_FAMILIES = [
 // regardless of family (e.g. Settings' loading skeleton).
 export const THEMES = THEME_FAMILIES.flatMap(f => f.themes);
 
-const DEFAULT_THEME = 'cyan';
+const DEFAULT_THEME = 'power-up';
 
 /**
  * Picks the toast copy for a failed theme change. Split out as its own
@@ -93,7 +80,7 @@ export function getThemeChangeErrorMessage(error) {
  * so every page reskins from CSS variables alone — no per-component
  * changes) and exposes setTheme() to change it. The write goes straight to
  * profiles.theme; profiles_lock_columns() rejects a non-Pro user setting
- * anything but 'cyan' server-side, so this is the real gate — any
+ * anything but a free theme server-side, so this is the real gate — any
  * client-side lock in the picker UI is just avoiding an unnecessary round
  * trip, never the enforcement itself.
  */
@@ -117,6 +104,16 @@ export function useTheme() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
+
+    // Mobile browser chrome (the address bar / status bar strip) doesn't
+    // read CSS variables, so it has to be told the active background
+    // directly, updated every time the theme changes — a static tag would
+    // leave it mismatched the moment anyone picks a different theme, which
+    // is exactly where it'd be most visibly wrong (Vintage Pastel's light
+    // background under a chrome bar left over from a dark theme).
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const match = THEMES.find(t => t.id === theme);
+    if (meta && match) meta.setAttribute('content', match.background);
   }, [theme]);
 
   const { mutate: setTheme, isPending } = useMutation({

@@ -214,7 +214,7 @@ export default function RarityReveal({ rarity, canName, onComplete, onScanNext }
 
         {/* Can name */}
         <motion.p
-          className="text-xl font-semibold text-white mb-2 leading-tight max-w-xs"
+          className="text-xl font-semibold text-foreground mb-2 leading-tight max-w-xs"
           initial={reducedMotion ? false : { y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={reducedMotion ? { duration: 0 } : { delay: 0.35 }}

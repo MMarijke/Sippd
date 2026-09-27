@@ -63,7 +63,7 @@ export default function RecommendedCans({ collection, sharedCans }) {
                 iconSize="w-7 h-7"
               />
               <div className="p-2 space-y-1">
-                <p className="text-[10px] font-mono text-primary/70 truncate">{sc.brand}</p>
+                <p className="text-[10px] font-mono text-muted-foreground truncate">{sc.brand}</p>
                 <p className="text-xs font-semibold text-foreground truncate leading-tight">{sc.name}</p>
                 {rarity
                   ? <RarityBadge rarity={rarity} size="sm" />

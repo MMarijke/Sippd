@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 function Particle({ x, y, color, size, angle, speed, opacity }) {
@@ -68,17 +68,6 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
     setTimeout(onDismiss, reducedMotion ? 0 : 400);
   };
 
-  // Escape to close — keyboard-only users have no other way out before the
-  // 3s auto-dismiss besides tabbing to... nothing, there's no button here.
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') dismiss();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const isEnter = phase === 'enter';
   const isExit = phase === 'exit';
 
@@ -88,11 +77,10 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
   // immediately, just without the animated interpolation between them.
   const stateTransition = reducedMotion ? 'none' : 'all 0.4s ease';
 
-  return createPortal(
-    <div
-      role="dialog"
-      aria-modal="true"
+  const content = (
+    <DialogPrimitive.Content
       aria-labelledby="achievement-unlock-title"
+      aria-describedby={undefined}
       onClick={dismiss}
       style={{
         position: 'fixed',
@@ -109,6 +97,7 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
         transition: reducedMotion ? 'none' : 'background 0.4s ease, backdrop-filter 0.4s ease',
         cursor: 'pointer',
         userSelect: 'none',
+        outline: 'none',
       }}
     >
       {/* Particles */}
@@ -232,7 +221,19 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
           TAP TO DISMISS
         </p>
       </div>
-    </div>,
-    document.body
+    </DialogPrimitive.Content>
+  );
+
+  // Root/Portal (not the raw createPortal this replaced) is what gives this
+  // a real focus trap and focus-return-to-trigger — screen-reader focus was
+  // previously never moved into this overlay at all, so aria-modal="true"
+  // was a lie: most screen readers only announce a dialog's appearance via
+  // a focus change. Radix's default open-focus (the Content root itself,
+  // since nothing inside is a real focusable control) fixes that, and
+  // Escape-to-close is now Radix's default too, not a manual listener.
+  return (
+    <DialogPrimitive.Root open onOpenChange={(isOpen) => { if (!isOpen) dismiss(); }}>
+      <DialogPrimitive.Portal>{content}</DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }

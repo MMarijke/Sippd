@@ -112,6 +112,7 @@
     --ring: 152 100% 50%;
     --radius: 0.75rem;
     --glow-intensity: 1;
+    --wash-intensity: 0;
     --card-texture: none;
     --sidebar-background: 217 35% 9%;
     --sidebar-foreground: 153 60% 85%;
@@ -165,6 +166,7 @@
     --input: 217 35% 20%;
     --ring: 152 100% 50%;
     --glow-intensity: 1;
+    --wash-intensity: 0;
     --card-texture: none;
     --sidebar-background: 217 35% 9%;
     --sidebar-foreground: 153 60% 85%;
@@ -211,6 +213,7 @@
     --input: 217 35% 20%;
     --ring: 152 100% 50%;
     --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 152 25% 28%;
     --breakdown-uncommon: 152 35% 36.5%;
     --breakdown-rare: 152 45% 45%;
@@ -235,6 +238,7 @@
     --input: 278 36% 19%;
     --ring: 312 100% 58%;
     --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 312 25% 28%;
     --breakdown-uncommon: 312 35% 36.5%;
     --breakdown-rare: 312 45% 45%;
@@ -259,6 +263,7 @@
     --input: 204 50% 19%;
     --ring: 186 100% 50%;
     --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 186 25% 28%;
     --breakdown-uncommon: 186 35% 36.5%;
     --breakdown-rare: 186 45% 45%;
@@ -283,6 +288,7 @@
     --input: 340 31% 18%;
     --ring: 347 100% 61%;
     --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 347 25% 28%;
     --breakdown-uncommon: 347 35% 36.5%;
     --breakdown-rare: 347 45% 45%;
@@ -307,6 +313,7 @@
     --input: 45 27% 18%;
     --ring: 47 100% 62%;
     --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 47 25% 28%;
     --breakdown-uncommon: 47 35% 36.5%;
     --breakdown-rare: 47 45% 45%;
@@ -335,6 +342,7 @@
     --input: 261 53% 19%;
     --ring: 283 79% 58%;
     --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 283 25% 28%;
     --breakdown-uncommon: 283 35% 36.5%;
     --breakdown-rare: 283 45% 45%;
@@ -383,6 +391,7 @@
     --input: 41 98% 82%;
     --ring: 168 32% 44%;
     --glow-intensity: 0;
+    --wash-intensity: 1;
     --breakdown-common: 168 25% 28%;
     --breakdown-uncommon: 168 35% 36.5%;
     --breakdown-rare: 168 45% 45%;
@@ -409,6 +418,7 @@
     --input: 20 98% 83%;
     --ring: 349 38% 59%;
     --glow-intensity: 0;
+    --wash-intensity: 1;
     --breakdown-common: 349 25% 28%;
     --breakdown-uncommon: 349 35% 36.5%;
     --breakdown-rare: 349 45% 45%;
@@ -435,6 +445,7 @@
     --input: 195 55% 83%;
     --ring: 205 42% 53%;
     --glow-intensity: 0;
+    --wash-intensity: 1;
     --breakdown-common: 205 25% 28%;
     --breakdown-uncommon: 205 35% 36.5%;
     --breakdown-rare: 205 45% 45%;
@@ -467,6 +478,7 @@
     --input: 49 98% 82%;
     --ring: 38 55% 44%;
     --glow-intensity: 0;
+    --wash-intensity: 1;
     --breakdown-common: 38 25% 28%;
     --breakdown-uncommon: 38 35% 36.5%;
     --breakdown-rare: 38 45% 45%;
@@ -493,6 +505,7 @@
     --input: 28 98% 82%;
     --ring: 18 55% 53%;
     --glow-intensity: 0;
+    --wash-intensity: 1;
     --breakdown-common: 18 25% 28%;
     --breakdown-uncommon: 18 35% 36.5%;
     --breakdown-rare: 18 45% 45%;
@@ -520,6 +533,7 @@
     --input: 283 52% 83%;
     --ring: 289 30% 58%;
     --glow-intensity: 0;
+    --wash-intensity: 1;
     --breakdown-common: 289 25% 28%;
     --breakdown-uncommon: 289 35% 36.5%;
     --breakdown-rare: 289 45% 45%;
@@ -647,9 +661,30 @@ body {
    user stack or a taller returning-user one without a magic number that
    has to be re-tuned by hand whenever that content changes. Everything
    below the hero zone (StatsRow onward) sits outside this wrapper
-   entirely, on the plain background. Alphas multiplied by --glow-intensity
-   so this zeroes out under Vintage Pastel the same as every other glow
-   surface, rather than staying a fixed-alpha wash regardless of theme. */
+   entirely, on the plain background.
+
+   Two independent intensity tokens, not one: --glow-intensity drives the
+   first three (radial-spot) layers below, --wash-intensity drives the
+   fourth. A literal glow — light emanating from a point — is a dark-
+   background metaphor; turning --glow-intensity down for a light theme
+   (correctly, to kill the neon box-shadow effects elsewhere) doesn't mean
+   that theme wants zero ambient depth, it means it wants a DIFFERENT
+   treatment. Neon Arcade: --glow-intensity: 1, --wash-intensity: 0 (only
+   the radial glow renders). Vintage Pastel: --glow-intensity: 0,
+   --wash-intensity: 1 (only the top-down wash renders) — a soft "morning
+   light through a window" fade rather than a glow, matching the soda-shop
+   print/poster character instead of imitating a dark-mode effect that
+   just reads as a faint smudge at low opacity (tried first, rejected —
+   see chat). Any future family that mixes light and dark backgrounds
+   within itself sets these per-theme, same as every other token here.
+
+   Every stop below ends in fully transparent (not an opaque copy of
+   --background) — background-color, set once above, already paints solid
+   beneath every background-image layer, so fading to transparent reveals
+   it cleanly instead of interpolating alpha and hue independently toward
+   an opaque endpoint (which is where a hue tint can leak through even at
+   intensity 0, since a 0-alpha color's RGB channels still participate in
+   the interpolation). */
 .home-gradient-bg-layer {
   position: absolute;
   inset: 0;
@@ -659,7 +694,11 @@ body {
   background-image:
     radial-gradient(circle at 92% 2%, hsl(var(--primary) / calc(0.45 * var(--glow-intensity))) 0%, transparent 32%),
     radial-gradient(circle at 8% 14%, hsl(var(--accent) / calc(0.22 * var(--glow-intensity))) 0%, transparent 34%),
-    linear-gradient(180deg, hsl(var(--primary) / calc(0.18 * var(--glow-intensity))) 0%, hsl(var(--background)) 100%);
+    linear-gradient(180deg, hsl(var(--primary) / calc(0.18 * var(--glow-intensity))) 0%, hsl(var(--background) / 0) 100%),
+    linear-gradient(180deg,
+      hsl(var(--primary) / calc(0.16 * var(--wash-intensity))) 0%,
+      hsl(var(--accent) / calc(0.08 * var(--wash-intensity))) 22%,
+      hsl(var(--background) / 0) 48%);
   transition: background-color 300ms ease;
 }
 

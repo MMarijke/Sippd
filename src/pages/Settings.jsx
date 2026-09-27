@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useTheme, THEME_FAMILIES } from '@/hooks/useTheme';
+import { useTheme, THEME_FAMILIES, THEMES } from '@/hooks/useTheme';
 import { ArrowLeft, ChevronRight, ChevronLeft, Lock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -268,14 +268,51 @@ function ChipToggle({ options, value, onChange, disabled }) {
   );
 }
 
+// ─── Polarity Toggle ─────────────────────────────────────────────────────────
+// A 3rd axis, independent of family/palette: every theme id renders in both
+// a dark and a light polarity (index.css's [data-theme][data-polarity]
+// blocks), so this always reads the CURRENT theme's own dark/light swatch —
+// never a fixed pair of colors — meaning it stays accurate no matter which
+// theme is active, and previews exactly what tapping it will produce.
+function PolarityToggle({ theme, polarity, setPolarity, isPending }) {
+  const match = THEMES.find(t => t.id === theme);
+  return (
+    <div className="flex items-center gap-2 px-4 pb-3.5">
+      {['dark', 'light'].map(p => {
+        const selected = polarity === p;
+        return (
+          <button
+            key={p}
+            onClick={() => setPolarity(p)}
+            disabled={isPending || selected}
+            aria-pressed={selected}
+            className={cn(
+              'flex-1 flex items-center justify-center gap-2 h-10 rounded-full border text-xs font-mono capitalize transition-colors disabled:cursor-not-allowed',
+              selected ? 'border-primary/50 bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/20'
+            )}
+          >
+            <span
+              className="w-3.5 h-3.5 rounded-full border border-foreground/10 flex-shrink-0"
+              style={{ background: match?.[p]?.background }}
+            />
+            {p}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Theme Picker ────────────────────────────────────────────────────────────
-// Two-step now that there are 3 families × 6 palettes (18 total, up from one
+// Two-step now that there are 2 families × 6 palettes (12 total, up from one
 // flat list of 6): Step 1 picks a family, Step 2 picks a palette within it.
 // `viewedFamilyId` is which family the picker is currently *browsing* —
 // independent of `theme` (the actually *applied* palette) — so tapping
 // around families to look at them never changes what's live until a swatch
-// is actually tapped.
-function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies }) {
+// is actually tapped. Polarity (light/dark) is a separate, always-visible
+// control (PolarityToggle above) rather than folded into either step, since
+// it applies to whichever theme ends up active regardless of family/palette.
+function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies, polarity }) {
   return (
     <div className="grid grid-cols-3 gap-3 p-4">
       {THEME_FAMILIES.map(family => {
@@ -304,7 +341,7 @@ function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies }) {
             )}
             <div
               className="w-9 h-9 rounded-full border border-foreground/10"
-              style={{ background: freeTheme?.swatch }}
+              style={{ background: freeTheme?.[polarity]?.swatch }}
             />
             <span className="text-[10px] font-mono text-muted-foreground text-center leading-tight">{family.label}</span>
           </button>
@@ -314,7 +351,7 @@ function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies }) {
   );
 }
 
-function ThemePalettePicker({ family, theme, setTheme, isPro, isPending, onLockedTap, onBack }) {
+function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPending, onLockedTap, onBack }) {
   return (
     <div className="p-4 space-y-3">
       <button
@@ -331,7 +368,7 @@ function ThemePalettePicker({ family, theme, setTheme, isPro, isPending, onLocke
           made themselves. (/impeccable critique) */}
       <p className="text-sm font-medium text-foreground">{family.label}</p>
       <div className="grid grid-cols-3 gap-3">
-        {family.themes.map(({ id, label, pro, swatch }) => {
+        {family.themes.map(({ id, label, pro, ...variants }) => {
           const locked = pro && !isPro;
           const selected = theme === id;
           return (
@@ -348,7 +385,7 @@ function ThemePalettePicker({ family, theme, setTheme, isPro, isPending, onLocke
             >
               <div
                 className="w-9 h-9 rounded-full border border-foreground/10"
-                style={{ background: swatch }}
+                style={{ background: variants[polarity]?.swatch }}
               />
               <span className="text-[10px] font-mono text-muted-foreground text-center leading-tight">{label}</span>
               {locked && (
@@ -370,7 +407,7 @@ export default function Settings() {
   const queryClient = useQueryClient();
   const { user, signOut } = useAuth();
   const { isPro, isLoading: isProLoading } = useSubscription();
-  const { theme, setTheme, isPending: themePending } = useTheme();
+  const { theme, polarity, setTheme, setPolarity, isPending: themePending } = useTheme();
   // Which family the theme picker is currently browsing — defaults to
   // whichever family the actually-applied `theme` belongs to, so opening
   // Settings always lands on a step-2 view of your real theme rather than
@@ -650,6 +687,7 @@ export default function Settings() {
               {isProLoading ? 'Loading…' : isPro ? 'Pick your look' : 'One free theme per family — the rest unlock with Pro'}
             </p>
           </div>
+          <PolarityToggle theme={theme} polarity={polarity} setPolarity={setPolarity} isPending={themePending} />
           {isProLoading ? (
             // Same reasoning as the Subscription section above: locked is
             // computed from isPro, so rendering real tiles here would
@@ -699,6 +737,7 @@ export default function Settings() {
             <ThemePalettePicker
               family={THEME_FAMILIES.find(f => f.id === viewedFamilyId)}
               theme={theme}
+              polarity={polarity}
               setTheme={setTheme}
               isPro={isPro}
               isPending={themePending}
@@ -710,6 +749,7 @@ export default function Settings() {
               viewedFamilyId={viewedFamilyId}
               onSelectFamily={id => { setViewedFamilyId(id); markFamilySeen(id); }}
               seenFamilies={seenFamilies}
+              polarity={polarity}
             />
           )}
         </div>

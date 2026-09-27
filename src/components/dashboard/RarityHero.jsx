@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { getDisplayRarity, RARITY_HEX, RARITY_ORDER } from '@/lib/rarityConsensus';
+import { getDisplayRarity, RARITY_ORDER, BREAKDOWN_VAR } from '@/lib/rarityConsensus';
+
+// This gauge shows a PROPORTION across tiers (like CollectionCard's
+// breakdown bar), not any single can's own badge color, so it reads the
+// theme-aware --breakdown-* ramp via BREAKDOWN_VAR rather than RARITY_HEX/
+// --rarity-*, which stay fixed on purpose for an individual can's rarity.
+// CSS custom properties resolve fine as literal SVG fill/style values in
+// every browser this app targets (this file's own empty-state ring already
+// relied on that via hsl(var(--secondary)) before this change).
+const breakdownColor = (name) => `hsl(var(${BREAKDOWN_VAR[name] || BREAKDOWN_VAR.Common}))`;
 
 export default function RarityHero({ collected, sharedCansMap = {}, isLoading = false }) {
   // Recharts sizes percentage-based innerRadius/outerRadius off a generic
@@ -65,7 +74,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
     if (isEmpty) return null;
     const { cx, cy, midAngle, value, index, name } = props;
     const RADIAN = Math.PI / 180;
-    const color = RARITY_HEX[name] || RARITY_HEX.Common;
+    const color = breakdownColor(name);
     const pathRadius = (innerRadius + outerRadius) / 2;
     const strokeWidth = outerRadius - innerRadius;
     const labelRadius = outerRadius + 16;
@@ -133,7 +142,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
                   // no product meaning tied to a specific rarity tier, so it
                   // should track the active theme like the rest of the app's
                   // neutral surfaces.
-                  fill={isEmpty ? 'hsl(var(--secondary))' : (RARITY_HEX[entry.name] || RARITY_HEX.Common)}
+                  fill={isEmpty ? 'hsl(var(--secondary))' : breakdownColor(entry.name)}
                 />
               ))}
             </Pie>
@@ -156,7 +165,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
             <div key={name} className="flex items-center gap-1.5">
               <div
                 className="w-2 h-2 rounded-full flex-shrink-0"
-                style={{ backgroundColor: RARITY_HEX[name] }}
+                style={{ backgroundColor: breakdownColor(name) }}
               />
               <span className="text-xs font-mono text-muted-foreground">{name}</span>
             </div>

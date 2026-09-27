@@ -5,24 +5,7 @@ import { Pin, Link2, CupSoda, X } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { getMaxPins } from '@/hooks/useTogglePin';
 import { cn } from '@/lib/utils';
-
-// Rarity Breakdown bar — theme-derived --breakdown-* tokens (a genuinely
-// multi-hue ramp per theme, not RarityBadge's --rarity-* tokens, which
-// stay theme-invariant on purpose since a can's own rarity must read the
-// same regardless of viewer theme). This bar used to read --rarity-*
-// directly, matching an earlier decision to revert away from a
-// monochromatic single-hue ramp that user feedback found unreadable at a
-// glance — --breakdown-* is deliberately NOT that: it rotates 5 hues off
-// the active theme's own --primary, each independently tuned for
-// contrast, so it changes per theme without reintroducing the original
-// readability problem.
-const BREAKDOWN_VAR = {
-  Common: '--breakdown-common',
-  Uncommon: '--breakdown-uncommon',
-  Rare: '--breakdown-rare',
-  'Ultra Rare': '--breakdown-ultra',
-  Legendary: '--breakdown-legendary',
-};
+import { BREAKDOWN_VAR } from '@/lib/rarityConsensus';
 
 // The trophy-case presentation shared by Profile.jsx (your own, editable
 // collection) and PublicProfile.jsx (anyone's, read-only) — score hero,

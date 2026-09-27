@@ -303,7 +303,7 @@ function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies }) {
               </span>
             )}
             <div
-              className="w-9 h-9 rounded-full border border-white/10"
+              className="w-9 h-9 rounded-full border border-foreground/10"
               style={{ background: freeTheme?.swatch }}
             />
             <span className="text-[10px] font-mono text-muted-foreground text-center leading-tight">{family.label}</span>
@@ -347,7 +347,7 @@ function ThemePalettePicker({ family, theme, setTheme, isPro, isPending, onLocke
               )}
             >
               <div
-                className="w-9 h-9 rounded-full border border-white/10"
+                className="w-9 h-9 rounded-full border border-foreground/10"
                 style={{ background: swatch }}
               />
               <span className="text-[10px] font-mono text-muted-foreground text-center leading-tight">{label}</span>
@@ -612,7 +612,7 @@ export default function Settings() {
             <>
               <SettingsRow
                 label="Status"
-                right={<span className="text-xs font-mono font-semibold text-primary">Pro — active</span>}
+                right={<span className="text-xs font-mono font-semibold text-foreground">Pro — active</span>}
               />
               <SettingsRow
                 label="Next Billing Date"
@@ -647,7 +647,7 @@ export default function Settings() {
           <div className="px-4 pt-3.5">
             <p className="text-sm font-medium text-foreground">Theme</p>
             <p className="text-xs font-mono text-muted-foreground mt-0.5">
-              {isProLoading ? 'Loading…' : isPro ? 'Pick your look' : 'Signal Cyan is free — the rest unlock with Pro'}
+              {isProLoading ? 'Loading…' : isPro ? 'Pick your look' : 'One free theme per family — the rest unlock with Pro'}
             </p>
           </div>
           {isProLoading ? (

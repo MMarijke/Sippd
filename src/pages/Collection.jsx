@@ -12,7 +12,8 @@ import CanCard from '@/components/shared/CanCard';
 import CanListItem from '@/components/collection/CanListItem';
 import EmptyState from '@/components/shared/EmptyState';
 import AddToCrateSheet from '@/components/crates/AddToCrateSheet';
-import { getDisplayRarity, RARITY_ORDER } from '@/lib/rarityConsensus';
+import { getDisplayRarity } from '@/lib/rarityConsensus';
+import { filterAndSortCollection } from '@/lib/filterCollection';
 import { computeAchievements } from '@/lib/achievements';
 import { useAchievementUnlock } from '@/hooks/useAchievementUnlock';
 import AchievementUnlockAnimation from '@/components/achievements/AchievementUnlockAnimation';
@@ -183,31 +184,12 @@ export default function Collection() {
   // search box, over the entire collection — the page most likely to hold
   // hundreds of items. sharedCansMap is memoized above specifically so this
   // dependency is stable across renders that don't actually change it.
-  const filtered = useMemo(() => collection
-    .filter(item => {
-      if (filters.status !== 'all' && item.status !== filters.status) return false;
-      if (filters.rarity !== 'all' && getEffectiveRarity(item) !== filters.rarity) return false;
-      if (filters.beverageType !== 'all' && item.can_beverage_type !== filters.beverageType) return false;
-      if (filters.favourites && !item.is_favourite) return false;
-      if (searchQuery.length >= 2) {
-        const q = searchQuery.toLowerCase();
-        return (
-          item.can_name?.toLowerCase().includes(q) ||
-          item.can_brand?.toLowerCase().includes(q)
-        );
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      const sort = filters.sort || 'date_desc';
-      if (sort === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
-      if (sort === 'date_desc') return new Date(b.created_at) - new Date(a.created_at);
-      if (sort === 'brand_asc') return (a.can_brand || '').localeCompare(b.can_brand || '');
-      if (sort === 'brand_desc') return (b.can_brand || '').localeCompare(a.can_brand || '');
-      if (sort === 'rarity_desc') return RARITY_ORDER.indexOf(getEffectiveRarity(b)) - RARITY_ORDER.indexOf(getEffectiveRarity(a));
-      if (sort === 'rarity_asc') return RARITY_ORDER.indexOf(getEffectiveRarity(a)) - RARITY_ORDER.indexOf(getEffectiveRarity(b));
-      return 0;
-    }), [collection, filters, searchQuery, sharedCansMap]);
+  // The actual filter/sort rules live in lib/filterCollection.js (unit
+  // tested there) — this is just wiring this page's own state into it.
+  const filtered = useMemo(
+    () => filterAndSortCollection(collection, filters, searchQuery, getEffectiveRarity),
+    [collection, filters, searchQuery, sharedCansMap]
+  );
 
   // Sort is excluded on purpose — it reorders results, it never excludes
   // them, so it can't be the reason a search+filter combination landed on

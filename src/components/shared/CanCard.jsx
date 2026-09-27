@@ -149,7 +149,7 @@ export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFav
 
       <div className="p-3 flex items-end justify-between gap-2 pointer-events-none">
         <div className="min-w-0">
-          <p className="text-[11px] font-mono text-primary/70 uppercase tracking-wider truncate">{brand}</p>
+          <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider truncate">{brand}</p>
           <h3 className="text-sm font-semibold text-foreground truncate mt-0.5">{name}</h3>
           {flavour && (
             <p className="text-xs text-muted-foreground truncate mt-0.5">{flavour}</p>

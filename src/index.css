@@ -1,120 +1,179 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap');
-/* Field Guide family fonts (naturalist specimen catalog). */
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Lora:wght@400;500;600;700&display=swap');
-/* Origami Fold family fonts (washi paper craft). */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+/* Vintage Pastel family fonts (1950s soda shop). */
+@import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Courier+Prime:wght@400;700&family=Quicksand:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================================
+   PHASE 1 THEME SYSTEM — full replacement, 2026-09-27.
+   The prior 18-theme system (Neon Grid / Field Guide / Origami Fold) is
+   deleted entirely, per the redesign brief: "This replaces the entire
+   current theme system." See supabase/migrations for the matching DB
+   migration (constraint swap + column default + backfill).
+
+   ARCHITECTURE: each theme is a self-contained 4-value system — main,
+   supporting, background, text — rather than one accent color swapped onto
+   a shared background. Concretely, on top of shadcn/ui's existing token
+   names (no Tailwind class renames needed anywhere in components):
+     - main         -> --primary        (+ --primary-foreground = on-main)
+     - supporting   -> --accent         (+ --accent-foreground = on-supporting)
+     - background   -> --background (and the surfaces derived from it below)
+     - text         -> --foreground (+ --card/--popover/--secondary-foreground,
+                       which must match it now that backgrounds vary in
+                       polarity -- see the audit note below)
+
+   This is the app's first-ever light-background family (Vintage Pastel), so
+   --foreground is no longer a single invariant value shared by every theme
+   the way it was when every background was dark. It's authored per theme
+   below, same as every other value.
+
+   NOT part of this restructure, confirmed explicitly and left exactly as
+   they already worked: --rarity-* (a can's actual rarity badge must read
+   the same regardless of viewer theme) and --breakdown-* (CollectionCard's
+   proportion bar; still theme-derived from that theme's own hue, same
+   formula as before, just recomputed for the new hues).
+
+   AUDIT FINDINGS baked into the values below (full detail in chat, not
+   repeated per-theme here):
+   - main/supporting are used bare (icon/number/link/label directly on
+     --background, not just inside a filled chip) at 120+ call sites
+     app-wide -- this is what actually gates every value below, not just
+     the swatch. Every Vintage Pastel main/supporting is deepened until it
+     clears 3:1 against its own --background using this exact hex, with no
+     separate "vivid" variant anywhere.
+   - --destructive/--success/--warning/--info were tuned for a dark
+     background only and never re-checked against a light one. Recalibrated
+     to one universal value per status color (status meaning stays
+     genuinely universal, per the pre-existing design decision) that clears
+     3:1 against BOTH the darkest Neon Arcade background and the lightest
+     Vintage Pastel background -- achievable because those two luminance
+     windows overlap at the 3:1 threshold (they don't at 4.5:1). These are
+     icon/badge/component colors in practice, not paragraph text, so 3:1 is
+     the correct floor, not 4.5:1.
+   - --muted-foreground has no semantic meaning to preserve (unlike the
+     four status colors above), and there is no single gray that clears
+     4.5:1 against both a near-black and a near-white background at once --
+     that's not a design compromise, it's outside what's mathematically
+     possible given this app's background range. Neon Arcade keeps the
+     original invariant value (still comfortably 5.9-6.2:1 against all six
+     dark backgrounds, unchanged). Vintage Pastel gets its own per-theme
+     value below, derived from that theme's own --text hue.
+   - --card-foreground/--popover-foreground/--secondary-foreground were
+     also a single invariant near-white value, actually consumed by
+     ui/button.jsx, ui/card.jsx, ui/select.jsx, ui/popover.jsx, and others
+     -- would have been near-white text on a near-white Vintage Pastel
+     surface. Set equal to that theme's own --foreground below, everywhere.
+   ============================================================================ */
+
 @layer base {
   :root {
+    /* Neon Arcade's default font trio (kept from the prior system --
+       matches the "dark, gamer/cyber/neon" character directly, no reason
+       to replace fonts that already suit the new family). Vintage Pastel
+       overrides all three below, family-wide, same mechanism as before. */
     --font-display: 'Orbitron', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
     --font-body: 'Exo 2', sans-serif;
 
-    --background: 240 20% 4%;
-    --foreground: 200 20% 95%;
-    --card: 240 15% 8%;
-    --card-foreground: 200 20% 95%;
-    --popover: 240 15% 8%;
-    --popover-foreground: 200 20% 95%;
-    --primary: 185 100% 50%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 240 10% 18%;
-    --secondary-foreground: 200 20% 85%;
-    --muted: 240 10% 9%;
+    /* Base = Power-Up (the new free default). Used directly by any
+       unauthenticated surface (data-theme is never set there) and as the
+       fallback for an unrecognized/stale theme id -- see the migration's
+       column-default fix for why that should no longer actually occur. */
+    --background: 217 37% 7%;
+    --foreground: 153 100% 98%;
+    --card: 217 35% 11%;
+    --card-foreground: 153 100% 98%;
+    --popover: 217 35% 11%;
+    --popover-foreground: 153 100% 98%;
+    --primary: 152 100% 50%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 217 33% 21%;
+    --secondary-foreground: 153 100% 98%;
+    --muted: 217 31% 12%;
     --muted-foreground: 220 10% 58%;
-    --accent: 330 81% 60%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --success: 158 64% 52%;
-    --success-foreground: 0 0% 98%;
-    --warning: 48 96% 53%;
-    --warning-foreground: 20 90% 10%;
-    --info: 217 91% 60%;
-    --info-foreground: 0 0% 98%;
-    --border: 240 10% 16%;
-    --input: 240 10% 16%;
-    --ring: 185 100% 50%;
+    --accent: 189 100% 50%;
+    --accent-foreground: 240 20% 5%;
+    /* Universal status colors -- recalibrated to clear 3:1 against every
+       Phase 1 background, dark or light (see file header). Status meaning
+       stays the same everywhere: this fixes the actual bug (tuned for one
+       background end only), it doesn't reopen the invariant itself. */
+    --destructive: 0 70% 56%;
+    --destructive-foreground: 240 20% 5%;
+    --success: 150 55% 35%;
+    --success-foreground: 240 20% 5%;
+    --warning: 38 75% 37%;
+    --warning-foreground: 240 20% 5%;
+    --info: 217 70% 55%;
+    --info-foreground: 240 20% 5%;
+    --border: 217 35% 20%;
+    --input: 217 35% 20%;
+    --ring: 152 100% 50%;
     --radius: 0.75rem;
-    /* Baseline glow multiplier — see the Pro themes below for the escalating
-       rarity-tier scale this feeds into (.neon-glow/.neon-text/.neon-border). */
     --glow-intensity: 1;
-    /* Card surface texture — a background-image layered onto every
-       `bg-card` element via the plain-CSS rule near the bottom of this file
-       (Tailwind's generated `.bg-card` only ever sets background-color, so
-       this composites rather than conflicts). `none` for Neon Grid; Field
-       Guide/Origami Fold override it per-family below. */
     --card-texture: none;
-    --sidebar-background: 240 15% 6%;
-    --sidebar-foreground: 200 20% 85%;
-    --sidebar-primary: 185 100% 50%;
-    --sidebar-primary-foreground: 240 20% 4%;
-    --sidebar-accent: 240 10% 12%;
-    --sidebar-accent-foreground: 200 20% 85%;
-    --sidebar-border: 240 10% 16%;
-    --sidebar-ring: 185 100% 50%;
+    --sidebar-background: 217 35% 9%;
+    --sidebar-foreground: 153 60% 85%;
+    --sidebar-primary: 152 100% 50%;
+    --sidebar-primary-foreground: 240 20% 5%;
+    --sidebar-accent: 217 31% 15%;
+    --sidebar-accent-foreground: 153 60% 85%;
+    --sidebar-border: 217 35% 20%;
+    --sidebar-ring: 152 100% 50%;
 
+    /* Not part of this restructure -- theme-invariant on purpose, unchanged. */
     --rarity-common: 220 9% 56%;
     --rarity-uncommon: 142 71% 45%;
     --rarity-rare: 217 91% 60%;
     --rarity-ultra: 271 91% 65%;
     --rarity-legendary: 330 81% 60%;
 
-    /* Rarity Breakdown bar (CollectionCard's proportion chart) only — a
-       monochromatic ramp built from this theme's own --primary hue, dim to
-       vivid. Deliberately NOT --rarity-* : those identify an individual
-       can's actual rarity and must stay theme-invariant (including in
-       exported share images); this bar is a mood/proportion visualization
-       on the same share card, so making it complement the active theme
-       instead of clashing with it is a different, narrower call. See
-       .impeccable/critique/2026-09-11T08-11-49Z, Minor Observations. */
-    --breakdown-common: 185 30% 25%;
-    --breakdown-uncommon: 185 50% 35%;
-    --breakdown-rare: 185 65% 45%;
-    --breakdown-ultra: 185 80% 50%;
-    --breakdown-legendary: 185 100% 55%;
+    /* Not part of this restructure -- still theme-derived from this
+       theme's own hue, same formula as before, just recomputed. */
+    --breakdown-common: 152 25% 28%;
+    --breakdown-uncommon: 152 35% 36.5%;
+    --breakdown-rare: 152 45% 45%;
+    --breakdown-ultra: 152 55% 53.5%;
+    --breakdown-legendary: 152 65% 62%;
   }
 
   .dark {
-    --background: 240 20% 4%;
-    --foreground: 200 20% 95%;
-    --card: 240 15% 8%;
-    --card-foreground: 200 20% 95%;
-    --popover: 240 15% 8%;
-    --popover-foreground: 200 20% 95%;
-    --primary: 185 100% 50%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 240 10% 18%;
-    --secondary-foreground: 200 20% 85%;
-    --muted: 240 10% 9%;
+    --background: 217 37% 7%;
+    --foreground: 153 100% 98%;
+    --card: 217 35% 11%;
+    --card-foreground: 153 100% 98%;
+    --popover: 217 35% 11%;
+    --popover-foreground: 153 100% 98%;
+    --primary: 152 100% 50%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 217 33% 21%;
+    --secondary-foreground: 153 100% 98%;
+    --muted: 217 31% 12%;
     --muted-foreground: 220 10% 58%;
-    --accent: 330 81% 60%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --success: 158 64% 52%;
-    --success-foreground: 0 0% 98%;
-    --warning: 48 96% 53%;
-    --warning-foreground: 20 90% 10%;
-    --info: 217 91% 60%;
-    --info-foreground: 0 0% 98%;
-    --border: 240 10% 16%;
-    --input: 240 10% 16%;
-    --ring: 185 100% 50%;
+    --accent: 189 100% 50%;
+    --accent-foreground: 240 20% 5%;
+    --destructive: 0 70% 56%;
+    --destructive-foreground: 240 20% 5%;
+    --success: 150 55% 35%;
+    --success-foreground: 240 20% 5%;
+    --warning: 38 75% 37%;
+    --warning-foreground: 240 20% 5%;
+    --info: 217 70% 55%;
+    --info-foreground: 240 20% 5%;
+    --border: 217 35% 20%;
+    --input: 217 35% 20%;
+    --ring: 152 100% 50%;
     --glow-intensity: 1;
     --card-texture: none;
-    --sidebar-background: 240 15% 6%;
-    --sidebar-foreground: 200 20% 85%;
-    --sidebar-primary: 185 100% 50%;
-    --sidebar-primary-foreground: 240 20% 4%;
-    --sidebar-accent: 240 10% 12%;
-    --sidebar-accent-foreground: 200 20% 85%;
-    --sidebar-border: 240 10% 16%;
-    --sidebar-ring: 185 100% 50%;
+    --sidebar-background: 217 35% 9%;
+    --sidebar-foreground: 153 60% 85%;
+    --sidebar-primary: 152 100% 50%;
+    --sidebar-primary-foreground: 240 20% 5%;
+    --sidebar-accent: 217 31% 15%;
+    --sidebar-accent-foreground: 153 60% 85%;
+    --sidebar-border: 217 35% 20%;
+    --sidebar-ring: 152 100% 50%;
 
     --rarity-common: 220 9% 56%;
     --rarity-uncommon: 142 71% 45%;
@@ -122,515 +181,350 @@
     --rarity-ultra: 271 91% 65%;
     --rarity-legendary: 330 81% 60%;
 
-    --breakdown-common: 185 30% 25%;
-    --breakdown-uncommon: 185 50% 35%;
-    --breakdown-rare: 185 65% 45%;
-    --breakdown-ultra: 185 80% 50%;
-    --breakdown-legendary: 185 100% 55%;
+    --breakdown-common: 152 25% 28%;
+    --breakdown-uncommon: 152 35% 36.5%;
+    --breakdown-rare: 152 45% 45%;
+    --breakdown-ultra: 152 55% 53.5%;
+    --breakdown-legendary: 152 65% 62%;
   }
 
-  /* Theme system: Signal Cyan (the values above) is the default/free look
-     and stays untouched. Each theme below swaps the surface/brand tokens —
-     background, card, primary, secondary, muted, accent, border, ring — plus
-     --glow-intensity. Never --foreground (body text stays legible),
-     --destructive (errors stay universally red), --success/--warning/--info
-     (status meaning stays universally green/amber/blue, same reasoning), or
-     --rarity-* (a can's actual rarity badge must read the same regardless of
-     the viewer's theme, including in exported/shared card images).
-
-     Redesigned 2026-09-11 (see .impeccable/critique/2026-09-11T08-11-49Z
-     for the full audit this responds to). Two rules replace the old
-     single-hue-swap formula:
-
-     1. RICHNESS ESCALATES WITH TIER, NOT JUST HUE. Every prior theme's
-        background/card/secondary/muted/border sat within 1-2 percentage
-        points of each other regardless of tier (border-L was *literally*
-        16% in all five) — only --primary differed, so five "themes" read
-        as one dark UI with a recolored button. Saturation AND lightness on
-        every surface token now climb from Common (flattest, greyest —
-        deliberately cheap-reading) to Legendary (richest, most saturated
-        near-black). Card in particular lifts much further off background
-        at higher tiers (9% L at Common -> 14% L at Legendary) instead of
-        the old fixed +4pt-everywhere recipe.
-     2. --accent IS OWN PER THEME, NOT PINNED TO CYAN. The old system gave
-        all five Pro themes the exact same accent (185 100% 50%) — half the
-        theme's identity was a shared constant. Each theme now gets its own
-        accent hue (thematically: Steel's spark, Verdant's gold, Cobalt's
-        electric teal, Voidglass's magenta, Aurora's gold trim).
-
-     --glow-intensity multiplies into .neon-glow/.neon-text/.neon-border
-     (and .hero-card's shadow) below, so a higher tier is felt as a real
-     increase in visual energy, not just a different-colored version of the
-     same energy. It also fixes a specific regression the audit caught:
-     Ultra's old primary (91% S / 65% L) out-saturated and out-brightened
-     Legendary's (81% S / 60% L) — the "pinnacle" Pro tier read calmer than
-     the one below it. Legendary is now the deliberate peak on saturation,
-     lightness, AND glow-intensity; Common is the deliberate floor.
-     Contrast re-verified for every new value: --foreground/--muted-foreground
-     stay theme-invariant and background/muted only moved 1-2pp lighter, so
-     the existing ~17.5:1 / ~6:1 contrast margins are preserved, not spent.
-     Applied via [data-theme] on <html> — see useTheme.js. */
-  [data-theme="common"] {
-    --background: 220 18% 5%;
-    --card: 220 16% 9%;
-    --popover: 220 16% 9%;
-    --primary: 220 12% 58%;
-    /* Dark foreground (matching every other theme's on-primary text), not
-       white — white-on-this-gray falls below WCAG AA's 4.5:1 floor for
-       small text like the header Scan button's label. Re-verified after
-       the 56%->58% lightness bump: still safely in dark-text territory. */
-    --primary-foreground: 240 20% 4%;
-    --secondary: 220 14% 19%;
-    --muted: 220 12% 10%;
-    /* Steel's spark: warm amber against the coldest, greyest theme. */
-    --accent: 38 90% 55%;
-    --accent-foreground: 240 20% 4%;
-    --border: 220 16% 18%;
-    --input: 220 16% 18%;
-    --ring: 220 12% 58%;
-    --glow-intensity: 0.6;
-    --breakdown-common: 220 25% 28%;
-    --breakdown-uncommon: 220 35% 38%;
-    --breakdown-rare: 220 45% 48%;
-    --breakdown-ultra: 220 55% 55%;
-    --breakdown-legendary: 220 65% 62%;
-  }
-  [data-theme="uncommon"] {
-    --background: 142 28% 5%;
-    --card: 142 26% 10%;
-    --popover: 142 26% 10%;
-    --primary: 142 75% 50%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 142 20% 20%;
-    --muted: 142 18% 10%;
-    /* Verdant's lime spark: sits between the green primary and Legendary's
-       gold-trim accent (45°) — deliberately distinct from it, not a repeat. */
-    --accent: 72 85% 55%;
-    --accent-foreground: 240 20% 4%;
-    --border: 142 22% 20%;
-    --input: 142 22% 20%;
-    --ring: 142 75% 50%;
-    --glow-intensity: 0.8;
-    --breakdown-common: 142 35% 25%;
-    --breakdown-uncommon: 142 50% 35%;
-    --breakdown-rare: 142 65% 42%;
-    --breakdown-ultra: 142 78% 48%;
-    --breakdown-legendary: 142 90% 52%;
-  }
-  [data-theme="rare"] {
-    --background: 217 34% 5%;
-    --card: 217 30% 11%;
-    --popover: 217 30% 11%;
-    --primary: 217 88% 60%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 217 24% 21%;
-    --muted: 217 20% 11%;
-    /* Cobalt's electric teal: cooler and brighter than the base cyan, kept
-       distinct from Signal Cyan's own accent. */
-    --accent: 188 95% 55%;
-    --accent-foreground: 240 20% 4%;
-    --border: 217 26% 22%;
-    --input: 217 26% 22%;
-    --ring: 217 88% 60%;
+  /* ── Neon Arcade family (dark, gamer/cyber/neon) ─────────────────────────
+     1 free + 5 Pro. Full glow (--glow-intensity: 1 for every palette --
+     no graduated rarity ladder in this flat free/Pro catalogue, unlike the
+     old system's Common->Legendary escalation). Font trio inherited from
+     :root, not repeated per palette. */
+  [data-theme="power-up"] {
+    --background: 217 37% 7%;
+    --foreground: 153 100% 98%;
+    --card: 217 35% 11%;
+    --card-foreground: 153 100% 98%;
+    --popover: 217 35% 11%;
+    --popover-foreground: 153 100% 98%;
+    --primary: 152 100% 50%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 217 33% 21%;
+    --secondary-foreground: 153 100% 98%;
+    --muted: 217 31% 12%;
+    --accent: 189 100% 50%;
+    --accent-foreground: 240 20% 5%;
+    --border: 217 35% 20%;
+    --input: 217 35% 20%;
+    --ring: 152 100% 50%;
     --glow-intensity: 1;
-    --breakdown-common: 217 40% 28%;
-    --breakdown-uncommon: 217 55% 40%;
-    --breakdown-rare: 217 70% 50%;
-    --breakdown-ultra: 217 82% 58%;
-    --breakdown-legendary: 217 95% 65%;
+    --breakdown-common: 152 25% 28%;
+    --breakdown-uncommon: 152 35% 36.5%;
+    --breakdown-rare: 152 45% 45%;
+    --breakdown-ultra: 152 55% 53.5%;
+    --breakdown-legendary: 152 65% 62%;
   }
-  [data-theme="ultra"] {
-    --background: 271 30% 6%;
-    --card: 271 28% 13%;
-    --popover: 271 28% 13%;
-    /* Revised via /impeccable critique: pushed darker/more electric-violet
-       (was 271/90/64, #A855F7) -- it's the only purple in Neon Grid and
-       should feel distinct/special. Contrast vs this theme's own --card
-       is 3.17:1 (was already 4.16:1 pre-revision, i.e. already short of
-       strict 4.5:1 AA-small-text before this change) -- accepted as-is
-       per explicit sign-off, same reasoning as Ume above: this risk tier
-       already existed live, not a new blocker, flagged as a separate
-       future accessibility pass across the original 18. */
-    --primary: 271 81% 56%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 271 22% 22%;
-    --muted: 271 18% 12%;
-    /* Voidglass's magenta: complementary shimmer against the void-purple. */
-    --accent: 312 90% 58%;
-    --accent-foreground: 240 20% 4%;
-    --border: 271 24% 24%;
-    --input: 271 24% 24%;
-    --ring: 271 81% 56%;
-    --glow-intensity: 1.2;
-    --breakdown-common: 271 35% 28%;
-    --breakdown-uncommon: 271 50% 38%;
-    --breakdown-rare: 271 65% 48%;
-    --breakdown-ultra: 271 80% 58%;
-    --breakdown-legendary: 271 95% 66%;
+  [data-theme="cyberpunk"] {
+    --background: 278 38% 6%;
+    --foreground: 316 100% 98%;
+    --card: 278 36% 10%;
+    --card-foreground: 316 100% 98%;
+    --popover: 278 36% 10%;
+    --popover-foreground: 316 100% 98%;
+    --primary: 312 100% 58%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 278 34% 20%;
+    --secondary-foreground: 316 100% 98%;
+    --muted: 278 32% 11%;
+    --accent: 257 100% 68%;
+    --accent-foreground: 240 20% 5%;
+    --border: 278 36% 19%;
+    --input: 278 36% 19%;
+    --ring: 312 100% 58%;
+    --glow-intensity: 1;
+    --breakdown-common: 312 25% 28%;
+    --breakdown-uncommon: 312 35% 36.5%;
+    --breakdown-rare: 312 45% 45%;
+    --breakdown-ultra: 312 55% 53.5%;
+    --breakdown-legendary: 312 65% 62%;
   }
-  [data-theme="legendary"] {
-    --background: 330 36% 6%;
-    --card: 330 32% 14%;
-    --popover: 330 32% 14%;
-    /* The deliberate peak: highest saturation and lightness of any theme
-       (was 81%/60% before this redesign — below Ultra's 91%/65%, which
-       is exactly the "pinnacle tier reads calmer than the one below it"
-       regression the audit flagged). */
-    --primary: 330 96% 68%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 330 26% 23%;
-    --muted: 330 20% 12%;
-    /* Aurora's gold trim: the classic legendary-tier accent. */
-    --accent: 45 95% 62%;
-    --accent-foreground: 240 20% 4%;
-    --border: 330 28% 26%;
-    --input: 330 28% 26%;
-    --ring: 330 96% 68%;
-    --glow-intensity: 1.5;
-    --breakdown-common: 330 40% 28%;
-    --breakdown-uncommon: 330 55% 40%;
-    --breakdown-rare: 330 72% 50%;
-    --breakdown-ultra: 330 85% 58%;
-    --breakdown-legendary: 330 98% 66%;
+  [data-theme="plasma"] {
+    --background: 204 52% 6%;
+    --foreground: 192 100% 97%;
+    --card: 204 50% 10%;
+    --card-foreground: 192 100% 97%;
+    --popover: 204 50% 10%;
+    --popover-foreground: 192 100% 97%;
+    --primary: 186 100% 50%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 204 48% 20%;
+    --secondary-foreground: 192 100% 97%;
+    --muted: 204 46% 11%;
+    --accent: 227 100% 63%;
+    --accent-foreground: 240 20% 5%;
+    --border: 204 50% 19%;
+    --input: 204 50% 19%;
+    --ring: 186 100% 50%;
+    --glow-intensity: 1;
+    --breakdown-common: 186 25% 28%;
+    --breakdown-uncommon: 186 35% 36.5%;
+    --breakdown-rare: 186 45% 45%;
+    --breakdown-ultra: 186 55% 53.5%;
+    --breakdown-legendary: 186 65% 62%;
   }
-
-  /* ── Field Guide family ──────────────────────────────────────────────────
-     A naturalist's specimen catalog, not a recolored Neon Grid: warm
-     kraft/sepia grounds (hue ~24-42, matching each palette's own accent
-     family, low saturation, near-black lightness — same envelope Neon
-     Grid's own grounds use), jewel-toned specimen accents instead of a hue
-     wheel spin, zero glow (a specimen card doesn't glow — --glow-intensity:
-     0 silently zeroes out .neon-glow/.neon-text/.neon-border/.hero-card's
-     shadow everywhere, no component changes needed), and its own font
-     triplet set once for the whole family rather than repeated per palette.
-     --rarity-* is never touched here — carried forward from the invariant
-     documented above: a can's actual rarity reads the same in every theme. */
-  [data-theme="herbarium"], [data-theme="monarch"], [data-theme="morpho"],
-  [data-theme="luna"], [data-theme="cochineal"], [data-theme="hornet"] {
-    --font-display: 'Fraunces', serif;
-    --font-mono: 'IBM Plex Mono', monospace;
-    --font-body: 'Lora', serif;
+  [data-theme="boss-fight"] {
+    --background: 340 33% 5%;
+    --foreground: 354 100% 98%;
+    --card: 340 31% 9%;
+    --card-foreground: 354 100% 98%;
+    --popover: 340 31% 9%;
+    --popover-foreground: 354 100% 98%;
+    --primary: 347 100% 61%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 340 29% 19%;
+    --secondary-foreground: 354 100% 98%;
+    --muted: 340 27% 10%;
+    --accent: 29 100% 50%;
+    --accent-foreground: 240 20% 5%;
+    --border: 340 31% 18%;
+    --input: 340 31% 18%;
+    --ring: 347 100% 61%;
+    --glow-intensity: 1;
+    --breakdown-common: 347 25% 28%;
+    --breakdown-uncommon: 347 35% 36.5%;
+    --breakdown-rare: 347 45% 45%;
+    --breakdown-ultra: 347 55% 53.5%;
+    --breakdown-legendary: 347 65% 62%;
   }
-  [data-theme="herbarium"] {
-    --background: 32 18% 6%;
-    --card: 32 16% 10%;
-    --popover: 32 16% 10%;
-    --primary: 32 30% 50%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 32 14% 19%;
-    --muted: 32 12% 11%;
-    /* Herbarium's ochre spark — the free/default plate, deliberately the
-       most understated of the six. */
-    --accent: 42 55% 55%;
-    --accent-foreground: 240 20% 4%;
-    --border: 32 16% 19%;
-    --input: 32 16% 19%;
-    --ring: 32 30% 50%;
-    --glow-intensity: 0;
-    --card-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    --breakdown-common: 32 25% 24%;
-    --breakdown-uncommon: 32 35% 34%;
-    --breakdown-rare: 32 45% 44%;
-    --breakdown-ultra: 32 55% 52%;
-    --breakdown-legendary: 32 65% 60%;
+  [data-theme="xp-gold"] {
+    --background: 45 29% 5%;
+    --foreground: 49 100% 96%;
+    --card: 45 27% 9%;
+    --card-foreground: 49 100% 96%;
+    --popover: 45 27% 9%;
+    --popover-foreground: 49 100% 96%;
+    --primary: 47 100% 62%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 45 25% 19%;
+    --secondary-foreground: 49 100% 96%;
+    --muted: 45 23% 10%;
+    --accent: 33 100% 50%;
+    --accent-foreground: 240 20% 5%;
+    --border: 45 27% 18%;
+    --input: 45 27% 18%;
+    --ring: 47 100% 62%;
+    --glow-intensity: 1;
+    --breakdown-common: 47 25% 28%;
+    --breakdown-uncommon: 47 35% 36.5%;
+    --breakdown-rare: 47 45% 45%;
+    --breakdown-ultra: 47 55% 53.5%;
+    --breakdown-legendary: 47 65% 62%;
   }
-  [data-theme="monarch"] {
-    --background: 24 22% 6%;
-    --card: 24 20% 10%;
-    --popover: 24 20% 10%;
-    --primary: 28 85% 54%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 24 16% 19%;
-    --muted: 24 14% 11%;
-    /* Monarch's wing-edge accent: deep amber-red against the orange primary. */
-    --accent: 12 75% 48%;
-    --accent-foreground: 240 20% 4%;
-    --border: 24 18% 19%;
-    --input: 24 18% 19%;
-    --ring: 28 85% 54%;
-    --glow-intensity: 0;
-    --card-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    --breakdown-common: 28 30% 26%;
-    --breakdown-uncommon: 28 45% 38%;
-    --breakdown-rare: 28 60% 48%;
-    --breakdown-ultra: 28 75% 55%;
-    --breakdown-legendary: 28 90% 60%;
-  }
-  [data-theme="morpho"] {
-    --background: 212 30% 6%;
-    --card: 212 26% 11%;
-    --popover: 212 26% 11%;
-    /* Revised via /impeccable critique: 210/80/56 (#358FE9) sat 7deg from
-       Cobalt's own 217/88/60 -- close enough at swatch-dot size to read as
-       a duplicate. Pushed to iridescent teal-blue; contrast vs this
-       theme's own --card improves 5.12 -> 6.00. */
-    --primary: 186 86% 39%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 212 20% 20%;
-    --muted: 212 16% 11%;
-    /* Morpho's violet-blue shimmer, distinct from Neon Grid's own Cobalt. */
-    --accent: 232 65% 60%;
-    --accent-foreground: 240 20% 4%;
-    --border: 212 22% 20%;
-    --input: 212 22% 20%;
-    --ring: 186 86% 39%;
-    --glow-intensity: 0;
-    --card-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    --breakdown-common: 210 35% 26%;
-    --breakdown-uncommon: 210 50% 38%;
-    --breakdown-rare: 210 65% 48%;
-    --breakdown-ultra: 210 78% 55%;
-    --breakdown-legendary: 210 92% 62%;
-  }
-  [data-theme="luna"] {
-    --background: 168 24% 6%;
-    --card: 168 22% 11%;
-    --popover: 168 22% 11%;
-    /* Revised via /impeccable critique: 165/50/50 (#40BF9F) sat only 23deg
-       from Verdant's 142/75/50 -- same broad green family, too close at
-       swatch-dot size. Pushed to pale seafoam/mint, this app's first
-       genuinely light theme color; contrast vs this theme's own --card
-       improves 7.15 -> 10.76 (background/card themselves stay dark and
-       unchanged -- only the accent goes pale). */
-    --primary: 156 72% 67%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 168 16% 20%;
-    --muted: 168 14% 11%;
-    /* Luna's gold eye-spot accent, warm against the pale jade primary. */
-    --accent: 45 55% 58%;
-    --accent-foreground: 240 20% 4%;
-    --border: 168 18% 20%;
-    --input: 168 18% 20%;
-    --ring: 156 72% 67%;
-    --glow-intensity: 0;
-    --card-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    --breakdown-common: 165 28% 26%;
-    --breakdown-uncommon: 165 42% 36%;
-    --breakdown-rare: 165 55% 45%;
-    --breakdown-ultra: 165 68% 52%;
-    --breakdown-legendary: 165 80% 58%;
-  }
-  [data-theme="cochineal"] {
-    --background: 350 26% 6%;
-    --card: 350 24% 11%;
-    --popover: 350 24% 11%;
-    --primary: 350 62% 52%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 350 18% 20%;
-    --muted: 350 15% 11%;
-    /* Cochineal's crimson-magenta accent. */
-    --accent: 328 55% 50%;
-    --accent-foreground: 240 20% 4%;
-    --border: 350 20% 20%;
-    --input: 350 20% 20%;
-    --ring: 350 62% 52%;
-    --glow-intensity: 0;
-    --card-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    --breakdown-common: 350 32% 26%;
-    --breakdown-uncommon: 350 46% 36%;
-    --breakdown-rare: 350 60% 46%;
-    --breakdown-ultra: 350 74% 54%;
-    --breakdown-legendary: 350 88% 60%;
-  }
-  [data-theme="hornet"] {
-    --background: 40 24% 6%;
-    --card: 40 22% 11%;
-    --popover: 40 22% 11%;
-    --primary: 42 88% 52%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 40 16% 20%;
-    --muted: 40 14% 11%;
-    /* Hornet's burnt-orange warning-stripe accent. */
-    --accent: 18 78% 46%;
-    --accent-foreground: 240 20% 4%;
-    --border: 40 18% 20%;
-    --input: 40 18% 20%;
-    --ring: 42 88% 52%;
-    --glow-intensity: 0;
-    --card-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    --breakdown-common: 42 30% 26%;
-    --breakdown-uncommon: 42 45% 38%;
-    --breakdown-rare: 42 60% 48%;
-    --breakdown-ultra: 42 75% 54%;
-    --breakdown-legendary: 42 90% 60%;
+  [data-theme="synthwave"] {
+    --background: 261 55% 6%;
+    --foreground: 310 100% 98%;
+    --card: 261 53% 10%;
+    --card-foreground: 310 100% 98%;
+    --popover: 261 53% 10%;
+    --popover-foreground: 310 100% 98%;
+    --primary: 283 79% 58%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 261 51% 20%;
+    --secondary-foreground: 310 100% 98%;
+    --muted: 261 49% 11%;
+    /* This palette's one exception to "dark on-color everywhere": Synthwave's
+       supporting (#6C4DFF) is dark/saturated enough that near-white text
+       reads better on it than near-black (4.86:1 vs 3.90:1) -- verified,
+       not a copy-paste of the other five palettes' on-supporting. */
+    --accent: 250 100% 65%;
+    --accent-foreground: 0 0% 98%;
+    --border: 261 53% 19%;
+    --input: 261 53% 19%;
+    --ring: 283 79% 58%;
+    --glow-intensity: 1;
+    --breakdown-common: 283 25% 28%;
+    --breakdown-uncommon: 283 35% 36.5%;
+    --breakdown-rare: 283 45% 45%;
+    --breakdown-ultra: 283 55% 53.5%;
+    --breakdown-legendary: 283 65% 62%;
   }
 
-  /* ── Origami Fold family ─────────────────────────────────────────────────
-     Precise washi-paper craft: flat matte grounds (no fiber texture, unlike
-     Field Guide — --card-texture stays 'none'; the material distinction is
-     color, type, and this family's signature fold/unfold reveal motion
-     rather than a grain layer), thin crease-line dividers instead of
-     glow/borders, zero glow (--glow-intensity: 0, same mechanism as Field
-     Guide), and its own font triplet. --rarity-* untouched, same invariant. */
-  [data-theme="washi"], [data-theme="shu"], [data-theme="ai"],
-  [data-theme="matcha"], [data-theme="ume"], [data-theme="kohaku"] {
-    --font-display: 'Outfit', sans-serif;
-    --font-mono: 'Space Mono', monospace;
-    --font-body: 'DM Sans', sans-serif;
+  /* ── Vintage Pastel family (light, 1950s soda shop) ──────────────────────
+     The app's first-ever light-background family -- see the file header for
+     the audit findings this palette's exact values were shaped by. Zero
+     glow (a soda-shop diner sign doesn't glow -- same --glow-intensity: 0
+     mechanism the old Field Guide/Origami Fold families used, zeroing out
+     .neon-glow/.neon-text/.neon-border/.hero-card's shadow with no
+     component changes needed), own font triplet for the whole family. */
+  [data-theme="mint-fizz"], [data-theme="strawberry-cream"], [data-theme="blue-raspberry"],
+  [data-theme="lemon-pop"], [data-theme="peach-soda"], [data-theme="grape-float"] {
+    --font-display: 'Alfa Slab One', cursive;
+    --font-mono: 'Courier Prime', monospace;
+    --font-body: 'Quicksand', sans-serif;
   }
-  [data-theme="washi"] {
-    --background: 35 8% 7%;
-    --card: 35 7% 11%;
-    --popover: 35 7% 11%;
-    /* Revised via /impeccable critique: 35/12/55 (#9A8F7E) shared
-       Herbarium's own hue (32deg) at lower saturation, real closeness at
-       swatch-dot size even though the desaturation itself was deliberate
-       (see "most neutral of the six" above). Pushed to pale warm
-       cream/ivory; contrast vs this theme's own --card improves 5.31 ->
-       10.59 (background/card stay dark and unchanged -- only the accent
-       goes pale). */
-    --primary: 44 42% 75%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 35 8% 19%;
-    --muted: 35 6% 11%;
-    /* Washi's own barely-there warm highlight — the free/default plate,
-       deliberately the most neutral of the six (plain, undyed paper). */
-    --accent: 40 20% 58%;
-    --accent-foreground: 240 20% 4%;
-    --border: 35 8% 19%;
-    --input: 35 8% 19%;
-    --ring: 44 42% 75%;
+  [data-theme="mint-fizz"] {
+    --background: 41 100% 96%;
+    --foreground: 159 14% 24%;
+    --card: 41 97% 97%;
+    --card-foreground: 159 14% 24%;
+    --popover: 41 97% 97%;
+    --popover-foreground: 159 14% 24%;
+    /* Deepened from the originally-specified pale mint (#A8D8C8) -- the
+       literal pastel failed background-vs-main at 1.49:1. This dusty
+       jade/teal-green is the same hue, pulled dark/saturated enough to
+       clear 3:1 (lands at 3.37:1), since main renders bare on --background
+       at 120+ call sites app-wide (icons, stat numbers, links), not just
+       inside a filled chip -- see the file header. */
+    --primary: 168 32% 44%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 41 98% 87%;
+    --secondary-foreground: 159 14% 24%;
+    --muted: 41 96% 91%;
+    /* No single gray clears 4.5:1 against both a near-black Neon Arcade
+       background and this near-white one -- theme-polarity-aware, derived
+       from this theme's own --foreground hue, same as --text itself. */
+    --muted-foreground: 160 10% 41%;
+    --accent: 168 38% 42%;
+    --accent-foreground: 240 20% 5%;
+    --border: 41 98% 82%;
+    --input: 41 98% 82%;
+    --ring: 168 32% 44%;
     --glow-intensity: 0;
-    --card-texture: none;
-    --breakdown-common: 35 15% 25%;
-    --breakdown-uncommon: 35 20% 34%;
-    --breakdown-rare: 35 25% 43%;
-    --breakdown-ultra: 35 30% 51%;
-    --breakdown-legendary: 35 35% 58%;
+    --breakdown-common: 168 25% 28%;
+    --breakdown-uncommon: 168 35% 36.5%;
+    --breakdown-rare: 168 45% 45%;
+    --breakdown-ultra: 168 55% 53.5%;
+    --breakdown-legendary: 168 65% 62%;
   }
-  [data-theme="shu"] {
-    --background: 8 28% 6%;
-    --card: 8 25% 11%;
-    --popover: 8 25% 11%;
-    --primary: 8 78% 54%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 8 18% 20%;
-    --muted: 8 15% 11%;
-    /* Shu's crimson-red accent, distinct from Cochineal's own deeper red. */
-    --accent: 350 60% 50%;
-    --accent-foreground: 240 20% 4%;
-    --border: 8 20% 20%;
-    --input: 8 20% 20%;
-    --ring: 8 78% 54%;
+  [data-theme="strawberry-cream"] {
+    --background: 20 100% 97%;
+    --foreground: 343 23% 27%;
+    --card: 20 97% 98%;
+    --card-foreground: 343 23% 27%;
+    --popover: 20 97% 98%;
+    --popover-foreground: 343 23% 27%;
+    /* Deepened from #F3A6B8 (1.79:1) to a dusty rose, 3.35:1. */
+    --primary: 349 38% 59%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 20 98% 88%;
+    --secondary-foreground: 343 23% 27%;
+    --muted: 20 96% 92%;
+    --muted-foreground: 343 16% 47%;
+    --accent: 350 45% 60%;
+    --accent-foreground: 240 20% 5%;
+    --border: 20 98% 83%;
+    --input: 20 98% 83%;
+    --ring: 349 38% 59%;
     --glow-intensity: 0;
-    --card-texture: none;
-    --breakdown-common: 8 32% 26%;
-    --breakdown-uncommon: 8 48% 37%;
-    --breakdown-rare: 8 62% 47%;
-    --breakdown-ultra: 8 76% 54%;
-    --breakdown-legendary: 8 90% 60%;
+    --breakdown-common: 349 25% 28%;
+    --breakdown-uncommon: 349 35% 36.5%;
+    --breakdown-rare: 349 45% 45%;
+    --breakdown-ultra: 349 55% 53.5%;
+    --breakdown-legendary: 349 65% 62%;
   }
-  [data-theme="ai"] {
-    --background: 228 32% 7%;
-    --card: 228 28% 12%;
-    --popover: 228 28% 12%;
-    /* Revised via /impeccable critique: 228/55/55 (#4D66CB) sat in an
-       18deg band with Cobalt (217deg) and Morpho's pre-revision hue
-       (210deg) -- a real 3-way blue collision across all 18 themes.
-       Pushed toward deep indigo-navy (231deg, desaturated to 54% vs
-       Cobalt's 88%) -- the originally-requested #2B3A8F (36% L) failed
-       contrast outright (1.72:1 vs this theme's own --card, under even
-       the 3:1 large-text/icon floor); this lands at 58% L, clearing 3:1
-       with real margin (3.68:1) while staying visibly darker/more muted
-       than Cobalt/Morpho. Still short of strict 4.5:1 small-text AA --
-       same risk tier as Ume/Voidglass below, flagged as a separate
-       future accessibility pass, not blocking here. */
-    --primary: 231 54% 58%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 228 22% 21%;
-    --muted: 228 18% 12%;
-    /* Ai's lighter sky-blue accent against the deeper indigo primary. */
-    --accent: 205 70% 55%;
-    --accent-foreground: 240 20% 4%;
-    --border: 228 24% 21%;
-    --input: 228 24% 21%;
-    --ring: 231 54% 58%;
+  [data-theme="blue-raspberry"] {
+    --background: 195 57% 97%;
+    --foreground: 203 26% 28%;
+    --card: 195 54% 98%;
+    --card-foreground: 203 26% 28%;
+    --popover: 195 54% 98%;
+    --popover-foreground: 203 26% 28%;
+    /* Deepened from #9DC9E8 (1.67:1) to a denim/dusty blue, 3.36:1. */
+    --primary: 205 42% 53%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 195 55% 88%;
+    --secondary-foreground: 203 26% 28%;
+    --muted: 195 53% 92%;
+    --muted-foreground: 203 19% 43%;
+    --accent: 205 48% 52%;
+    --accent-foreground: 240 20% 5%;
+    --border: 195 55% 83%;
+    --input: 195 55% 83%;
+    --ring: 205 42% 53%;
     --glow-intensity: 0;
-    --card-texture: none;
-    --breakdown-common: 228 35% 27%;
-    --breakdown-uncommon: 228 48% 38%;
-    --breakdown-rare: 228 60% 47%;
-    --breakdown-ultra: 228 72% 55%;
-    --breakdown-legendary: 228 85% 62%;
+    --breakdown-common: 205 25% 28%;
+    --breakdown-uncommon: 205 35% 36.5%;
+    --breakdown-rare: 205 45% 45%;
+    --breakdown-ultra: 205 55% 53.5%;
+    --breakdown-legendary: 205 65% 62%;
   }
-  [data-theme="matcha"] {
-    --background: 95 22% 6%;
-    --card: 95 20% 11%;
-    --popover: 95 20% 11%;
-    --primary: 95 45% 46%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 95 15% 20%;
-    --muted: 95 13% 11%;
-    /* Matcha's warm chartreuse accent. */
-    --accent: 65 55% 55%;
-    --accent-foreground: 240 20% 4%;
-    --border: 95 16% 20%;
-    --input: 95 16% 20%;
-    --ring: 95 45% 46%;
+  [data-theme="lemon-pop"] {
+    --background: 49 100% 96%;
+    --foreground: 50 45% 22%;
+    --card: 49 97% 97%;
+    --card-foreground: 50 45% 22%;
+    --popover: 49 97% 97%;
+    --popover-foreground: 50 45% 22%;
+    /* The worst offender pre-fix (#F5D76E, 1.36:1) -- yellow stays
+       perceptually bright even when darkened in lightness alone (its high
+       R+G channel weight in relative luminance means a "dark yellow" still
+       reads fairly luminous), so this also shifts hue from 47 deg (true
+       yellow) to 38 deg, toward mustard/gold, not lightness alone. Lands
+       at 3.37:1, and reads as clearly distinct from Neon Arcade's XP Gold
+       (still 47 deg, full saturation) -- no longer a close-hue risk at all. */
+    --primary: 38 55% 44%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 49 98% 87%;
+    --secondary-foreground: 50 45% 22%;
+    --muted: 49 96% 91%;
+    --muted-foreground: 51 31% 36%;
+    --accent: 32 60% 46%;
+    --accent-foreground: 240 20% 5%;
+    --border: 49 98% 82%;
+    --input: 49 98% 82%;
+    --ring: 38 55% 44%;
     --glow-intensity: 0;
-    --card-texture: none;
-    --breakdown-common: 95 26% 25%;
-    --breakdown-uncommon: 95 38% 35%;
-    --breakdown-rare: 95 50% 43%;
-    --breakdown-ultra: 95 62% 50%;
-    --breakdown-legendary: 95 74% 56%;
+    --breakdown-common: 38 25% 28%;
+    --breakdown-uncommon: 38 35% 36.5%;
+    --breakdown-rare: 38 45% 45%;
+    --breakdown-ultra: 38 55% 53.5%;
+    --breakdown-legendary: 38 65% 62%;
   }
-  [data-theme="ume"] {
-    --background: 320 24% 7%;
-    --card: 320 22% 12%;
-    --popover: 320 22% 12%;
-    /* Revised via /impeccable critique: 322/55/55 (#CB4D9D) sat only 8deg
-       from Aurora's 330/96/68. Pushed to true orchid/purple-pink.
-       Contrast vs this theme's own --card is 3.80:1 (was already 4.14:1
-       pre-revision, i.e. already short of strict 4.5:1 AA-small-text
-       before this change) -- accepted as-is per explicit sign-off: this
-       risk tier already exists in a live theme (see Voidglass below),
-       so it's not a blocker here, flagged as a separate future
-       accessibility pass across the original 18. */
-    --primary: 319 50% 52%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 320 17% 21%;
-    --muted: 320 14% 12%;
-    /* Ume's violet accent against the plum-pink primary. */
-    --accent: 300 45% 55%;
-    --accent-foreground: 240 20% 4%;
-    --border: 320 18% 21%;
-    --input: 320 18% 21%;
-    --ring: 319 50% 52%;
+  [data-theme="peach-soda"] {
+    --background: 28 100% 96%;
+    --foreground: 16 29% 27%;
+    --card: 28 97% 97%;
+    --card-foreground: 16 29% 27%;
+    --popover: 28 97% 97%;
+    --popover-foreground: 16 29% 27%;
+    /* Deepened from #F3B18C (1.70:1) to a terracotta/rust, 3.36:1. */
+    --primary: 18 55% 53%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 28 98% 87%;
+    --secondary-foreground: 16 29% 27%;
+    --muted: 28 96% 91%;
+    --muted-foreground: 17 21% 45%;
+    --accent: 14 60% 55%;
+    --accent-foreground: 240 20% 5%;
+    --border: 28 98% 82%;
+    --input: 28 98% 82%;
+    --ring: 18 55% 53%;
     --glow-intensity: 0;
-    --card-texture: none;
-    --breakdown-common: 322 30% 27%;
-    --breakdown-uncommon: 322 42% 38%;
-    --breakdown-rare: 322 55% 47%;
-    --breakdown-ultra: 322 68% 55%;
-    --breakdown-legendary: 322 80% 62%;
+    --breakdown-common: 18 25% 28%;
+    --breakdown-uncommon: 18 35% 36.5%;
+    --breakdown-rare: 18 45% 45%;
+    --breakdown-ultra: 18 55% 53.5%;
+    --breakdown-legendary: 18 65% 62%;
   }
-  [data-theme="kohaku"] {
-    --background: 42 26% 6%;
-    --card: 42 23% 11%;
-    --popover: 42 23% 11%;
-    /* Revised via /impeccable critique: 42/75/55 (#E2AF36) shared
-       Hornet's exact hue (42deg) -- the strongest collision of the seven
-       revised themes. Pushed warmer/darker toward amber-honey. Contrast
-       vs this theme's own --card is still comfortable at 4.63:1 (was
-       8.17:1 pre-revision -- less headroom, still clears AA-small-text). */
-    --primary: 33 62% 45%;
-    --primary-foreground: 240 20% 4%;
-    --secondary: 42 17% 20%;
-    --muted: 42 14% 11%;
-    /* Kohaku's burnt-amber accent against the gold primary. */
-    --accent: 30 60% 52%;
-    --accent-foreground: 240 20% 4%;
-    --border: 42 18% 20%;
-    --input: 42 18% 20%;
-    --ring: 33 62% 45%;
+  [data-theme="grape-float"] {
+    --background: 283 54% 97%;
+    --foreground: 279 17% 27%;
+    --card: 283 51% 98%;
+    --card-foreground: 279 17% 27%;
+    --popover: 283 51% 98%;
+    --popover-foreground: 279 17% 27%;
+    /* Deepened from #B8A0D2 (2.17:1, the closest of the six to passing
+       already) to a plum/mauve, 3.35:1. */
+    --primary: 289 30% 58%;
+    --primary-foreground: 240 20% 5%;
+    --secondary: 283 52% 88%;
+    --secondary-foreground: 279 17% 27%;
+    --muted: 283 50% 92%;
+    --muted-foreground: 279 12% 46%;
+    --accent: 288 36% 59%;
+    --accent-foreground: 240 20% 5%;
+    --border: 283 52% 83%;
+    --input: 283 52% 83%;
+    --ring: 289 30% 58%;
     --glow-intensity: 0;
-    --card-texture: none;
-    --breakdown-common: 42 30% 26%;
-    --breakdown-uncommon: 42 44% 37%;
-    --breakdown-rare: 42 58% 47%;
-    --breakdown-ultra: 42 72% 54%;
-    --breakdown-legendary: 42 86% 60%;
+    --breakdown-common: 289 25% 28%;
+    --breakdown-uncommon: 289 35% 36.5%;
+    --breakdown-rare: 289 45% 45%;
+    --breakdown-ultra: 289 55% 53.5%;
+    --breakdown-legendary: 289 65% 62%;
   }
 }
 
@@ -649,10 +543,10 @@
   width: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: hsl(240, 15%, 6%);
+  background: hsl(var(--background));
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(240, 10%, 20%);
+  background: hsl(var(--border));
   border-radius: 4px;
 }
 
@@ -670,10 +564,10 @@
 }
 
 /* Neon glow utilities — driven by --primary so the glow reskins with the
-   active theme instead of staying Signal Cyan under every Pro theme. Alpha
-   is multiplied by --glow-intensity (0.6 at Common up to 1.5 at Legendary,
-   1 for the free/default theme) so a higher rarity tier is felt as more
-   visual energy, not just a different-colored version of the same energy. */
+   active theme instead of staying one fixed color under every Pro theme.
+   Alpha is multiplied by --glow-intensity (1 for every Neon Arcade palette,
+   0 for every Vintage Pastel palette, zeroing this out with no component
+   changes needed). */
 .neon-glow {
   box-shadow:
     0 0 10px hsl(var(--primary) / calc(0.3 * var(--glow-intensity))),
@@ -683,9 +577,8 @@
 /* Alpha coefficients kept lower than .neon-glow's: text-shadow's blur
    halos sit directly over glyph strokes rather than around a card edge,
    so the same intensity that reads fine on a border blooms into the
-   digits themselves — worst on high-luminosity primaries (Signal Cyan's
-   100% S/50% L, Legendary's 96% S/68% L) where it washed out the
-   numerals rather than accenting them. */
+   digits themselves — worst on high-luminosity primaries where it washed
+   out the numerals rather than accenting them. */
 .neon-text {
   text-shadow:
     0 0 10px hsl(var(--primary) / calc(0.3 * var(--glow-intensity))),
@@ -701,19 +594,17 @@
 
 /* CanCard's favourited-state glow — was a fixed hsl(var(--primary)/0.12)
    shadow, the one glow surface left out of the --glow-intensity system:
-   a Legendary-tier user's favourites glowed exactly as much as a
-   Common-tier user's, unlike every other glow in the app. */
+   a Neon Arcade user's favourites glowed exactly as much regardless of
+   theme, unlike every other glow in the app. */
 .favourite-glow {
   box-shadow: 0 0 12px hsl(var(--primary) / calc(0.12 * var(--glow-intensity)));
 }
 
 /* RarityBadge's per-can glow — hue stays theme-invariant on purpose (a
    can's actual rarity must read the same regardless of viewer theme,
-   same invariant as --rarity-* generally), but INTENSITY now escalates
-   with the viewer's active tier like every other glow surface. Replaces
-   three hardcoded rgba() literals that were a hand-copy of --rarity-*'s
-   hex values and couldn't scale. Common/Uncommon stay glow-free by
-   design (RarityBadge.jsx). */
+   same invariant as --rarity-* generally), but INTENSITY escalates with
+   --glow-intensity like every other glow surface. Common/Uncommon stay
+   glow-free by design (RarityBadge.jsx). */
 .rarity-glow-rare {
   box-shadow: 0 0 8px hsl(var(--rarity-rare) / calc(0.3 * var(--glow-intensity)));
 }
@@ -728,12 +619,9 @@
    literal share-image capture target). Home's own Collection Score has
    since moved to .glass-card-hero, which relies on backdrop-filter blur —
    untested and risky under html2canvas capture, so this card deliberately
-   keeps the older opaque-gradient recipe rather than following suit.
-   Previously a hardcoded hex gradient that never reskinned with the active
-   theme — the app's single most-emphasized surface looked identical in
-   every theme. Now built from --card/--background (which already carry
-   each theme's real richness) plus a primary-tinted wash and
-   glow-intensity-scaled shadow. */
+   keeps the older opaque-gradient recipe rather than following suit. Built
+   from --card/--background (which already carry each theme's real
+   richness) plus a primary-tinted wash and glow-intensity-scaled shadow. */
 .hero-card {
   background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--background)) 100%);
   border: 1px solid hsl(var(--primary) / 0.3);
@@ -752,27 +640,16 @@ body {
 
 /* Home's colored hero backdrop — a vivid --primary/--accent glow that
    fades into the flat --background the rest of the app already uses.
-   Content-sized, not a fixed pixel value (see
-   .impeccable/critique/2026-09-11T10-00-20Z, P2): this is an absolutely-
-   positioned layer (`.home-gradient-bg-layer`) filling a `relative`
-   wrapper around exactly the "hero zone" (header + whichever of
-   welcome-card/RarityHero/Score/error-card is showing) — so it naturally
-   fits a short first-time-user stack or a taller returning-user one
-   without a magic number that has to be re-tuned by hand whenever that
-   content changes. Everything below the hero zone (StatsRow onward) sits
-   outside this wrapper entirely, on the plain background. Not
-   `background-attachment: fixed` — a known mobile-Safari scroll-jank
-   source, and no longer relevant once the layer is sized to its own
-   (short) container rather than the whole page. Alphas were tuned
-   against Legendary (the brightest primary in the system) so header text
-   stays legible in every theme, not just the calmer ones. */
-/* Alphas multiplied by --glow-intensity -- was fixed-alpha, quietly
-   contradicting Field Guide/Origami Fold's "zero glow" invariant
-   (--glow-intensity: 0) on the app's own hero surface. Alpha coefficients
-   themselves (0.45/0.22/0.18) are unchanged from the original legibility
-   tuning against Legendary noted below; only the escalation multiplier is
-   new, matching every other glow surface in this file. (/impeccable
-   critique) */
+   Content-sized, not a fixed pixel value: this is an absolutely-positioned
+   layer (`.home-gradient-bg-layer`) filling a `relative` wrapper around
+   exactly the "hero zone" (header + whichever of welcome-card/RarityHero/
+   Score/error-card is showing) — so it naturally fits a short first-time-
+   user stack or a taller returning-user one without a magic number that
+   has to be re-tuned by hand whenever that content changes. Everything
+   below the hero zone (StatsRow onward) sits outside this wrapper
+   entirely, on the plain background. Alphas multiplied by --glow-intensity
+   so this zeroes out under Vintage Pastel the same as every other glow
+   surface, rather than staying a fixed-alpha wash regardless of theme. */
 .home-gradient-bg-layer {
   position: absolute;
   inset: 0;
@@ -787,9 +664,9 @@ body {
 }
 
 /* Frosted glass panel for content sitting directly on
-   .home-gradient-bg-layer — dark translucent (not white; this is a
-   dark-only app) so the colored backdrop shows through softly instead of
-   the opaque card-to-background fill .hero-card uses elsewhere. */
+   .home-gradient-bg-layer — a translucent card tint (not a fixed white or
+   black) so the colored backdrop shows through softly under any theme,
+   dark or light. */
 .glass-card {
   background: hsl(var(--card) / 0.55);
   backdrop-filter: blur(20px);
@@ -804,10 +681,7 @@ body {
    rather than composing a Tailwind border-color utility on top of
    .glass-card: this file's plain CSS rules are injected after
    @tailwind utilities, so .glass-card's own `border` shorthand would
-   win the cascade over a utility class every time. Previously hand-
-   duplicated as `bg-card/55 backdrop-blur-xl border border-destructive/30`
-   on Home's error card — Tailwind's backdrop-blur-xl is 24px, silently
-   different from this family's 20px. */
+   win the cascade over a utility class every time. */
 .glass-card-destructive {
   background: hsl(var(--card) / 0.55);
   backdrop-filter: blur(20px);
@@ -818,13 +692,11 @@ body {
 }
 
 /* Collection Score's own elevation — same frosted-glass family as
-   .glass-card (deliberately kept, not reverted to the old opaque
-   .hero-card gradient: see .impeccable/critique/2026-09-11T10-00-20Z)
-   but with a primary-tinted border/glow instead of the neutral
-   --foreground border, scaled by --glow-intensity so Home's headline
-   metric escalates with rarity tier the same way the rest of the app's
-   glow language already does. Welcome/error states stay on plain
-   .glass-card — this is what makes Score read as categorically
+   .glass-card, but with a primary-tinted border/glow instead of the
+   neutral --foreground border, scaled by --glow-intensity so Home's
+   headline metric escalates with theme energy the same way the rest of
+   the app's glow language already does. Welcome/error states stay on
+   plain .glass-card — this is what makes Score read as categorically
    different from an onboarding nudge or a failure message, not just a
    nicer box. */
 .glass-card-hero {
@@ -838,48 +710,13 @@ body {
   transition: background 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
 }
 
-/* Card surface texture (Field Guide's kraft-fiber grain) — layered onto
-   every `bg-card` element app-wide with zero component changes. Tailwind's
-   generated `.bg-card` utility only ever sets background-color; this rule
-   (written after @tailwind utilities, so it's later in the cascade for a
-   property Tailwind's own rule never touches) adds background-image on top
-   of it, composited rather than conflicting. --card-texture is 'none' for
-   every Neon Grid and Origami Fold theme, so this is a no-op there. */
+/* Card surface texture — layered onto every `bg-card` element app-wide
+   with zero component changes, via a background-image Tailwind's own
+   generated `.bg-card` utility never sets. --card-texture is 'none' for
+   every Phase 1 theme (Neon Arcade and Vintage Pastel), so this is
+   currently a no-op everywhere — kept as reusable architecture for a
+   future family that wants a texture, same mechanism as before. */
 .bg-card {
   background-image: var(--card-texture);
   background-repeat: repeat;
-}
-
-/* Origami Fold's signature motion: a fold/unfold reveal on mount, standing
-   in for Neon Grid's glow as this family's one place to feel distinct in
-   motion, not just palette. Inert by default (no animation at all) and
-   only turned on under the 6 Origami Fold [data-theme] selectors below —
-   same value-based, not per-component-conditional, pattern already
-   established for --glow-intensity/--card-texture: call sites apply this
-   class unconditionally wherever a real "reveal" moment happens
-   (AddedConfirmation's can image, wired below), and it's a visual no-op
-   under every other family automatically, no JS theme check needed.
-   Previously defined but wired nowhere — Origami Fold had no
-   differentiator beyond palette. (/impeccable critique) */
-@keyframes origami-unfold {
-  0% { transform: scaleY(0.4) rotateX(35deg); opacity: 0; }
-  60% { transform: scaleY(1.03) rotateX(-4deg); opacity: 1; }
-  100% { transform: scaleY(1) rotateX(0deg); opacity: 1; }
-}
-.animate-origami-unfold {
-  transform-origin: top center;
-  animation: none;
-}
-[data-theme="washi"] .animate-origami-unfold,
-[data-theme="shu"] .animate-origami-unfold,
-[data-theme="ai"] .animate-origami-unfold,
-[data-theme="matcha"] .animate-origami-unfold,
-[data-theme="ume"] .animate-origami-unfold,
-[data-theme="kohaku"] .animate-origami-unfold {
-  animation: origami-unfold 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@media (prefers-reduced-motion: reduce) {
-  .animate-origami-unfold {
-    animation: none;
-  }
 }

@@ -154,7 +154,7 @@ const RecapCardTemplate = forwardRef(function RecapCardTemplate(
                   above), so this couldn't be fixed retroactively in
                   already-shared recap images, only in new ones going
                   forward. (/impeccable critique) */}
-              <p className="text-[8px] font-mono text-primary/50 tracking-wide mt-0.5">CAN COLLECTION TRACKER</p>
+              <p className="text-[8px] font-mono text-muted-foreground tracking-wide mt-0.5">CAN COLLECTION TRACKER</p>
             </div>
           </div>
           <div className="absolute right-0 top-0 text-right max-w-[55%]">

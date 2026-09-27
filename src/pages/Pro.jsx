@@ -11,7 +11,7 @@ import LegalFooter from '@/components/legal/LegalFooter';
 const FEATURES = [
   'Unlimited crates (free: 5 crates, 10 cans each)',
   'Unlimited barcode scans (free: 10/day)',
-  '5 exclusive themes — Steel, Verdant, Cobalt, Voidglass, Aurora',
+  '10 exclusive themes across two collections — Neon Arcade and Vintage Pastel',
   'Pro badge on your profile, leaderboard, and feed posts',
   'Bigger pinned showcase (10 vs. 6) with a hero spotlight slot',
   'Support indie development',

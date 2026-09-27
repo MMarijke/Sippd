@@ -24,3 +24,46 @@ jobs:
       - run: npm run build
 
       - run: npm run test
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      # Full history, not the default shallow clone -- a secret committed
+      # 50 commits ago and never removed is still a leak; a shallow clone
+      # would only ever see the current diff.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Raw MIT-licensed CLI binary, not the gitleaks-action wrapper --
+      # the wrapper's free tier only covers personal-account repos outright;
+      # an org repo needs a license key. The CLI itself has no such
+      # restriction regardless of account type, so this avoids the question
+      # entirely rather than depending on it staying personal-account-owned.
+      - name: Install gitleaks
+        run: |
+          curl -sSL -o gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo mv gitleaks /usr/local/bin/
+
+      - name: Scan for secrets
+        run: gitleaks detect --source . --verbose --redact
+
+  db-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ubuntu-latest ships Docker preinstalled, which is what `db start`
+      # needs to spin up a disposable local Postgres seeded from
+      # supabase/migrations/*. Nothing here touches the linked project --
+      # no project ref, no login, no secrets. See supabase/tests/*.sql for
+      # the RLS/RPC cross-account isolation and column-lock trigger tests
+      # this actually runs.
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - run: supabase db start
+
+      - run: supabase test db

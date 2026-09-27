@@ -1,0 +1,10 @@
+# One fingerprint per line, in gitleaks' own printed format. Each entry
+# below was verified by hand -- checked the actual flagged line in the
+# historical commit it points at, confirmed it's not a real secret -- not
+# just silenced because the scanner complained.
+
+# .env.example:8, commit 60d4bd7 (2026-08-18) -- VITE_PADDLE_CLIENT_TOKEN=
+# is an empty placeholder in that commit too; gitleaks' generic-api-key
+# entropy rule false-positives on the surrounding comment text, not an
+# actual value. Verified via `git show 60d4bd7:.env.example`.
+60d4bd7219afaf37eaaf1ef3b648927119e35188:.env.example:generic-api-key:8

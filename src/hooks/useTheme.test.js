@@ -1,4 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// useTheme.js imports the real supabase client at module scope for
+// useTheme() itself (untested here) — that import executes on ANY import
+// from this file, including just this one pure function, and
+// supabaseClient.js throws if VITE_SUPABASE_URL/ANON_KEY aren't set. This
+// project's CI never sets them for the plain `vitest run` step (only the
+// e2e job's build does, and only because a real value has to exist, not
+// because vitest needs one) — mocking the module here makes this test
+// depend on nothing but the function it actually exercises. Vitest hoists
+// vi.mock() above the imports below at transform time, so ordering in
+// source doesn't matter, but it's written first to match how it executes.
+vi.mock('@/lib/supabaseClient', () => ({ supabase: {} }));
+
 import { getThemeChangeErrorMessage } from './useTheme';
 
 // Only the pure branch of setTheme's onError handler — the optimistic

@@ -70,6 +70,25 @@ export const THEMES = THEME_FAMILIES.flatMap(f => f.themes);
 const DEFAULT_THEME = 'cyan';
 
 /**
+ * Picks the toast copy for a failed theme change. Split out as its own
+ * function purely so it's unit-testable without jsdom/@testing-library —
+ * the rest of setTheme's behavior (optimistic cache update + rollback)
+ * lives inside react-query's own hook lifecycle and isn't practical to
+ * test the same way without them (see useTheme.test.js).
+ *
+ * The 'Pro-only' substring match is deliberately loose, not an error-code
+ * check — it has to match profiles_lock_columns()'s exact RAISE EXCEPTION
+ * text ('theme is Pro-only — upgrade to unlock',
+ * 20260909000000_add_profile_theme.sql), which is the only signal this
+ * client has for *why* the update was rejected.
+ */
+export function getThemeChangeErrorMessage(error) {
+  return error?.message?.includes('Pro-only')
+    ? 'That theme is a Pro perk — upgrade to unlock it.'
+    : 'Failed to change theme';
+}
+
+/**
  * Reads and applies the current user's theme (via [data-theme] on <html>,
  * so every page reskins from CSS variables alone — no per-component
  * changes) and exposes setTheme() to change it. The write goes straight to
@@ -117,11 +136,7 @@ export function useTheme() {
     },
     onError: (error, _nextTheme, context) => {
       if (context?.previous) queryClient.setQueryData(['my-theme', user?.id], context.previous);
-      toast.error(
-        error.message?.includes('Pro-only')
-          ? 'That theme is a Pro perk — upgrade to unlock it.'
-          : 'Failed to change theme'
-      );
+      toast.error(getThemeChangeErrorMessage(error));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['my-theme', user?.id] });

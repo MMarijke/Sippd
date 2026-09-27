@@ -37,3 +37,8 @@ ios/
 
 .env
 .vite
+
+# Playwright — local run artifacts, not fixtures
+/test-results/
+/playwright-report/
+/blob-report/

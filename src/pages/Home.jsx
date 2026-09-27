@@ -251,22 +251,26 @@ export default function Home() {
               )}
             </>
           )}
+
+          {/* StatsRow's own cards are opaque (bg-card), so the gradient
+              layer doesn't show through them directly -- but keeping it
+              inside the hero-zone wrapper still extends the ambient
+              atmosphere into the gaps and margins around them, rather
+              than cutting off abruptly right after the Score card. */}
+          {!hasCollectionError && (
+            <div className="mt-5">
+              <StatsRow
+                rarePulls={rarePulls}
+                streak={`${streak}d`}
+                wishlistCount={wishlistCount}
+                isLoadingRarePulls={isLoading}
+                isLoadingStreak={isLoading || streakLoading}
+                isLoadingWishlist={isLoading}
+              />
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Below the hero zone: plain background, no gradient. */}
-      {!hasCollectionError && (
-        <div className="mt-5">
-          <StatsRow
-            rarePulls={rarePulls}
-            streak={`${streak}d`}
-            wishlistCount={wishlistCount}
-            isLoadingRarePulls={isLoading}
-            isLoadingStreak={isLoading || streakLoading}
-            isLoadingWishlist={isLoading}
-          />
-        </div>
-      )}
 
       <div className="px-5 mt-5">
         {isNewUser && (

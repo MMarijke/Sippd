@@ -12,6 +12,21 @@ export const RARITY_HEX = {
   Legendary: '#EC4899',
 };
 
+// CSS custom property per tier for the theme-aware breakdown ramp
+// (--breakdown-* in index.css) — a genuinely multi-hue ramp rotated off
+// each theme's own --primary, deliberately distinct from RARITY_HEX/
+// --rarity-* above, which stay fixed regardless of theme since a can's
+// own rarity badge must read the same for every viewer. Anything showing
+// a PROPORTION/breakdown across tiers (not a specific can's own badge)
+// should use this instead of RARITY_HEX.
+export const BREAKDOWN_VAR = {
+  Common: '--breakdown-common',
+  Uncommon: '--breakdown-uncommon',
+  Rare: '--breakdown-rare',
+  'Ultra Rare': '--breakdown-ultra',
+  Legendary: '--breakdown-legendary',
+};
+
 // Tailwind text token per tier, for contexts using CSS custom properties
 export const RARITY_TEXT_CLASS = {
   Common: 'text-rarity-common',

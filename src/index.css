@@ -375,11 +375,11 @@
      color -- see the file header) recomputed for a light background using
      the exact Vintage Pastel formula: main/supporting deepened to ~3.4:1
      against a new near-white background, text/muted-foreground authored
-     dark, on-main/on-supporting verified rather than assumed. Zero glow,
-     full wash (--glow-intensity: 0, --wash-intensity: 1) -- these are the
-     LIGHT rendering of a Neon Arcade identity, so they get Vintage
-     Pastel's atmosphere treatment, not Neon Arcade's own glow, regardless
-     of which family tile they're browsed under in the picker. */
+     dark, on-main/on-supporting verified rather than assumed. Full glow
+     (--glow-intensity: 1, --wash-intensity: 0) -- light and dark used to
+     get different ambient treatments (glow vs. a top-down wash) until the
+     user asked for both polarities to share the same neon-bubble glow, so
+     every polarity now renders it identically regardless of family. */
   [data-theme="power-up"][data-polarity="light"] {
     --background: 218 89% 96%;
     --foreground: 218 30% 25%;
@@ -398,8 +398,8 @@
     --border: 217 87% 82%;
     --input: 217 87% 82%;
     --ring: 152 55% 38%;
-    --glow-intensity: 0;
-    --wash-intensity: 1;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 152 55% 37.0%;
     --breakdown-uncommon: 190 60% 39.5%;
     --breakdown-rare: 228 65% 63.0%;
@@ -424,8 +424,8 @@
     --border: 278 87% 82%;
     --input: 278 87% 82%;
     --ring: 312 55% 56%;
-    --glow-intensity: 0;
-    --wash-intensity: 1;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 312 55% 55.5%;
     --breakdown-uncommon: 350 60% 58.5%;
     --breakdown-rare: 28 65% 44.5%;
@@ -450,8 +450,8 @@
     --border: 204 87% 82%;
     --input: 204 87% 82%;
     --ring: 186 55% 40%;
-    --glow-intensity: 0;
-    --wash-intensity: 1;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 186 55% 39.0%;
     --breakdown-uncommon: 224 60% 61.0%;
     --breakdown-rare: 262 65% 65.0%;
@@ -479,8 +479,8 @@
     --border: 340 87% 82%;
     --input: 340 87% 82%;
     --ring: 334 55% 58%;
-    --glow-intensity: 0;
-    --wash-intensity: 1;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 334 55% 57.5%;
     --breakdown-uncommon: 12 60% 53.5%;
     --breakdown-rare: 50 65% 35.0%;
@@ -507,8 +507,8 @@
     --border: 45 87% 82%;
     --input: 45 87% 82%;
     --ring: 53 55% 38%;
-    --glow-intensity: 0;
-    --wash-intensity: 1;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 53 55% 37.5%;
     --breakdown-uncommon: 91 60% 36.5%;
     --breakdown-rare: 129 65% 36.5%;
@@ -535,8 +535,8 @@
     --border: 261 87% 82%;
     --input: 261 87% 82%;
     --ring: 274 55% 62%;
-    --glow-intensity: 0;
-    --wash-intensity: 1;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 274 55% 60.5%;
     --breakdown-uncommon: 312 60% 55.0%;
     --breakdown-rare: 350 65% 58.0%;
@@ -546,11 +546,11 @@
 
   /* ── Vintage Pastel family (light, 1950s soda shop) ──────────────────────
      The app's first-ever light-background family -- see the file header for
-     the audit findings this palette's exact values were shaped by. Zero
-     glow (a soda-shop diner sign doesn't glow -- same --glow-intensity: 0
-     mechanism the old Field Guide/Origami Fold families used, zeroing out
-     .neon-glow/.neon-text/.neon-border/.hero-card's shadow with no
-     component changes needed), own font triplet for the whole family. */
+     the audit findings this palette's exact values were shaped by. Full
+     glow (--glow-intensity: 1, same neon-bubble treatment as Neon Arcade --
+     see the .home-gradient-bg-layer comment for why light and dark no
+     longer get different ambient treatments), own font triplet for the
+     whole family. */
   [data-theme="mint-fizz"], [data-theme="strawberry-cream"], [data-theme="blue-raspberry"],
   [data-theme="lemon-pop"], [data-theme="peach-soda"], [data-theme="grape-float"] {
     --font-display: 'Alfa Slab One', cursive;
@@ -584,8 +584,8 @@
     --border: 41 98% 82%;
     --input: 41 98% 82%;
     --ring: 168 32% 44%;
-    --glow-intensity: 0;
-    --wash-intensity: 1;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 289 55% 59.0%;
     --breakdown-uncommon: 327 60% 58.0%;
     --breakdown-rare: 5 65% 58.0%;
@@ -611,8 +611,8 @@
     --border: 20 98% 83%;
     --input: 20 98% 83%;
     --ring: 349 38% 59%;
-    --glow-intensity: 0;
-    --wash-intensity: 1;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 349 55% 59.5%;
     --breakdown-uncommon: 27 60% 47.0%;
     --breakdown-rare: 65 65% 33.0%;
@@ -638,8 +638,8 @@
     --border: 195 55% 83%;
     --input: 195 55% 83%;
     --ring: 205 42% 53%;
-    --glow-intensity: 0;
-    --wash-intensity: 1;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 205 55% 50.0%;
     --breakdown-uncommon: 243 60% 67.5%;
     --breakdown-rare: 281 65% 62.0%;
@@ -671,8 +671,8 @@
     --border: 49 98% 82%;
     --input: 49 98% 82%;
     --ring: 38 55% 44%;
-    --glow-intensity: 0;
-    --wash-intensity: 1;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 38 55% 43.0%;
     --breakdown-uncommon: 76 60% 35.5%;
     --breakdown-rare: 114 65% 36.5%;
@@ -698,8 +698,8 @@
     --border: 28 98% 82%;
     --input: 28 98% 82%;
     --ring: 18 55% 53%;
-    --glow-intensity: 0;
-    --wash-intensity: 1;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 18 55% 52.0%;
     --breakdown-uncommon: 56 60% 34.5%;
     --breakdown-rare: 94 65% 35.0%;
@@ -726,8 +726,8 @@
     --border: 283 52% 83%;
     --input: 283 52% 83%;
     --ring: 289 30% 58%;
-    --glow-intensity: 0;
-    --wash-intensity: 1;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
     --breakdown-common: 289 25% 28%;
     --breakdown-uncommon: 289 35% 36.5%;
     --breakdown-rare: 289 45% 45%;
@@ -742,10 +742,10 @@
      far more contrast headroom than light ones, so main/supporting are
      brightened toward a healthy ~5-5.5:1 margin rather than the bare
      minimum -- matching Neon Arcade's own existing margins, not a timid
-     "technically passes" value. Full glow, zero wash
-     (--glow-intensity: 1, --wash-intensity: 0) -- these are the DARK
-     rendering of a Vintage Pastel identity, so they get Neon Arcade's
-     glow, not Vintage Pastel's own wash. muted-foreground reuses the
+     "technically passes" value. Full glow
+     (--glow-intensity: 1, --wash-intensity: 0) -- same treatment every
+     theme uses now regardless of polarity, see the .home-gradient-bg-layer
+     comment. muted-foreground reuses the
      global dark-family invariant (verified against each of these new
      backgrounds too, not assumed) rather than a new per-theme value --
      only the light polarity needed its own, per the file header. */
@@ -1031,18 +1031,16 @@ body {
 
    Two independent intensity tokens, not one: --glow-intensity drives the
    first three (radial-spot) layers below, --wash-intensity drives the
-   fourth. A literal glow — light emanating from a point — is a dark-
-   background metaphor; turning --glow-intensity down for a light theme
-   (correctly, to kill the neon box-shadow effects elsewhere) doesn't mean
-   that theme wants zero ambient depth, it means it wants a DIFFERENT
-   treatment. Neon Arcade: --glow-intensity: 1, --wash-intensity: 0 (only
-   the radial glow renders). Vintage Pastel: --glow-intensity: 0,
-   --wash-intensity: 1 (only the top-down wash renders) — a soft "morning
-   light through a window" fade rather than a glow, matching the soda-shop
-   print/poster character instead of imitating a dark-mode effect that
-   just reads as a faint smudge at low opacity (tried first, rejected —
-   see chat). Any future family that mixes light and dark backgrounds
-   within itself sets these per-theme, same as every other token here.
+   fourth. These used to vary by polarity — light themes got a flat
+   top-down wash instead of the radial glow, since a literal glow (light
+   emanating from a point) reads as a dark-background metaphor — but the
+   user asked for light and dark to share the same neon-bubble glow
+   instead, so every theme now sets --glow-intensity: 1, --wash-intensity:
+   0 regardless of polarity, and the fourth (wash) layer below is
+   currently unreachable at runtime. Left in place, not deleted: the
+   mechanism is cheap to keep inert and lets a future theme opt into the
+   wash treatment per-theme (same as every other token here) without
+   rebuilding it.
 
    Every stop below ends in fully transparent (not an opaque copy of
    --background) — background-color, set once above, already paints solid

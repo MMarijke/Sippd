@@ -3,21 +3,16 @@ import { Zap, CupSoda } from 'lucide-react';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { proxyImageUrl } from '@/lib/cardCapture';
 import RarityBadge from '@/components/shared/RarityBadge';
+import { BREAKDOWN_VAR } from '@/lib/rarityConsensus';
 
-// Rarity Breakdown bar — theme-invariant --rarity-* tokens, the same ones
-// RarityBadge uses, so this proportion chart reads as the same rarity
-// language as every badge/gauge elsewhere in the app (a can's actual
-// rarity must look the same regardless of viewer theme). An earlier
-// version of this bar used a monochromatic single-hue ramp instead —
-// changed back after user feedback that losing the per-tier color
-// distinction made the bar unreadable as a breakdown at a glance.
-const BREAKDOWN_VAR = {
-  Common: '--rarity-common',
-  Uncommon: '--rarity-uncommon',
-  Rare: '--rarity-rare',
-  'Ultra Rare': '--rarity-ultra',
-  Legendary: '--rarity-legendary',
-};
+// Rarity Breakdown bar — theme-aware --breakdown-* ramp, matching
+// CollectionCard's and RarityHero's proportion charts elsewhere in the
+// app (deliberately switched from the theme-invariant --rarity-* tokens
+// RarityBadge itself still uses — a shared/exported card reflecting the
+// owner's chosen theme was judged more valuable than exported images
+// looking identical across every theme, unlike a can's own badge color,
+// which stays fixed for a different reason: it's the one true rarity
+// value being asserted, not a personalization choice).
 
 function CanTile({ image, bgColor, name, rarityBadge }) {
   return (
@@ -204,7 +199,7 @@ const RecapCardTemplate = forwardRef(function RecapCardTemplate(
                 <div
                   key={rarity}
                   className="h-full"
-                  style={{ width: `${pct}%`, backgroundColor: `hsl(var(${BREAKDOWN_VAR[rarity] || '--rarity-legendary'}))` }}
+                  style={{ width: `${pct}%`, backgroundColor: `hsl(var(${BREAKDOWN_VAR[rarity] || '--breakdown-legendary'}))` }}
                 />
               ))}
             </div>

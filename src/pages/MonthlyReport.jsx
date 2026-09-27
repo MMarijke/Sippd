@@ -7,7 +7,12 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Share2, Package, Flame, Trophy, T
 import { Button } from '@/components/ui/button';
 import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, subMonths, addMonths } from 'date-fns';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { RARITY_POINTS, RARITY_ORDER, RARITY_HEX as RARITY_COLORS, getEffectiveRarity as getEffectiveRarityBase } from '@/lib/rarityConsensus';
+import { RARITY_POINTS, RARITY_ORDER, BREAKDOWN_VAR, getEffectiveRarity as getEffectiveRarityBase } from '@/lib/rarityConsensus';
+
+// This proportion chart, like RarityHero's Home gauge, reads the
+// theme-aware --breakdown-* ramp rather than the fixed RARITY_HEX/
+// --rarity-* colors a can's own badge uses.
+const breakdownColor = (name) => `hsl(var(${BREAKDOWN_VAR[name] || BREAKDOWN_VAR.Common}))`;
 import { useStreak } from '@/lib/useStreak';
 import RarityBadge from '@/components/shared/RarityBadge';
 import CanImageBox from '@/components/shared/CanImageBox';
@@ -264,7 +269,7 @@ export default function MonthlyReport() {
                       <PieChart>
                         <Pie data={rarityChartData} cx="50%" cy="50%" innerRadius={22} outerRadius={40} paddingAngle={3} dataKey="value" stroke="none">
                           {rarityChartData.map(entry => (
-                            <Cell key={entry.name} fill={RARITY_COLORS[entry.name] || '#6B7280'} />
+                            <Cell key={entry.name} fill={breakdownColor(entry.name)} />
                           ))}
                         </Pie>
                       </PieChart>
@@ -274,7 +279,7 @@ export default function MonthlyReport() {
                     {rarityChartData.map(({ name, value }) => (
                       <div key={name} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: RARITY_COLORS[name] }} />
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: breakdownColor(name) }} />
                           <span className="text-xs font-mono text-muted-foreground">{name}</span>
                         </div>
                         <span className="text-xs font-mono font-semibold text-foreground">{value}</span>

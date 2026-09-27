@@ -6,19 +6,22 @@ import RarityBadge from '@/components/shared/RarityBadge';
 import { getMaxPins } from '@/hooks/useTogglePin';
 import { cn } from '@/lib/utils';
 
-// Rarity Breakdown bar — theme-invariant --rarity-* tokens, the same ones
-// RarityBadge uses, so this proportion chart reads as the same rarity
-// language as every badge/gauge elsewhere in the app (a can's actual
-// rarity must look the same regardless of viewer theme). An earlier
-// version of this bar used a monochromatic single-hue ramp instead —
-// changed back after user feedback that losing the per-tier color
-// distinction made the bar unreadable as a breakdown at a glance.
+// Rarity Breakdown bar — theme-derived --breakdown-* tokens (a genuinely
+// multi-hue ramp per theme, not RarityBadge's --rarity-* tokens, which
+// stay theme-invariant on purpose since a can's own rarity must read the
+// same regardless of viewer theme). This bar used to read --rarity-*
+// directly, matching an earlier decision to revert away from a
+// monochromatic single-hue ramp that user feedback found unreadable at a
+// glance — --breakdown-* is deliberately NOT that: it rotates 5 hues off
+// the active theme's own --primary, each independently tuned for
+// contrast, so it changes per theme without reintroducing the original
+// readability problem.
 const BREAKDOWN_VAR = {
-  Common: '--rarity-common',
-  Uncommon: '--rarity-uncommon',
-  Rare: '--rarity-rare',
-  'Ultra Rare': '--rarity-ultra',
-  Legendary: '--rarity-legendary',
+  Common: '--breakdown-common',
+  Uncommon: '--breakdown-uncommon',
+  Rare: '--breakdown-rare',
+  'Ultra Rare': '--breakdown-ultra',
+  Legendary: '--breakdown-legendary',
 };
 
 // The trophy-case presentation shared by Profile.jsx (your own, editable
@@ -167,7 +170,7 @@ export default function CollectionCard({
               <div
                 key={rarity}
                 className="h-full"
-                style={{ width: `${pct}%`, backgroundColor: `hsl(var(${BREAKDOWN_VAR[rarity] || '--rarity-legendary'}))` }}
+                style={{ width: `${pct}%`, backgroundColor: `hsl(var(${BREAKDOWN_VAR[rarity] || '--breakdown-legendary'}))` }}
               />
             ))}
           </div>

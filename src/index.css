@@ -29,11 +29,22 @@
    the way it was when every background was dark. It's authored per theme
    below, same as every other value.
 
-   NOT part of this restructure, confirmed explicitly and left exactly as
-   they already worked: --rarity-* (a can's actual rarity badge must read
-   the same regardless of viewer theme) and --breakdown-* (CollectionCard's
-   proportion bar; still theme-derived from that theme's own hue, same
-   formula as before, just recomputed for the new hues).
+   --rarity-* is NOT part of this restructure -- a can's actual rarity
+   badge must read the same regardless of viewer theme, confirmed
+   explicitly, left exactly as it already worked.
+
+   --breakdown-* (CollectionCard's proportion bar) WAS part of an earlier
+   pass of this restructure, and that pass was wrong about its own
+   premise: CollectionCard.jsx was actually still reading --rarity-* for
+   this bar the whole time (a real, deliberate decision from before this
+   redesign -- an earlier monochromatic single-hue ramp was tried and
+   reverted after user feedback that it made tiers hard to tell apart),
+   so the --breakdown-* values computed in that pass were dead CSS,
+   consumed nowhere. This follow-up actually wires CollectionCard.jsx to
+   --breakdown-* for the first time, with a genuinely multi-hue formula
+   (5 hues rotated from this theme's own --primary, each independently
+   contrast-tuned) specifically so it doesn't reintroduce the readability
+   problem the original --rarity-* choice was fixing.
 
    AUDIT FINDINGS baked into the values below (full detail in chat, not
    repeated per-theme here):
@@ -130,13 +141,21 @@
     --rarity-ultra: 271 91% 65%;
     --rarity-legendary: 330 81% 60%;
 
-    /* Not part of this restructure -- still theme-derived from this
-       theme's own hue, same formula as before, just recomputed. */
-    --breakdown-common: 152 25% 28%;
-    --breakdown-uncommon: 152 35% 36.5%;
-    --breakdown-rare: 152 45% 45%;
-    --breakdown-ultra: 152 55% 53.5%;
-    --breakdown-legendary: 152 65% 62%;
+    /* Multi-hue per-theme ramp, not the single-hue monochromatic version
+       first tried in this restructure -- see the file header. Common
+       through Legendary rotate through 5 hues anchored on this theme's own
+       --primary (guarantees separation even when a theme's main and
+       supporting are nearly the same hue, which most of Vintage Pastel's
+       are), each independently tuned to ~3.5:1 against this theme's own
+       background so no segment goes visually missing regardless of where
+       its hue lands (a fixed lightness formula made yellow-ish segments
+       pop and blue/purple ones nearly vanish -- same root cause as Lemon
+       Pop's original main color, just across 5 hues instead of 1). */
+    --breakdown-common: 152 55% 30.0%;
+    --breakdown-uncommon: 190 60% 32.5%;
+    --breakdown-rare: 228 65% 55.0%;
+    --breakdown-ultra: 266 70% 56.5%;
+    --breakdown-legendary: 304 75% 41.5%;
   }
 
   .dark {
@@ -183,11 +202,11 @@
     --rarity-ultra: 271 91% 65%;
     --rarity-legendary: 330 81% 60%;
 
-    --breakdown-common: 152 25% 28%;
-    --breakdown-uncommon: 152 35% 36.5%;
-    --breakdown-rare: 152 45% 45%;
-    --breakdown-ultra: 152 55% 53.5%;
-    --breakdown-legendary: 152 65% 62%;
+    --breakdown-common: 152 55% 30.0%;
+    --breakdown-uncommon: 190 60% 32.5%;
+    --breakdown-rare: 228 65% 55.0%;
+    --breakdown-ultra: 266 70% 56.5%;
+    --breakdown-legendary: 304 75% 41.5%;
   }
 
   /* ── Neon Arcade family (dark, gamer/cyber/neon) ─────────────────────────
@@ -214,11 +233,11 @@
     --ring: 152 100% 50%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 152 25% 28%;
-    --breakdown-uncommon: 152 35% 36.5%;
-    --breakdown-rare: 152 45% 45%;
-    --breakdown-ultra: 152 55% 53.5%;
-    --breakdown-legendary: 152 65% 62%;
+    --breakdown-common: 152 55% 30.0%;
+    --breakdown-uncommon: 190 60% 32.5%;
+    --breakdown-rare: 228 65% 55.0%;
+    --breakdown-ultra: 266 70% 56.5%;
+    --breakdown-legendary: 304 75% 41.5%;
   }
   [data-theme="cyberpunk"] {
     --background: 278 38% 6%;
@@ -239,11 +258,11 @@
     --ring: 312 100% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 312 25% 28%;
-    --breakdown-uncommon: 312 35% 36.5%;
-    --breakdown-rare: 312 45% 45%;
-    --breakdown-ultra: 312 55% 53.5%;
-    --breakdown-legendary: 312 65% 62%;
+    --breakdown-common: 312 55% 44.5%;
+    --breakdown-uncommon: 350 60% 47.0%;
+    --breakdown-rare: 28 65% 36.0%;
+    --breakdown-ultra: 66 70% 25.0%;
+    --breakdown-legendary: 104 75% 26.5%;
   }
   [data-theme="plasma"] {
     --background: 204 52% 6%;
@@ -264,11 +283,11 @@
     --ring: 186 100% 50%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 186 25% 28%;
-    --breakdown-uncommon: 186 35% 36.5%;
-    --breakdown-rare: 186 45% 45%;
-    --breakdown-ultra: 186 55% 53.5%;
-    --breakdown-legendary: 186 65% 62%;
+    --breakdown-common: 186 55% 31.5%;
+    --breakdown-uncommon: 224 60% 52.0%;
+    --breakdown-rare: 262 65% 57.0%;
+    --breakdown-ultra: 300 70% 41.5%;
+    --breakdown-legendary: 338 75% 45.0%;
   }
   [data-theme="boss-fight"] {
     --background: 340 33% 5%;
@@ -289,11 +308,11 @@
     --ring: 347 100% 61%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 347 25% 28%;
-    --breakdown-uncommon: 347 35% 36.5%;
-    --breakdown-rare: 347 45% 45%;
-    --breakdown-ultra: 347 55% 53.5%;
-    --breakdown-legendary: 347 65% 62%;
+    --breakdown-common: 347 55% 47.0%;
+    --breakdown-uncommon: 25 60% 37.5%;
+    --breakdown-rare: 63 65% 25.5%;
+    --breakdown-ultra: 101 70% 27.0%;
+    --breakdown-legendary: 139 75% 27.0%;
   }
   [data-theme="xp-gold"] {
     --background: 45 29% 5%;
@@ -314,11 +333,11 @@
     --ring: 47 100% 62%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 47 25% 28%;
-    --breakdown-uncommon: 47 35% 36.5%;
-    --breakdown-rare: 47 45% 45%;
-    --breakdown-ultra: 47 55% 53.5%;
-    --breakdown-legendary: 47 65% 62%;
+    --breakdown-common: 47 55% 31.0%;
+    --breakdown-uncommon: 85 60% 28.5%;
+    --breakdown-rare: 123 65% 29.0%;
+    --breakdown-ultra: 161 70% 28.0%;
+    --breakdown-legendary: 199 75% 34.5%;
   }
   [data-theme="synthwave"] {
     --background: 261 55% 6%;
@@ -343,11 +362,11 @@
     --ring: 283 79% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 283 25% 28%;
-    --breakdown-uncommon: 283 35% 36.5%;
-    --breakdown-rare: 283 45% 45%;
-    --breakdown-ultra: 283 55% 53.5%;
-    --breakdown-legendary: 283 65% 62%;
+    --breakdown-common: 283 55% 49.0%;
+    --breakdown-uncommon: 321 60% 44.5%;
+    --breakdown-rare: 359 65% 46.5%;
+    --breakdown-ultra: 37 70% 32.0%;
+    --breakdown-legendary: 75 75% 25.0%;
   }
 
   /* ── Vintage Pastel family (light, 1950s soda shop) ──────────────────────
@@ -392,11 +411,11 @@
     --ring: 168 32% 44%;
     --glow-intensity: 0;
     --wash-intensity: 1;
-    --breakdown-common: 168 25% 28%;
-    --breakdown-uncommon: 168 35% 36.5%;
-    --breakdown-rare: 168 45% 45%;
-    --breakdown-ultra: 168 55% 53.5%;
-    --breakdown-legendary: 168 65% 62%;
+    --breakdown-common: 289 55% 59.0%;
+    --breakdown-uncommon: 327 60% 58.0%;
+    --breakdown-rare: 5 65% 58.0%;
+    --breakdown-ultra: 43 70% 38.0%;
+    --breakdown-legendary: 81 75% 32.5%;
   }
   [data-theme="strawberry-cream"] {
     --background: 20 100% 97%;
@@ -419,11 +438,11 @@
     --ring: 349 38% 59%;
     --glow-intensity: 0;
     --wash-intensity: 1;
-    --breakdown-common: 349 25% 28%;
-    --breakdown-uncommon: 349 35% 36.5%;
-    --breakdown-rare: 349 45% 45%;
-    --breakdown-ultra: 349 55% 53.5%;
-    --breakdown-legendary: 349 65% 62%;
+    --breakdown-common: 349 55% 59.5%;
+    --breakdown-uncommon: 27 60% 47.0%;
+    --breakdown-rare: 65 65% 33.0%;
+    --breakdown-ultra: 103 70% 34.5%;
+    --breakdown-legendary: 141 75% 34.0%;
   }
   [data-theme="blue-raspberry"] {
     --background: 195 57% 97%;
@@ -446,11 +465,11 @@
     --ring: 205 42% 53%;
     --glow-intensity: 0;
     --wash-intensity: 1;
-    --breakdown-common: 205 25% 28%;
-    --breakdown-uncommon: 205 35% 36.5%;
-    --breakdown-rare: 205 45% 45%;
-    --breakdown-ultra: 205 55% 53.5%;
-    --breakdown-legendary: 205 65% 62%;
+    --breakdown-common: 205 55% 50.0%;
+    --breakdown-uncommon: 243 60% 67.5%;
+    --breakdown-rare: 281 65% 62.0%;
+    --breakdown-ultra: 319 70% 58.0%;
+    --breakdown-legendary: 357 75% 61.0%;
   }
   [data-theme="lemon-pop"] {
     --background: 49 100% 96%;
@@ -479,11 +498,11 @@
     --ring: 38 55% 44%;
     --glow-intensity: 0;
     --wash-intensity: 1;
-    --breakdown-common: 38 25% 28%;
-    --breakdown-uncommon: 38 35% 36.5%;
-    --breakdown-rare: 38 45% 45%;
-    --breakdown-ultra: 38 55% 53.5%;
-    --breakdown-legendary: 38 65% 62%;
+    --breakdown-common: 38 55% 43.0%;
+    --breakdown-uncommon: 76 60% 35.5%;
+    --breakdown-rare: 114 65% 36.5%;
+    --breakdown-ultra: 152 70% 35.5%;
+    --breakdown-legendary: 190 75% 38.5%;
   }
   [data-theme="peach-soda"] {
     --background: 28 100% 96%;
@@ -506,11 +525,11 @@
     --ring: 18 55% 53%;
     --glow-intensity: 0;
     --wash-intensity: 1;
-    --breakdown-common: 18 25% 28%;
-    --breakdown-uncommon: 18 35% 36.5%;
-    --breakdown-rare: 18 45% 45%;
-    --breakdown-ultra: 18 55% 53.5%;
-    --breakdown-legendary: 18 65% 62%;
+    --breakdown-common: 18 55% 52.0%;
+    --breakdown-uncommon: 56 60% 34.5%;
+    --breakdown-rare: 94 65% 35.0%;
+    --breakdown-ultra: 132 70% 35.0%;
+    --breakdown-legendary: 170 75% 33.5%;
   }
   [data-theme="grape-float"] {
     --background: 283 54% 97%;

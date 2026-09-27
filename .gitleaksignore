@@ -8,3 +8,11 @@
 # entropy rule false-positives on the surrounding comment text, not an
 # actual value. Verified via `git show 60d4bd7:.env.example`.
 60d4bd7219afaf37eaaf1ef3b648927119e35188:.env.example:generic-api-key:8
+
+# ci.yml:92, commit 7b55c06 (2026-09-27) -- VITE_SUPABASE_ANON_KEY:
+# e2e-placeholder-anon-key is a literal placeholder string authored for
+# the e2e job's build step, not a real key -- every Supabase call the e2e
+# suite makes is mocked at the network layer (e2e/smoke.spec.js), so this
+# value is never sent anywhere. Verified by reading the line myself, not
+# just silencing the scanner.
+7b55c06f1d30cc9f547d2b07bf4927a4201f8ef3:.github/workflows/ci.yml:generic-api-key:92

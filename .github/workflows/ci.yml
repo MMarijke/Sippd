@@ -48,3 +48,22 @@ jobs:
 
       - name: Scan for secrets
         run: gitleaks detect --source . --verbose --redact
+
+  db-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ubuntu-latest ships Docker preinstalled, which is what `db start`
+      # needs to spin up a disposable local Postgres seeded from
+      # supabase/migrations/*. Nothing here touches the linked project --
+      # no project ref, no login, no secrets. See supabase/tests/*.sql for
+      # the RLS/RPC cross-account isolation and column-lock trigger tests
+      # this actually runs.
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - run: supabase db start
+
+      - run: supabase test db

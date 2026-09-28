@@ -152,12 +152,27 @@
        background so no segment goes visually missing regardless of where
        its hue lands (a fixed lightness formula made yellow-ish segments
        pop and blue/purple ones nearly vanish -- same root cause as Lemon
-       Pop's original main color, just across 5 hues instead of 1). */
-    --breakdown-common: 152 55% 30.0%;
-    --breakdown-uncommon: 190 60% 32.5%;
-    --breakdown-rare: 228 65% 55.0%;
-    --breakdown-ultra: 266 70% 56.5%;
-    --breakdown-legendary: 304 75% 41.5%;
+       Pop's original main color, just across 5 hues instead of 1).
+
+       Step size is 15deg/tier (60deg total spread), not the original
+       38deg/tier (152deg total) -- confirmed real user feedback: a near-
+       half-wheel rotation regularly crossed into a hue family that reads
+       as wrong for the theme regardless of passing contrast (a red/wine
+       theme's ramp reaching green, a blue theme's reaching pink/red),
+       even though a citrus-toned theme's yellow-to-green rotation
+       happened to land somewhere sensible by coincidence. 15deg/tier is
+       a true analogous range (classical color theory's own definition of
+       "harmonious," not just "technically distinct") -- every one of the
+       36 themes' ramps stays within its own family (crimson ends in
+       amber/gold, sapphire ends in violet, aurora ends in blue -- all
+       plausible extensions of that theme's own hue, not a detour through
+       its opposite). Saturation step (+5%/tier) and the per-tier contrast
+       fit are unchanged. */
+    --breakdown-common: 152.0 55% 30.2%;
+    --breakdown-uncommon: 167.0 60% 29.0%;
+    --breakdown-rare: 182.0 65% 28.4%;
+    --breakdown-ultra: 197.0 70% 34.2%;
+    --breakdown-legendary: 212.0 75% 43.6%;
   }
 
   .dark {
@@ -204,11 +219,11 @@
     --rarity-ultra: 271 91% 65%;
     --rarity-legendary: 330 81% 60%;
 
-    --breakdown-common: 152 55% 30.0%;
-    --breakdown-uncommon: 190 60% 32.5%;
-    --breakdown-rare: 228 65% 55.0%;
-    --breakdown-ultra: 266 70% 56.5%;
-    --breakdown-legendary: 304 75% 41.5%;
+    --breakdown-common: 152.0 55% 30.2%;
+    --breakdown-uncommon: 167.0 60% 29.0%;
+    --breakdown-rare: 182.0 65% 28.4%;
+    --breakdown-ultra: 197.0 70% 34.2%;
+    --breakdown-legendary: 212.0 75% 43.6%;
   }
 
   /* ── Neon Arcade family (dark, gamer/cyber/neon) ─────────────────────────
@@ -235,11 +250,11 @@
     --ring: 152 100% 50%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 152 55% 30.0%;
-    --breakdown-uncommon: 190 60% 32.5%;
-    --breakdown-rare: 228 65% 55.0%;
-    --breakdown-ultra: 266 70% 56.5%;
-    --breakdown-legendary: 304 75% 41.5%;
+    --breakdown-common: 152.0 55% 30.2%;
+    --breakdown-uncommon: 167.0 60% 29.0%;
+    --breakdown-rare: 182.0 65% 28.4%;
+    --breakdown-ultra: 197.0 70% 34.2%;
+    --breakdown-legendary: 212.0 75% 43.6%;
   }
   [data-theme="cyberpunk"][data-polarity="dark"] {
     --background: 278 38% 6%;
@@ -260,11 +275,11 @@
     --ring: 312 100% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 312 55% 44.5%;
-    --breakdown-uncommon: 350 60% 47.0%;
-    --breakdown-rare: 28 65% 36.0%;
-    --breakdown-ultra: 66 70% 25.0%;
-    --breakdown-legendary: 104 75% 26.5%;
+    --breakdown-common: 312.0 55% 44.4%;
+    --breakdown-uncommon: 327.0 60% 45.5%;
+    --breakdown-rare: 342.0 65% 46.2%;
+    --breakdown-ultra: 357.0 70% 46.3%;
+    --breakdown-legendary: 12.0 75% 42.0%;
   }
   [data-theme="plasma"][data-polarity="dark"] {
     --background: 204 52% 6%;
@@ -285,11 +300,11 @@
     --ring: 186 100% 50%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 186 55% 31.5%;
-    --breakdown-uncommon: 224 60% 52.0%;
-    --breakdown-rare: 262 65% 57.0%;
-    --breakdown-ultra: 300 70% 41.5%;
-    --breakdown-legendary: 338 75% 45.0%;
+    --breakdown-common: 186.0 55% 31.5%;
+    --breakdown-uncommon: 201.0 60% 37.4%;
+    --breakdown-rare: 216.0 65% 46.7%;
+    --breakdown-ultra: 231.0 70% 57.2%;
+    --breakdown-legendary: 246.0 75% 61.2%;
   }
   [data-theme="boss-fight"][data-polarity="dark"] {
     --background: 340 33% 5%;
@@ -310,11 +325,11 @@
     --ring: 347 100% 61%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 347 55% 47.0%;
-    --breakdown-uncommon: 25 60% 37.5%;
-    --breakdown-rare: 63 65% 25.5%;
-    --breakdown-ultra: 101 70% 27.0%;
-    --breakdown-legendary: 139 75% 27.0%;
+    --breakdown-common: 347.0 55% 46.9%;
+    --breakdown-uncommon: 2.0 60% 46.7%;
+    --breakdown-rare: 17.0 65% 40.7%;
+    --breakdown-ultra: 32.0 70% 33.9%;
+    --breakdown-legendary: 47.0 75% 27.9%;
   }
   [data-theme="xp-gold"][data-polarity="dark"] {
     --background: 45 29% 5%;
@@ -335,11 +350,11 @@
     --ring: 47 100% 62%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 47 55% 31.0%;
-    --breakdown-uncommon: 85 60% 28.5%;
-    --breakdown-rare: 123 65% 29.0%;
-    --breakdown-ultra: 161 70% 28.0%;
-    --breakdown-legendary: 199 75% 34.5%;
+    --breakdown-common: 47.0 55% 30.9%;
+    --breakdown-uncommon: 62.0 60% 26.8%;
+    --breakdown-rare: 77.0 65% 27.0%;
+    --breakdown-ultra: 92.0 70% 27.1%;
+    --breakdown-legendary: 107.0 75% 27.0%;
   }
   [data-theme="synthwave"][data-polarity="dark"] {
     --background: 261 55% 6%;
@@ -364,11 +379,11 @@
     --ring: 283 79% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 283 55% 49.0%;
-    --breakdown-uncommon: 321 60% 44.5%;
-    --breakdown-rare: 359 65% 46.5%;
-    --breakdown-ultra: 37 70% 32.0%;
-    --breakdown-legendary: 75 75% 25.0%;
+    --breakdown-common: 283.0 55% 48.9%;
+    --breakdown-uncommon: 298.0 60% 43.0%;
+    --breakdown-rare: 313.0 65% 43.1%;
+    --breakdown-ultra: 328.0 70% 44.2%;
+    --breakdown-legendary: 343.0 75% 44.7%;
   }
 
   /* ── Neon Arcade, light-polarity counterparts ────────────────────────────
@@ -402,11 +417,11 @@
     --ring: 152 55% 38%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 152 55% 37.0%;
-    --breakdown-uncommon: 190 60% 39.5%;
-    --breakdown-rare: 228 65% 63.0%;
-    --breakdown-ultra: 266 70% 64.5%;
-    --breakdown-legendary: 304 75% 52.0%;
+    --breakdown-common: 152.0 55% 36.8%;
+    --breakdown-uncommon: 167.0 60% 35.4%;
+    --breakdown-rare: 182.0 65% 34.6%;
+    --breakdown-ultra: 197.0 70% 41.4%;
+    --breakdown-legendary: 212.0 75% 53.1%;
   }
   [data-theme="cyberpunk"][data-polarity="light"] {
     --background: 278 89% 96%;
@@ -428,11 +443,11 @@
     --ring: 312 55% 56%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 312 55% 55.5%;
-    --breakdown-uncommon: 350 60% 58.5%;
-    --breakdown-rare: 28 65% 44.5%;
-    --breakdown-ultra: 66 70% 31.0%;
-    --breakdown-legendary: 104 75% 33.0%;
+    --breakdown-common: 312.0 55% 55.1%;
+    --breakdown-uncommon: 327.0 60% 56.4%;
+    --breakdown-rare: 342.0 65% 57.6%;
+    --breakdown-ultra: 357.0 70% 58.4%;
+    --breakdown-legendary: 12.0 75% 51.7%;
   }
   [data-theme="plasma"][data-polarity="light"] {
     --background: 203 89% 96%;
@@ -454,11 +469,11 @@
     --ring: 186 55% 40%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 186 55% 39.0%;
-    --breakdown-uncommon: 224 60% 61.0%;
-    --breakdown-rare: 262 65% 65.0%;
-    --breakdown-ultra: 300 70% 53.5%;
-    --breakdown-legendary: 338 75% 59.0%;
+    --breakdown-common: 186.0 55% 39.1%;
+    --breakdown-uncommon: 201.0 60% 46.0%;
+    --breakdown-rare: 216.0 65% 56.8%;
+    --breakdown-ultra: 231.0 70% 65.1%;
+    --breakdown-legendary: 246.0 75% 68.5%;
   }
   [data-theme="boss-fight"][data-polarity="light"] {
     /* main/supporting hue shifted -13/-13deg from the dark original (347,
@@ -483,11 +498,11 @@
     --ring: 334 55% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 334 55% 57.5%;
-    --breakdown-uncommon: 12 60% 53.5%;
-    --breakdown-rare: 50 65% 35.0%;
-    --breakdown-ultra: 88 70% 33.0%;
-    --breakdown-legendary: 126 75% 33.5%;
+    --breakdown-common: 334.0 55% 56.9%;
+    --breakdown-uncommon: 349.0 60% 58.1%;
+    --breakdown-rare: 4.0 65% 56.9%;
+    --breakdown-ultra: 19.0 70% 48.3%;
+    --breakdown-legendary: 34.0 75% 40.1%;
   }
   [data-theme="xp-gold"][data-polarity="light"] {
     /* shifted +6/+6deg (47, 33 -> 53, 39) to clear Lemon Pop's dark
@@ -511,11 +526,11 @@
     --ring: 53 55% 38%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 53 55% 37.5%;
-    --breakdown-uncommon: 91 60% 36.5%;
-    --breakdown-rare: 129 65% 36.5%;
-    --breakdown-ultra: 167 70% 34.5%;
-    --breakdown-legendary: 205 75% 48.5%;
+    --breakdown-common: 53.0 55% 37.1%;
+    --breakdown-uncommon: 68.0 60% 34.4%;
+    --breakdown-rare: 83.0 65% 34.8%;
+    --breakdown-ultra: 98.0 70% 34.7%;
+    --breakdown-legendary: 113.0 75% 34.4%;
   }
   [data-theme="synthwave"][data-polarity="light"] {
     /* shifted -9/-9deg (283, 250 -> 274, 241) to clear Grape Float's dark
@@ -539,11 +554,11 @@
     --ring: 274 55% 62%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 274 55% 60.5%;
-    --breakdown-uncommon: 312 60% 55.0%;
-    --breakdown-rare: 350 65% 58.0%;
-    --breakdown-ultra: 28 70% 43.5%;
-    --breakdown-legendary: 66 75% 30.0%;
+    --breakdown-common: 274.0 55% 60.4%;
+    --breakdown-uncommon: 289.0 60% 57.2%;
+    --breakdown-rare: 304.0 65% 52.4%;
+    --breakdown-ultra: 319.0 70% 54.4%;
+    --breakdown-legendary: 334.0 75% 56.0%;
   }
 
   /* ── Vintage Pastel family (light, 1950s soda shop) ──────────────────────
@@ -588,11 +603,11 @@
     --ring: 168 32% 44%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 289 55% 59.0%;
-    --breakdown-uncommon: 327 60% 58.0%;
-    --breakdown-rare: 5 65% 58.0%;
-    --breakdown-ultra: 43 70% 38.0%;
-    --breakdown-legendary: 81 75% 32.5%;
+    --breakdown-common: 168.0 55% 37.8%;
+    --breakdown-uncommon: 183.0 60% 37.4%;
+    --breakdown-rare: 198.0 65% 44.4%;
+    --breakdown-ultra: 213.0 70% 55.8%;
+    --breakdown-legendary: 228.0 75% 65.2%;
   }
   [data-theme="strawberry-cream"][data-polarity="light"] {
     --background: 20 100% 97%;
@@ -615,11 +630,11 @@
     --ring: 349 38% 59%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 349 55% 59.5%;
-    --breakdown-uncommon: 27 60% 47.0%;
-    --breakdown-rare: 65 65% 33.0%;
-    --breakdown-ultra: 103 70% 34.5%;
-    --breakdown-legendary: 141 75% 34.0%;
+    --breakdown-common: 349.0 55% 59.5%;
+    --breakdown-uncommon: 4.0 60% 58.6%;
+    --breakdown-rare: 19.0 65% 50.4%;
+    --breakdown-ultra: 34.0 70% 42.1%;
+    --breakdown-legendary: 49.0 75% 34.6%;
   }
   [data-theme="blue-raspberry"][data-polarity="light"] {
     --background: 195 57% 97%;
@@ -642,11 +657,11 @@
     --ring: 205 42% 53%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 205 55% 50.0%;
-    --breakdown-uncommon: 243 60% 67.5%;
-    --breakdown-rare: 281 65% 62.0%;
-    --breakdown-ultra: 319 70% 58.0%;
-    --breakdown-legendary: 357 75% 61.0%;
+    --breakdown-common: 205.0 55% 50.0%;
+    --breakdown-uncommon: 220.0 60% 59.6%;
+    --breakdown-rare: 235.0 65% 66.6%;
+    --breakdown-ultra: 250.0 70% 68.0%;
+    --breakdown-legendary: 265.0 75% 66.5%;
   }
   [data-theme="lemon-pop"][data-polarity="light"] {
     --background: 49 100% 96%;
@@ -675,11 +690,11 @@
     --ring: 38 55% 44%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 38 55% 43.0%;
-    --breakdown-uncommon: 76 60% 35.5%;
-    --breakdown-rare: 114 65% 36.5%;
-    --breakdown-ultra: 152 70% 35.5%;
-    --breakdown-legendary: 190 75% 38.5%;
+    --breakdown-common: 38.0 55% 43.3%;
+    --breakdown-uncommon: 53.0 60% 36.4%;
+    --breakdown-rare: 68.0 65% 33.6%;
+    --breakdown-ultra: 83.0 70% 34.0%;
+    --breakdown-legendary: 98.0 75% 34.2%;
   }
   [data-theme="peach-soda"][data-polarity="light"] {
     --background: 28 100% 96%;
@@ -702,11 +717,11 @@
     --ring: 18 55% 53%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 18 55% 52.0%;
-    --breakdown-uncommon: 56 60% 34.5%;
-    --breakdown-rare: 94 65% 35.0%;
-    --breakdown-ultra: 132 70% 35.0%;
-    --breakdown-legendary: 170 75% 33.5%;
+    --breakdown-common: 18.0 55% 51.6%;
+    --breakdown-uncommon: 33.0 60% 43.7%;
+    --breakdown-rare: 48.0 65% 36.5%;
+    --breakdown-ultra: 63.0 70% 31.5%;
+    --breakdown-legendary: 78.0 75% 31.9%;
   }
   [data-theme="grape-float"][data-polarity="light"] {
     --background: 283 54% 97%;
@@ -730,11 +745,11 @@
     --ring: 289 30% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 289 25% 28%;
-    --breakdown-uncommon: 289 35% 36.5%;
-    --breakdown-rare: 289 45% 45%;
-    --breakdown-ultra: 289 55% 53.5%;
-    --breakdown-legendary: 289 65% 62%;
+    --breakdown-common: 289.0 55% 58.6%;
+    --breakdown-uncommon: 304.0 60% 55.3%;
+    --breakdown-rare: 319.0 65% 56.9%;
+    --breakdown-ultra: 334.0 70% 58.4%;
+    --breakdown-legendary: 349.0 75% 59.3%;
   }
 
   /* ── Vintage Pastel, dark-polarity counterparts ──────────────────────────
@@ -770,11 +785,11 @@
     --ring: 168 70% 36%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 168 55% 30.0%;
-    --breakdown-uncommon: 206 60% 40.5%;
-    --breakdown-rare: 244 65% 60.0%;
-    --breakdown-ultra: 282 70% 51.0%;
-    --breakdown-legendary: 320 75% 44.0%;
+    --breakdown-common: 168.0 55% 30.2%;
+    --breakdown-uncommon: 183.0 60% 29.9%;
+    --breakdown-rare: 198.0 65% 35.6%;
+    --breakdown-ultra: 213.0 70% 44.9%;
+    --breakdown-legendary: 228.0 75% 56.6%;
   }
   [data-theme="strawberry-cream"][data-polarity="dark"] {
     /* main/supporting hue shifted +13/+13deg from the light original (349,
@@ -798,11 +813,11 @@
     --ring: 2 70% 62%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 2 55% 47.5%;
-    --breakdown-uncommon: 40 60% 32.5%;
-    --breakdown-rare: 78 65% 27.0%;
-    --breakdown-ultra: 116 70% 28.0%;
-    --breakdown-legendary: 154 75% 27.0%;
+    --breakdown-common: 2.0 55% 47.7%;
+    --breakdown-uncommon: 17.0 60% 41.5%;
+    --breakdown-rare: 32.0 65% 35.1%;
+    --breakdown-ultra: 47.0 70% 29.0%;
+    --breakdown-legendary: 62.0 75% 24.5%;
   }
   [data-theme="blue-raspberry"][data-polarity="dark"] {
     --background: 195 40% 6%;
@@ -823,11 +838,11 @@
     --ring: 205 70% 50%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 205 55% 40.0%;
-    --breakdown-uncommon: 243 60% 59.0%;
-    --breakdown-rare: 281 65% 51.0%;
-    --breakdown-ultra: 319 70% 44.5%;
-    --breakdown-legendary: 357 75% 46.5%;
+    --breakdown-common: 205.0 55% 39.8%;
+    --breakdown-uncommon: 220.0 60% 49.8%;
+    --breakdown-rare: 235.0 65% 58.4%;
+    --breakdown-ultra: 250.0 70% 60.0%;
+    --breakdown-legendary: 265.0 75% 57.5%;
   }
   [data-theme="lemon-pop"][data-polarity="dark"] {
     /* shifted -6/-6deg (38, 32 -> 32, 26) to clear XP Gold's light
@@ -850,11 +865,11 @@
     --ring: 32 70% 45%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 32 55% 37.0%;
-    --breakdown-uncommon: 70 60% 28.0%;
-    --breakdown-rare: 108 65% 29.0%;
-    --breakdown-ultra: 146 70% 28.5%;
-    --breakdown-legendary: 184 75% 28.0%;
+    --breakdown-common: 32.0 55% 36.8%;
+    --breakdown-uncommon: 47.0 60% 30.9%;
+    --breakdown-rare: 62.0 65% 26.5%;
+    --breakdown-ultra: 77.0 70% 26.9%;
+    --breakdown-legendary: 92.0 75% 27.0%;
   }
   [data-theme="peach-soda"][data-polarity="dark"] {
     --background: 30 40% 6%;
@@ -875,11 +890,11 @@
     --ring: 17 70% 55%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 17 55% 42.0%;
-    --breakdown-uncommon: 55 60% 28.0%;
-    --breakdown-rare: 93 65% 28.0%;
-    --breakdown-ultra: 131 70% 28.0%;
-    --breakdown-legendary: 169 75% 27.0%;
+    --breakdown-common: 17.0 55% 42.0%;
+    --breakdown-uncommon: 32.0 60% 35.6%;
+    --breakdown-rare: 47.0 65% 29.7%;
+    --breakdown-ultra: 62.0 70% 25.3%;
+    --breakdown-legendary: 77.0 75% 25.7%;
   }
   [data-theme="grape-float"][data-polarity="dark"] {
     /* shifted -21/-21deg (289, 288 -> 268, 267) to clear Synthwave's
@@ -902,11 +917,11 @@
     --ring: 268 70% 66%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 268 55% 53.5%;
-    --breakdown-uncommon: 306 60% 43.5%;
-    --breakdown-rare: 344 65% 46.0%;
-    --breakdown-ultra: 22 70% 38.0%;
-    --breakdown-legendary: 60 75% 24.0%;
+    --breakdown-common: 268.0 55% 53.7%;
+    --breakdown-uncommon: 283.0 60% 49.3%;
+    --breakdown-rare: 298.0 65% 42.8%;
+    --breakdown-ultra: 313.0 70% 42.8%;
+    --breakdown-legendary: 328.0 75% 43.8%;
   }
 
   /* ============================================================================
@@ -995,10 +1010,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 219.2 55% 49.8%;
-    --breakdown-uncommon: 257.2 60% 58.2%;
-    --breakdown-rare: 295.2 65% 45.8%;
-    --breakdown-ultra: 333.2 70% 46.9%;
-    --breakdown-legendary: 11.2 75% 44.0%;
+    --breakdown-uncommon: 234.2 60% 58.1%;
+    --breakdown-rare: 249.2 65% 60.2%;
+    --breakdown-ultra: 264.2 70% 58.1%;
+    --breakdown-legendary: 279.2 75% 53.1%;
   }
   [data-theme="nebula"] {
     --background: 262.9 49% 8.4%;
@@ -1020,10 +1035,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 250.1 55% 57.3%;
-    --breakdown-uncommon: 288.1 60% 47.6%;
-    --breakdown-rare: 326.1 65% 45.5%;
-    --breakdown-ultra: 4.1 70% 45.8%;
-    --breakdown-legendary: 42.1 75% 29.9%;
+    --breakdown-uncommon: 265.1 60% 55.5%;
+    --breakdown-rare: 280.1 65% 51.2%;
+    --breakdown-ultra: 295.1 70% 43.8%;
+    --breakdown-legendary: 310.1 75% 42.3%;
   }
   [data-theme="solar-flare"] {
     --background: 16.7 53% 6.7%;
@@ -1044,11 +1059,11 @@
     --ring: 14.4 100% 63.1%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 14.4 55% 43.2%;
-    --breakdown-uncommon: 52.4 60% 28.9%;
-    --breakdown-rare: 90.4 65% 27.9%;
-    --breakdown-ultra: 128.4 70% 28.3%;
-    --breakdown-legendary: 166.4 75% 26.8%;
+    --breakdown-common: 14.4 55% 43.1%;
+    --breakdown-uncommon: 29.4 60% 36.7%;
+    --breakdown-rare: 44.4 65% 30.6%;
+    --breakdown-ultra: 59.4 70% 25.5%;
+    --breakdown-legendary: 74.4 75% 25.7%;
   }
   [data-theme="aurora"] {
     --background: 176.0 48% 6.1%;
@@ -1070,10 +1085,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 161.4 55% 30.7%;
-    --breakdown-uncommon: 199.4 60% 37.4%;
-    --breakdown-rare: 237.4 65% 60.2%;
-    --breakdown-ultra: 275.4 70% 54.4%;
-    --breakdown-legendary: 313.4 75% 43.8%;
+    --breakdown-uncommon: 176.4 60% 29.5%;
+    --breakdown-rare: 191.4 65% 32.8%;
+    --breakdown-ultra: 206.4 70% 40.7%;
+    --breakdown-legendary: 221.4 75% 52.5%;
   }
   [data-theme="deep-space"] {
     --background: 228.0 56% 7.1%;
@@ -1095,10 +1110,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 228.4 55% 53.3%;
-    --breakdown-uncommon: 266.4 60% 54.8%;
-    --breakdown-rare: 304.4 65% 42.7%;
-    --breakdown-ultra: 342.4 70% 45.8%;
-    --breakdown-legendary: 20.4 75% 38.7%;
+    --breakdown-uncommon: 243.4 60% 58.7%;
+    --breakdown-rare: 258.4 65% 57.2%;
+    --breakdown-ultra: 273.4 70% 53.6%;
+    --breakdown-legendary: 288.4 75% 45.8%;
   }
   [data-theme="stellar-gold"] {
     --background: 45.0 35% 6.7%;
@@ -1120,10 +1135,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 45.7 55% 32.3%;
-    --breakdown-uncommon: 83.7 60% 29.0%;
-    --breakdown-rare: 121.7 65% 29.6%;
-    --breakdown-ultra: 159.7 70% 28.3%;
-    --breakdown-legendary: 197.7 75% 34.7%;
+    --breakdown-uncommon: 60.7 60% 27.3%;
+    --breakdown-rare: 75.7 65% 27.7%;
+    --breakdown-ultra: 90.7 70% 27.8%;
+    --breakdown-legendary: 105.7 75% 27.9%;
   }
 
   /* ── Botanical family (natural/earthy, mixed polarity) ───────────────────
@@ -1159,10 +1174,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 125.9 55% 37.1%;
-    --breakdown-uncommon: 163.9 60% 35.2%;
-    --breakdown-rare: 201.9 65% 44.8%;
-    --breakdown-ultra: 239.9 70% 67.5%;
-    --breakdown-legendary: 277.9 75% 61.7%;
+    --breakdown-uncommon: 140.9 60% 35.7%;
+    --breakdown-rare: 155.9 65% 34.3%;
+    --breakdown-ultra: 170.9 70% 33.1%;
+    --breakdown-legendary: 185.9 75% 34.4%;
   }
   [data-theme="forest"] {
     --background: 150.0 28% 7.1%;
@@ -1184,10 +1199,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 151.1 55% 31.0%;
-    --breakdown-uncommon: 189.1 60% 32.8%;
-    --breakdown-rare: 227.1 65% 55.5%;
-    --breakdown-ultra: 265.1 70% 57.7%;
-    --breakdown-legendary: 303.1 75% 42.5%;
+    --breakdown-uncommon: 166.1 60% 29.8%;
+    --breakdown-rare: 181.1 65% 29.1%;
+    --breakdown-ultra: 196.1 70% 34.5%;
+    --breakdown-legendary: 211.1 75% 43.8%;
   }
   [data-theme="fern"] {
     --background: 132.0 25% 7.8%;
@@ -1209,10 +1224,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 124.7 55% 31.8%;
-    --breakdown-uncommon: 162.7 60% 30.3%;
-    --breakdown-rare: 200.7 65% 38.0%;
-    --breakdown-ultra: 238.7 70% 61.8%;
-    --breakdown-legendary: 276.7 75% 54.8%;
+    --breakdown-uncommon: 139.7 60% 30.8%;
+    --breakdown-rare: 154.7 65% 29.6%;
+    --breakdown-ultra: 169.7 70% 28.5%;
+    --breakdown-legendary: 184.7 75% 29.2%;
   }
   [data-theme="moss"] {
     --background: 56.0 33% 91.2%;
@@ -1235,10 +1250,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 61.3 55% 33.0%;
-    --breakdown-uncommon: 99.3 60% 34.9%;
-    --breakdown-rare: 137.3 65% 34.6%;
-    --breakdown-ultra: 175.3 70% 32.4%;
-    --breakdown-legendary: 213.3 75% 53.1%;
+    --breakdown-uncommon: 76.3 60% 33.4%;
+    --breakdown-rare: 91.3 65% 33.4%;
+    --breakdown-ultra: 106.3 70% 33.3%;
+    --breakdown-legendary: 121.3 75% 32.8%;
   }
   [data-theme="terracotta"] {
     --background: 18.8 38% 8.2%;
@@ -1260,10 +1275,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 7.8 55% 46.7%;
-    --breakdown-uncommon: 45.8 60% 31.5%;
-    --breakdown-rare: 83.8 65% 28.2%;
-    --breakdown-ultra: 121.8 70% 29.0%;
-    --breakdown-legendary: 159.8 75% 27.7%;
+    --breakdown-uncommon: 22.8 60% 40.1%;
+    --breakdown-rare: 37.8 65% 33.7%;
+    --breakdown-ultra: 52.8 70% 27.8%;
+    --breakdown-legendary: 67.8 75% 25.7%;
   }
   [data-theme="meadow"] {
     --background: 54.8 53% 91.6%;
@@ -1286,10 +1301,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 99.8 55% 36.6%;
-    --breakdown-uncommon: 137.8 60% 36.2%;
-    --breakdown-rare: 175.8 65% 34.1%;
-    --breakdown-ultra: 213.8 70% 54.7%;
-    --breakdown-legendary: 251.8 75% 67.2%;
+    --breakdown-uncommon: 114.8 60% 36.2%;
+    --breakdown-rare: 129.8 65% 35.3%;
+    --breakdown-ultra: 144.8 70% 34.0%;
+    --breakdown-legendary: 159.8 75% 32.8%;
   }
 
   /* ── Noir family (dark, luxury/minimalist) ────────────────────────────────
@@ -1323,10 +1338,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 213.3 55% 44.9%;
-    --breakdown-uncommon: 251.3 60% 58.5%;
-    --breakdown-rare: 289.3 65% 47.6%;
-    --breakdown-ultra: 327.3 70% 45.6%;
-    --breakdown-legendary: 5.3 75% 45.5%;
+    --breakdown-uncommon: 228.3 60% 54.8%;
+    --breakdown-rare: 243.3 65% 60.4%;
+    --breakdown-ultra: 258.3 70% 58.8%;
+    --breakdown-legendary: 273.3 75% 54.9%;
   }
   [data-theme="crimson"] {
     --background: 343.6 33% 6.5%;
@@ -1348,10 +1363,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 351.9 55% 47.9%;
-    --breakdown-uncommon: 29.9 60% 36.2%;
-    --breakdown-rare: 67.9 65% 26.3%;
-    --breakdown-ultra: 105.9 70% 27.8%;
-    --breakdown-legendary: 143.9 75% 27.0%;
+    --breakdown-uncommon: 6.9 60% 45.5%;
+    --breakdown-rare: 21.9 65% 38.9%;
+    --breakdown-ultra: 36.9 70% 32.4%;
+    --breakdown-legendary: 51.9 75% 26.6%;
   }
   [data-theme="amethyst"] {
     --background: 273.3 26% 6.9%;
@@ -1373,10 +1388,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 271.9 55% 53.1%;
-    --breakdown-uncommon: 309.9 60% 44.2%;
-    --breakdown-rare: 347.9 65% 47.2%;
-    --breakdown-ultra: 25.9 70% 37.0%;
-    --breakdown-legendary: 63.9 75% 24.8%;
+    --breakdown-uncommon: 286.9 60% 48.2%;
+    --breakdown-rare: 301.9 65% 42.7%;
+    --breakdown-ultra: 316.9 70% 43.8%;
+    --breakdown-legendary: 331.9 75% 44.7%;
   }
   [data-theme="sapphire"] {
     --background: 215.3 52% 6.5%;
@@ -1397,11 +1412,11 @@
     --ring: 216.1 42% 52.4%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 216.1 55% 46.2%;
-    --breakdown-uncommon: 254.1 60% 57.5%;
-    --breakdown-rare: 292.1 65% 45.5%;
-    --breakdown-ultra: 330.1 70% 45.1%;
-    --breakdown-legendary: 8.1 75% 43.8%;
+    --breakdown-common: 216.1 55% 46.1%;
+    --breakdown-uncommon: 231.1 60% 55.7%;
+    --breakdown-rare: 246.1 65% 59.5%;
+    --breakdown-ultra: 261.1 70% 57.6%;
+    --breakdown-legendary: 276.1 75% 53.0%;
   }
   [data-theme="champagne"] {
     --background: 40.0 24% 7.3%;
@@ -1423,10 +1438,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 24.9 55% 39.6%;
-    --breakdown-uncommon: 62.9 60% 27.6%;
-    --breakdown-rare: 100.9 65% 29.1%;
-    --breakdown-ultra: 138.9 70% 28.7%;
-    --breakdown-legendary: 176.9 75% 27.0%;
+    --breakdown-uncommon: 39.9 60% 33.6%;
+    --breakdown-rare: 54.9 65% 27.9%;
+    --breakdown-ultra: 69.9 70% 26.6%;
+    --breakdown-legendary: 84.9 75% 26.8%;
   }
   [data-theme="emerald"] {
     --background: 156.0 36% 5.5%;
@@ -1448,10 +1463,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 179.1 55% 29.7%;
-    --breakdown-uncommon: 217.1 60% 47.7%;
-    --breakdown-rare: 255.1 65% 58.5%;
-    --breakdown-ultra: 293.1 70% 45.1%;
-    --breakdown-legendary: 331.1 75% 44.9%;
+    --breakdown-uncommon: 194.1 60% 34.1%;
+    --breakdown-rare: 209.1 65% 41.7%;
+    --breakdown-ultra: 224.1 70% 53.5%;
+    --breakdown-legendary: 239.1 75% 61.7%;
   }
 
   /* ── Candy family (light, playful) ────────────────────────────────────────
@@ -1485,10 +1500,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 336.7 55% 58.6%;
-    --breakdown-uncommon: 14.7 60% 53.3%;
-    --breakdown-rare: 52.7 65% 34.8%;
-    --breakdown-ultra: 90.7 70% 33.8%;
-    --breakdown-legendary: 128.7 75% 33.9%;
+    --breakdown-uncommon: 351.7 60% 59.7%;
+    --breakdown-rare: 6.7 65% 57.3%;
+    --breakdown-ultra: 21.7 70% 48.3%;
+    --breakdown-legendary: 36.7 75% 40.0%;
   }
   [data-theme="blue-pop"] {
     --background: 200.0 100% 97.1%;
@@ -1511,10 +1526,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 217.1 55% 57.7%;
-    --breakdown-uncommon: 255.1 60% 65.8%;
-    --breakdown-rare: 293.1 65% 58.3%;
-    --breakdown-ultra: 331.1 70% 59.1%;
-    --breakdown-legendary: 9.1 75% 56.4%;
+    --breakdown-uncommon: 232.1 60% 64.8%;
+    --breakdown-rare: 247.1 65% 67.6%;
+    --breakdown-ultra: 262.1 70% 66.2%;
+    --breakdown-legendary: 277.1 75% 63.8%;
   }
   [data-theme="grape-candy"] {
     --background: 270.0 100% 97.3%;
@@ -1537,10 +1552,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 267.4 55% 62.4%;
-    --breakdown-uncommon: 305.4 60% 55.0%;
-    --breakdown-rare: 343.4 65% 58.8%;
-    --breakdown-ultra: 21.4 70% 47.9%;
-    --breakdown-legendary: 59.4 75% 30.2%;
+    --breakdown-uncommon: 282.4 60% 60.2%;
+    --breakdown-rare: 297.4 65% 55.0%;
+    --breakdown-ultra: 312.4 70% 54.9%;
+    --breakdown-legendary: 327.4 75% 56.9%;
   }
   [data-theme="orange-crush"] {
     --background: 26.7 100% 96.5%;
@@ -1563,10 +1578,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 21.3 55% 50.1%;
-    --breakdown-uncommon: 59.3 60% 33.5%;
-    --breakdown-rare: 97.3 65% 35.3%;
-    --breakdown-ultra: 135.3 70% 34.9%;
-    --breakdown-legendary: 173.3 75% 33.1%;
+    --breakdown-uncommon: 36.3 60% 42.3%;
+    --breakdown-rare: 51.3 65% 35.3%;
+    --breakdown-ultra: 66.3 70% 31.9%;
+    --breakdown-legendary: 81.3 75% 32.4%;
   }
   [data-theme="sour-apple"] {
     --background: 87.3 100% 95.7%;
@@ -1589,10 +1604,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 82.0 55% 37.1%;
-    --breakdown-uncommon: 120.0 60% 38.1%;
-    --breakdown-rare: 158.0 65% 36.2%;
-    --breakdown-ultra: 196.0 70% 42.8%;
-    --breakdown-legendary: 234.0 75% 68.0%;
+    --breakdown-uncommon: 97.0 60% 37.1%;
+    --breakdown-rare: 112.0 65% 36.7%;
+    --breakdown-ultra: 127.0 70% 35.9%;
+    --breakdown-legendary: 142.0 75% 34.8%;
   }
   [data-theme="cherry-pop"] {
     --background: 351.4 100% 97.3%;
@@ -1615,10 +1630,10 @@
     --glow-intensity: 1;
     --wash-intensity: 0;
     --breakdown-common: 352.2 55% 59.1%;
-    --breakdown-uncommon: 30.2 60% 44.7%;
-    --breakdown-rare: 68.2 65% 32.7%;
-    --breakdown-ultra: 106.2 70% 34.3%;
-    --breakdown-legendary: 144.2 75% 33.5%;
+    --breakdown-uncommon: 7.2 60% 56.5%;
+    --breakdown-rare: 22.2 65% 48.1%;
+    --breakdown-ultra: 37.2 70% 40.1%;
+    --breakdown-legendary: 52.2 75% 32.9%;
   }
 }
 

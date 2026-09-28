@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useTheme, THEME_FAMILIES, THEMES, getThemeRendering, familyHasPolarityToggle } from '@/hooks/useTheme';
-import { ArrowLeft, ChevronRight, ChevronLeft, Lock, Loader2 } from 'lucide-react';
+import { ArrowLeft, ChevronRight, ChevronLeft, Lock, Loader2, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -268,6 +268,33 @@ function ChipToggle({ options, value, onChange, disabled }) {
   );
 }
 
+// ─── Swatch styling ──────────────────────────────────────────────────────────
+// A flat single-color circle reads as a generic color picker once several
+// families' swatches sit side by side with reused hues (flagged in an
+// /impeccable critique). A two-tone gradient from a theme's own main to its
+// own supporting color gives every swatch real depth for free — no new
+// design decision, just rendering data (`sup`) the app already needed for
+// --accent. Falls back to a flat fill for any theme that doesn't carry
+// `sup` yet (Phase 1's 12 shipped themes, pending the same treatment).
+function swatchBackground(rendering) {
+  if (!rendering) return undefined;
+  return rendering.sup ? `linear-gradient(135deg, ${rendering.swatch} 0%, ${rendering.sup} 100%)` : rendering.swatch;
+}
+
+// Cosmic's swatches read as generic warm/amber circles with nothing evoking
+// "space" (same critique) — a few star-dots is a small, contained way to
+// give the one family whose whole concept is astronomy an actual motif,
+// without touching the live app's own background treatment.
+function StarDots() {
+  return (
+    <>
+      <span className="absolute top-1.5 left-2 w-[3px] h-[3px] rounded-full bg-white/90" />
+      <span className="absolute top-4 right-2 w-[2px] h-[2px] rounded-full bg-white/70" />
+      <span className="absolute bottom-2 left-3.5 w-[2px] h-[2px] rounded-full bg-white/80" />
+    </>
+  );
+}
+
 // ─── Polarity Toggle ─────────────────────────────────────────────────────────
 // A 3rd axis, independent of family/palette: every theme id renders in both
 // a dark and a light polarity (index.css's [data-theme][data-polarity]
@@ -277,28 +304,40 @@ function ChipToggle({ options, value, onChange, disabled }) {
 function PolarityToggle({ theme, polarity, setPolarity, isPending }) {
   const match = THEMES.find(t => t.id === theme);
   return (
-    <div className="flex items-center gap-2 px-4 pb-3.5">
-      {['dark', 'light'].map(p => {
-        const selected = polarity === p;
-        return (
-          <button
-            key={p}
-            onClick={() => setPolarity(p)}
-            disabled={isPending || selected}
-            aria-pressed={selected}
-            className={cn(
-              'flex-1 flex items-center justify-center gap-2 h-11 rounded-full border text-xs font-mono capitalize transition-colors disabled:cursor-not-allowed',
-              selected ? 'border-primary/50 bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/20'
-            )}
-          >
-            <span
-              className="w-3.5 h-3.5 rounded-full border border-foreground/10 flex-shrink-0"
-              style={{ background: match?.[p]?.background }}
-            />
-            {p}
-          </button>
-        );
-      })}
+    <div className="px-4 pb-3.5">
+      <div className="flex items-center gap-2">
+        {['dark', 'light'].map(p => {
+          const selected = polarity === p;
+          return (
+            <button
+              key={p}
+              onClick={() => setPolarity(p)}
+              disabled={isPending || selected}
+              aria-pressed={selected}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 h-11 rounded-full border text-xs font-mono capitalize transition-colors disabled:cursor-not-allowed',
+                selected ? 'border-primary/50 bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/20'
+              )}
+            >
+              <span
+                className="w-3.5 h-3.5 rounded-full border border-foreground/10 flex-shrink-0"
+                style={{ background: match?.[p]?.background }}
+              />
+              {p}
+            </button>
+          );
+        })}
+      </div>
+      {/* This toggle changes whichever theme is actually APPLIED, not
+          whichever family the picker happens to be browsing below it —
+          two independent /impeccable critique reviewers both flagged that
+          distinction as invisible (it reads as broken when you're looking
+          at a family that doesn't even support light/dark). Naming the
+          real target theme here resolves it without needing a "browsing
+          vs. applied" mode of its own. */}
+      <p className="text-[10px] font-mono text-muted-foreground mt-1.5 px-1">
+        Applies to your current theme, {match?.label ?? theme}.
+      </p>
     </div>
   );
 }
@@ -325,8 +364,12 @@ function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies, polari
         // Clears itself the first time this tile is actually opened
         // (Settings' onSelectFamily marks it seen), not on a timer or a
         // manual dismiss — a launch that only ever shows up if you already
-        // knew to look defeats the point of a "New" badge.
+        // knew to look defeats the point of a "New" marker. A quiet dot,
+        // not a text pill — an /impeccable critique found 4-5 loud "New"
+        // pills showing at once (every Phase 2 family, all unseen on a
+        // fresh install) diluted the signal rather than drawing attention.
         const showNewBadge = family.isNew && !seenFamilies.has(family.id);
+        const rendering = getThemeRendering(freeTheme, polarity);
         return (
           <button
             key={family.id}
@@ -339,14 +382,15 @@ function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies, polari
             )}
           >
             {showNewBadge && (
-              <span className="absolute top-1.5 right-1.5 px-1.5 h-4 rounded-full bg-primary text-primary-foreground text-[9px] font-mono font-bold uppercase tracking-wider flex items-center justify-center">
-                New
-              </span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" aria-hidden="true" />
             )}
-            <div
-              className="w-9 h-9 rounded-full border border-foreground/10"
-              style={{ background: getThemeRendering(freeTheme, polarity)?.swatch }}
-            />
+            <div className="relative w-9 h-9">
+              <div
+                className="w-9 h-9 rounded-full border border-foreground/10"
+                style={{ background: swatchBackground(rendering) }}
+              />
+              {family.id === 'cosmic' && <StarDots />}
+            </div>
             <span className="text-[10px] font-mono text-muted-foreground text-center leading-tight">{family.label}</span>
           </button>
         );
@@ -356,6 +400,19 @@ function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies, polari
 }
 
 function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPending, onLockedTap, onBack }) {
+  // Botanical is the one family where adjacent swatches can be different
+  // fixed polarities (Sage/Moss/Meadow are light, Forest/Fern/Terracotta
+  // are dark) — tapping between them flips the whole app's light/dark with
+  // no warning, unlike Neon Arcade/Vintage Pastel where the separate
+  // toggle telegraphs that upfront (/impeccable critique). Only families
+  // with more than one fixed-polarity kind get the sun/moon glyph — a
+  // single-polarity family (Cosmic, Noir, Candy) doesn't need it, every
+  // swatch already implies the same answer.
+  const fixedPolarityKinds = family.themes
+    .filter(t => !(t.dark && t.light))
+    .map(t => (t.light ? 'light' : 'dark'));
+  const familyMixedPolarity = new Set(fixedPolarityKinds).size > 1;
+
   return (
     <div className="p-4 space-y-3">
       <button
@@ -376,23 +433,36 @@ function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPendin
           const { id, label, pro } = themeEntry;
           const locked = pro && !isPro;
           const selected = theme === id;
+          const rendering = getThemeRendering(themeEntry, polarity);
+          const entrySinglePolarity = !(themeEntry.dark && themeEntry.light);
+          const entryPolarity = themeEntry.light ? 'light' : 'dark';
           return (
             <button
               key={id}
               onClick={() => (locked ? onLockedTap() : setTheme(id))}
               disabled={isPending}
-              aria-label={locked ? `${label} — Pro only, tap to upgrade` : `Use ${label} theme`}
+              aria-label={locked ? `${label} — Pro only, tap to upgrade` : `Use ${label} theme (${familyMixedPolarity ? entryPolarity : ''})`}
               aria-pressed={selected}
               className={cn(
                 'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors',
                 selected ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/20'
               )}
             >
-              <div
-                className="w-9 h-9 rounded-full border border-foreground/10"
-                style={{ background: getThemeRendering(themeEntry, polarity)?.swatch }}
-              />
+              <div className="relative w-9 h-9">
+                <div
+                  className="w-9 h-9 rounded-full border border-foreground/10"
+                  style={{ background: swatchBackground(rendering) }}
+                />
+                {family.id === 'cosmic' && <StarDots />}
+              </div>
               <span className="text-[10px] font-mono text-muted-foreground text-center leading-tight">{label}</span>
+              {familyMixedPolarity && entrySinglePolarity && (
+                <span className="absolute top-1.5 left-1.5 w-4 h-4 rounded-full bg-background/80 border border-border flex items-center justify-center">
+                  {entryPolarity === 'light'
+                    ? <Sun className="w-2.5 h-2.5 text-muted-foreground" />
+                    : <Moon className="w-2.5 h-2.5 text-muted-foreground" />}
+                </span>
+              )}
               {locked && (
                 <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-background/80 border border-border flex items-center justify-center">
                   <Lock className="w-2.5 h-2.5 text-muted-foreground" />
@@ -466,6 +536,10 @@ export default function Settings() {
       return next;
     });
   };
+  // One consolidated count instead of a "New" pill repeated on every
+  // unseen family tile — a fresh install has 4 new Phase 2 families at
+  // once, and 4 loud pills diluted the signal (/impeccable critique).
+  const unseenNewFamilyCount = THEME_FAMILIES.filter(f => f.isNew && !seenFamilies.has(f.id)).length;
   const [panel, setPanel] = useState(null); // 'name' | 'region' | 'password'
   const [prefs, setPrefs] = useState(loadPrefs);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -709,6 +783,12 @@ export default function Settings() {
             <p className="text-xs font-mono text-muted-foreground mt-0.5">
               {isProLoading ? 'Loading…' : isPro ? 'Pick your look' : 'One free theme per family — the rest unlock with Pro'}
             </p>
+            {!isProLoading && unseenNewFamilyCount > 0 && (
+              <p className="text-[10px] font-mono text-primary mt-1 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" aria-hidden="true" />
+                {unseenNewFamilyCount} new {unseenNewFamilyCount === 1 ? 'family' : 'families'} this update
+              </p>
+            )}
           </div>
           {showPolarityToggle && (
             <PolarityToggle theme={theme} polarity={polarity} setPolarity={setPolarity} isPending={themePending} />

@@ -7,9 +7,14 @@ import { useAuth } from '@/lib/AuthContext';
 // Keep in sync with index.css's [data-theme] blocks and the
 // profiles_theme_valid / profiles_theme_polarity_valid check constraints.
 // Each theme's `dark`/`light` sub-objects carry the exact hex this app
-// actually renders for that combination (main color as `swatch`,
-// --background as `background`) -- no separate "true" swatch color that
-// differs from what ships.
+// actually renders for that combination (main color as `swatch`, supporting
+// color as `sup`, --background as `background`) -- no separate "true"
+// swatch color that differs from what ships. `sup` is Phase 2 only so far
+// (an /impeccable critique found the picker's flat single-color swatches
+// read as generic, especially with hue reuse across families — Phase 1's
+// swatches stay flat pending the same treatment); Settings renders a
+// two-tone gradient wherever `sup` exists and falls back to a flat fill
+// otherwise.
 //
 // Phase 1 (Neon Arcade, Vintage Pastel) themes have BOTH `dark` and
 // `light` -- index.css keys their CSS on [data-theme="x"][data-polarity="y"],
@@ -44,7 +49,6 @@ export const THEME_FAMILIES = [
   {
     id: 'vintage-pastel',
     label: 'Vintage Pastel',
-    isNew: true,
     themes: [
       { id: 'mint-fizz', label: 'Mint Fizz', pro: false,
         light: { swatch: '#4C9486', background: '#FFF8E9' }, dark: { swatch: '#1C9C82', background: '#151209' } },
@@ -65,12 +69,12 @@ export const THEME_FAMILIES = [
     label: 'Cosmic',
     isNew: true,
     themes: [
-      { id: 'moonlight', label: 'Moonlight', pro: false, dark: { swatch: '#B3BCCD', background: '#101522' } },
-      { id: 'nebula', label: 'Nebula', pro: true, dark: { swatch: '#7A5FFF', background: '#130B20' } },
-      { id: 'solar-flare', label: 'Solar Flare', pro: true, dark: { swatch: '#FF7043', background: '#1A0D08' } },
-      { id: 'aurora', label: 'Aurora', pro: true, dark: { swatch: '#45E0B0', background: '#081716' } },
-      { id: 'deep-space', label: 'Deep Space', pro: true, dark: { swatch: '#5269C9', background: '#080C1C' } },
-      { id: 'stellar-gold', label: 'Stellar Gold', pro: true, dark: { swatch: '#E4C76A', background: '#17140B' } },
+      { id: 'moonlight', label: 'Moonlight', pro: false, dark: { swatch: '#B3BCCD', sup: '#7183AA', background: '#101522' } },
+      { id: 'nebula', label: 'Nebula', pro: true, dark: { swatch: '#7A5FFF', sup: '#5579E8', background: '#130B20' } },
+      { id: 'solar-flare', label: 'Solar Flare', pro: true, dark: { swatch: '#FF7043', sup: '#FFB347', background: '#1A0D08' } },
+      { id: 'aurora', label: 'Aurora', pro: true, dark: { swatch: '#45E0B0', sup: '#6875FF', background: '#081716' } },
+      { id: 'deep-space', label: 'Deep Space', pro: true, dark: { swatch: '#5269C9', sup: '#3655E3', background: '#080C1C' } },
+      { id: 'stellar-gold', label: 'Stellar Gold', pro: true, dark: { swatch: '#E4C76A', sup: '#A98F45', background: '#17140B' } },
     ],
   },
   {
@@ -78,12 +82,12 @@ export const THEME_FAMILIES = [
     label: 'Botanical',
     isNew: true,
     themes: [
-      { id: 'sage', label: 'Sage', pro: false, light: { swatch: '#628B66', background: '#F4F0E5' } },
-      { id: 'forest', label: 'Forest', pro: true, dark: { swatch: '#3E765B', background: '#0D1712' } },
-      { id: 'fern', label: 'Fern', pro: true, dark: { swatch: '#68A86D', background: '#0F1911' } },
-      { id: 'moss', label: 'Moss', pro: true, light: { swatch: '#828355', background: '#F0EFE1' } },
-      { id: 'terracotta', label: 'Terracotta', pro: true, dark: { swatch: '#AF4B3C', background: '#1D120D' } },
-      { id: 'meadow', label: 'Meadow', pro: true, light: { swatch: '#549135', background: '#F5F3DE' } },
+      { id: 'sage', label: 'Sage', pro: false, light: { swatch: '#628B66', sup: '#3E5140', background: '#F4F0E5' } },
+      { id: 'forest', label: 'Forest', pro: true, dark: { swatch: '#3E765B', sup: '#107848', background: '#0D1712' } },
+      { id: 'fern', label: 'Fern', pro: true, dark: { swatch: '#68A86D', sup: '#447547', background: '#0F1911' } },
+      { id: 'moss', label: 'Moss', pro: true, light: { swatch: '#828355', sup: '#5A5B37', background: '#F0EFE1' } },
+      { id: 'terracotta', label: 'Terracotta', pro: true, dark: { swatch: '#AF4B3C', sup: '#967948', background: '#1D120D' } },
+      { id: 'meadow', label: 'Meadow', pro: true, light: { swatch: '#549135', sup: '#2C491F', background: '#F5F3DE' } },
     ],
   },
   {
@@ -91,12 +95,12 @@ export const THEME_FAMILIES = [
     label: 'Noir',
     isNew: true,
     themes: [
-      { id: 'carbon', label: 'Carbon', pro: false, dark: { swatch: '#6F7378', background: '#111214' } },
-      { id: 'crimson', label: 'Crimson', pro: true, dark: { swatch: '#B83A4B', background: '#160B0E' } },
-      { id: 'amethyst', label: 'Amethyst', pro: true, dark: { swatch: '#8E6DAB', background: '#120D16' } },
-      { id: 'sapphire', label: 'Sapphire', pro: true, dark: { swatch: '#527BB9', background: '#080F19' } },
-      { id: 'champagne', label: 'Champagne', pro: true, dark: { swatch: '#C79A7A', background: '#17140E' } },
-      { id: 'emerald', label: 'Emerald', pro: true, dark: { swatch: '#458584', background: '#09130F' } },
+      { id: 'carbon', label: 'Carbon', pro: false, dark: { swatch: '#6F7378', sup: '#4D698B', background: '#111214' } },
+      { id: 'crimson', label: 'Crimson', pro: true, dark: { swatch: '#B83A4B', sup: '#8A5760', background: '#160B0E' } },
+      { id: 'amethyst', label: 'Amethyst', pro: true, dark: { swatch: '#8E6DAB', sup: '#8B3DCB', background: '#120D16' } },
+      { id: 'sapphire', label: 'Sapphire', pro: true, dark: { swatch: '#527BB9', sup: '#1961CC', background: '#080F19' } },
+      { id: 'champagne', label: 'Champagne', pro: true, dark: { swatch: '#C79A7A', sup: '#8F684E', background: '#17140E' } },
+      { id: 'emerald', label: 'Emerald', pro: true, dark: { swatch: '#458584', sup: '#0A754D', background: '#09130F' } },
     ],
   },
   {
@@ -104,12 +108,12 @@ export const THEME_FAMILIES = [
     label: 'Candy',
     isNew: true,
     themes: [
-      { id: 'bubblegum', label: 'Bubblegum', pro: false, light: { swatch: '#FF1F76', background: '#FFF3F8' } },
-      { id: 'blue-pop', label: 'Blue Pop', pro: true, light: { swatch: '#3582FF', background: '#F0FAFF' } },
-      { id: 'grape-candy', label: 'Grape Candy', pro: true, light: { swatch: '#A65BFF', background: '#F8F1FF' } },
-      { id: 'orange-crush', label: 'Orange Crush', pro: true, light: { swatch: '#EA5300', background: '#FFF5ED' } },
-      { id: 'sour-apple', label: 'Sour Apple', pro: true, light: { swatch: '#679616', background: '#F5FFE9' } },
-      { id: 'cherry-pop', label: 'Cherry Pop', pro: true, light: { swatch: '#FF2743', background: '#FFF1F3' } },
+      { id: 'bubblegum', label: 'Bubblegum', pro: false, light: { swatch: '#FF1F76', sup: '#B91D59', background: '#FFF3F8' } },
+      { id: 'blue-pop', label: 'Blue Pop', pro: true, light: { swatch: '#3582FF', sup: '#255FBD', background: '#F0FAFF' } },
+      { id: 'grape-candy', label: 'Grape Candy', pro: true, light: { swatch: '#A65BFF', sup: '#7637CE', background: '#F8F1FF' } },
+      { id: 'orange-crush', label: 'Orange Crush', pro: true, light: { swatch: '#EA5300', sup: '#953A11', background: '#FFF5ED' } },
+      { id: 'sour-apple', label: 'Sour Apple', pro: true, light: { swatch: '#679616', sup: '#2B4213', background: '#F5FFE9' } },
+      { id: 'cherry-pop', label: 'Cherry Pop', pro: true, light: { swatch: '#FF2743', sup: '#B4243A', background: '#FFF1F3' } },
     ],
   },
 ];

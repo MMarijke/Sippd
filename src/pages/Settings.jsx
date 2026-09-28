@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useTheme, THEME_FAMILIES, THEMES } from '@/hooks/useTheme';
+import { useTheme, THEME_FAMILIES, THEMES, getThemeRendering, familyHasPolarityToggle } from '@/hooks/useTheme';
 import { ArrowLeft, ChevronRight, ChevronLeft, Lock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -304,14 +304,18 @@ function PolarityToggle({ theme, polarity, setPolarity, isPending }) {
 }
 
 // ─── Theme Picker ────────────────────────────────────────────────────────────
-// Two-step now that there are 2 families × 6 palettes (12 total, up from one
-// flat list of 6): Step 1 picks a family, Step 2 picks a palette within it.
-// `viewedFamilyId` is which family the picker is currently *browsing* —
-// independent of `theme` (the actually *applied* palette) — so tapping
-// around families to look at them never changes what's live until a swatch
-// is actually tapped. Polarity (light/dark) is a separate, always-visible
-// control (PolarityToggle above) rather than folded into either step, since
-// it applies to whichever theme ends up active regardless of family/palette.
+// Two-step now that there are 6 families × 6 palettes (36 total): Step 1
+// picks a family, Step 2 picks a palette within it. `viewedFamilyId` is
+// which family the picker is currently *browsing* — independent of `theme`
+// (the actually *applied* palette) — so tapping around families to look at
+// them never changes what's live until a swatch is actually tapped.
+// Polarity (light/dark) is a separate control (PolarityToggle above) rather
+// than folded into either step — but it only applies to Neon Arcade/Vintage
+// Pastel, the two families where every palette genuinely has both a dark
+// and light rendering. The 4 Phase 2 families are each a single fixed
+// polarity per theme (Botanical mixes light/dark PALETTES within itself,
+// but no individual palette toggles), so the toggle only renders when the
+// viewed family actually supports it — see familyHasPolarityToggle.
 function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies, polarity }) {
   return (
     <div className="grid grid-cols-3 gap-3 p-4">
@@ -341,7 +345,7 @@ function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies, polari
             )}
             <div
               className="w-9 h-9 rounded-full border border-foreground/10"
-              style={{ background: freeTheme?.[polarity]?.swatch }}
+              style={{ background: getThemeRendering(freeTheme, polarity)?.swatch }}
             />
             <span className="text-[10px] font-mono text-muted-foreground text-center leading-tight">{family.label}</span>
           </button>
@@ -368,7 +372,8 @@ function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPendin
           made themselves. (/impeccable critique) */}
       <p className="text-sm font-medium text-foreground">{family.label}</p>
       <div className="grid grid-cols-3 gap-3">
-        {family.themes.map(({ id, label, pro, ...variants }) => {
+        {family.themes.map((themeEntry) => {
+          const { id, label, pro } = themeEntry;
           const locked = pro && !isPro;
           const selected = theme === id;
           return (
@@ -385,7 +390,7 @@ function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPendin
             >
               <div
                 className="w-9 h-9 rounded-full border border-foreground/10"
-                style={{ background: variants[polarity]?.swatch }}
+                style={{ background: getThemeRendering(themeEntry, polarity)?.swatch }}
               />
               <span className="text-[10px] font-mono text-muted-foreground text-center leading-tight">{label}</span>
               {locked && (
@@ -407,7 +412,7 @@ export default function Settings() {
   const queryClient = useQueryClient();
   const { user, signOut } = useAuth();
   const { isPro, isLoading: isProLoading } = useSubscription();
-  const { theme, polarity, setTheme, setPolarity, isPending: themePending } = useTheme();
+  const { theme, polarity, setTheme, setPolarity, isThemeLoading, isPending: themePending } = useTheme();
   // Which family the theme picker is currently browsing — defaults to
   // whichever family the actually-applied `theme` belongs to, so opening
   // Settings always lands on a step-2 view of your real theme rather than
@@ -415,11 +420,29 @@ export default function Settings() {
   const [viewedFamilyId, setViewedFamilyId] = useState(
     () => THEME_FAMILIES.find(f => f.themes.some(t => t.id === theme))?.id ?? null
   );
+  // The initializer above runs once at mount, using `theme`'s pre-load
+  // default (power-up) — for anyone whose real theme isn't Power-Up, that
+  // default resolves to the wrong family and nothing ever corrects it,
+  // since useState's initial value never re-runs. Sync once, the moment
+  // the real value actually loads; never again after that, so it doesn't
+  // fight the user's own picker navigation.
+  useEffect(() => {
+    if (!isThemeLoading) {
+      setViewedFamilyId(THEME_FAMILIES.find(f => f.themes.some(t => t.id === theme))?.id ?? null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isThemeLoading]);
+  // The toggle changes the polarity of the ACTIVE theme, not whichever
+  // family is currently being browsed — so its visibility depends on the
+  // active theme's own family, not viewedFamilyId. Only Neon Arcade and
+  // Vintage Pastel currently have every palette in both polarities.
+  const activeFamily = THEME_FAMILIES.find(f => f.themes.some(t => t.id === theme));
+  const showPolarityToggle = familyHasPolarityToggle(activeFamily);
   // Tracks which theme families this browser has ever opened, purely to
-  // clear the "New" badge on Field Guide/Origami Fold's tiles once seen —
+  // clear the "New" badge on Cosmic/Botanical/Noir/Candy's tiles once seen —
   // per-device is fine for a one-time UI hint like this, same reasoning as
   // any other localStorage-backed "seen" flag. A family whose theme is
-  // already applied (e.g. already on a Field Guide palette) counts as seen
+  // already applied (e.g. already on a Cosmic palette) counts as seen
   // immediately, not just once its tile is tapped.
   const [seenFamilies, setSeenFamilies] = useState(() => {
     let stored = [];
@@ -687,7 +710,9 @@ export default function Settings() {
               {isProLoading ? 'Loading…' : isPro ? 'Pick your look' : 'One free theme per family — the rest unlock with Pro'}
             </p>
           </div>
-          <PolarityToggle theme={theme} polarity={polarity} setPolarity={setPolarity} isPending={themePending} />
+          {showPolarityToggle && (
+            <PolarityToggle theme={theme} polarity={polarity} setPolarity={setPolarity} isPending={themePending} />
+          )}
           {isProLoading ? (
             // Same reasoning as the Subscription section above: locked is
             // computed from isPro, so rendering real tiles here would

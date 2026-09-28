@@ -287,7 +287,7 @@ function PolarityToggle({ theme, polarity, setPolarity, isPending }) {
             disabled={isPending || selected}
             aria-pressed={selected}
             className={cn(
-              'flex-1 flex items-center justify-center gap-2 h-10 rounded-full border text-xs font-mono capitalize transition-colors disabled:cursor-not-allowed',
+              'flex-1 flex items-center justify-center gap-2 h-11 rounded-full border text-xs font-mono capitalize transition-colors disabled:cursor-not-allowed',
               selected ? 'border-primary/50 bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/20'
             )}
           >

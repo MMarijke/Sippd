@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap');
 /* Vintage Pastel family fonts (1950s soda shop). */
 @import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Courier+Prime:wght@400;700&family=Quicksand:wght@400;500;600;700&display=swap');
+/* Phase 2 family fonts: Cosmic, Botanical, Noir, Candy. */
+@import url('https://fonts.googleapis.com/css2?family=Michroma&family=Space+Mono:wght@400;700&family=Manrope:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Karla:wght@400;500;700&family=Bodoni+Moda:wght@500;700&family=Fragment+Mono&family=Jost:wght@400;500&family=Fredoka:wght@500;600;700&family=Chivo+Mono:wght@400;500&family=Nunito:wght@400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -905,6 +907,718 @@
     --breakdown-rare: 344 65% 46.0%;
     --breakdown-ultra: 22 70% 38.0%;
     --breakdown-legendary: 60 75% 24.0%;
+  }
+
+  /* ============================================================================
+     PHASE 2 — Cosmic, Botanical, Noir, Candy. 24 new themes, 12 total now 36.
+     Single fixed polarity per theme, NOT the [data-theme][data-polarity]
+     dual-rendering Phase 1 themes get -- confirmed explicitly: every value
+     here was authored and audited as one native rendering (Cosmic/Noir dark,
+     Candy light, Botanical mixed PER THEME -- Sage/Moss/Meadow light,
+     Forest/Fern/Terracotta dark, fixed by identity, not user-toggleable).
+     The Settings polarity toggle only renders for a family where every theme
+     actually has both a dark and light block; these selectors are plain
+     [data-theme="x"], unconditional on [data-polarity], so they render
+     correctly regardless of whatever that attribute happens to hold.
+
+     --primary-foreground/--accent-foreground are NOT the single near-black
+     constant every Phase 1 theme uses -- that constant fails 4.5:1 against
+     14 of these 24 mains and all 24 supporting colors, since several of
+     these families are deliberately more muted/dark than Neon Arcade or
+     Vintage Pastel ever were (Noir's whole point; Botanical's dark trio;
+     Cosmic's night-sky darks). Each theme below picks near-black
+     (240 20% 5%) or near-white (0 0% 98%), whichever actually clears 4.5:1
+     against that theme's own final main/supporting -- computed per theme,
+     not assumed.
+
+     card/secondary/muted/border/input follow the same formula already
+     implicit in every Phase 1 theme (reverse-engineered from the shipped
+     values, not a new rule): same hue/saturation as --background, offset in
+     lightness -- dark themes: card bg+4, secondary bg+14, muted bg+5,
+     border/input bg+13 (saturation -2/-4/-6/-2 respectively). Light themes:
+     card bg+1, secondary bg-9, muted bg-5, border/input bg-14 (saturation
+     -3/-2/-4/-2). --ring is always --primary, matching every existing theme.
+
+     --breakdown-* uses the exact formula already shipped (verified against
+     power-up's real numbers): hue = primary-hue + tier-index*38 (Common=0
+     through Legendary=4), saturation = 55 + tier-index*5, lightness
+     binary-searched for ~3.5:1 against this theme's own background.
+
+     muted-foreground is set only for the 9 light-background themes (Sage,
+     Moss, Meadow, and all 6 Candy) -- the 15 dark ones inherit the existing
+     invariant value from :root/.dark, same as every Phase 1 dark theme.
+
+     This whole revision cycle (contrast fixes, hue-collision fixes, and the
+     on-color/restoration pass below) followed an /impeccable critique with
+     two independent review passes -- see .impeccable/critique/ for the full
+     writeup. The single most consequential finding: round 1 of this pass
+     independently re-targeted every mutable main/supporting to the same
+     ~3.4:1 contrast ratio even when the source value already cleared the
+     floor, which (a) needlessly muddied several colors that never needed
+     touching and (b) collapsed the source palette's own main/supporting
+     lightness relationship into near-identical pairs wherever a background
+     was dark or light enough to compress the passing range. The values
+     below only touch a color that actually fails its floor, and preserve or
+     deliberately rebuild the source's main/supporting relationship
+     otherwise (a real lightness gap where the floor allows it to survive; a
+     saturation or hue split where the background is too extreme for that
+     gap to survive intact -- Deep Space, Forest, Carbon, Crimson, Amethyst,
+     Sapphire, Emerald, Terracotta). */
+
+  /* ── Cosmic family (dark, space/astronomy) ───────────────────────────────
+     1 free + 5 Pro. Full glow, same treatment as every other theme now
+     (see the .home-gradient-bg-layer comment -- light and dark no longer
+     get different ambient treatments). */
+  [data-theme="moonlight"], [data-theme="nebula"], [data-theme="solar-flare"],
+  [data-theme="aurora"], [data-theme="deep-space"], [data-theme="stellar-gold"] {
+    --font-display: 'Michroma', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --font-body: 'Manrope', sans-serif;
+  }
+  [data-theme="moonlight"] {
+    --background: 223.3 36% 9.8%;
+    --foreground: 223.6 100% 97.8%;
+    --card: 223.3 34% 13.8%;
+    --card-foreground: 223.6 100% 97.8%;
+    --popover: 223.3 34% 13.8%;
+    --popover-foreground: 223.6 100% 97.8%;
+    --primary: 219.2 21% 75.3%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 223.3 32% 23.8%;
+    --secondary-foreground: 223.6 100% 97.8%;
+    --muted: 223.3 30% 14.8%;
+    --accent: 221.1 25% 55.5%;
+    --accent-foreground: 240.0 20% 4.9%;
+    --border: 223.3 34% 22.8%;
+    --input: 223.3 34% 22.8%;
+    --ring: 219.2 21% 75.3%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 219.2 55% 49.8%;
+    --breakdown-uncommon: 257.2 60% 58.2%;
+    --breakdown-rare: 295.2 65% 45.8%;
+    --breakdown-ultra: 333.2 70% 46.9%;
+    --breakdown-legendary: 11.2 75% 44.0%;
+  }
+  [data-theme="nebula"] {
+    --background: 262.9 49% 8.4%;
+    --foreground: 272.7 100% 97.8%;
+    --card: 262.9 47% 12.4%;
+    --card-foreground: 272.7 100% 97.8%;
+    --popover: 262.9 47% 12.4%;
+    --popover-foreground: 272.7 100% 97.8%;
+    --primary: 250.1 100% 68.6%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 262.9 45% 22.4%;
+    --secondary-foreground: 272.7 100% 97.8%;
+    --muted: 262.9 43% 13.4%;
+    --accent: 225.3 76% 62.2%;
+    --accent-foreground: 240.0 20% 4.9%;
+    --border: 262.9 47% 21.4%;
+    --input: 262.9 47% 21.4%;
+    --ring: 250.1 100% 68.6%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 250.1 55% 57.3%;
+    --breakdown-uncommon: 288.1 60% 47.6%;
+    --breakdown-rare: 326.1 65% 45.5%;
+    --breakdown-ultra: 4.1 70% 45.8%;
+    --breakdown-legendary: 42.1 75% 29.9%;
+  }
+  [data-theme="solar-flare"] {
+    --background: 16.7 53% 6.7%;
+    --foreground: 26.3 100% 96.9%;
+    --card: 16.7 51% 10.7%;
+    --card-foreground: 26.3 100% 96.9%;
+    --popover: 16.7 51% 10.7%;
+    --popover-foreground: 26.3 100% 96.9%;
+    --primary: 14.4 100% 63.1%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 16.7 49% 20.7%;
+    --secondary-foreground: 26.3 100% 96.9%;
+    --muted: 16.7 47% 11.7%;
+    --accent: 35.2 100% 63.9%;
+    --accent-foreground: 240.0 20% 4.9%;
+    --border: 16.7 51% 19.7%;
+    --input: 16.7 51% 19.7%;
+    --ring: 14.4 100% 63.1%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 14.4 55% 43.2%;
+    --breakdown-uncommon: 52.4 60% 28.9%;
+    --breakdown-rare: 90.4 65% 27.9%;
+    --breakdown-ultra: 128.4 70% 28.3%;
+    --breakdown-legendary: 166.4 75% 26.8%;
+  }
+  [data-theme="aurora"] {
+    --background: 176.0 48% 6.1%;
+    --foreground: 158.6 100% 97.3%;
+    --card: 176.0 46% 10.1%;
+    --card-foreground: 158.6 100% 97.3%;
+    --popover: 176.0 46% 10.1%;
+    --popover-foreground: 158.6 100% 97.3%;
+    --primary: 161.4 71% 57.5%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 176.0 44% 20.1%;
+    --secondary-foreground: 158.6 100% 97.3%;
+    --muted: 176.0 42% 11.1%;
+    --accent: 234.8 100% 70.4%;
+    --accent-foreground: 240.0 20% 4.9%;
+    --border: 176.0 46% 19.1%;
+    --input: 176.0 46% 19.1%;
+    --ring: 161.4 71% 57.5%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 161.4 55% 30.7%;
+    --breakdown-uncommon: 199.4 60% 37.4%;
+    --breakdown-rare: 237.4 65% 60.2%;
+    --breakdown-ultra: 275.4 70% 54.4%;
+    --breakdown-legendary: 313.4 75% 43.8%;
+  }
+  [data-theme="deep-space"] {
+    --background: 228.0 56% 7.1%;
+    --foreground: 227.1 100% 97.3%;
+    --card: 228.0 54% 11.1%;
+    --card-foreground: 227.1 100% 97.3%;
+    --popover: 228.0 54% 11.1%;
+    --popover-foreground: 227.1 100% 97.3%;
+    --primary: 228.4 52% 55.5%;
+    --primary-foreground: 0.0 0% 98.0%;
+    --secondary: 228.0 52% 21.1%;
+    --secondary-foreground: 227.1 100% 97.3%;
+    --muted: 228.0 50% 12.1%;
+    --accent: 229.2 76% 55.1%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 228.0 54% 20.1%;
+    --input: 228.0 54% 20.1%;
+    --ring: 228.4 52% 55.5%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 228.4 55% 53.3%;
+    --breakdown-uncommon: 266.4 60% 54.8%;
+    --breakdown-rare: 304.4 65% 42.7%;
+    --breakdown-ultra: 342.4 70% 45.8%;
+    --breakdown-legendary: 20.4 75% 38.7%;
+  }
+  [data-theme="stellar-gold"] {
+    --background: 45.0 35% 6.7%;
+    --foreground: 45.0 100% 96.9%;
+    --card: 45.0 33% 10.7%;
+    --card-foreground: 45.0 100% 96.9%;
+    --popover: 45.0 33% 10.7%;
+    --popover-foreground: 45.0 100% 96.9%;
+    --primary: 45.7 69% 65.5%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 45.0 31% 20.7%;
+    --secondary-foreground: 45.0 100% 96.9%;
+    --muted: 45.0 29% 11.7%;
+    --accent: 44.4 42% 46.7%;
+    --accent-foreground: 240.0 20% 4.9%;
+    --border: 45.0 33% 19.7%;
+    --input: 45.0 33% 19.7%;
+    --ring: 45.7 69% 65.5%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 45.7 55% 32.3%;
+    --breakdown-uncommon: 83.7 60% 29.0%;
+    --breakdown-rare: 121.7 65% 29.6%;
+    --breakdown-ultra: 159.7 70% 28.3%;
+    --breakdown-legendary: 197.7 75% 34.7%;
+  }
+
+  /* ── Botanical family (natural/earthy, mixed polarity) ───────────────────
+     1 free + 5 Pro. Sage/Moss/Meadow are light-background, Forest/Fern/
+     Terracotta are dark-background -- that split is each theme's own fixed
+     identity (confirmed explicitly), not something the polarity toggle
+     controls; the toggle doesn't render for this family at all. Full glow
+     on every one of the six, same as every other family. */
+  [data-theme="sage"], [data-theme="forest"], [data-theme="fern"],
+  [data-theme="moss"], [data-theme="terracotta"], [data-theme="meadow"] {
+    --font-display: 'Fraunces', serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-body: 'Karla', sans-serif;
+  }
+  [data-theme="sage"] {
+    --background: 44.0 41% 92.7%;
+    --foreground: 114.5 9% 24.1%;
+    --card: 44.0 38% 93.7%;
+    --card-foreground: 114.5 9% 24.1%;
+    --popover: 44.0 38% 93.7%;
+    --popover-foreground: 114.5 9% 24.1%;
+    --primary: 125.9 17% 46.5%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 44.0 39% 83.7%;
+    --secondary-foreground: 114.5 9% 24.1%;
+    --muted: 44.0 37% 87.7%;
+    --muted-foreground: 115.4 6% 40.6%;
+    --accent: 126.3 13% 28.0%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 44.0 39% 78.7%;
+    --input: 44.0 39% 78.7%;
+    --ring: 125.9 17% 46.5%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 125.9 55% 37.1%;
+    --breakdown-uncommon: 163.9 60% 35.2%;
+    --breakdown-rare: 201.9 65% 44.8%;
+    --breakdown-ultra: 239.9 70% 67.5%;
+    --breakdown-legendary: 277.9 75% 61.7%;
+  }
+  [data-theme="forest"] {
+    --background: 150.0 28% 7.1%;
+    --foreground: 135.0 36% 95.7%;
+    --card: 150.0 26% 11.1%;
+    --card-foreground: 135.0 36% 95.7%;
+    --popover: 150.0 26% 11.1%;
+    --popover-foreground: 135.0 36% 95.7%;
+    --primary: 151.1 31% 35.3%;
+    --primary-foreground: 0.0 0% 98.0%;
+    --secondary: 150.0 24% 21.1%;
+    --secondary-foreground: 135.0 36% 95.7%;
+    --muted: 150.0 22% 12.1%;
+    --accent: 152.3 76% 26.7%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 150.0 26% 20.1%;
+    --input: 150.0 26% 20.1%;
+    --ring: 151.1 31% 35.3%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 151.1 55% 31.0%;
+    --breakdown-uncommon: 189.1 60% 32.8%;
+    --breakdown-rare: 227.1 65% 55.5%;
+    --breakdown-ultra: 265.1 70% 57.7%;
+    --breakdown-legendary: 303.1 75% 42.5%;
+  }
+  [data-theme="fern"] {
+    --background: 132.0 25% 7.8%;
+    --foreground: 124.6 100% 97.5%;
+    --card: 132.0 23% 11.8%;
+    --card-foreground: 124.6 100% 97.5%;
+    --popover: 132.0 23% 11.8%;
+    --popover-foreground: 124.6 100% 97.5%;
+    --primary: 124.7 27% 53.3%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 132.0 21% 21.8%;
+    --secondary-foreground: 124.6 100% 97.5%;
+    --muted: 132.0 19% 12.8%;
+    --accent: 126.7 28% 37.3%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 132.0 23% 20.8%;
+    --input: 132.0 23% 20.8%;
+    --ring: 124.7 27% 53.3%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 124.7 55% 31.8%;
+    --breakdown-uncommon: 162.7 60% 30.3%;
+    --breakdown-rare: 200.7 65% 38.0%;
+    --breakdown-ultra: 238.7 70% 61.8%;
+    --breakdown-legendary: 276.7 75% 54.8%;
+  }
+  [data-theme="moss"] {
+    --background: 56.0 33% 91.2%;
+    --foreground: 67.2 23% 21.8%;
+    --card: 56.0 30% 92.2%;
+    --card-foreground: 67.2 23% 21.8%;
+    --popover: 56.0 30% 92.2%;
+    --popover-foreground: 67.2 23% 21.8%;
+    --primary: 61.3 21% 42.4%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 56.0 31% 82.2%;
+    --secondary-foreground: 67.2 23% 21.8%;
+    --muted: 56.0 29% 86.2%;
+    --muted-foreground: 66.2 16% 36.7%;
+    --accent: 61.7 25% 28.6%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 56.0 31% 77.2%;
+    --input: 56.0 31% 77.2%;
+    --ring: 61.3 21% 42.4%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 61.3 55% 33.0%;
+    --breakdown-uncommon: 99.3 60% 34.9%;
+    --breakdown-rare: 137.3 65% 34.6%;
+    --breakdown-ultra: 175.3 70% 32.4%;
+    --breakdown-legendary: 213.3 75% 53.1%;
+  }
+  [data-theme="terracotta"] {
+    --background: 18.8 38% 8.2%;
+    --foreground: 23.3 100% 96.5%;
+    --card: 18.8 36% 12.2%;
+    --card-foreground: 23.3 100% 96.5%;
+    --popover: 18.8 36% 12.2%;
+    --popover-foreground: 23.3 100% 96.5%;
+    --primary: 7.8 49% 46.1%;
+    --primary-foreground: 0.0 0% 98.0%;
+    --secondary: 18.8 34% 22.2%;
+    --secondary-foreground: 23.3 100% 96.5%;
+    --muted: 18.8 32% 13.2%;
+    --accent: 37.7 35% 43.5%;
+    --accent-foreground: 240.0 20% 4.9%;
+    --border: 18.8 36% 21.2%;
+    --input: 18.8 36% 21.2%;
+    --ring: 7.8 49% 46.1%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 7.8 55% 46.7%;
+    --breakdown-uncommon: 45.8 60% 31.5%;
+    --breakdown-rare: 83.8 65% 28.2%;
+    --breakdown-ultra: 121.8 70% 29.0%;
+    --breakdown-legendary: 159.8 75% 27.7%;
+  }
+  [data-theme="meadow"] {
+    --background: 54.8 53% 91.6%;
+    --foreground: 69.1 29% 22.5%;
+    --card: 54.8 50% 92.6%;
+    --card-foreground: 69.1 29% 22.5%;
+    --popover: 54.8 50% 92.6%;
+    --popover-foreground: 69.1 29% 22.5%;
+    --primary: 99.8 46% 38.8%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 54.8 51% 82.6%;
+    --secondary-foreground: 69.1 29% 22.5%;
+    --muted: 54.8 49% 86.6%;
+    --muted-foreground: 68.1 20% 36.3%;
+    --accent: 101.4 40% 20.4%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 54.8 51% 77.6%;
+    --input: 54.8 51% 77.6%;
+    --ring: 99.8 46% 38.8%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 99.8 55% 36.6%;
+    --breakdown-uncommon: 137.8 60% 36.2%;
+    --breakdown-rare: 175.8 65% 34.1%;
+    --breakdown-ultra: 213.8 70% 54.7%;
+    --breakdown-legendary: 251.8 75% 67.2%;
+  }
+
+  /* ── Noir family (dark, luxury/minimalist) ────────────────────────────────
+     1 free + 5 Pro. Carbon's near-zero main saturation (4%) is intentional
+     -- the one theme in the whole catalogue meant to read as nearly
+     colorless -- its supporting color carries a real hue (29% saturation)
+     so derived chrome isn't gray-on-gray. */
+  [data-theme="carbon"], [data-theme="crimson"], [data-theme="amethyst"],
+  [data-theme="sapphire"], [data-theme="champagne"], [data-theme="emerald"] {
+    --font-display: 'Bodoni Moda', serif;
+    --font-mono: 'Fragment Mono', monospace;
+    --font-body: 'Jost', sans-serif;
+  }
+  [data-theme="carbon"] {
+    --background: 220.0 8% 7.3%;
+    --foreground: 0.0 0% 96.1%;
+    --card: 220.0 6% 11.3%;
+    --card-foreground: 0.0 0% 96.1%;
+    --popover: 220.0 6% 11.3%;
+    --popover-foreground: 0.0 0% 96.1%;
+    --primary: 213.3 4% 45.3%;
+    --primary-foreground: 0.0 0% 98.0%;
+    --secondary: 220.0 4% 21.3%;
+    --secondary-foreground: 0.0 0% 96.1%;
+    --muted: 220.0 2% 12.3%;
+    --accent: 212.9 29% 42.4%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 220.0 6% 20.3%;
+    --input: 220.0 6% 20.3%;
+    --ring: 213.3 4% 45.3%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 213.3 55% 44.9%;
+    --breakdown-uncommon: 251.3 60% 58.5%;
+    --breakdown-rare: 289.3 65% 47.6%;
+    --breakdown-ultra: 327.3 70% 45.6%;
+    --breakdown-legendary: 5.3 75% 45.5%;
+  }
+  [data-theme="crimson"] {
+    --background: 343.6 33% 6.5%;
+    --foreground: 355.0 100% 97.6%;
+    --card: 343.6 31% 10.5%;
+    --card-foreground: 355.0 100% 97.6%;
+    --popover: 343.6 31% 10.5%;
+    --popover-foreground: 355.0 100% 97.6%;
+    --primary: 351.9 52% 47.5%;
+    --primary-foreground: 0.0 0% 98.0%;
+    --secondary: 343.6 29% 20.5%;
+    --secondary-foreground: 355.0 100% 97.6%;
+    --muted: 343.6 27% 11.5%;
+    --accent: 349.4 23% 44.1%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 343.6 31% 19.5%;
+    --input: 343.6 31% 19.5%;
+    --ring: 351.9 52% 47.5%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 351.9 55% 47.9%;
+    --breakdown-uncommon: 29.9 60% 36.2%;
+    --breakdown-rare: 67.9 65% 26.3%;
+    --breakdown-ultra: 105.9 70% 27.8%;
+    --breakdown-legendary: 143.9 75% 27.0%;
+  }
+  [data-theme="amethyst"] {
+    --background: 273.3 26% 6.9%;
+    --foreground: 276.0 63% 96.9%;
+    --card: 273.3 24% 10.9%;
+    --card-foreground: 276.0 63% 96.9%;
+    --popover: 273.3 24% 10.9%;
+    --popover-foreground: 276.0 63% 96.9%;
+    --primary: 271.9 27% 54.9%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 273.3 22% 20.9%;
+    --secondary-foreground: 276.0 63% 96.9%;
+    --muted: 273.3 20% 11.9%;
+    --accent: 273.0 58% 51.8%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 273.3 24% 19.9%;
+    --input: 273.3 24% 19.9%;
+    --ring: 271.9 27% 54.9%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 271.9 55% 53.1%;
+    --breakdown-uncommon: 309.9 60% 44.2%;
+    --breakdown-rare: 347.9 65% 47.2%;
+    --breakdown-ultra: 25.9 70% 37.0%;
+    --breakdown-legendary: 63.9 75% 24.8%;
+  }
+  [data-theme="sapphire"] {
+    --background: 215.3 52% 6.5%;
+    --foreground: 218.6 100% 97.3%;
+    --card: 215.3 50% 10.5%;
+    --card-foreground: 218.6 100% 97.3%;
+    --popover: 215.3 50% 10.5%;
+    --popover-foreground: 218.6 100% 97.3%;
+    --primary: 216.1 42% 52.4%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 215.3 48% 20.5%;
+    --secondary-foreground: 218.6 100% 97.3%;
+    --muted: 215.3 46% 11.5%;
+    --accent: 215.9 78% 44.9%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 215.3 50% 19.5%;
+    --input: 215.3 50% 19.5%;
+    --ring: 216.1 42% 52.4%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 216.1 55% 46.2%;
+    --breakdown-uncommon: 254.1 60% 57.5%;
+    --breakdown-rare: 292.1 65% 45.5%;
+    --breakdown-ultra: 330.1 70% 45.1%;
+    --breakdown-legendary: 8.1 75% 43.8%;
+  }
+  [data-theme="champagne"] {
+    --background: 40.0 24% 7.3%;
+    --foreground: 42.9 100% 95.9%;
+    --card: 40.0 22% 11.3%;
+    --card-foreground: 42.9 100% 95.9%;
+    --popover: 40.0 22% 11.3%;
+    --popover-foreground: 42.9 100% 95.9%;
+    --primary: 24.9 41% 62.9%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 40.0 20% 21.3%;
+    --secondary-foreground: 42.9 100% 95.9%;
+    --muted: 40.0 18% 12.3%;
+    --accent: 24.0 29% 43.3%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 40.0 22% 20.3%;
+    --input: 40.0 22% 20.3%;
+    --ring: 24.9 41% 62.9%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 24.9 55% 39.6%;
+    --breakdown-uncommon: 62.9 60% 27.6%;
+    --breakdown-rare: 100.9 65% 29.1%;
+    --breakdown-ultra: 138.9 70% 28.7%;
+    --breakdown-legendary: 176.9 75% 27.0%;
+  }
+  [data-theme="emerald"] {
+    --background: 156.0 36% 5.5%;
+    --foreground: 155.0 60% 96.1%;
+    --card: 156.0 34% 9.5%;
+    --card-foreground: 155.0 60% 96.1%;
+    --popover: 156.0 34% 9.5%;
+    --popover-foreground: 155.0 60% 96.1%;
+    --primary: 179.1 32% 39.6%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 156.0 32% 19.5%;
+    --secondary-foreground: 155.0 60% 96.1%;
+    --muted: 156.0 30% 10.5%;
+    --accent: 157.6 84% 24.9%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 156.0 34% 18.5%;
+    --input: 156.0 34% 18.5%;
+    --ring: 179.1 32% 39.6%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 179.1 55% 29.7%;
+    --breakdown-uncommon: 217.1 60% 47.7%;
+    --breakdown-rare: 255.1 65% 58.5%;
+    --breakdown-ultra: 293.1 70% 45.1%;
+    --breakdown-legendary: 331.1 75% 44.9%;
+  }
+
+  /* ── Candy family (light, playful) ────────────────────────────────────────
+     1 free + 5 Pro. Every main/supporting here failed the 3:1 floor as
+     given -- these were designed as pastel-bright accents on white, the
+     same failure mode Vintage Pastel's originals had in Phase 1. */
+  [data-theme="bubblegum"], [data-theme="blue-pop"], [data-theme="grape-candy"],
+  [data-theme="orange-crush"], [data-theme="sour-apple"], [data-theme="cherry-pop"] {
+    --font-display: 'Fredoka', sans-serif;
+    --font-mono: 'Chivo Mono', monospace;
+    --font-body: 'Nunito', sans-serif;
+  }
+  [data-theme="bubblegum"] {
+    --background: 335.0 100% 97.6%;
+    --foreground: 334.3 25% 27.3%;
+    --card: 335.0 97% 98.6%;
+    --card-foreground: 334.3 25% 27.3%;
+    --popover: 335.0 97% 98.6%;
+    --popover-foreground: 334.3 25% 27.3%;
+    --primary: 336.7 100% 56.1%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 335.0 98% 88.6%;
+    --secondary-foreground: 334.3 25% 27.3%;
+    --muted: 335.0 96% 92.6%;
+    --muted-foreground: 334.9 18% 46.9%;
+    --accent: 336.9 73% 42.0%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 335.0 98% 83.6%;
+    --input: 335.0 98% 83.6%;
+    --ring: 336.7 100% 56.1%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 336.7 55% 58.6%;
+    --breakdown-uncommon: 14.7 60% 53.3%;
+    --breakdown-rare: 52.7 65% 34.8%;
+    --breakdown-ultra: 90.7 70% 33.8%;
+    --breakdown-legendary: 128.7 75% 33.9%;
+  }
+  [data-theme="blue-pop"] {
+    --background: 200.0 100% 97.1%;
+    --foreground: 200.9 36% 25.1%;
+    --card: 200.0 97% 98.1%;
+    --card-foreground: 200.9 36% 25.1%;
+    --popover: 200.0 97% 98.1%;
+    --popover-foreground: 200.9 36% 25.1%;
+    --primary: 217.1 100% 60.4%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 200.0 98% 88.1%;
+    --secondary-foreground: 200.9 36% 25.1%;
+    --muted: 200.0 96% 92.1%;
+    --muted-foreground: 201.1 25% 42.4%;
+    --accent: 217.1 67% 44.3%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 200.0 98% 83.1%;
+    --input: 200.0 98% 83.1%;
+    --ring: 217.1 100% 60.4%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 217.1 55% 57.7%;
+    --breakdown-uncommon: 255.1 60% 65.8%;
+    --breakdown-rare: 293.1 65% 58.3%;
+    --breakdown-ultra: 331.1 70% 59.1%;
+    --breakdown-legendary: 9.1 75% 56.4%;
+  }
+  [data-theme="grape-candy"] {
+    --background: 270.0 100% 97.3%;
+    --foreground: 271.3 32% 28.2%;
+    --card: 270.0 97% 98.3%;
+    --card-foreground: 271.3 32% 28.2%;
+    --popover: 270.0 97% 98.3%;
+    --popover-foreground: 271.3 32% 28.2%;
+    --primary: 267.4 100% 67.8%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 270.0 98% 88.3%;
+    --secondary-foreground: 271.3 32% 28.2%;
+    --muted: 270.0 96% 92.3%;
+    --muted-foreground: 272.1 23% 48.6%;
+    --accent: 265.0 61% 51.2%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 270.0 98% 83.3%;
+    --input: 270.0 98% 83.3%;
+    --ring: 267.4 100% 67.8%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 267.4 55% 62.4%;
+    --breakdown-uncommon: 305.4 60% 55.0%;
+    --breakdown-rare: 343.4 65% 58.8%;
+    --breakdown-ultra: 21.4 70% 47.9%;
+    --breakdown-legendary: 59.4 75% 30.2%;
+  }
+  [data-theme="orange-crush"] {
+    --background: 26.7 100% 96.5%;
+    --foreground: 16.8 40% 24.7%;
+    --card: 26.7 97% 97.5%;
+    --card-foreground: 16.8 40% 24.7%;
+    --popover: 26.7 97% 97.5%;
+    --popover-foreground: 16.8 40% 24.7%;
+    --primary: 21.3 100% 45.9%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 26.7 98% 87.5%;
+    --secondary-foreground: 16.8 40% 24.7%;
+    --muted: 26.7 96% 91.5%;
+    --muted-foreground: 17.1 28% 44.5%;
+    --accent: 18.6 80% 32.5%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 26.7 98% 82.5%;
+    --input: 26.7 98% 82.5%;
+    --ring: 21.3 100% 45.9%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 21.3 55% 50.1%;
+    --breakdown-uncommon: 59.3 60% 33.5%;
+    --breakdown-rare: 97.3 65% 35.3%;
+    --breakdown-ultra: 135.3 70% 34.9%;
+    --breakdown-legendary: 173.3 75% 33.1%;
+  }
+  [data-theme="sour-apple"] {
+    --background: 87.3 100% 95.7%;
+    --foreground: 89.3 36% 23.3%;
+    --card: 87.3 97% 96.7%;
+    --card-foreground: 89.3 36% 23.3%;
+    --popover: 87.3 97% 96.7%;
+    --popover-foreground: 89.3 36% 23.3%;
+    --primary: 82.0 74% 33.7%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 87.3 98% 86.7%;
+    --secondary-foreground: 89.3 36% 23.3%;
+    --muted: 87.3 96% 90.7%;
+    --muted-foreground: 88.8 25% 37.6%;
+    --accent: 89.4 55% 16.7%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 87.3 98% 81.7%;
+    --input: 87.3 98% 81.7%;
+    --ring: 82.0 74% 33.7%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 82.0 55% 37.1%;
+    --breakdown-uncommon: 120.0 60% 38.1%;
+    --breakdown-rare: 158.0 65% 36.2%;
+    --breakdown-ultra: 196.0 70% 42.8%;
+    --breakdown-legendary: 234.0 75% 68.0%;
+  }
+  [data-theme="cherry-pop"] {
+    --background: 351.4 100% 97.3%;
+    --foreground: 347.8 37% 25.7%;
+    --card: 351.4 97% 98.3%;
+    --card-foreground: 347.8 37% 25.7%;
+    --popover: 351.4 97% 98.3%;
+    --popover-foreground: 347.8 37% 25.7%;
+    --primary: 352.2 100% 57.6%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 351.4 98% 88.3%;
+    --secondary-foreground: 347.8 37% 25.7%;
+    --muted: 351.4 96% 92.3%;
+    --muted-foreground: 347.1 27% 48.0%;
+    --accent: 350.8 67% 42.4%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 351.4 98% 83.3%;
+    --input: 351.4 98% 83.3%;
+    --ring: 352.2 100% 57.6%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 352.2 55% 59.1%;
+    --breakdown-uncommon: 30.2 60% 44.7%;
+    --breakdown-rare: 68.2 65% 32.7%;
+    --breakdown-ultra: 106.2 70% 34.3%;
+    --breakdown-legendary: 144.2 75% 33.5%;
   }
 }
 

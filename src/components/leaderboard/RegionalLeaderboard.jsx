@@ -15,7 +15,6 @@ import ProBadge from '@/components/shared/ProBadge';
 import { withCompetitionRank } from '@/lib/ranking';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
-const MEDAL_COLORS = ['text-yellow-400', 'text-slate-300', 'text-amber-600'];
 
 export default function RegionalLeaderboard() {
   const navigate = useNavigate();
@@ -262,7 +261,7 @@ export default function RegionalLeaderboard() {
                     top of it rather than a replacement for it. */}
                 <div className="w-7 flex-shrink-0 flex flex-col items-center justify-center gap-0.5">
                   {isMedal && (
-                    <span className={cn('text-base leading-none', MEDAL_COLORS[entry.rank - 1])} aria-hidden="true">
+                    <span className="text-base leading-none" aria-hidden="true">
                       {MEDAL[entry.rank - 1]}
                     </span>
                   )}

@@ -12,7 +12,7 @@ import { describe, it, expect, vi } from 'vitest';
 // source doesn't matter, but it's written first to match how it executes.
 vi.mock('@/lib/supabaseClient', () => ({ supabase: {} }));
 
-import { getThemeChangeErrorMessage } from './useTheme';
+import { getThemeChangeErrorMessage, getRenderedTone, getThemeFamily, THEMES, FAMILY_FONT_URLS, THEME_FAMILIES } from './useTheme';
 
 // Only the pure branch of setTheme's onError handler — the optimistic
 // cache update/rollback around it lives inside react-query's own hook
@@ -39,5 +39,42 @@ describe('getThemeChangeErrorMessage', () => {
   it('does not crash on a null/undefined error', () => {
     expect(getThemeChangeErrorMessage(null)).toBe('Failed to change theme');
     expect(getThemeChangeErrorMessage(undefined)).toBe('Failed to change theme');
+  });
+});
+
+// [data-tone] drives the medal/overlap tokens' light-vs-dark values, so
+// it has to report what actually renders, not the stored preference.
+describe('getRenderedTone', () => {
+  const byId = id => THEMES.find(t => t.id === id);
+
+  it('follows the stored polarity for a theme with both renderings', () => {
+    expect(getRenderedTone(byId('power-up'), 'dark')).toBe('dark');
+    expect(getRenderedTone(byId('power-up'), 'light')).toBe('light');
+  });
+
+  it('ignores the stored polarity for a fixed-light Phase 2 theme', () => {
+    expect(getRenderedTone(byId('sage'), 'dark')).toBe('light');
+  });
+
+  it('ignores the stored polarity for a fixed-dark Phase 2 theme', () => {
+    expect(getRenderedTone(byId('forest'), 'light')).toBe('dark');
+  });
+
+  it('falls back to dark for an unknown theme, matching :root', () => {
+    expect(getRenderedTone(undefined, 'light')).toBe('dark');
+  });
+});
+
+describe('getThemeFamily / FAMILY_FONT_URLS', () => {
+  it('finds the family a theme belongs to', () => {
+    expect(getThemeFamily('sage')?.id).toBe('botanical');
+    expect(getThemeFamily('nope')).toBeNull();
+  });
+
+  it('has an on-demand font URL for every family except the :root default', () => {
+    for (const family of THEME_FAMILIES) {
+      if (family.id === 'neon-arcade') expect(FAMILY_FONT_URLS[family.id]).toBeUndefined();
+      else expect(FAMILY_FONT_URLS[family.id]).toMatch(/^https:\/\/fonts\.googleapis\.com\//);
+    }
   });
 });

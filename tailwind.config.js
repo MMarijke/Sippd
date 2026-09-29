@@ -67,6 +67,12 @@ module.exports = {
   				ultra: 'hsl(var(--rarity-ultra))',
   				legendary: 'hsl(var(--rarity-legendary))',
   			},
+  			medal: {
+  				gold: 'hsl(var(--medal-gold))',
+  				silver: 'hsl(var(--medal-silver))',
+  				bronze: 'hsl(var(--medal-bronze))',
+  			},
+  			overlap: 'hsl(var(--overlap))',
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',

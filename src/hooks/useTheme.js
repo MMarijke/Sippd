@@ -129,6 +129,48 @@ export function getThemeRendering(theme, polarity) {
   return theme?.[polarity] ?? theme?.dark ?? theme?.light ?? null;
 }
 
+// The tone that actually renders, which is what [data-tone] carries -- not
+// always the stored polarity: a fixed-polarity Phase 2 theme (Sage is
+// light, Forest is dark) ignores the stored value entirely. Falls back to
+// 'dark' for an unknown id, matching :root's dark default.
+export function getRenderedTone(theme, polarity) {
+  if (theme?.[polarity]) return polarity;
+  if (theme?.dark) return 'dark';
+  if (theme?.light) return 'light';
+  return 'dark';
+}
+
+export function getThemeFamily(themeId) {
+  return THEME_FAMILIES.find(f => f.themes.some(t => t.id === themeId)) ?? null;
+}
+
+// Each family's font trio (must match the --font-* vars its index.css
+// block sets). Neon Arcade has no entry: it's :root's default, loaded by
+// index.css's own @import for every visitor. The rest load on demand the
+// first time their family is applied, so a user only ever downloads the
+// one trio they actually see (/impeccable audit).
+export const FAMILY_FONT_URLS = {
+  'vintage-pastel': 'https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Courier+Prime:wght@400;700&family=Quicksand:wght@400;500;600;700&display=swap',
+  cosmic: 'https://fonts.googleapis.com/css2?family=Michroma&family=Space+Mono:wght@400;700&family=Manrope:wght@400;500;700&display=swap',
+  botanical: 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Karla:wght@400;500;700&display=swap',
+  noir: 'https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500;700&family=Fragment+Mono&family=Jost:wght@400;500&display=swap',
+  candy: 'https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Chivo+Mono:wght@400;500&family=Nunito:wght@400;600;700&display=swap',
+};
+
+// Appends the family's stylesheet once; later calls for the same family
+// are no-ops, so switching back and forth never duplicates the <link>.
+function ensureFamilyFonts(familyId) {
+  const href = FAMILY_FONT_URLS[familyId];
+  if (!href) return;
+  const id = `family-fonts-${familyId}`;
+  if (document.getElementById(id)) return;
+  const link = document.createElement('link');
+  link.id = id;
+  link.rel = 'stylesheet';
+  link.href = href;
+  document.head.appendChild(link);
+}
+
 // The polarity toggle only makes sense for a family where every theme
 // genuinely has both renderings -- a family with any single-polarity theme
 // (Botanical, or any Phase 2 family) never shows it, since toggling
@@ -200,8 +242,11 @@ export function useTheme() {
   const polarity = data?.polarity ?? DEFAULT_POLARITY;
 
   useEffect(() => {
+    const match = THEMES.find(t => t.id === theme);
     document.documentElement.dataset.theme = theme;
     document.documentElement.dataset.polarity = polarity;
+    document.documentElement.dataset.tone = getRenderedTone(match, polarity);
+    ensureFamilyFonts(getThemeFamily(theme)?.id);
 
     // Mobile browser chrome (the address bar / status bar strip) doesn't
     // read CSS variables, so it has to be told the active background
@@ -211,7 +256,6 @@ export function useTheme() {
     // visibly wrong (a light polarity's near-white background under a
     // chrome bar left over from a dark one).
     const meta = document.querySelector('meta[name="theme-color"]');
-    const match = THEMES.find(t => t.id === theme);
     const rendering = getThemeRendering(match, polarity);
     if (meta && rendering) meta.setAttribute('content', rendering.background);
   }, [theme, polarity]);

@@ -13,9 +13,9 @@ import { useFavourite } from '@/hooks/useFavourite';
 import { toast } from 'sonner';
 
 const MEDAL_COLORS = [
-  'text-yellow-400 border-yellow-400/40 bg-yellow-400/5',
-  'text-slate-300 border-slate-300/40 bg-slate-300/5',
-  'text-amber-600 border-amber-600/40 bg-amber-600/5',
+  'text-medal-gold border-medal-gold/40 bg-medal-gold/5',
+  'text-medal-silver border-medal-silver/40 bg-medal-silver/5',
+  'text-medal-bronze border-medal-bronze/40 bg-medal-bronze/5',
 ];
 
 // Rows are heavier than Collection's grid cards (medal styling, favourite

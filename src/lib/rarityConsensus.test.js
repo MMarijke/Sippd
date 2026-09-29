@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeConsensus, getConfidence, getDisplayRarity, getItemScore } from './rarityConsensus';
+import { computeConsensus, computeTrustedStats, getConfidence, getDisplayRarity, getItemScore } from './rarityConsensus';
 
 describe('getConfidence', () => {
   it('is unrated below 5 votes', () => {
@@ -60,5 +60,36 @@ describe('getItemScore', () => {
   it('scores off community consensus once confirmed', () => {
     const sharedCan = { total_votes: 20, consensus_rarity: 'Ultra Rare' };
     expect(getItemScore({ can_rarity: 'Common' }, sharedCan)).toBe(4);
+  });
+});
+
+// Must agree with sync_leaderboard_for_user() so a signed-out visitor's
+// view of a profile shows the same score and rare pulls the leaderboard
+// ranks by (20260914000000_harden_leaderboard_rarity_trust.sql).
+describe('computeTrustedStats', () => {
+  const map = {
+    a: { consensus_rarity: 'Legendary', total_votes: 20 },
+    b: { consensus_rarity: 'Common', total_votes: 1 },
+    c: { consensus_rarity: null, total_votes: 0 },
+  };
+
+  it('scores and counts rare pulls from consensus_rarity only', () => {
+    const items = [{ can_id: 'a' }, { can_id: 'b' }];
+    expect(computeTrustedStats(items, map)).toEqual({ score: 6, rarePulls: 1 });
+  });
+
+  it("ignores the owner's own can_rarity snapshot, even for a thinly voted can", () => {
+    // getItemScore would trust can_rarity here (unrated confidence); the
+    // leaderboard doesn't, and neither may this.
+    const items = [{ can_id: 'b', can_rarity: 'Legendary' }];
+    expect(computeTrustedStats(items, map)).toEqual({ score: 1, rarePulls: 0 });
+  });
+
+  it('scores a can with no consensus as 1, like the SQL else-branch', () => {
+    expect(computeTrustedStats([{ can_id: 'c' }], map)).toEqual({ score: 1, rarePulls: 0 });
+  });
+
+  it('skips items with no shared can, like the SQL inner join', () => {
+    expect(computeTrustedStats([{ can_id: 'missing', can_rarity: 'Rare' }], map)).toEqual({ score: 0, rarePulls: 0 });
   });
 });

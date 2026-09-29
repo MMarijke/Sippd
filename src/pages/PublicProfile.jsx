@@ -6,16 +6,19 @@ import { Zap, Star, Flame, Package, Lock, ArrowRightLeft, GitCompare, ArrowLeft,
 import { Button } from '@/components/ui/button';
 import CollectionCard from '@/components/shared/CollectionCard';
 import AchievementsSection from '@/components/shared/AchievementsSection';
-import { getDisplayRarity, getConfidence, getItemScore, RARITY_ORDER } from '@/lib/rarityConsensus';
 import { computeAchievements } from '@/lib/achievements';
 import FollowButton from '@/components/social/FollowButton';
 import TradeRequestDialog from '@/components/social/TradeRequestDialog';
 import { useMyFollows } from '@/hooks/useFollow';
 import { useProStatus } from '@/hooks/useProStatus';
 import { sortPinnedFirst } from '@/hooks/useCollectionHighlights';
+import { useProfileShowcase } from '@/hooks/useProfileShowcase';
 import ProBadge from '@/components/shared/ProBadge';
 import SippdBranding from '@/components/shared/SippdBranding';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+
+// Page size for the expanded "See all" grid; matches MostWanted's.
+const ALL_CANS_PAGE_SIZE = 30;
 
 export default function PublicProfile() {
   const urlParts = window.location.pathname.split('/u/');
@@ -132,36 +135,9 @@ export default function PublicProfile() {
 
   const isLoading = loadingProfile || loadingItems || loadingShared;
 
-  const getEffectiveRarity = (item) => {
-    const sc = sharedCansMap[item.can_id];
-    if (!sc) return item.can_rarity || 'Common';
-    const conf = getConfidence(sc.total_votes);
-    return conf === 'unrated' ? null : getDisplayRarity(sc);
-  };
-
-  // Sorted pinned-first (not just filtered) so the Trophy Case hero slot
-  // (always index 0 in CollectionCard) lands on a genuinely showcased item
-  // when the owner has pinned one, rather than an arbitrary query-order
-  // item — get_public_collection() has no ORDER BY, so the order coming
-  // back is otherwise undefined.
-  const myItems = useMemo(
-    () => sortPinnedFirst(profileItems.filter(i => i.status === 'collected'), getEffectiveRarity),
-    [profileItems, sharedCansMap]
-  );
-
-  const score = useMemo(
-    () => myItems.reduce((acc, item) => acc + getItemScore(item, sharedCansMap[item.can_id]), 0),
-    [myItems, sharedCansMap]
-  );
-
-  const rarePulls = useMemo(
-    () => myItems.filter(item => {
-      const r = getEffectiveRarity(item);
-      return r && ['Rare', 'Ultra Rare', 'Legendary'].includes(r);
-    }).length,
-    [myItems, sharedCansMap]
-  );
-
+  // Lapse-aware: public_profiles applies tick_streak()'s own rule, so an
+  // abandoned streak reads 0 here just as it does on the owner's Profile
+  // (20260929200000_public_profile_effective_streak.sql).
   const streak = profileUser?.current_streak || 0;
 
   // Achievements use the full item set (all statuses), not just collected —
@@ -171,24 +147,38 @@ export default function PublicProfile() {
     [profileItems, streak, profileUser, voteCount]
   );
 
-  // TODO: global rank needs a public leaderboard aggregate (see Leaderboard.jsx
-  // slice) — the old client-side "load everyone's collection and rank" approach
-  // is impossible under owner-scoped RLS on user_collection.
+  // The same showcase the owner curates on their own Profile, from one
+  // definition (useProfileShowcase): capped at the owner's pin limit,
+  // pinned first, with the leaderboard's own score, rare pulls and rank.
+  // This page used to compute its own -- every can uncapped, a different
+  // rare-pull rule, no rank -- so the link you shared wasn't what you'd
+  // curated. Signed-out visitors can't read leaderboard_scores, so they get
+  // the client mirror of its rule and no rank.
+  const {
+    collected, showcase, totalCount, rarityBreakdown, getEffectiveRarity,
+    score, rarePulls, rank,
+  } = useProfileShowcase({
+    userId,
+    collection: profileItems,
+    sharedCansMap,
+    isOwnerPro,
+    canReadLeaderboard: !!currentUser,
+    streak,
+    voteCount,
+    userCreatedDate: profileUser?.created_at,
+  });
 
-  // Same shape (and same unrated-items-silently-excluded behavior) as
-  // Profile's useCollectionHighlights — kept in sync by hand since this
-  // page's data (a public RPC read, not the owner-scoped table query
-  // that hook wraps) can't reuse that hook directly.
-  const rarityBreakdown = useMemo(() => {
-    const counts = {};
-    myItems.forEach(item => {
-      const r = getEffectiveRarity(item);
-      counts[r] = (counts[r] || 0) + 1;
-    });
-    return RARITY_ORDER
-      .filter(r => counts[r])
-      .map(r => ({ rarity: r, count: counts[r], pct: myItems.length ? (counts[r] / myItems.length) * 100 : 0 }));
-  }, [myItems, sharedCansMap]);
+  // "See all N cans" expands in place (there's no public collection page),
+  // a page at a time so a 1000-can collector doesn't render 1000 tiles at
+  // once. Sorted pinned-first, then rarest, like the showcase it extends.
+  const [expanded, setExpanded] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(ALL_CANS_PAGE_SIZE);
+  const allSorted = useMemo(
+    () => (expanded ? sortPinnedFirst(collected, getEffectiveRarity) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [expanded, collected, sharedCansMap]
+  );
+  const gridItems = expanded ? allSorted.slice(0, visibleCount) : showcase;
 
   const initial = profileUser?.full_name?.[0]?.toUpperCase() || '?';
   const displayName = profileUser?.full_name || 'Collector';
@@ -214,7 +204,11 @@ export default function PublicProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    // max-w-lg mx-auto: this route sits outside AppLayout (it has to work
+    // signed out), so it never got the app's phone-width column -- on the
+    // desktop browsers shared links are often opened in, tiles stretched
+    // to ~400px. Same column the rest of the app uses.
+    <div className="min-h-screen bg-background max-w-lg mx-auto">
       <div className="px-5 pt-6 pb-4 border-b border-border flex items-center gap-3">
         <button
           onClick={() => navigate(-1)}
@@ -237,6 +231,23 @@ export default function PublicProfile() {
           </div>
         </div>
       </div>
+
+      {/* Reached from Profile's "Preview": says what you're looking at and
+          how to leave it. Privacy applies here exactly as it does for a
+          stranger (canViewContent ignores isSelf in preview). */}
+      {isSelf && isPreview && (
+        <div role="status" className="mx-5 mt-4 flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2">
+          <p className="text-xs font-mono text-foreground">
+            Preview: this is how other collectors see your profile.
+          </p>
+          <button
+            onClick={() => navigate(-1)}
+            className="h-11 -my-2 -mr-1 px-2 flex-shrink-0 rounded-lg text-xs font-mono text-foreground underline underline-offset-2 hover:text-primary transition-colors"
+          >
+            Done
+          </button>
+        </div>
+      )}
 
       <div className="px-5 py-5 space-y-4 pb-16">
         {isLoading ? (
@@ -355,18 +366,48 @@ export default function PublicProfile() {
                   matching Profile.jsx's own pattern of replacing the whole
                   card with a single empty message rather than showing a
                   zero-score card with an empty grid underneath it. */}
-              {myItems.length > 0 ? (
+              {totalCount > 0 ? (
                 <CollectionCard
                   score={score}
-                  items={myItems}
+                  rank={rank}
+                  items={gridItems}
                   isPro={isOwnerPro}
                   rarityBreakdown={rarityBreakdown}
                   getEffectiveRarity={getEffectiveRarity}
                   stats={[
-                    { icon: Zap, label: 'Cans', value: myItems.length },
+                    { icon: Zap, label: 'Cans', value: totalCount },
                     { icon: Star, label: 'Rare Pulls', value: rarePulls },
                     { icon: Flame, label: 'Streak', value: streak },
                   ]}
+                  footer={totalCount > showcase.length && (
+                    <div className="mt-3 flex gap-2">
+                      {!expanded ? (
+                        <button
+                          onClick={() => setExpanded(true)}
+                          className="flex-1 h-11 rounded-xl border border-border text-xs font-mono text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors"
+                        >
+                          See all {totalCount} cans
+                        </button>
+                      ) : (
+                        <>
+                          {visibleCount < totalCount && (
+                            <button
+                              onClick={() => setVisibleCount(n => n + ALL_CANS_PAGE_SIZE)}
+                              className="flex-1 h-11 rounded-xl border border-border text-xs font-mono text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors"
+                            >
+                              Show more ({totalCount - visibleCount} left)
+                            </button>
+                          )}
+                          <button
+                            onClick={() => { setExpanded(false); setVisibleCount(ALL_CANS_PAGE_SIZE); }}
+                            className="flex-1 h-11 rounded-xl border border-border text-xs font-mono text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors"
+                          >
+                            Showcase only
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
                 />
               ) : (
                 <div className="flex flex-col items-center py-12 gap-3">

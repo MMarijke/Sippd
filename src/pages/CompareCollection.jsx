@@ -104,13 +104,16 @@ export default function CompareCollection() {
   // just cans that belong to the other collector.
   const tabColors = {
     mine: 'bg-primary/10 border-primary/30 text-primary',
-    theirs: 'bg-slate-500/10 border-slate-500/30 text-slate-400',
-    both: 'bg-amber-500/10 border-amber-500/30 text-amber-400',
+    // text-foreground, not text-muted-foreground: muted clears 4.5:1 on
+    // the bare background only, and drops under it once any tint sits
+    // behind this 11px label (Synthwave light, 4.05:1).
+    theirs: 'bg-muted-foreground/10 border-muted-foreground/30 text-foreground',
+    both: 'bg-overlap/10 border-overlap/30 text-overlap',
   };
   const activeTabColors = {
     mine: 'bg-primary/20 border-primary/50 text-primary',
-    theirs: 'bg-slate-500/20 border-slate-400/50 text-slate-300',
-    both: 'bg-amber-500/20 border-amber-400/50 text-amber-300',
+    theirs: 'bg-muted-foreground/20 border-muted-foreground/50 text-foreground',
+    both: 'bg-overlap/20 border-overlap/50 text-overlap',
   };
 
   const myName = currentUser?.user_metadata?.full_name || 'Me';
@@ -169,12 +172,12 @@ export default function CompareCollection() {
               <p className="text-xl font-display font-bold text-primary">{onlyMine.length}</p>
               <p className="text-[10px] font-mono text-muted-foreground mt-0.5">Only Mine</p>
             </div>
-            <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-3 text-center">
-              <p className="text-xl font-display font-bold text-amber-400">{inCommon.length}</p>
+            <div className="bg-overlap/5 border border-overlap/20 rounded-xl p-3 text-center">
+              <p className="text-xl font-display font-bold text-overlap">{inCommon.length}</p>
               <p className="text-[10px] font-mono text-muted-foreground mt-0.5">In Common</p>
             </div>
-            <div className="bg-slate-500/5 border border-slate-500/20 rounded-xl p-3 text-center">
-              <p className="text-xl font-display font-bold text-slate-400">{onlyTheirs.length}</p>
+            <div className="bg-muted-foreground/5 border border-muted-foreground/20 rounded-xl p-3 text-center">
+              <p className="text-xl font-display font-bold text-muted-foreground">{onlyTheirs.length}</p>
               <p className="text-[10px] font-mono text-muted-foreground mt-0.5">Only Theirs</p>
             </div>
           </div>
@@ -233,7 +236,7 @@ export default function CompareCollection() {
               const sc = sharedCansMap[item.can_id];
               const rarity = getEffectiveRarity(item);
               const imageUrl = item.can_image_url || sc?.image_url;
-              const borderColor = tab === 'mine' ? 'border-primary/30' : tab === 'theirs' ? 'border-slate-500/30' : 'border-amber-500/30';
+              const borderColor = tab === 'mine' ? 'border-primary/30' : tab === 'theirs' ? 'border-muted-foreground/30' : 'border-overlap/30';
               return (
                 <div key={item.id} className={cn('bg-card border rounded-xl overflow-hidden', borderColor)}>
                   <CanImageBox imageUrl={imageUrl} bgColor={item.can_bg_color} alt={item.can_name} className="aspect-square" iconSize="w-7 h-7" />

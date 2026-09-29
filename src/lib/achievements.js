@@ -122,6 +122,20 @@ export function selectHighlightAchievements(achievements, limit = 10) {
 }
 
 /**
+ * Profile's trophy-shelf selection: the most recent `unlockedCount`
+ * unlocked achievements, then the `lockedCount` closest to unlocking (by
+ * progress fraction, via sortAchievements). Replaces a 10-tile strip that
+ * was ~70% locked grey with every title truncated. When fewer are unlocked,
+ * locked ones fill the gap so a new collector still sees what's next.
+ */
+export function selectShelfAchievements(achievements, unlockedCount = 3, lockedCount = 2) {
+  const sorted = sortAchievements(achievements);
+  const unlocked = sorted.filter(a => a.unlocked).slice(0, unlockedCount);
+  const locked = sorted.filter(a => !a.unlocked);
+  return [...unlocked, ...locked.slice(0, lockedCount + (unlockedCount - unlocked.length))];
+}
+
+/**
  * Order the full achievements gallery the same way as the highlight strip
  * (unlocked-first, then closest-to-unlocking), uncapped — every achievement
  * still shows, just in the order that actually answers "what's next".

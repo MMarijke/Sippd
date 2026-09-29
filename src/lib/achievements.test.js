@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeAchievements, selectHighlightAchievements } from './achievements';
+import { computeAchievements, selectHighlightAchievements, selectShelfAchievements } from './achievements';
 
 function collectedCan(overrides = {}) {
   return {
@@ -79,5 +79,37 @@ describe('selectHighlightAchievements', () => {
   it('respects the limit', () => {
     const achievements = computeAchievements([], 0, 0, null);
     expect(selectHighlightAchievements(achievements, 3)).toHaveLength(3);
+  });
+});
+
+describe('selectShelfAchievements', () => {
+  const a = (key, unlocked, extra = {}) => ({ key, unlocked, ...extra });
+
+  it('shows the 3 most recent unlocked, then the 2 closest to unlocking', () => {
+    const list = [
+      a('u1', true, { unlockedAt: '2026-09-01' }), a('u2', true, { unlockedAt: '2026-09-20' }),
+      a('u3', true, { unlockedAt: '2026-09-10' }), a('u4', true, { unlockedAt: '2026-08-01' }),
+      a('far', false, { incremental: true, progress: { current: 1, goal: 10 } }),
+      a('close', false, { incremental: true, progress: { current: 9, goal: 10 } }),
+      a('mid', false, { incremental: true, progress: { current: 5, goal: 10 } }),
+    ];
+    expect(selectShelfAchievements(list).map(x => x.key)).toEqual(['u2', 'u3', 'u1', 'close', 'mid']);
+  });
+
+  it('fills with more locked ones when fewer than 3 are unlocked', () => {
+    const list = [
+      a('only', true, { unlockedAt: '2026-09-01' }),
+      a('l1', false, { incremental: true, progress: { current: 8, goal: 10 } }),
+      a('l2', false, { incremental: true, progress: { current: 6, goal: 10 } }),
+      a('l3', false, { incremental: true, progress: { current: 4, goal: 10 } }),
+      a('l4', false, { incremental: true, progress: { current: 2, goal: 10 } }),
+      a('l5', false, { incremental: true, progress: { current: 1, goal: 10 } }),
+    ];
+    expect(selectShelfAchievements(list).map(x => x.key)).toEqual(['only', 'l1', 'l2', 'l3', 'l4']);
+  });
+
+  it('shows 5 for a brand-new collector', () => {
+    const list = Array.from({ length: 8 }, (_, i) => a(`l${i}`, false));
+    expect(selectShelfAchievements(list)).toHaveLength(5);
   });
 });

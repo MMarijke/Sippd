@@ -31,6 +31,7 @@ const SharedCrate = lazy(() => import('./pages/SharedCrate'));
 const Feed = lazy(() => import('./pages/Feed'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const Crates = lazy(() => import('./pages/Crates'));
+const Trades = lazy(() => import('./pages/Trades'));
 const CompareCollection = lazy(() => import('./pages/CompareCollection'));
 const Wishlist = lazy(() => import('./pages/Wishlist'));
 const Pro = lazy(() => import('./pages/Pro'));
@@ -142,6 +143,7 @@ function App() {
               <Route path="/monthly-report" element={<MonthlyReport />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/crates" element={<Crates />} />
+              <Route path="/trades" element={<Trades />} />
               <Route path="/achievements" element={<Achievements />} />
               <Route path="/feed" element={<Feed />} />
               <Route path="/wishlist" element={<Wishlist />} />

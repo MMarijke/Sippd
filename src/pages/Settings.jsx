@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useTheme, THEME_FAMILIES, THEMES, getThemeRendering, familyHasPolarityToggle } from '@/hooks/useTheme';
+import { useTheme, THEME_FAMILIES, THEMES, getThemeRendering, familyHasPolarityToggle, PICKER_LABEL_FONTS_URL } from '@/hooks/useTheme';
 import { ArrowLeft, ChevronRight, ChevronLeft, Lock, Loader2, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -406,7 +406,7 @@ function FamilyTile({ family, polarity, isCurrent, showNewBadge, onSelect, focus
       aria-label={label}
       className={cn(
         PICKER_TILE, PICKER_FOCUS, 'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors',
-        'border-border hover:border-primary/20'
+        isCurrent ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/20'
       )}
     >
       {showNewBadge && (
@@ -419,8 +419,53 @@ function FamilyTile({ family, polarity, isCurrent, showNewBadge, onSelect, focus
         />
         {family.id === 'cosmic' && <StarDots />}
       </div>
-      <span className="text-2xs font-mono text-muted-foreground text-center leading-tight">{family.label}</span>
+      {/* Each family names itself in its own display face -- the one part
+          of a theme a swatch can't show. text-xs, not the 2xs mono labels
+          elsewhere: display faces set small, and Michroma/Orbitron run
+          wide, so they need the extra size to read at all. */}
+      <span
+        className="text-xs text-foreground text-center leading-tight"
+        style={{ fontFamily: family.displayFont }}
+      >
+        {family.label}
+      </span>
+      {/* Words, not just the accent border: the dot carries the accent,
+          the text stays foreground so it clears 4.5:1 at 11px on every
+          theme (primary as small text doesn't). */}
+      {isCurrent && (
+        <span className="flex items-center gap-1 text-2xs font-mono text-foreground" aria-hidden="true">
+          <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+          Current
+        </span>
+      )}
     </button>
+  );
+}
+
+const RARITY_TIERS = ['common', 'uncommon', 'rare', 'ultra', 'legendary'];
+
+// A palette's rarity ramp, previewed before you commit to it -- the ramp
+// is the part of a theme that shows up on your collection (the Collection
+// bar, Home's donut) and a swatch can't show it. The wrapper carries the
+// tile theme's own data-theme/data-polarity, so every theme block in
+// index.css (keyed on those attributes, not :root) scopes its
+// --breakdown-* and --card to just this strip. It sits on that theme's
+// own card colour, so the preview matches what you'd actually get.
+// Equal widths: this previews the colours, not anyone's distribution.
+function RarityStrip({ themeId, polarity }) {
+  return (
+    <div
+      data-theme={themeId}
+      data-polarity={polarity}
+      className="w-full rounded-md bg-card border border-foreground/10 p-1"
+      aria-hidden="true"
+    >
+      <div className="flex h-1.5 gap-px rounded-full overflow-hidden">
+        {RARITY_TIERS.map(tier => (
+          <div key={tier} className="flex-1" style={{ backgroundColor: `hsl(var(--breakdown-${tier}))` }} />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -471,11 +516,13 @@ function ThemePalettePicker({ family, theme, polarity, onSelectTheme, isPro, isP
 
   return (
     <div className="p-4 space-y-3">
+      {/* 44px tall hit area (was ~16px), pulled back into the row with
+          negative margins so the visible text keeps its alignment. */}
       <button
         onClick={onBack}
-        className={cn(PICKER_FOCUS, 'flex items-center gap-1 rounded text-2xs font-mono text-muted-foreground hover:text-foreground transition-colors')}
+        className={cn(PICKER_FOCUS, 'h-11 -my-2.5 -ml-2 px-2 flex items-center gap-1 rounded-lg text-xs font-mono text-muted-foreground hover:text-foreground transition-colors')}
       >
-        <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" /> All families
+        <ChevronLeft className="w-4 h-4" aria-hidden="true" /> All families
       </button>
       {/* The whole point of a two-step picker is orientation at 18 options
           — landing on 6 swatches with nothing naming which family they
@@ -532,6 +579,7 @@ function ThemePalettePicker({ family, theme, polarity, onSelectTheme, isPro, isP
                 {family.id === 'cosmic' && <StarDots />}
               </div>
               <span className="text-2xs font-mono text-muted-foreground text-center leading-tight">{label}</span>
+              <RarityStrip themeId={id} polarity={polarity} />
               {familyMixedPolarity && entrySinglePolarity && (
                 <span className="absolute top-1.5 left-1.5 w-4 h-4 rounded-full bg-background/80 border border-border flex items-center justify-center">
                   {entryPolarity === 'light'
@@ -563,6 +611,21 @@ export default function Settings() {
   // value loads, so rendering early flashed a Neon Arcade grid with
   // Power-Up pressed (and the Neon-only polarity toggle) for everyone else.
   const pickerLoading = isProLoading || isThemeLoading;
+  // Each family tile names itself in its own display face (FamilyTile), so
+  // those faces are needed before a family is ever applied. Only the
+  // display weights, and the browser only downloads a face once a label
+  // actually uses it. Deliberately NOT Google's text= subsetting: that
+  // registers a glyph-partial face under the real family name, which could
+  // win over the full face app-wide once that family is applied.
+  useEffect(() => {
+    const id = 'picker-label-fonts';
+    if (document.getElementById(id)) return;
+    const link = document.createElement('link');
+    link.id = id;
+    link.rel = 'stylesheet';
+    link.href = PICKER_LABEL_FONTS_URL;
+    document.head.appendChild(link);
+  }, []);
   // Which control should take keyboard focus after a picker step change:
   // 'palette-heading' going in, 'family:<id>' coming back out. Null
   // otherwise, so nothing steals focus on first render.
@@ -936,6 +999,8 @@ export default function Settings() {
                           <div key={id} className={cn(PICKER_TILE, 'flex flex-col items-center gap-2 rounded-xl border border-border p-3')}>
                             <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
                             <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
+                            {/* Same footprint as RarityStrip, so tiles don't grow on load. */}
+                            <div className="h-4 w-full rounded-md bg-secondary/60 animate-pulse" />
                           </div>
                         ))}
                       </div>

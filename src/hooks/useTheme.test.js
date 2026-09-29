@@ -78,3 +78,26 @@ describe('getThemeFamily / FAMILY_FONT_URLS', () => {
     }
   });
 });
+
+// The picker sets each family's tile label in `displayFont`; it must stay
+// the same face index.css applies as that family's --font-display, or the
+// preview lies about the theme.
+describe('THEME_FAMILIES displayFont', () => {
+  it('matches each family\'s --font-display in index.css', async () => {
+    const { readFileSync } = await import('node:fs');
+    const css = readFileSync(new URL('../index.css', import.meta.url), 'utf8');
+    for (const family of THEME_FAMILIES) {
+      const sample = family.themes[0].id;
+      // Neon Arcade inherits its trio from :root; every other family sets it
+      // on a selector group that names its themes.
+      const block = family.id === 'neon-arcade'
+        ? css.slice(css.indexOf(':root {'), css.indexOf('}', css.indexOf(':root {')))
+        : (() => {
+          const at = css.indexOf(`[data-theme="${sample}"],`);
+          return css.slice(at, css.indexOf('}', at));
+        })();
+      const face = block.match(/--font-display:\s*([^;]+);/)?.[1].trim();
+      expect(face, family.id).toBe(family.displayFont);
+    }
+  });
+});

@@ -1067,7 +1067,20 @@
   /* ── Candy family (light, playful) ────────────────────────────────────────
      1 free + 5 Pro. Every main/supporting here failed the 3:1 floor as
      given -- these were designed as pastel-bright accents on white, the
-     same failure mode Vintage Pastel's originals had in Phase 1. */
+     same failure mode Vintage Pastel's originals had in Phase 1.
+
+     --breakdown-* is HAND-AUTHORED for Bubblegum, Blue Pop, Orange Crush
+     and Cherry Pop (2026-09-29), not the 15deg/tier hue rotation the rest
+     of the file uses: single-hue ramps anchored on each theme's own
+     --primary (the scan button color), per product direction. Bubblegum /
+     Blue Pop / Orange Crush run light tint (Common) -> primary (Legendary);
+     Cherry Pop runs primary pink -> cherry red (348 90% 38%). Separation
+     comes from lightness, spaced for an even ~1.15 contrast step between
+     adjacent tiers. The light-end Commons sit at 2:1 against --card, not
+     the usual 3:1 -- deliberate: at 3:1 a "light" start is barely lighter
+     than primary and the five tiers collapse into one shade. Acceptable
+     here because both consumers (CollectionCard's bar, RarityHero's donut)
+     also label every tier's count in text. */
   [data-theme="bubblegum"], [data-theme="blue-pop"], [data-theme="grape-candy"],
   [data-theme="orange-crush"], [data-theme="sour-apple"], [data-theme="cherry-pop"] {
     --font-display: 'Fredoka', sans-serif;
@@ -1094,11 +1107,11 @@
     --ring: 336.7 100% 56.1%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 336.7 55% 58.6%;
-    --breakdown-uncommon: 351.7 60% 59.7%;
-    --breakdown-rare: 6.7 65% 57.3%;
-    --breakdown-ultra: 21.7 70% 48.3%;
-    --breakdown-legendary: 36.7 75% 40.0%;
+    --breakdown-common: 336.7 100% 78.4%;
+    --breakdown-uncommon: 336.7 100% 72.8%;
+    --breakdown-rare: 336.7 100% 67.3%;
+    --breakdown-ultra: 336.7 100% 61.7%;
+    --breakdown-legendary: 336.7 100% 56.1%;
   }
   [data-theme="blue-pop"] {
     --background: 200.0 100% 97.1%;
@@ -1120,11 +1133,11 @@
     --ring: 217.1 100% 60.4%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 217.1 55% 57.7%;
-    --breakdown-uncommon: 232.1 60% 64.8%;
-    --breakdown-rare: 247.1 65% 67.6%;
-    --breakdown-ultra: 262.1 70% 66.2%;
-    --breakdown-legendary: 277.1 75% 63.8%;
+    --breakdown-common: 217.1 100% 76.6%;
+    --breakdown-uncommon: 217.1 100% 72.6%;
+    --breakdown-rare: 217.1 100% 68.5%;
+    --breakdown-ultra: 217.1 100% 64.5%;
+    --breakdown-legendary: 217.1 100% 60.4%;
   }
   [data-theme="grape-candy"] {
     --background: 270.0 100% 97.3%;
@@ -1172,11 +1185,11 @@
     --ring: 21.3 100% 45.9%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 21.3 55% 50.1%;
-    --breakdown-uncommon: 36.3 60% 42.3%;
-    --breakdown-rare: 51.3 65% 35.3%;
-    --breakdown-ultra: 66.3 70% 31.9%;
-    --breakdown-legendary: 81.3 75% 32.4%;
+    --breakdown-common: 21.3 100% 68.9%;
+    --breakdown-uncommon: 21.3 100% 63.2%;
+    --breakdown-rare: 21.3 100% 57.4%;
+    --breakdown-ultra: 21.3 100% 51.7%;
+    --breakdown-legendary: 21.3 100% 45.9%;
   }
   [data-theme="sour-apple"] {
     --background: 87.3 100% 95.7%;
@@ -1224,11 +1237,11 @@
     --ring: 352.2 100% 57.6%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 352.2 55% 59.1%;
-    --breakdown-uncommon: 7.2 60% 56.5%;
-    --breakdown-rare: 22.2 65% 48.1%;
-    --breakdown-ultra: 37.2 70% 40.1%;
-    --breakdown-legendary: 52.2 75% 32.9%;
+    --breakdown-common: 352.2 100% 57.6%;
+    --breakdown-uncommon: 351.1 98% 48.2%;
+    --breakdown-rare: 350.1 95% 44.8%;
+    --breakdown-ultra: 349.1 93% 41.4%;
+    --breakdown-legendary: 348.0 90% 38.0%;
   }
 }
 

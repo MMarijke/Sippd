@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import { Link } from 'react-router-dom';
-import { Pin, Link2, CupSoda, X } from 'lucide-react';
+import { Pin, Link2, CupSoda, X, Eye } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { getMaxPins } from '@/hooks/useTogglePin';
 import { cn } from '@/lib/utils';
@@ -48,6 +48,12 @@ export default function CollectionCard({
   pinnedCount,
   pinPending,
   onShare,
+  // Opens your own profile the way other people see it. Profile passes it;
+  // PublicProfile doesn't (you're already looking at the public view).
+  onPreview,
+  // Rendered under the grid: "See all N cans" on both profile pages, since
+  // the grid is capped to the showcase and the rest has to be reachable.
+  footer,
   // Whether the COLLECTION OWNER (not the viewer) has Pro — Trophy Case's
   // bigger pin cap and hero spotlight tile are a perk of the showcase
   // itself, so a stranger viewing a Pro collector's PublicProfile sees the
@@ -84,22 +90,37 @@ export default function CollectionCard({
 
   return (
     <div className="bg-card border border-border rounded-2xl p-5">
-      {(headerTitle || onShare) && (
+      {(headerTitle || onShare || onPreview) && (
         <div className="flex items-center justify-between mb-4 gap-2">
           {headerTitle && (
             <h2 className="text-sm font-display font-bold text-foreground tracking-wide truncate">
               {headerTitle}
             </h2>
           )}
-          {onShare && (
-            <button
-              onClick={handleShareClick}
-              aria-label="Share profile link"
-              className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
-            >
-              <Link2 className="w-4 h-4" />
-            </button>
-          )}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Text, not just an eye icon: "preview" is ambiguous as a
+                glyph, and this is the one place you can check what the
+                link you're about to share actually shows. */}
+            {onPreview && (
+              <button
+                onClick={onPreview}
+                aria-label="Preview your profile as others see it"
+                className="h-11 px-3 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors flex items-center gap-1.5 text-xs font-mono"
+              >
+                <Eye className="w-4 h-4" aria-hidden="true" />
+                Preview
+              </button>
+            )}
+            {onShare && (
+              <button
+                onClick={handleShareClick}
+                aria-label="Share profile link"
+                className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors flex items-center justify-center flex-shrink-0"
+              >
+                <Link2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -289,6 +310,7 @@ export default function CollectionCard({
           {pinnedCount}/{maxPins} pinned
         </p>
       )}
+      {footer}
     </div>
   );
 }

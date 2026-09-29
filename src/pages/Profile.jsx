@@ -10,9 +10,8 @@ import PageHeader from '@/components/shared/PageHeader';
 import CollectionCard from '@/components/shared/CollectionCard';
 import AchievementsSection from '@/components/shared/AchievementsSection';
 import { toast } from 'sonner';
-import { getItemScore } from '@/lib/rarityConsensus';
 import { useStreak } from '@/lib/useStreak';
-import { useCollectionHighlights } from '@/hooks/useCollectionHighlights';
+import { useProfileShowcase } from '@/hooks/useProfileShowcase';
 import { useTogglePin } from '@/hooks/useTogglePin';
 import { useShare } from '@/hooks/useShare';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -154,30 +153,21 @@ export default function Profile() {
     [sharedCans]
   );
 
-  const collected = useMemo(
-    () => collection.filter(c => c.status === 'collected'),
-    [collection]
-  );
-
-  const rarePulls = useMemo(
-    () => collected.filter(c => ['Rare', 'Ultra Rare', 'Legendary'].includes(c.can_rarity)).length,
-    [collected]
-  );
-
-  const score = useMemo(
-    () => collected.reduce((acc, c) => acc + getItemScore(c, sharedCansMap[c.can_id]), 0),
-    [collected, sharedCansMap]
-  );
-
   const { isPro } = useSubscription();
 
-  const { topPulls, rarityBreakdown, getEffectiveRarity } = useCollectionHighlights({
+  // Same showcase, stats and rank PublicProfile shows for this user (the
+  // link you share), from one definition -- see useProfileShowcase.
+  const {
+    collected, showcase, totalCount, rarityBreakdown, getEffectiveRarity,
+    score, rarePulls, rank, isRankError,
+  } = useProfileShowcase({
+    userId: user?.id,
     collection,
     sharedCansMap,
+    isOwnerPro: isPro,
     streak,
     voteCount: votes.length,
     userCreatedDate: user?.created_at,
-    isPro,
   });
 
   const achievements = useMemo(
@@ -189,19 +179,6 @@ export default function Profile() {
   const pinnedCount = collected.filter(c => c.pinned_at).length;
 
   const { copyLink, shareLink } = useShare();
-
-  const { data: rank, isError: isRankError } = useQuery({
-    queryKey: ['my-rank', user?.id, score],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from('leaderboard_scores')
-        .select('*', { count: 'exact', head: true })
-        .gt('score', score);
-      if (error) throw error;
-      return (count || 0) + 1;
-    },
-    enabled: !!user?.id && score > 0,
-  });
 
   useEffect(() => {
     if (isRankError) toast.error('Could not load your rank');
@@ -346,7 +323,7 @@ export default function Profile() {
             <div className="px-5">
               <CollectionCard
                 headerTitle={`${profile?.full_name || 'Collector'}’s Collection`}
-                items={topPulls}
+                items={showcase}
                 isPro={isPro}
                 rarityBreakdown={rarityBreakdown}
                 getEffectiveRarity={getEffectiveRarity}
@@ -354,14 +331,23 @@ export default function Profile() {
                 onTogglePin={item => togglePin({ collectionItem: item, pinnedCount, isPro })}
                 pinPending={pinPending}
                 onShare={handleShareProfile}
+                onPreview={() => navigate(`/u/${user.id}?preview=true`)}
                 score={score}
                 rank={rank}
                 canEdit
                 stats={[
-                  { icon: Zap, label: 'Cans', value: collected.length },
+                  { icon: Zap, label: 'Cans', value: totalCount },
                   { icon: Star, label: 'Rare Pulls', value: rarePulls },
                   { icon: Flame, label: 'Streak', value: streak ?? 0 },
                 ]}
+                footer={totalCount > showcase.length && (
+                  <Link
+                    to="/collection"
+                    className="mt-3 h-11 flex items-center justify-center rounded-xl border border-border text-xs font-mono text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors"
+                  >
+                    See all {totalCount} cans
+                  </Link>
+                )}
               />
             </div>
           )}

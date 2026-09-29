@@ -181,6 +181,34 @@ export function getItemScore(collectionItem, sharedCan) {
 }
 
 /**
+ * Client mirror of sync_leaderboard_for_user()'s trusted scoring
+ * (20260914000000_harden_leaderboard_rarity_trust.sql) -- the rule the
+ * leaderboard ranks by. Unlike getItemScore it never falls back to the
+ * owner's own can_rarity snapshot (client-written at add-time, which is
+ * exactly what that migration stopped trusting): only the community's
+ * consensus_rarity counts. Items with no shared_cans row are skipped, as
+ * the SQL's inner join skips them; a present row with no consensus scores
+ * 1, matching the SQL's `else 1`.
+ *
+ * Used where the synced leaderboard_scores row can't be read (a signed-out
+ * visitor on a shared profile), so both profile pages still show the same
+ * numbers the leaderboard does.
+ */
+export function computeTrustedStats(collectedItems, sharedCansMap) {
+  let score = 0;
+  let rarePulls = 0;
+  for (const item of collectedItems) {
+    const sc = sharedCansMap[item.can_id];
+    if (!sc) continue;
+    score += RARITY_POINTS[sc.consensus_rarity] || 1;
+    if (TRUSTED_RARE_TIERS.has(sc.consensus_rarity)) rarePulls += 1;
+  }
+  return { score, rarePulls };
+}
+
+const TRUSTED_RARE_TIERS = new Set(['Rare', 'Ultra Rare', 'Legendary']);
+
+/**
  * Compute total score for a collection using the new scoring system.
  */
 export function computeCollectionScore(collectionItems, sharedCansMap) {

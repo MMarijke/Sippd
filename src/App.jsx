@@ -1,3 +1,4 @@
+import { lazy, Suspense, useEffect } from 'react';
 import { Toaster } from "@/components/ui/sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -8,27 +9,54 @@ import { useTheme } from '@/hooks/useTheme';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
 import Login from './pages/Login';
-import ResetPassword from './pages/ResetPassword';
 import Home from './pages/Home';
-import Scan from './pages/Scan';
-import Collection from './pages/Collection';
-import CanDetail from './pages/CanDetail';
-import Leaderboard from './pages/Leaderboard';
-import Profile from './pages/Profile';
-import Achievements from './pages/Achievements';
-import Settings from './pages/Settings';
-import MonthlyReport from './pages/MonthlyReport';
-import PublicProfile from './pages/PublicProfile';
-import SharedCrate from './pages/SharedCrate';
-import Feed from './pages/Feed';
-import Notifications from './pages/Notifications';
-import Crates from './pages/Crates';
-import CompareCollection from './pages/CompareCollection';
-import Wishlist from './pages/Wishlist';
-import Pro from './pages/Pro';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
-import Refund from './pages/Refund';
+
+// Route-level code splitting (/impeccable audit: everything shipped as one
+// 2.4 MB chunk, so a first load mid-shop on a patchy connection paid for
+// Monthly Report's html2canvas and every chart up front). Login and Home
+// stay eager -- they're the two landing routes, and lazy-loading the first
+// screen would only add a round trip. Everything else is its own chunk.
+const Scan = lazy(() => import('./pages/Scan'));
+const Collection = lazy(() => import('./pages/Collection'));
+const Leaderboard = lazy(() => import('./pages/Leaderboard'));
+const Profile = lazy(() => import('./pages/Profile'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const CanDetail = lazy(() => import('./pages/CanDetail'));
+const Achievements = lazy(() => import('./pages/Achievements'));
+const Settings = lazy(() => import('./pages/Settings'));
+const MonthlyReport = lazy(() => import('./pages/MonthlyReport'));
+const PublicProfile = lazy(() => import('./pages/PublicProfile'));
+const SharedCrate = lazy(() => import('./pages/SharedCrate'));
+const Feed = lazy(() => import('./pages/Feed'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const Crates = lazy(() => import('./pages/Crates'));
+const CompareCollection = lazy(() => import('./pages/CompareCollection'));
+const Wishlist = lazy(() => import('./pages/Wishlist'));
+const Pro = lazy(() => import('./pages/Pro'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Refund = lazy(() => import('./pages/Refund'));
+
+// The other four tab-bar destinations are one tap away from Home, so their
+// chunks are warmed once the browser is idle -- a tab switch should never
+// wait on the network. Same import() specifiers as above, so Vite resolves
+// them to the same chunks and React.lazy finds them already loaded.
+function usePrefetchTabRoutes() {
+  useEffect(() => {
+    const prefetch = () => {
+      import('./pages/Scan');
+      import('./pages/Collection');
+      import('./pages/Leaderboard');
+      import('./pages/Profile');
+    };
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(prefetch, { timeout: 3000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const t = setTimeout(prefetch, 1500);
+    return () => clearTimeout(t);
+  }, []);
+}
 
 // Applies the signed-in user's saved theme to <html> for the whole app
 // lifetime, independent of which route is mounted — Settings' picker calls
@@ -39,11 +67,18 @@ function ThemeEffect() {
 }
 
 function App() {
+  usePrefetchTabRoutes();
+
   return (
     <QueryClientProvider client={queryClientInstance}>
       <AuthProvider>
         <ThemeEffect />
         <Router>
+          {/* Blank page-colored fallback, not a spinner: a chunk usually
+              lands in well under a second, and a spinner flashing for that
+              long reads as jank rather than progress. Tab routes have their
+              own boundary inside AppLayout so the bottom nav stays put. */}
+          <Suspense fallback={<div className="fixed inset-0 bg-background" />}>
           <Routes>
             <Route path="/login" element={<Login />} />
             {/* Public on purpose — reached from the link in a password-reset
@@ -104,6 +139,7 @@ function App() {
 
             <Route path="*" element={<PageNotFound />} />
           </Routes>
+          </Suspense>
         </Router>
         <Toaster />
       </AuthProvider>

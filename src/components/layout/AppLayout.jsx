@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { Outlet, useLocation, useNavigationType } from 'react-router-dom';
 import BottomNav from './BottomNav';
 
@@ -73,7 +73,12 @@ export default function AppLayout() {
   return (
     <div className="flex flex-col h-dvh bg-background font-body">
       <main ref={mainRef} className="flex-1 overflow-y-auto pb-6 max-w-lg mx-auto w-full">
-        <Outlet />
+        {/* Own boundary so a lazy tab chunk (App.jsx) suspends only the
+            page area -- without it the nearest boundary is App's full-screen
+            one, which would blank the bottom nav mid tab switch. */}
+        <Suspense fallback={null}>
+          <Outlet />
+        </Suspense>
       </main>
       <BottomNav />
     </div>

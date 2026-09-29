@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
 import { useShare } from '@/hooks/useShare';
 
@@ -37,6 +36,10 @@ export function useCardCapture(cardRef, signature) {
       // that fill matching the viewer's actual active theme instead of
       // always rendering the default theme's near-black behind the card.
       const bgHsl = getComputedStyle(document.documentElement).getPropertyValue('--background').trim();
+      // Loaded on first capture, not at module scope -- only this share
+      // flow uses it, and it's too heavy to ride along in MonthlyReport's
+      // chunk for everyone who opens the report but never shares.
+      const { default: html2canvas } = await import('html2canvas');
       const canvas = await html2canvas(cardRef.current, {
         scale: 2,
         useCORS: true,

@@ -35,7 +35,7 @@ function savePrefs(prefs) {
 
 function SectionHeader({ title }) {
   return (
-    <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest px-1 mb-1 mt-5 first:mt-0">
+    <p className="text-2xs font-mono text-muted-foreground uppercase tracking-widest px-1 mb-1 mt-5 first:mt-0">
       {title}
     </p>
   );
@@ -335,7 +335,7 @@ function PolarityToggle({ theme, polarity, setPolarity, isPending }) {
           at a family that doesn't even support light/dark). Naming the
           real target theme here resolves it without needing a "browsing
           vs. applied" mode of its own. */}
-      <p className="text-[10px] font-mono text-muted-foreground mt-1.5 px-1">
+      <p className="text-2xs font-mono text-muted-foreground mt-1.5 px-1">
         Applies to your current theme, {match?.label ?? theme}.
       </p>
     </div>
@@ -391,7 +391,7 @@ function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies, polari
               />
               {family.id === 'cosmic' && <StarDots />}
             </div>
-            <span className="text-[10px] font-mono text-muted-foreground text-center leading-tight">{family.label}</span>
+            <span className="text-2xs font-mono text-muted-foreground text-center leading-tight">{family.label}</span>
           </button>
         );
       })}
@@ -417,7 +417,7 @@ function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPendin
     <div className="p-4 space-y-3">
       <button
         onClick={onBack}
-        className="flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+        className="flex items-center gap-1 text-2xs font-mono text-muted-foreground hover:text-foreground transition-colors"
       >
         <ChevronLeft className="w-3.5 h-3.5" /> All families
       </button>
@@ -455,7 +455,7 @@ function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPendin
                 />
                 {family.id === 'cosmic' && <StarDots />}
               </div>
-              <span className="text-[10px] font-mono text-muted-foreground text-center leading-tight">{label}</span>
+              <span className="text-2xs font-mono text-muted-foreground text-center leading-tight">{label}</span>
               {familyMixedPolarity && entrySinglePolarity && (
                 <span className="absolute top-1.5 left-1.5 w-4 h-4 rounded-full bg-background/80 border border-border flex items-center justify-center">
                   {entryPolarity === 'light'
@@ -710,7 +710,7 @@ export default function Settings() {
           <SettingsRow
             label="Email"
             sub={user?.email || 'Not set'}
-            right={<span className="text-[10px] font-mono text-muted-foreground">read-only</span>}
+            right={<span className="text-2xs font-mono text-muted-foreground">read-only</span>}
           />
           {hasPasswordAuth ? (
             <>
@@ -784,7 +784,7 @@ export default function Settings() {
               {isProLoading ? 'Loading…' : isPro ? 'Pick your look' : 'One free theme per family — the rest unlock with Pro'}
             </p>
             {!isProLoading && unseenNewFamilyCount > 0 && (
-              <p className="text-[10px] font-mono text-primary mt-1 flex items-center gap-1.5">
+              <p className="text-2xs font-mono text-primary mt-1 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" aria-hidden="true" />
                 {unseenNewFamilyCount} new {unseenNewFamilyCount === 1 ? 'family' : 'families'} this update
               </p>
@@ -812,7 +812,7 @@ export default function Settings() {
                   <div className="p-4 space-y-3">
                     <button
                       onClick={() => setViewedFamilyId(null)}
-                      className="flex items-center gap-1 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+                      className="flex items-center gap-1 text-2xs font-mono text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <ChevronLeft className="w-3.5 h-3.5" /> All families
                     </button>

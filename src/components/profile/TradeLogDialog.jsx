@@ -267,7 +267,7 @@ export default function TradeLogDialog({ collection, onClose }) {
                           className="w-full flex items-center gap-2 px-3 py-2 hover:bg-muted/50 text-left"
                         >
                           <div className="w-6 h-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
-                            <span className="text-[10px] font-display text-primary">{(u.full_name || 'C')?.[0]?.toUpperCase()}</span>
+                            <span className="text-2xs font-display text-primary">{(u.full_name || 'C')?.[0]?.toUpperCase()}</span>
                           </div>
                           <div className="min-w-0">
                             <p className="text-xs font-body text-foreground truncate">{u.full_name || 'Collector'}</p>
@@ -377,7 +377,7 @@ function CanPicker({ label, items, selected, search, onSearch, onSelect, onClear
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-body font-medium text-foreground truncate">{selected.can_name}</p>
-            <p className="text-[11px] font-mono text-muted-foreground">{selected.can_brand}</p>
+            <p className="text-2xs font-mono text-muted-foreground">{selected.can_brand}</p>
           </div>
           <button onClick={onClear} aria-label="Clear selection" className="w-11 h-11 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground">
             <X className="w-3 h-3" />
@@ -410,7 +410,7 @@ function CanPicker({ label, items, selected, search, onSearch, onSelect, onClear
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-body font-medium text-foreground truncate">{item.can_name}</p>
-                    <p className="text-[10px] font-mono text-muted-foreground">{item.can_brand}</p>
+                    <p className="text-2xs font-mono text-muted-foreground">{item.can_brand}</p>
                   </div>
                 </button>
               ))}

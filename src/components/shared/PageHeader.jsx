@@ -41,7 +41,7 @@ export default function PageHeader({ title, subtitle, action, showBell = true, o
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-destructive rounded-full flex items-center justify-center text-[9px] font-mono font-bold text-white">
+              <span className="absolute -top-1 -right-1 min-w-[1.125rem] h-[1.125rem] px-1 bg-destructive rounded-full flex items-center justify-center text-2xs leading-none font-mono font-bold text-white">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}

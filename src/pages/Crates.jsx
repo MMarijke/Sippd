@@ -95,7 +95,7 @@ export default function Crates() {
           </button>
           <div>
             <h1 className="text-base font-display font-bold text-foreground tracking-wide">Crates</h1>
-            <p className="text-[11px] font-mono text-muted-foreground">{crates.length} crate{crates.length !== 1 ? 's' : ''}</p>
+            <p className="text-2xs font-mono text-muted-foreground">{crates.length} crate{crates.length !== 1 ? 's' : ''}</p>
           </div>
         </div>
         {!atCrateLimit && (

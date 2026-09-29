@@ -44,7 +44,7 @@ export default function CanBackgroundPicker({ value, onChange, label = 'Card Bac
         />
         <div className="flex-1 min-w-0">
           <p className="text-xs font-mono font-semibold text-foreground uppercase">{value}</p>
-          <p className="text-[11px] font-mono text-muted-foreground leading-snug">
+          <p className="text-2xs font-mono text-muted-foreground leading-snug">
             Pick a color below, or Custom for any hue — it's automatically kept dark enough to stay readable.
           </p>
         </div>

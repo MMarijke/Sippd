@@ -347,7 +347,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           <span className="text-lg">🌍</span>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-mono text-primary font-semibold">Found on Open Food Facts</p>
-            <p className="text-[11px] font-mono text-muted-foreground mt-0.5">
+            <p className="text-2xs font-mono text-muted-foreground mt-0.5">
               Verify the details below before saving — select rarity, status, beverage type & flavour manually.
             </p>
           </div>
@@ -396,14 +396,14 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
               </span>
             </div>
             {alreadyVoted && (
-              <p className="text-[11px] font-mono text-muted-foreground mt-1">
+              <p className="text-2xs font-mono text-muted-foreground mt-1">
                 You voted: <span className="text-foreground">{existingVote?.voted_rarity}</span> · vote locked
               </p>
             )}
           </div>
           <div className="flex items-center gap-1 text-muted-foreground flex-shrink-0">
             <Users className="w-3 h-3" />
-            <span className="text-[11px] font-mono">{totalVotes}</span>
+            <span className="text-2xs font-mono">{totalVotes}</span>
           </div>
         </div>
       )}
@@ -558,7 +558,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
                 can has no explanation anywhere before this commits. This
                 stays visible unconditionally so the warning is never gated
                 behind an optional interaction. */}
-            <p className="text-[11px] font-mono text-muted-foreground" aria-live="polite">
+            <p className="text-2xs font-mono text-muted-foreground" aria-live="polite">
               {pendingRarity
                 ? `Tap ${pendingRarity} again to lock it in.`
                 : 'Vote locks once cast — choose carefully.'}
@@ -585,7 +585,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           disabled={!!prefillData?.id}
         />
         {!prefillData?.id && !prefillData?._offSource && (
-          <p className="text-[11px] font-mono text-muted-foreground">You can change this anytime.</p>
+          <p className="text-2xs font-mono text-muted-foreground">You can change this anytime.</p>
         )}
         {/* Three distinct states a silent value can't tell apart on its own:
             an existing catalog can (locked, someone already decided this);
@@ -597,11 +597,11 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
             with nothing telling the one person able to catch it that it
             was ever in question. (/impeccable critique) */}
         {prefillData?.id ? (
-          <p className="text-[11px] font-mono text-muted-foreground">Set by this can's catalog entry.</p>
+          <p className="text-2xs font-mono text-muted-foreground">Set by this can's catalog entry.</p>
         ) : prefillData?._offSource && prefillData?.beverage_type ? (
-          <p className="text-[11px] font-mono text-primary">Guessed from Open Food Facts — tap to change if wrong.</p>
+          <p className="text-2xs font-mono text-primary">Guessed from Open Food Facts — tap to change if wrong.</p>
         ) : prefillData?._offSource ? (
-          <p className="text-[11px] font-mono text-warning">Open Food Facts didn't specify a category — defaulted to Energy Drink, please confirm.</p>
+          <p className="text-2xs font-mono text-warning">Open Food Facts didn't specify a category — defaulted to Energy Drink, please confirm.</p>
         ) : null}
       </div>
 

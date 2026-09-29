@@ -84,7 +84,7 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
               <SheetTitle asChild>
                 <h2 className="text-base font-display font-bold text-foreground">Propose a Trade</h2>
               </SheetTitle>
-              <p className="text-[11px] font-mono text-muted-foreground">with {targetUser?.full_name || 'this collector'}</p>
+              <p className="text-2xs font-mono text-muted-foreground">with {targetUser?.full_name || 'this collector'}</p>
             </div>
           </div>
           <button onClick={onClose} aria-label="Close" className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground flex-shrink-0">
@@ -107,7 +107,7 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-body font-medium text-foreground truncate">{selectedOffer.can_name}</p>
-                  <p className="text-[11px] font-mono text-muted-foreground">{selectedOffer.can_brand}</p>
+                  <p className="text-2xs font-mono text-muted-foreground">{selectedOffer.can_brand}</p>
                 </div>
                 <button onClick={() => { setOfferCanId(''); setOfferSearch(''); }} aria-label="Clear selected offer" className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground">
                   <X className="w-3 h-3" />
@@ -137,7 +137,7 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-body font-medium text-foreground truncate">{item.can_name}</p>
-                        <p className="text-[10px] font-mono text-muted-foreground">{item.can_brand}</p>
+                        <p className="text-2xs font-mono text-muted-foreground">{item.can_brand}</p>
                       </div>
                     </button>
                   ))}

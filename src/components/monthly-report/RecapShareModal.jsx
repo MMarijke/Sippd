@@ -81,7 +81,7 @@ export default function RecapShareModal({ title, onClose, cardSignature, filenam
                 handleSave). Long-press is the one save path that always
                 works there, so it's called out as the iPhone-specific
                 alternative rather than a second competing instruction. */}
-            <p className="text-[10px] font-mono text-muted-foreground text-center mt-2">On iPhone, you can also long-press the image to save it</p>
+            <p className="text-2xs font-mono text-muted-foreground text-center mt-2">On iPhone, you can also long-press the image to save it</p>
           </div>
         )}
 

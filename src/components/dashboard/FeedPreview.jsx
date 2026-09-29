@@ -83,7 +83,7 @@ export default function FeedPreview() {
       <div className="relative flex items-center justify-between mb-3">
         <div className="pointer-events-none">
           <h3 className="text-sm font-display font-semibold text-foreground tracking-wide">Feed</h3>
-          <p className="text-[11px] font-mono text-muted-foreground">Community activity</p>
+          <p className="text-2xs font-mono text-muted-foreground">Community activity</p>
         </div>
         <button
           onClick={() => refetch()}
@@ -103,13 +103,13 @@ export default function FeedPreview() {
       <div aria-label="Feed shortcuts" className="relative z-10 flex bg-secondary rounded-lg border border-border p-0.5 mb-3">
         <button
           onClick={() => goToFeed('global')}
-          className="flex-1 h-11 font-mono text-[11px] rounded-md transition-colors gap-1.5 flex items-center justify-center bg-card text-primary shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex-1 h-11 font-mono text-2xs rounded-md transition-colors gap-1.5 flex items-center justify-center bg-card text-primary shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Radio className="w-3 h-3" /> Global
         </button>
         <button
           onClick={() => goToFeed('following')}
-          className="flex-1 h-11 font-mono text-[11px] rounded-md transition-colors gap-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex-1 h-11 font-mono text-2xs rounded-md transition-colors gap-1.5 flex items-center justify-center text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Users className="w-3 h-3" /> Following
         </button>
@@ -138,7 +138,7 @@ export default function FeedPreview() {
                   {renderAction(item)}
                 </p>
               </div>
-              <span className="text-[10px] font-mono text-muted-foreground flex-shrink-0">
+              <span className="text-2xs font-mono text-muted-foreground flex-shrink-0">
                 {item.created_at ? formatDistanceToNow(new Date(item.created_at), { addSuffix: true }) : ''}
               </span>
             </div>

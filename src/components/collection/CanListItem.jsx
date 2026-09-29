@@ -43,8 +43,8 @@ export default function CanListItem({ item, sharedCan, onAddToCrate, selectable,
       <div className="flex-1 min-w-0 pointer-events-none">
         <p className="text-sm font-semibold text-foreground truncate">{item.can_name}</p>
         <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-[11px] font-mono text-muted-foreground">{item.can_brand}</span>
-          <span className={`text-[9px] font-mono uppercase px-1.5 py-0.5 rounded ${
+          <span className="text-2xs font-mono text-muted-foreground">{item.can_brand}</span>
+          <span className={`text-2xs font-mono uppercase px-1.5 py-0.5 rounded ${
             item.status === 'collected' ? 'bg-rarity-uncommon/15 text-rarity-uncommon' :
             item.status === 'wishlist' ? 'bg-rarity-rare/15 text-rarity-rare' :
             'bg-muted text-muted-foreground'
@@ -56,12 +56,12 @@ export default function CanListItem({ item, sharedCan, onAddToCrate, selectable,
       <div className="flex flex-col items-end gap-1 pointer-events-none">
         <RarityBadge rarity={rarity} />
         {confidence === 'low' && (
-          <span className="text-[8px] font-mono uppercase tracking-wider px-1 py-0.5 rounded text-yellow-400 border border-yellow-400/30">
+          <span className="text-2xs font-mono uppercase tracking-wider px-1 py-0.5 rounded text-yellow-400 border border-yellow-400/30">
             Low Conf.
           </span>
         )}
         {confidence === 'unrated' && (
-          <span className="text-[8px] font-mono uppercase tracking-wider px-1 py-0.5 rounded text-muted-foreground border border-border/60">
+          <span className="text-2xs font-mono uppercase tracking-wider px-1 py-0.5 rounded text-muted-foreground border border-border/60">
             Unrated
           </span>
         )}

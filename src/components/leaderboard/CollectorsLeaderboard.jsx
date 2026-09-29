@@ -233,7 +233,7 @@ export default function CollectorsLeaderboard() {
             {rankDelta != null && rankDelta !== 0 && (
               <span
                 className={cn(
-                  'flex items-center gap-0.5 text-[10px] font-mono font-semibold',
+                  'flex items-center gap-0.5 text-2xs font-mono font-semibold',
                   rankDelta > 0 ? 'text-success' : 'text-muted-foreground'
                 )}
                 title={`${rankDelta > 0 ? 'Up' : 'Down'} ${Math.abs(rankDelta)} rank${Math.abs(rankDelta) === 1 ? '' : 's'} since your last visit`}
@@ -323,7 +323,7 @@ export default function CollectorsLeaderboard() {
                     <p className={cn('flex items-center gap-1 text-sm font-semibold truncate group-hover/row:underline', isMe ? 'text-primary' : 'text-foreground')}>
                       <span className="truncate">{name}</span>
                       {proUserIds.has(entry.user_id) && <ProBadge />}
-                      {isMe && <span className="ml-0.5 text-[10px] font-mono text-primary/70">(you)</span>}
+                      {isMe && <span className="ml-0.5 text-2xs font-mono text-primary/70">(you)</span>}
                     </p>
                   </div>
                 </Link>
@@ -334,7 +334,7 @@ export default function CollectorsLeaderboard() {
                   )}>
                     {score}
                   </p>
-                  <p className="text-[10px] font-mono text-muted-foreground">
+                  <p className="text-2xs font-mono text-muted-foreground">
                     {sortBy === 'total' ? 'cans' : 'rare'}
                   </p>
                 </div>

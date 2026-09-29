@@ -105,7 +105,7 @@ export default function TradeTemplatesSheet({ onClose, onUseTemplate }) {
               </div>
 
               {tpl.notes && (
-                <p className="text-[11px] font-mono text-muted-foreground italic truncate">{tpl.notes}</p>
+                <p className="text-2xs font-mono text-muted-foreground italic truncate">{tpl.notes}</p>
               )}
 
               <Button
@@ -140,7 +140,7 @@ export default function TradeTemplatesSheet({ onClose, onUseTemplate }) {
 function CanChip({ name, brand, imageUrl, rarity, label }) {
   return (
     <div className="flex-1 min-w-0">
-      <p className="text-[10px] font-mono text-muted-foreground mb-1">{label}</p>
+      <p className="text-2xs font-mono text-muted-foreground mb-1">{label}</p>
       <div className="flex items-center gap-2 bg-card rounded-lg px-2 py-1.5">
         <div className="w-7 h-7 rounded-md overflow-hidden border border-border flex-shrink-0" style={{ background: DEFAULT_CAN_BG }}>
           {imageUrl && <img src={imageUrl} alt={name} loading="lazy" decoding="async" className="w-full h-full object-contain" />}
@@ -148,7 +148,7 @@ function CanChip({ name, brand, imageUrl, rarity, label }) {
         <div className="min-w-0">
           <p className="text-xs font-body font-medium text-foreground truncate leading-tight">{name || 'Unknown can'}</p>
           {rarity && (
-            <p className={`text-[10px] font-mono leading-tight ${RARITY_TEXT_CLASS[rarity] || 'text-muted-foreground'}`}>{rarity}</p>
+            <p className={`text-2xs font-mono leading-tight ${RARITY_TEXT_CLASS[rarity] || 'text-muted-foreground'}`}>{rarity}</p>
           )}
         </div>
       </div>

@@ -9,6 +9,13 @@ module.exports = {
   			mono: ['var(--font-mono)'],
   			body: ['var(--font-body)'],
   		},
+  		// The app's small-text floor: labels, metadata, badges. rem, not px,
+  		// so it follows the user's own browser/OS text size. Font-size only
+  		// (no paired line-height) to match the text-[Npx] values it replaced,
+  		// which inherited line-height rather than setting one.
+  		fontSize: {
+  			'2xs': '0.6875rem',
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

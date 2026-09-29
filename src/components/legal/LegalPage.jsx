@@ -60,7 +60,7 @@ const markdownComponents = {
   ),
   thead: ({ children }) => <thead className="bg-secondary">{children}</thead>,
   th: ({ children }) => (
-    <th className="text-left font-mono uppercase tracking-wider text-muted-foreground text-[10px] px-3 py-2 border-b border-border">
+    <th className="text-left font-mono uppercase tracking-wider text-muted-foreground text-2xs px-3 py-2 border-b border-border">
       {children}
     </th>
   ),

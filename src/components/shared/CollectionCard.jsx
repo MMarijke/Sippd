@@ -101,7 +101,7 @@ export default function CollectionCard({
 
       {onShare && !shareHintSeen && (
         <div className="flex items-start justify-between gap-2 -mt-2 mb-4 px-0.5">
-          <p className="text-[11px] font-mono text-muted-foreground leading-snug">
+          <p className="text-2xs font-mono text-muted-foreground leading-snug">
             New: tap the link icon above to share your live profile — no more downloading an image.
           </p>
           <button

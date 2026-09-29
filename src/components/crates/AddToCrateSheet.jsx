@@ -148,7 +148,7 @@ export default function AddToCrateSheet({ can, cans, onClose }) {
                   {isBulk ? `${cans.length} cans selected` : can.can_name}
                 </h2>
               </SheetTitle>
-              <p className="text-[11px] font-mono text-muted-foreground truncate">
+              <p className="text-2xs font-mono text-muted-foreground truncate">
                 {isBulk ? 'Add all to a crate' : 'Add to crate'}
               </p>
             </div>
@@ -204,7 +204,7 @@ export default function AddToCrateSheet({ can, cans, onClose }) {
                     <span className="text-xl flex-shrink-0">{crate.emoji || '📦'}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-body font-medium text-foreground truncate">{crate.name}</p>
-                      <p className="text-[11px] font-mono text-muted-foreground">
+                      <p className="text-2xs font-mono text-muted-foreground">
                         {(crate.can_ids || []).length} can{(crate.can_ids || []).length !== 1 ? 's' : ''}
                         {!allAlreadyIn && ` · ${newCount} new`}
                       </p>
@@ -230,7 +230,7 @@ export default function AddToCrateSheet({ can, cans, onClose }) {
                   <span className="text-xl flex-shrink-0">{crate.emoji || '📦'}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-body font-medium text-foreground truncate">{crate.name}</p>
-                    <p className="text-[11px] font-mono text-muted-foreground">{(crate.can_ids || []).length} can{(crate.can_ids || []).length !== 1 ? 's' : ''}</p>
+                    <p className="text-2xs font-mono text-muted-foreground">{(crate.can_ids || []).length} can{(crate.can_ids || []).length !== 1 ? 's' : ''}</p>
                   </div>
                   <button
                     onClick={() => handleToggle(crate, !inCrate)}

@@ -145,7 +145,7 @@ export default function CompareCollection() {
           <GitCompare className="w-4 h-4 text-primary flex-shrink-0" />
           <div className="min-w-0">
             <h1 className="text-sm font-display font-bold text-foreground">Collection Comparison</h1>
-            <p className="text-[10px] font-mono text-muted-foreground truncate">{myName} vs {friendName}</p>
+            <p className="text-2xs font-mono text-muted-foreground truncate">{myName} vs {friendName}</p>
           </div>
         </div>
         <Popover>
@@ -170,15 +170,15 @@ export default function CompareCollection() {
           <div className="grid grid-cols-3 gap-2">
             <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 text-center">
               <p className="text-xl font-display font-bold text-primary">{onlyMine.length}</p>
-              <p className="text-[10px] font-mono text-muted-foreground mt-0.5">Only Mine</p>
+              <p className="text-2xs font-mono text-muted-foreground mt-0.5">Only Mine</p>
             </div>
             <div className="bg-overlap/5 border border-overlap/20 rounded-xl p-3 text-center">
               <p className="text-xl font-display font-bold text-overlap">{inCommon.length}</p>
-              <p className="text-[10px] font-mono text-muted-foreground mt-0.5">In Common</p>
+              <p className="text-2xs font-mono text-muted-foreground mt-0.5">In Common</p>
             </div>
             <div className="bg-muted-foreground/5 border border-muted-foreground/20 rounded-xl p-3 text-center">
               <p className="text-xl font-display font-bold text-muted-foreground">{onlyTheirs.length}</p>
-              <p className="text-[10px] font-mono text-muted-foreground mt-0.5">Only Theirs</p>
+              <p className="text-2xs font-mono text-muted-foreground mt-0.5">Only Theirs</p>
             </div>
           </div>
         )}
@@ -196,7 +196,7 @@ export default function CompareCollection() {
               aria-pressed={tab === t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                'flex-1 h-11 flex items-center justify-center rounded-xl border text-[11px] font-mono transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                'flex-1 h-11 flex items-center justify-center rounded-xl border text-2xs font-mono transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 tab === t.key ? activeTabColors[t.key] : tabColors[t.key]
               )}
             >
@@ -224,7 +224,7 @@ export default function CompareCollection() {
 
         {/* Positive reframing for "Only Theirs" — trade opportunity, not a deficit */}
         {!isLoading && tab === 'theirs' && displayItems.length > 0 && (
-          <p className="text-[11px] font-mono text-muted-foreground -mt-1">
+          <p className="text-2xs font-mono text-muted-foreground -mt-1">
             Cans {friendName} has that you don't — potential trade targets.
           </p>
         )}
@@ -241,10 +241,10 @@ export default function CompareCollection() {
                 <div key={item.id} className={cn('bg-card border rounded-xl overflow-hidden', borderColor)}>
                   <CanImageBox imageUrl={imageUrl} bgColor={item.can_bg_color} alt={item.can_name} className="aspect-square" iconSize="w-7 h-7" />
                   <div className="px-2 py-1.5 space-y-0.5">
-                    <p className="text-[10px] font-mono text-primary/70 truncate">{item.can_brand}</p>
+                    <p className="text-2xs font-mono text-primary/70 truncate">{item.can_brand}</p>
                     <p className="text-xs font-semibold text-foreground truncate leading-tight">{item.can_name}</p>
                     <div className="pt-0.5">
-                      {rarity ? <RarityBadge rarity={rarity} size="sm" /> : <span className="text-[10px] font-mono text-muted-foreground">? ? ?</span>}
+                      {rarity ? <RarityBadge rarity={rarity} size="sm" /> : <span className="text-2xs font-mono text-muted-foreground">? ? ?</span>}
                     </div>
                   </div>
                 </div>

@@ -294,17 +294,17 @@ export default function CanDetail() {
           )}
           {confidence !== 'unrated' && <RarityBadge rarity={rarity} size="md" />}
           {confidence === 'unrated' && (
-            <span className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground border border-border rounded px-1.5 py-0.5">
+            <span className="flex items-center gap-1 text-2xs font-mono text-muted-foreground border border-border rounded px-1.5 py-0.5">
               <ShieldAlert className="w-2.5 h-2.5" /> Unrated
             </span>
           )}
           {confidence === 'low' && (
-            <span className="flex items-center gap-1 text-[10px] font-mono text-warning border border-warning/30 rounded px-1.5 py-0.5">
+            <span className="flex items-center gap-1 text-2xs font-mono text-warning border border-warning/30 rounded px-1.5 py-0.5">
               <ShieldAlert className="w-2.5 h-2.5" /> Low Confidence
             </span>
           )}
           {confidence === 'confirmed' && (
-            <span className="flex items-center gap-1 text-[10px] font-mono text-primary border border-primary/30 rounded px-1.5 py-0.5">
+            <span className="flex items-center gap-1 text-2xs font-mono text-primary border border-primary/30 rounded px-1.5 py-0.5">
               <ShieldCheck className="w-2.5 h-2.5" /> Confirmed
             </span>
           )}
@@ -313,7 +313,7 @@ export default function CanDetail() {
         {/* Rarity consensus section */}
         <div className="bg-card border border-border rounded-xl p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-2xs font-mono text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
               <Users className="w-3 h-3" /> Community Rarity
               <Popover>
                 <PopoverTrigger
@@ -330,13 +330,13 @@ export default function CanDetail() {
                 </PopoverContent>
               </Popover>
             </span>
-            <span className="text-[10px] font-mono text-muted-foreground">{totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}</span>
+            <span className="text-2xs font-mono text-muted-foreground">{totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}</span>
           </div>
 
           {confidence === 'unrated' ? (
             <div>
               <p className="text-3xl font-display font-black tracking-wide text-muted-foreground">? ? ?</p>
-              <p className="text-[11px] font-mono text-muted-foreground mt-1">Not enough votes yet — need {Math.max(0, 5 - totalVotes)} more</p>
+              <p className="text-2xs font-mono text-muted-foreground mt-1">Not enough votes yet — need {Math.max(0, 5 - totalVotes)} more</p>
             </div>
           ) : (
             <p className={cn('text-3xl font-display font-black tracking-wide', RARITY_TEXT_CLASS[rarity] || 'text-foreground')}>
@@ -359,7 +359,7 @@ export default function CanDetail() {
                   <span className="text-xs font-mono text-muted-foreground w-6 text-right tabular-nums">{votes}</span>
                 </div>
               ))}
-              <p className="text-[10px] font-mono text-muted-foreground pt-1">
+              <p className="text-2xs font-mono text-muted-foreground pt-1">
                 {rarityBreakdown.map(({ rarity: r, votes }) => `${r}: ${votes}`).join(' · ')}
               </p>
             </div>
@@ -370,7 +370,7 @@ export default function CanDetail() {
           {/* User's own vote */}
           {myVote && (
             <div className="pt-2 border-t border-border">
-              <p className="text-[11px] font-mono text-muted-foreground">
+              <p className="text-2xs font-mono text-muted-foreground">
                 Your vote:{' '}
                 <span className={cn('font-semibold', RARITY_TEXT_CLASS[myVote.voted_rarity] || 'text-foreground')}>
                   {myVote.voted_rarity}
@@ -387,7 +387,7 @@ export default function CanDetail() {
             <div className="bg-card border border-border rounded-xl p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <Tag className="w-3 h-3 text-muted-foreground" />
-                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Flavour</span>
+                <span className="text-2xs font-mono text-muted-foreground uppercase tracking-wider">Flavour</span>
               </div>
               <p className="text-sm font-semibold text-foreground">{flavour}</p>
             </div>
@@ -396,7 +396,7 @@ export default function CanDetail() {
             <div className="bg-card border border-border rounded-xl p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <FileText className="w-3 h-3 text-muted-foreground" />
-                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Edition</span>
+                <span className="text-2xs font-mono text-muted-foreground uppercase tracking-wider">Edition</span>
               </div>
               <p className="text-sm font-semibold text-foreground">{edition}</p>
             </div>
@@ -405,7 +405,7 @@ export default function CanDetail() {
             <div className="bg-card border border-border rounded-xl p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <Calendar className="w-3 h-3 text-muted-foreground" />
-                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Added</span>
+                <span className="text-2xs font-mono text-muted-foreground uppercase tracking-wider">Added</span>
               </div>
               <p className="text-sm font-semibold text-foreground">
                 {format(new Date(item.created_at), 'MMM d, yyyy')}
@@ -422,11 +422,11 @@ export default function CanDetail() {
           <div className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center gap-1.5 mb-2">
               <Star className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Your Rating</span>
+              <span className="text-2xs font-mono text-muted-foreground uppercase tracking-wider">Your Rating</span>
             </div>
             <TasteRatingStars value={item.taste_rating} readOnly />
             {!item.taste_rating && (
-              <p className="text-[11px] font-mono text-muted-foreground mt-2">Tap Edit to rate this can</p>
+              <p className="text-2xs font-mono text-muted-foreground mt-2">Tap Edit to rate this can</p>
             )}
           </div>
         )}
@@ -436,7 +436,7 @@ export default function CanDetail() {
           <div className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center gap-1.5 mb-2">
               <StickyNote className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Notes</span>
+              <span className="text-2xs font-mono text-muted-foreground uppercase tracking-wider">Notes</span>
             </div>
             <p className="text-sm text-foreground leading-relaxed">{item.notes}</p>
           </div>

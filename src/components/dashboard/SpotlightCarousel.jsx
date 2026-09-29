@@ -46,7 +46,7 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
       <div className="flex items-center justify-between px-5 mb-3">
         <h3 className="text-base font-display font-bold text-foreground">Recent Pulls</h3>
         {items.length > 0 && (
-          <span className="text-[11px] font-mono text-muted-foreground">Swipe →</span>
+          <span className="text-2xs font-mono text-muted-foreground">Swipe →</span>
         )}
       </div>
 
@@ -86,7 +86,7 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
                     <p className="text-sm font-semibold text-foreground truncate">{item.can_name}</p>
                     <div className="flex items-center justify-between gap-2">
                       <RarityBadge rarity={rarity} />
-                      <span className="text-[10px] font-mono text-muted-foreground truncate">{item.can_brand}</span>
+                      <span className="text-2xs font-mono text-muted-foreground truncate">{item.can_brand}</span>
                     </div>
                   </div>
                 </div>

@@ -213,7 +213,7 @@ export default function MostWanted() {
               className="flex-1 min-w-0 text-left"
             >
               <p className="text-sm font-semibold text-foreground truncate">{can.name}</p>
-              <p className="text-[11px] font-mono text-primary/70 truncate">{can.brand}</p>
+              <p className="text-2xs font-mono text-primary/70 truncate">{can.brand}</p>
               <div className="mt-1">
                 <RarityBadge rarity={rarity} />
               </div>
@@ -250,7 +250,7 @@ export default function MostWanted() {
                   <Plus className="w-4 h-4" />
                 </button>
               )}
-              <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
+              <span className="text-2xs font-mono text-muted-foreground tabular-nums">
                 {can.community_favourites || 0}
               </span>
             </div>

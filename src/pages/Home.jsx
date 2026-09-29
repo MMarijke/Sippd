@@ -235,7 +235,7 @@ export default function Home() {
                         guarantees the fix without per-theme tuning. The
                         card's own primary-tinted border/glow still carries
                         the themed identity. */}
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-foreground">
+                    <p className="text-2xs font-mono uppercase tracking-widest text-foreground">
                       COLLECTION SCORE
                     </p>
                     <p className="text-5xl font-mono font-black text-foreground neon-text">
@@ -284,11 +284,11 @@ export default function Home() {
       {!isLoading && !hasCollectionError && collected.length > 0 && brands.length > 1 && (
         <div className="mt-5">
           <div className="px-5 mb-2 flex items-center justify-between">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+            <p className="text-2xs font-mono uppercase tracking-widest text-muted-foreground">
               Browse by Brand
             </p>
             {brands.length > 4 && (
-              <span className="text-[11px] font-mono text-muted-foreground">Swipe →</span>
+              <span className="text-2xs font-mono text-muted-foreground">Swipe →</span>
             )}
           </div>
           <div className="flex gap-3 overflow-x-auto px-5 pb-1 scrollbar-none">
@@ -330,7 +330,7 @@ export default function Home() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-display font-semibold text-foreground tracking-wide">Monthly Report</p>
-            <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{format(new Date(), 'MMMM yyyy')} · Tap to view</p>
+            <p className="text-2xs font-mono text-muted-foreground mt-0.5">{format(new Date(), 'MMMM yyyy')} · Tap to view</p>
           </div>
           <span className="text-xs font-mono text-primary">→</span>
         </div>

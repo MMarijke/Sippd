@@ -167,7 +167,7 @@ export default function RegionalLeaderboard() {
   return (
     <div className="px-5">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wide truncate">
+        <span className="text-2xs font-mono text-muted-foreground uppercase tracking-wide truncate">
           {profile?.region}
         </span>
         <Popover>
@@ -197,7 +197,7 @@ export default function RegionalLeaderboard() {
             {rankDelta != null && rankDelta !== 0 && (
               <span
                 className={cn(
-                  'flex items-center gap-0.5 text-[10px] font-mono font-semibold',
+                  'flex items-center gap-0.5 text-2xs font-mono font-semibold',
                   rankDelta > 0 ? 'text-success' : 'text-muted-foreground'
                 )}
                 title={`${rankDelta > 0 ? 'Up' : 'Down'} ${Math.abs(rankDelta)} rank${Math.abs(rankDelta) === 1 ? '' : 's'} since your last visit`}
@@ -282,7 +282,7 @@ export default function RegionalLeaderboard() {
                     <p className={cn('flex items-center gap-1 text-sm font-semibold truncate group-hover/row:underline', isMe ? 'text-primary' : 'text-foreground')}>
                       <span className="truncate">{name}</span>
                       {proUserIds.has(entry.user_id) && <ProBadge />}
-                      {isMe && <span className="ml-0.5 text-[10px] font-mono text-primary/70">(you)</span>}
+                      {isMe && <span className="ml-0.5 text-2xs font-mono text-primary/70">(you)</span>}
                     </p>
                   </div>
                 </Link>
@@ -290,7 +290,7 @@ export default function RegionalLeaderboard() {
                   <p className={cn('text-sm font-display font-bold tabular-nums', isMe ? 'text-primary' : 'text-foreground')}>
                     {entry.score}
                   </p>
-                  <p className="text-[10px] font-mono text-muted-foreground">score</p>
+                  <p className="text-2xs font-mono text-muted-foreground">score</p>
                 </div>
               </div>
             );

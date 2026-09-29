@@ -47,7 +47,7 @@ export default function Pro() {
         </button>
         <div>
           <h1 className="text-base font-display font-bold text-foreground tracking-wide">Sippd Pro</h1>
-          <p className="text-[11px] font-mono text-muted-foreground">The serious collector's toolkit</p>
+          <p className="text-2xs font-mono text-muted-foreground">The serious collector's toolkit</p>
         </div>
       </div>
 

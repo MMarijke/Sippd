@@ -82,7 +82,7 @@ export default function TasteRatingStars({ value, onChange, readOnly = false, si
           </button>
         ))}
       </div>
-      <p className="text-[11px] font-mono text-muted-foreground">1 = not for me · 10 = all-time favorite</p>
+      <p className="text-2xs font-mono text-muted-foreground">1 = not for me · 10 = all-time favorite</p>
     </div>
   );
 }

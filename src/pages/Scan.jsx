@@ -278,7 +278,7 @@ export default function Scan() {
                         <span className="text-primary text-xs font-mono ml-1">✓</span>
                       )}
                     </p>
-                    <p className="text-[11px] font-mono text-muted-foreground">{can.brand}</p>
+                    <p className="text-2xs font-mono text-muted-foreground">{can.brand}</p>
                   </div>
                   <RarityBadge rarity={can.cosensus_rarity || can.rarity || 'Common'} />
                 </button>
@@ -317,7 +317,7 @@ export default function Scan() {
 
       <div className="flex items-center gap-3 px-5 mt-6">
         <div className="flex-1 h-px bg-border" />
-        <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest">OR</span>
+        <span className="text-2xs font-mono text-muted-foreground uppercase tracking-widest">OR</span>
         <div className="flex-1 h-px bg-border" />
       </div>
 

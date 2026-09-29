@@ -191,7 +191,7 @@ export default function Wishlist() {
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-display font-bold text-foreground">{brand}</span>
-                      <span className="text-[10px] font-mono text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
+                      <span className="text-2xs font-mono text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
                         {items.length}
                       </span>
                     </div>
@@ -220,7 +220,7 @@ export default function Wishlist() {
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-semibold text-foreground truncate leading-tight">{item.can_name}</p>
                               {item.can_flavour && (
-                                <p className="text-[10px] font-mono text-muted-foreground truncate">{item.can_flavour}</p>
+                                <p className="text-2xs font-mono text-muted-foreground truncate">{item.can_flavour}</p>
                               )}
                               <div className="mt-0.5">
                                 <RarityBadge rarity={rarity} size="sm" />

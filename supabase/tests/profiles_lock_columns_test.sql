@@ -83,6 +83,14 @@ select lives_ok(
   'free user can still switch between free themes (power-up / moonlight)'
 );
 
+-- Added in 20260929120000_add_silver_screen_theme.sql; Pro-locked by
+-- omission from the free list, not by any explicit entry.
+select throws_like(
+  $$update profiles set theme = 'silver-screen' where id = '11111111-1111-1111-1111-111111111111'$$,
+  '%theme is Pro-only%',
+  'free user is blocked from Silver Screen'
+);
+
 reset role;
 
 -- ── As the Pro user (authenticated) ──────────────────────────────────────
@@ -93,6 +101,11 @@ select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-2222222
 select lives_ok(
   $$update profiles set theme = 'cyberpunk' where id = '22222222-2222-2222-2222-222222222222'$$,
   'Pro user can switch to a Pro-locked theme'
+);
+
+select lives_ok(
+  $$update profiles set theme = 'silver-screen' where id = '22222222-2222-2222-2222-222222222222'$$,
+  'Pro user can switch to Silver Screen (passes the widened check constraint)'
 );
 
 -- Retired in 20260929000000_trim_theme_catalogue.sql. Run as a Pro user so

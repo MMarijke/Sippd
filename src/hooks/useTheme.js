@@ -81,6 +81,7 @@ export const THEME_FAMILIES = [
       { id: 'amethyst', label: 'Amethyst', pro: true, dark: { swatch: '#8E6DAB', sup: '#8B3DCB', background: '#120D16' } },
       { id: 'sapphire', label: 'Sapphire', pro: true, dark: { swatch: '#527BB9', sup: '#1961CC', background: '#080F19' } },
       { id: 'emerald', label: 'Emerald', pro: true, dark: { swatch: '#458584', sup: '#0A754D', background: '#09130F' } },
+      { id: 'silver-screen', label: 'Silver Screen', pro: true, dark: { swatch: '#F2F2F2', sup: '#B8B8B8', background: '#0A0A0A' } },
     ],
   },
   {

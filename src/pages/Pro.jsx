@@ -6,12 +6,17 @@ import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { openCheckout, PADDLE_MONTHLY_PRICE_ID, PADDLE_ANNUAL_PRICE_ID } from '@/lib/paddle';
 import { toast } from 'sonner';
+import { THEMES, THEME_FAMILIES } from '@/hooks/useTheme';
 import LegalFooter from '@/components/legal/LegalFooter';
+
+// Derived from the catalogue itself -- the hardcoded version of this line
+// went stale twice (Phase 2 added four families, then a trim removed one).
+const PRO_THEME_COUNT = THEMES.filter(t => t.pro).length;
 
 const FEATURES = [
   'Unlimited crates (free: 5 crates, 10 cans each)',
   'Unlimited barcode scans (free: 10/day)',
-  '10 exclusive themes across two collections — Neon Arcade and Vintage Pastel',
+  `${PRO_THEME_COUNT} exclusive themes across all ${THEME_FAMILIES.length} collections`,
   'Pro badge on your profile, leaderboard, and feed posts',
   'Bigger pinned showcase (10 vs. 6) with a hero spotlight slot',
   'Support indie development',

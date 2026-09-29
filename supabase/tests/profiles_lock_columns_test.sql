@@ -6,7 +6,8 @@
 -- Pro-locked theme directly is profiles_lock_columns() (first added in
 -- 20260815120100_security.sql, extended in 20260901000000_add_pro_subscription.sql,
 -- 20260909000000_add_profile_theme.sql, 20260926000000_add_theme_families.sql,
--- and 20260927000000_replace_theme_catalogue_phase1.sql).
+-- 20260927000000_replace_theme_catalogue_phase1.sql, and most recently
+-- 20260929000000_trim_theme_catalogue.sql).
 -- This is exactly the gap this project's own CLAUDE.md calls out ("RLS only
 -- restricts which rows a user can touch, not which columns") — this file is
 -- the regression check that the trigger still closes it after every future
@@ -78,8 +79,8 @@ select throws_like(
 );
 
 select lives_ok(
-  $$update profiles set theme = 'mint-fizz' where id = '11111111-1111-1111-1111-111111111111'$$,
-  'free user can still switch between free themes (power-up / mint-fizz)'
+  $$update profiles set theme = 'moonlight' where id = '11111111-1111-1111-1111-111111111111'$$,
+  'free user can still switch between free themes (power-up / moonlight)'
 );
 
 reset role;
@@ -92,6 +93,14 @@ select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-2222222
 select lives_ok(
   $$update profiles set theme = 'cyberpunk' where id = '22222222-2222-2222-2222-222222222222'$$,
   'Pro user can switch to a Pro-locked theme'
+);
+
+-- Retired in 20260929000000_trim_theme_catalogue.sql. Run as a Pro user so
+-- the Pro-lock passes and it's the check constraint doing the rejecting.
+select throws_like(
+  $$update profiles set theme = 'xp-gold' where id = '22222222-2222-2222-2222-222222222222'$$,
+  '%profiles_theme_valid%',
+  'a retired theme id is rejected even for a Pro user'
 );
 
 reset role;

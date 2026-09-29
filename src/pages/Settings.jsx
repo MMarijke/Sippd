@@ -343,21 +343,30 @@ function PolarityToggle({ theme, polarity, setPolarity, isPending }) {
 }
 
 // ─── Theme Picker ────────────────────────────────────────────────────────────
-// Two-step now that there are 6 families × 6 palettes (36 total): Step 1
+// Two-step now that there are 5 families (28 palettes, 5-6 each): Step 1
 // picks a family, Step 2 picks a palette within it. `viewedFamilyId` is
 // which family the picker is currently *browsing* — independent of `theme`
 // (the actually *applied* palette) — so tapping around families to look at
 // them never changes what's live until a swatch is actually tapped.
 // Polarity (light/dark) is a separate control (PolarityToggle above) rather
-// than folded into either step — but it only applies to Neon Arcade/Vintage
-// Pastel, the two families where every palette genuinely has both a dark
-// and light rendering. The 4 Phase 2 families are each a single fixed
+// than folded into either step — but it only applies to Neon Arcade, the
+// one family where every palette genuinely has both a dark and light
+// rendering. The 4 Phase 2 families are each a single fixed
 // polarity per theme (Botanical mixes light/dark PALETTES within itself,
 // but no individual palette toggles), so the toggle only renders when the
 // viewed family actually supports it — see familyHasPolarityToggle.
+// Both picker steps lay out 3 per row with any short final row centered,
+// not a CSS grid: 5 families (and Neon Arcade/Noir's 5 palettes) would
+// leave a grid's last row as 2 tiles plus an empty slot that reads like
+// something failed to load. Centered 3-over-2 reads as deliberate.
+// A single row of 5 was ruled out -- at 375px each tile gets ~54px and
+// "Botanical" alone needs ~59px in the 11px mono label.
+const PICKER_ROW = 'flex flex-wrap justify-center gap-3';
+const PICKER_TILE = 'w-[calc((100%_-_1.5rem)/3)]';
+
 function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies, polarity }) {
   return (
-    <div className="grid grid-cols-3 gap-3 p-4">
+    <div className={cn(PICKER_ROW, 'p-4')}>
       {THEME_FAMILIES.map(family => {
         const freeTheme = family.themes.find(t => !t.pro);
         const selected = viewedFamilyId === family.id;
@@ -377,7 +386,7 @@ function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies, polari
             aria-label={showNewBadge ? `Browse ${family.label} themes — new` : `Browse ${family.label} themes`}
             aria-pressed={selected}
             className={cn(
-              'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors',
+              PICKER_TILE, 'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors',
               selected ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/20'
             )}
           >
@@ -403,7 +412,7 @@ function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPendin
   // Botanical is the one family where adjacent swatches can be different
   // fixed polarities (Sage/Moss/Meadow are light, Forest/Fern/Terracotta
   // are dark) — tapping between them flips the whole app's light/dark with
-  // no warning, unlike Neon Arcade/Vintage Pastel where the separate
+  // no warning, unlike Neon Arcade where the separate
   // toggle telegraphs that upfront (/impeccable critique). Only families
   // with more than one fixed-polarity kind get the sun/moon glyph — a
   // single-polarity family (Cosmic, Noir, Candy) doesn't need it, every
@@ -428,7 +437,7 @@ function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPendin
           family containing your current theme), not a tap the user just
           made themselves. (/impeccable critique) */}
       <p className="text-sm font-medium text-foreground">{family.label}</p>
-      <div className="grid grid-cols-3 gap-3">
+      <div className={PICKER_ROW}>
         {family.themes.map((themeEntry) => {
           const { id, label, pro } = themeEntry;
           const locked = pro && !isPro;
@@ -444,7 +453,7 @@ function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPendin
               aria-label={locked ? `${label} — Pro only, tap to upgrade` : `Use ${label} theme (${familyMixedPolarity ? entryPolarity : ''})`}
               aria-pressed={selected}
               className={cn(
-                'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors',
+                PICKER_TILE, 'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors',
                 selected ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/20'
               )}
             >
@@ -504,8 +513,8 @@ export default function Settings() {
   }, [isThemeLoading]);
   // The toggle changes the polarity of the ACTIVE theme, not whichever
   // family is currently being browsed — so its visibility depends on the
-  // active theme's own family, not viewedFamilyId. Only Neon Arcade and
-  // Vintage Pastel currently have every palette in both polarities.
+  // active theme's own family, not viewedFamilyId. Only Neon Arcade
+  // currently has every palette in both polarities.
   const activeFamily = THEME_FAMILIES.find(f => f.themes.some(t => t.id === theme));
   const showPolarityToggle = familyHasPolarityToggle(activeFamily);
   // Tracks which theme families this browser has ever opened, purely to
@@ -802,7 +811,7 @@ export default function Settings() {
             // resolve once loading finishes, not always step 1 — for most
             // returning users viewedFamilyId is already non-null (it
             // defaults to the family containing their current theme), so
-            // the real resolved view is step 2's 6-swatch grid, and a
+            // the real resolved view is step 2's swatch grid, and a
             // step-1 skeleton there was a real layout jump, not the
             // "no jump" the old comment here claimed. (/impeccable critique)
             viewedFamilyId ? (
@@ -817,9 +826,9 @@ export default function Settings() {
                       <ChevronLeft className="w-3.5 h-3.5" /> All families
                     </button>
                     <p className="text-sm font-medium text-foreground">{loadingFamily?.label}</p>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className={PICKER_ROW}>
                       {loadingFamily?.themes.map(({ id }) => (
-                        <div key={id} className="flex flex-col items-center gap-2 rounded-xl border border-border p-3">
+                        <div key={id} className={cn(PICKER_TILE, 'flex flex-col items-center gap-2 rounded-xl border border-border p-3')}>
                           <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
                           <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
                         </div>
@@ -829,9 +838,9 @@ export default function Settings() {
                 );
               })()
             ) : (
-              <div className="grid grid-cols-3 gap-3 p-4">
+              <div className={cn(PICKER_ROW, 'p-4')}>
                 {THEME_FAMILIES.map(({ id }) => (
-                  <div key={id} className="flex flex-col items-center gap-2 rounded-xl border border-border p-3">
+                  <div key={id} className={cn(PICKER_TILE, 'flex flex-col items-center gap-2 rounded-xl border border-border p-3')}>
                     <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
                     <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
                   </div>

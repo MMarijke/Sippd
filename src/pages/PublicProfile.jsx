@@ -156,7 +156,7 @@ export default function PublicProfile() {
   // the client mirror of its rule and no rank.
   const {
     collected, showcase, totalCount, rarityBreakdown, getEffectiveRarity,
-    score, rarePulls, rank,
+    score, rarePulls, rank, rankTotal,
   } = useProfileShowcase({
     userId,
     collection: profileItems,
@@ -370,6 +370,7 @@ export default function PublicProfile() {
                 <CollectionCard
                   score={score}
                   rank={rank}
+                  rankTotal={rankTotal}
                   items={gridItems}
                   isPro={isOwnerPro}
                   rarityBreakdown={rarityBreakdown}

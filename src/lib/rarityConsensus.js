@@ -209,6 +209,19 @@ export function computeTrustedStats(collectedItems, sharedCansMap) {
 const TRUSTED_RARE_TIERS = new Set(['Rare', 'Ultra Rare', 'Legendary']);
 
 /**
+ * Points a collector gained from cans added on or after `since`, by the same
+ * trusted rule the leaderboard scores with -- Profile's "+N pts this week".
+ * There is no score history, so this is additions only: removing a can, or
+ * votes shifting an older can's rarity, doesn't show up here. Items without
+ * a created_at are ignored rather than guessed.
+ */
+export function pointsAddedSince(collectedItems, sharedCansMap, since) {
+  const cutoff = since instanceof Date ? since.getTime() : new Date(since).getTime();
+  const recent = collectedItems.filter(item => item.created_at && new Date(item.created_at).getTime() >= cutoff);
+  return computeTrustedStats(recent, sharedCansMap).score;
+}
+
+/**
  * Compute total score for a collection using the new scoring system.
  */
 export function computeCollectionScore(collectionItems, sharedCansMap) {

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { canTileBackground } from '@/lib/canBgColors';
 import { Link } from 'react-router-dom';
-import { Pin, Link2, CupSoda, X, Eye } from 'lucide-react';
+import { Pin, Link2, CupSoda, X, Eye, TrendingUp, ChevronRight } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { getMaxPins } from '@/hooks/useTogglePin';
 import { cn } from '@/lib/utils';
@@ -39,6 +39,15 @@ export default function CollectionCard({
   headerTitle,
   score,
   rank,
+  // Competitive context under Score. rankTotal: "of N". nextRank +
+  // pointsToNextRank: the gap to the next rank up (owner only).
+  // rankHref: where the rank chip links (your row on the Score leaderboard).
+  // weeklyPoints: "+N pts this week", owner only; omit to hide.
+  rankTotal,
+  nextRank,
+  pointsToNextRank,
+  rankHref,
+  weeklyPoints,
   stats,
   rarityBreakdown,
   items,
@@ -150,14 +159,51 @@ export default function CollectionCard({
       <div className="hero-card rounded-2xl p-5 mb-3 text-center">
         <p className="text-xs font-mono uppercase tracking-widest text-foreground">Score</p>
         <p className="text-5xl font-mono font-black text-foreground tabular-nums">{score}</p>
-        {/* Rank chip: foreground text on the accent tint. Primary as 12px
-            text is only ~3:1 on light themes (3.13 on Sage); the chip keeps
-            the accent in its fill and border. */}
-        {rank && (
-          <span className="inline-block mt-1.5 px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-xs font-mono font-semibold text-foreground">
-            #{rank}
-          </span>
+        {/* This week's movement, directly under the number it moves. */}
+        {weeklyPoints != null && (
+          <p className="mt-1 flex items-center justify-center gap-1 text-xs font-mono text-foreground">
+            {weeklyPoints > 0 ? (
+              <>
+                <TrendingUp className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
+                +{weeklyPoints} pts this week
+              </>
+            ) : (
+              <span className="text-muted-foreground">No new points this week</span>
+            )}
+          </p>
         )}
+        {/* Rank with its context: where you stand, out of how many, and
+            what the next step up costs. Foreground text on the accent tint
+            (primary as 12px text is ~3:1 on light themes); the chip keeps
+            the accent in its fill and border. A real link to your row on
+            the Score leaderboard when rankHref is given (Profile), plain
+            text otherwise (PublicProfile, about someone else). */}
+        {rank && (() => {
+          const gapText = rank === 1
+            ? 'top of the board'
+            : pointsToNextRank != null && nextRank
+              ? `${pointsToNextRank} pt${pointsToNextRank === 1 ? '' : 's'} to #${nextRank}`
+              : null;
+          const label = (
+            <>
+              <span>Rank #{rank}{rankTotal ? ` of ${rankTotal}` : ''}</span>
+              {gapText && <span className="text-muted-foreground">· {gapText}</span>}
+            </>
+          );
+          const chipClass = 'mt-2 inline-flex items-center gap-1.5 px-3 rounded-full bg-primary/10 border border-primary/30 text-xs font-mono font-semibold text-foreground';
+          return rankHref ? (
+            <Link
+              to={rankHref}
+              aria-label={`Rank ${rank}${rankTotal ? ` of ${rankTotal}` : ''}${gapText ? `, ${gapText.replace('pts', 'points').replace('pt ', 'point ')}` : ''}. View on the leaderboard`}
+              className={cn(chipClass, 'min-h-11 hover:bg-primary/15 transition-colors')}
+            >
+              {label}
+              <ChevronRight className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
+            </Link>
+          ) : (
+            <span className={cn(chipClass, 'py-1')}>{label}</span>
+          );
+        })()}
       </div>
 
       <div className={cn('grid divide-x divide-border mb-5', stats.length === 3 ? 'grid-cols-3' : 'grid-cols-2')}>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
@@ -301,7 +301,7 @@ function StarDots() {
 // blocks), so this always reads the CURRENT theme's own dark/light swatch —
 // never a fixed pair of colors — meaning it stays accurate no matter which
 // theme is active, and previews exactly what tapping it will produce.
-function PolarityToggle({ theme, polarity, setPolarity, isPending }) {
+function PolarityToggle({ theme, polarity, onSelectPolarity, isPending }) {
   const match = THEMES.find(t => t.id === theme);
   return (
     <div className="px-4 pb-3.5">
@@ -309,19 +309,25 @@ function PolarityToggle({ theme, polarity, setPolarity, isPending }) {
         {['dark', 'light'].map(p => {
           const selected = polarity === p;
           return (
+            // aria-disabled + a guarded onClick, not `disabled`: a disabled
+            // button leaves the tab order, so the current polarity was
+            // unreachable by keyboard, and pressing the other one dropped
+            // focus to <body> the moment the mutation went pending.
             <button
               key={p}
-              onClick={() => setPolarity(p)}
-              disabled={isPending || selected}
+              onClick={() => { if (!selected && !isPending) onSelectPolarity(p); }}
+              aria-disabled={isPending || undefined}
               aria-pressed={selected}
               className={cn(
-                'flex-1 flex items-center justify-center gap-2 h-11 rounded-full border text-xs font-mono capitalize transition-colors disabled:cursor-not-allowed',
+                PICKER_FOCUS,
+                'flex-1 flex items-center justify-center gap-2 h-11 rounded-full border text-xs font-mono capitalize transition-colors aria-disabled:cursor-not-allowed',
                 selected ? 'border-primary/50 bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:border-primary/20'
               )}
             >
               <span
                 className="w-3.5 h-3.5 rounded-full border border-foreground/10 flex-shrink-0"
                 style={{ background: match?.[p]?.background }}
+                aria-hidden="true"
               />
               {p}
             </button>
@@ -363,52 +369,93 @@ function PolarityToggle({ theme, polarity, setPolarity, isPending }) {
 // "Botanical" alone needs ~59px in the 11px mono label.
 const PICKER_ROW = 'flex flex-wrap justify-center gap-3';
 const PICKER_TILE = 'w-[calc((100%_-_1.5rem)/3)]';
+// One deliberate keyboard focus treatment for every picker control. The
+// global `outline-ring/50` fallback was a half-alpha browser outline that
+// all but vanished on light themes. --ring tracks --primary, so the ring is
+// always this theme's own accent; offset against the card it sits on.
+const PICKER_FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card';
 
-function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies, polarity }) {
+// Moves keyboard focus to `ref` when `request` matches `key`, then reports
+// back so the request is spent. Only ever driven by a user's own step
+// change -- never on first render, so opening Settings doesn't jump focus.
+function useFocusRequest(ref, request, key, onHandled) {
+  useEffect(() => {
+    if (request !== key || !ref.current) return;
+    ref.current.focus();
+    onHandled();
+  }, [request, key, ref, onHandled]);
+}
+
+function FamilyTile({ family, polarity, isCurrent, showNewBadge, onSelect, focusRequest, onFocusHandled }) {
+  const ref = useRef(null);
+  useFocusRequest(ref, focusRequest, `family:${family.id}`, onFocusHandled);
+  const freeTheme = family.themes.find(t => !t.pro);
+  const rendering = getThemeRendering(freeTheme, polarity);
+  // This tile opens a family; it doesn't toggle anything, so no
+  // aria-pressed (it always read "not pressed"). Where the user's own
+  // theme lives is said in words instead.
+  const label = [
+    `Browse ${family.label} themes`,
+    isCurrent && 'your current theme family',
+    showNewBadge && 'new',
+  ].filter(Boolean).join(', ');
+  return (
+    <button
+      ref={ref}
+      onClick={() => onSelect(family.id)}
+      aria-label={label}
+      className={cn(
+        PICKER_TILE, PICKER_FOCUS, 'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors',
+        'border-border hover:border-primary/20'
+      )}
+    >
+      {showNewBadge && (
+        <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" aria-hidden="true" />
+      )}
+      <div className="relative w-9 h-9" aria-hidden="true">
+        <div
+          className="w-9 h-9 rounded-full border border-foreground/10"
+          style={{ background: swatchBackground(rendering) }}
+        />
+        {family.id === 'cosmic' && <StarDots />}
+      </div>
+      <span className="text-2xs font-mono text-muted-foreground text-center leading-tight">{family.label}</span>
+    </button>
+  );
+}
+
+function ThemeFamilyTiles({ activeFamilyId, onSelectFamily, seenFamilies, polarity, focusRequest, onFocusHandled }) {
   return (
     <div className={cn(PICKER_ROW, 'p-4')}>
-      {THEME_FAMILIES.map(family => {
-        const freeTheme = family.themes.find(t => !t.pro);
-        const selected = viewedFamilyId === family.id;
-        // Clears itself the first time this tile is actually opened
-        // (Settings' onSelectFamily marks it seen), not on a timer or a
-        // manual dismiss — a launch that only ever shows up if you already
-        // knew to look defeats the point of a "New" marker. A quiet dot,
-        // not a text pill — an /impeccable critique found 4-5 loud "New"
-        // pills showing at once (every Phase 2 family, all unseen on a
-        // fresh install) diluted the signal rather than drawing attention.
-        const showNewBadge = family.isNew && !seenFamilies.has(family.id);
-        const rendering = getThemeRendering(freeTheme, polarity);
-        return (
-          <button
-            key={family.id}
-            onClick={() => onSelectFamily(family.id)}
-            aria-label={showNewBadge ? `Browse ${family.label} themes — new` : `Browse ${family.label} themes`}
-            aria-pressed={selected}
-            className={cn(
-              PICKER_TILE, 'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors',
-              selected ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/20'
-            )}
-          >
-            {showNewBadge && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" aria-hidden="true" />
-            )}
-            <div className="relative w-9 h-9">
-              <div
-                className="w-9 h-9 rounded-full border border-foreground/10"
-                style={{ background: swatchBackground(rendering) }}
-              />
-              {family.id === 'cosmic' && <StarDots />}
-            </div>
-            <span className="text-2xs font-mono text-muted-foreground text-center leading-tight">{family.label}</span>
-          </button>
-        );
-      })}
+      {THEME_FAMILIES.map(family => (
+        <FamilyTile
+          key={family.id}
+          family={family}
+          polarity={polarity}
+          isCurrent={family.id === activeFamilyId}
+          // Clears itself the first time this tile is actually opened
+          // (Settings' onSelectFamily marks it seen), not on a timer or a
+          // manual dismiss — a launch that only ever shows up if you already
+          // knew to look defeats the point of a "New" marker. A quiet dot,
+          // not a text pill — an /impeccable critique found 4-5 loud "New"
+          // pills showing at once (every Phase 2 family, all unseen on a
+          // fresh install) diluted the signal rather than drawing attention.
+          showNewBadge={family.isNew && !seenFamilies.has(family.id)}
+          onSelect={onSelectFamily}
+          focusRequest={focusRequest}
+          onFocusHandled={onFocusHandled}
+        />
+      ))}
     </div>
   );
 }
 
-function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPending, onLockedTap, onBack }) {
+function ThemePalettePicker({ family, theme, polarity, onSelectTheme, isPro, isPending, onLockedTap, onBack, focusRequest, onFocusHandled }) {
+  // Arriving from a family tile unmounts that tile, which would drop focus
+  // to <body>; the family heading takes it instead, so a screen reader
+  // announces where you landed.
+  const headingRef = useRef(null);
+  useFocusRequest(headingRef, focusRequest, 'palette-heading', onFocusHandled);
   // Botanical is the one family where adjacent swatches can be different
   // fixed polarities (Sage/Moss/Meadow are light, Forest/Fern are
   // dark) — tapping between them flips the whole app's light/dark with
@@ -426,9 +473,9 @@ function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPendin
     <div className="p-4 space-y-3">
       <button
         onClick={onBack}
-        className="flex items-center gap-1 text-2xs font-mono text-muted-foreground hover:text-foreground transition-colors"
+        className={cn(PICKER_FOCUS, 'flex items-center gap-1 rounded text-2xs font-mono text-muted-foreground hover:text-foreground transition-colors')}
       >
-        <ChevronLeft className="w-3.5 h-3.5" /> All families
+        <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" /> All families
       </button>
       {/* The whole point of a two-step picker is orientation at 18 options
           — landing on 6 swatches with nothing naming which family they
@@ -436,7 +483,13 @@ function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPendin
           reached by the picker's own default (viewedFamilyId starts on the
           family containing your current theme), not a tap the user just
           made themselves. (/impeccable critique) */}
-      <p className="text-sm font-medium text-foreground">{family.label}</p>
+      <h2
+        ref={headingRef}
+        tabIndex={-1}
+        className="text-sm font-medium text-foreground rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        {family.label}
+      </h2>
       <div className={PICKER_ROW}>
         {family.themes.map((themeEntry) => {
           const { id, label, pro } = themeEntry;
@@ -445,19 +498,33 @@ function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPendin
           const rendering = getThemeRendering(themeEntry, polarity);
           const entrySinglePolarity = !(themeEntry.dark && themeEntry.light);
           const entryPolarity = themeEntry.light ? 'light' : 'dark';
+          // Light/dark is only worth saying where it varies tile to tile
+          // (Botanical) -- elsewhere the old template left an empty "()".
+          // Locked copy says what happens on activation rather than naming
+          // a gesture, and warns that it leaves Settings.
+          const modeNote = familyMixedPolarity ? `, ${entryPolarity} mode` : '';
+          const ariaLabel = locked
+            ? `${label}${modeNote}, Pro only. Opens the upgrade page`
+            : `Use ${label} theme${modeNote}`;
           return (
+            // aria-disabled while a change is saving, not `disabled`: a
+            // disabled button drops keyboard focus to <body> mid-change.
             <button
               key={id}
-              onClick={() => (locked ? onLockedTap() : setTheme(id))}
-              disabled={isPending}
-              aria-label={locked ? `${label} — Pro only, tap to upgrade` : `Use ${label} theme (${familyMixedPolarity ? entryPolarity : ''})`}
+              onClick={() => {
+                if (isPending) return;
+                if (locked) onLockedTap();
+                else onSelectTheme(id);
+              }}
+              aria-disabled={isPending || undefined}
+              aria-label={ariaLabel}
               aria-pressed={selected}
               className={cn(
-                PICKER_TILE, 'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors',
+                PICKER_TILE, PICKER_FOCUS, 'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors aria-disabled:cursor-wait',
                 selected ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/20'
               )}
             >
-              <div className="relative w-9 h-9">
+              <div className="relative w-9 h-9" aria-hidden="true">
                 <div
                   className="w-9 h-9 rounded-full border border-foreground/10"
                   style={{ background: swatchBackground(rendering) }}
@@ -492,6 +559,31 @@ export default function Settings() {
   const { user, signOut } = useAuth();
   const { isPro, isLoading: isProLoading } = useSubscription();
   const { theme, polarity, setTheme, setPolarity, isThemeLoading, isPending: themePending } = useTheme();
+  // Both queries gate the picker: `theme` reads as Power-Up until the real
+  // value loads, so rendering early flashed a Neon Arcade grid with
+  // Power-Up pressed (and the Neon-only polarity toggle) for everyone else.
+  const pickerLoading = isProLoading || isThemeLoading;
+  // Which control should take keyboard focus after a picker step change:
+  // 'palette-heading' going in, 'family:<id>' coming back out. Null
+  // otherwise, so nothing steals focus on first render.
+  const [focusRequest, setFocusRequest] = useState(null);
+  const clearFocusRequest = useCallback(() => setFocusRequest(null), []);
+  // Polite status text for screen readers once a change is actually saved.
+  // The optimistic reskin is visual-only; an error is already announced by
+  // the toast useTheme raises, so only success needs saying here.
+  const [themeAnnouncement, setThemeAnnouncement] = useState('');
+  const announce = (text) => {
+    // Clear first so the same message twice in a row is re-announced.
+    setThemeAnnouncement('');
+    requestAnimationFrame(() => setThemeAnnouncement(text));
+  };
+  const handleSelectTheme = (id) => {
+    const label = THEMES.find(t => t.id === id)?.label ?? id;
+    setTheme(id, { onSuccess: () => announce(`Theme changed to ${label}`) });
+  };
+  const handleSelectPolarity = (p) => {
+    setPolarity(p, { onSuccess: () => announce(`Switched to ${p} mode`) });
+  };
   // Which family the theme picker is currently browsing — defaults to
   // whichever family the actually-applied `theme` belongs to, so opening
   // Settings always lands on a step-2 view of your real theme rather than
@@ -507,7 +599,13 @@ export default function Settings() {
   // fight the user's own picker navigation.
   useEffect(() => {
     if (!isThemeLoading) {
-      setViewedFamilyId(THEME_FAMILIES.find(f => f.themes.some(t => t.id === theme))?.id ?? null);
+      const realFamilyId = THEME_FAMILIES.find(f => f.themes.some(t => t.id === theme))?.id ?? null;
+      setViewedFamilyId(realFamilyId);
+      // Same pre-load default bit the "seen" set below: it was seeded from
+      // Power-Up's family, so the family you're actually using kept its
+      // "new" dot (and counted in "N new families"). In-memory only, same
+      // as the original seed -- opening a tile is what persists it.
+      if (realFamilyId) setSeenFamilies(prev => (prev.has(realFamilyId) ? prev : new Set(prev).add(realFamilyId)));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isThemeLoading]);
@@ -790,19 +888,20 @@ export default function Settings() {
           <div className="px-4 pt-3.5">
             <p className="text-sm font-medium text-foreground">Theme</p>
             <p className="text-xs font-mono text-muted-foreground mt-0.5">
-              {isProLoading ? 'Loading…' : isPro ? 'Pick your look' : 'One free theme per family — the rest unlock with Pro'}
+              {pickerLoading ? 'Loading…' : isPro ? 'Pick your look' : 'One free theme per family — the rest unlock with Pro'}
             </p>
-            {!isProLoading && unseenNewFamilyCount > 0 && (
+            <p className="sr-only" role="status" aria-live="polite">{themeAnnouncement}</p>
+            {!pickerLoading && unseenNewFamilyCount > 0 && (
               <p className="text-2xs font-mono text-primary mt-1 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" aria-hidden="true" />
                 {unseenNewFamilyCount} new {unseenNewFamilyCount === 1 ? 'family' : 'families'} this update
               </p>
             )}
           </div>
-          {showPolarityToggle && (
-            <PolarityToggle theme={theme} polarity={polarity} setPolarity={setPolarity} isPending={themePending} />
+          {showPolarityToggle && !pickerLoading && (
+            <PolarityToggle theme={theme} polarity={polarity} onSelectPolarity={handleSelectPolarity} isPending={themePending} />
           )}
-          {isProLoading ? (
+          {pickerLoading ? (
             // Same reasoning as the Subscription section above: locked is
             // computed from isPro, so rendering real tiles here would
             // briefly lock every theme — including a Pro user's own
@@ -814,56 +913,67 @@ export default function Settings() {
             // the real resolved view is step 2's swatch grid, and a
             // step-1 skeleton there was a real layout jump, not the
             // "no jump" the old comment here claimed. (/impeccable critique)
-            viewedFamilyId ? (
-              (() => {
-                const loadingFamily = THEME_FAMILIES.find(f => f.id === viewedFamilyId);
-                return (
-                  <div className="p-4 space-y-3">
-                    <button
-                      onClick={() => setViewedFamilyId(null)}
-                      className="flex items-center gap-1 text-2xs font-mono text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <ChevronLeft className="w-3.5 h-3.5" /> All families
-                    </button>
-                    <p className="text-sm font-medium text-foreground">{loadingFamily?.label}</p>
-                    <div className={PICKER_ROW}>
-                      {loadingFamily?.themes.map(({ id }) => (
-                        <div key={id} className={cn(PICKER_TILE, 'flex flex-col items-center gap-2 rounded-xl border border-border p-3')}>
-                          <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
-                          <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
-                        </div>
-                      ))}
+            // aria-busy + a status line so a screen reader hears that the
+            // picker is loading rather than meeting an empty region. No real
+            // controls in here: the old skeleton's live "All families" button
+            // could be pressed mid-load.
+            <div aria-busy="true">
+              <p className="sr-only" role="status">Loading themes</p>
+              {viewedFamilyId ? (
+                (() => {
+                  const loadingFamily = THEME_FAMILIES.find(f => f.id === viewedFamilyId);
+                  return (
+                    <div className="p-4 space-y-3" aria-hidden="true">
+                      <div className="h-4 w-24 rounded bg-secondary/60 animate-pulse" />
+                      {/* While the theme itself is loading, viewedFamilyId is
+                          still the Power-Up default, so naming it would flash
+                          "Neon Arcade" at everyone. A bar until it's real. */}
+                      {isThemeLoading
+                        ? <div className="h-5 w-28 rounded bg-secondary/60 animate-pulse" />
+                        : <p className="text-sm font-medium text-foreground">{loadingFamily?.label}</p>}
+                      <div className={PICKER_ROW}>
+                        {loadingFamily?.themes.map(({ id }) => (
+                          <div key={id} className={cn(PICKER_TILE, 'flex flex-col items-center gap-2 rounded-xl border border-border p-3')}>
+                            <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
+                            <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                );
-              })()
-            ) : (
-              <div className={cn(PICKER_ROW, 'p-4')}>
-                {THEME_FAMILIES.map(({ id }) => (
-                  <div key={id} className={cn(PICKER_TILE, 'flex flex-col items-center gap-2 rounded-xl border border-border p-3')}>
-                    <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
-                    <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
-                  </div>
-                ))}
-              </div>
-            )
+                  );
+                })()
+              ) : (
+                <div className={cn(PICKER_ROW, 'p-4')} aria-hidden="true">
+                  {THEME_FAMILIES.map(({ id }) => (
+                    <div key={id} className={cn(PICKER_TILE, 'flex flex-col items-center gap-2 rounded-xl border border-border p-3')}>
+                      <div className="w-9 h-9 rounded-full bg-secondary/60 animate-pulse" />
+                      <div className="h-2.5 w-10 rounded bg-secondary/60 animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           ) : viewedFamilyId ? (
             <ThemePalettePicker
               family={THEME_FAMILIES.find(f => f.id === viewedFamilyId)}
               theme={theme}
               polarity={polarity}
-              setTheme={setTheme}
+              onSelectTheme={handleSelectTheme}
               isPro={isPro}
               isPending={themePending}
               onLockedTap={() => navigate('/pro')}
-              onBack={() => setViewedFamilyId(null)}
+              onBack={() => { setFocusRequest(`family:${viewedFamilyId}`); setViewedFamilyId(null); }}
+              focusRequest={focusRequest}
+              onFocusHandled={clearFocusRequest}
             />
           ) : (
             <ThemeFamilyTiles
-              viewedFamilyId={viewedFamilyId}
-              onSelectFamily={id => { setViewedFamilyId(id); markFamilySeen(id); }}
+              activeFamilyId={activeFamily?.id}
+              onSelectFamily={id => { setFocusRequest('palette-heading'); setViewedFamilyId(id); markFamilySeen(id); }}
               seenFamilies={seenFamilies}
               polarity={polarity}
+              focusRequest={focusRequest}
+              onFocusHandled={clearFocusRequest}
             />
           )}
         </div>

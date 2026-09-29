@@ -79,7 +79,7 @@ export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFav
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           <RarityBadge rarity={rarity} />
           {confidence === 'low' && (
-            <span className="text-2xs font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-background/80 text-yellow-400 border border-yellow-400/30">
+            <span className="text-2xs font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-background/80 text-caution border border-caution/30">
               Low Conf.
             </span>
           )}

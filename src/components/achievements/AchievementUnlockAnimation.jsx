@@ -151,7 +151,7 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
         {/* "ACHIEVEMENT UNLOCKED" label */}
         <p style={{
           fontSize: '0.6875rem',
-          fontFamily: 'monospace',
+          fontFamily: 'var(--font-mono)',
           fontWeight: 700,
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
@@ -202,8 +202,8 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
         {/* Description */}
         <p style={{
           fontSize: '0.8125rem',
-          fontFamily: 'monospace',
-          color: 'rgba(240,244,248,0.6)',
+          fontFamily: 'var(--font-mono)',
+          color: 'hsl(var(--muted-foreground))',
           textAlign: 'center',
           maxWidth: 240,
         }}>
@@ -213,8 +213,8 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
         {/* Tap to dismiss hint */}
         <p style={{
           fontSize: '0.6875rem', // was 10px -- raised to the app's 11px text-2xs floor
-          fontFamily: 'monospace',
-          color: 'rgba(240,244,248,0.25)',
+          fontFamily: 'var(--font-mono)',
+          color: 'hsl(var(--muted-foreground))',
           marginTop: 8,
           letterSpacing: '0.1em',
         }}>

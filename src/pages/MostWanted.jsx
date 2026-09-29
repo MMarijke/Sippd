@@ -196,8 +196,14 @@ export default function MostWanted() {
               )}
             </div>
 
+            {/* Same action as the name button beside it, which carries the
+                accessible name -- this one is a bigger touch target only,
+                so it's kept out of the tab order and the a11y tree rather
+                than being a second, unnamed stop for the same thing. */}
             <button
               onClick={() => handleCanTap(can)}
+              tabIndex={-1}
+              aria-hidden="true"
               className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0"
             >
               <CanImageBox

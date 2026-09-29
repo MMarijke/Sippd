@@ -38,9 +38,9 @@ const markdownComponents = {
   p: ({ children }) => {
     if (isNeedsReview(children)) {
       return (
-        <div className="flex items-start gap-2.5 rounded-xl border border-yellow-500/30 bg-yellow-500/5 px-3 py-2.5 my-3">
-          <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
-          <p className="text-xs font-mono text-yellow-400 leading-relaxed">{children}</p>
+        <div className="flex items-start gap-2.5 rounded-xl border border-caution/30 bg-caution/5 px-3 py-2.5 my-3">
+          <AlertTriangle className="w-4 h-4 text-caution flex-shrink-0 mt-0.5" aria-hidden="true" />
+          <p className="text-xs font-mono text-caution leading-relaxed">{children}</p>
         </div>
       );
     }

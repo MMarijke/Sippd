@@ -189,6 +189,11 @@
     --medal-silver: 215 16% 75%;
     --medal-bronze: 28 75% 55%;
     --overlap: 38 92% 60%;
+    /* Caution TEXT (low-confidence badges, legal and Add Can notices).
+       Separate from --warning on purpose: --warning is authored to the 3:1
+       icon/component floor (see file header) and reads 2.9:1 as small
+       text on light themes. Same amber values as --overlap, same checks. */
+    --caution: 38 92% 60%;
   }
 
   :root[data-tone="light"] {
@@ -196,6 +201,7 @@
     --medal-silver: 215 16% 33%;
     --medal-bronze: 24 72% 30%;
     --overlap: 35 92% 25%;
+    --caution: 35 92% 25%;
   }
 
   .dark {

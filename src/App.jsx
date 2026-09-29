@@ -5,7 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
-import { AuthProvider } from '@/lib/AuthContext';
+import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
@@ -42,8 +42,12 @@ const Refund = lazy(() => import('./pages/Refund'));
 // chunks are warmed once the browser is idle -- a tab switch should never
 // wait on the network. Same import() specifiers as above, so Vite resolves
 // them to the same chunks and React.lazy finds them already loaded.
-function usePrefetchTabRoutes() {
+// Signed-in only: a visitor on /login can't reach any tab, and Scan's chunk
+// alone carries the ~0.5 MB barcode reader.
+function PrefetchTabRoutes() {
+  const { user } = useAuth();
   useEffect(() => {
+    if (!user) return;
     const prefetch = () => {
       import('./pages/Scan');
       import('./pages/Collection');
@@ -56,7 +60,8 @@ function usePrefetchTabRoutes() {
     }
     const t = setTimeout(prefetch, 1500);
     return () => clearTimeout(t);
-  }, []);
+  }, [user]);
+  return null;
 }
 
 // Applies the signed-in user's saved theme to <html> for the whole app
@@ -68,8 +73,6 @@ function ThemeEffect() {
 }
 
 function App() {
-  usePrefetchTabRoutes();
-
   return (
     // reducedMotion="user": under the OS's reduce-motion setting, framer
     // drops transform/layout animation app-wide but keeps opacity and color,
@@ -81,6 +84,7 @@ function App() {
     <QueryClientProvider client={queryClientInstance}>
       <AuthProvider>
         <ThemeEffect />
+        <PrefetchTabRoutes />
         <Router>
           {/* Blank page-colored fallback, not a spinner: a chunk usually
               lands in well under a second, and a spinner flashing for that

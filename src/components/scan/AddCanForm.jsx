@@ -333,8 +333,8 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
     <div className="space-y-5 px-5 pb-10">
 
       {(prefillData?._offMiss || (prefillData?._offSource && (!prefillData?.name || !prefillData?.brand))) && (
-        <div className="mb-2 px-3 py-2 rounded-xl border border-yellow-500/30 bg-yellow-500/5">
-          <p className="text-xs font-mono text-yellow-400">
+        <div className="mb-2 px-3 py-2 rounded-xl border border-caution/30 bg-caution/5">
+          <p className="text-xs font-mono text-caution">
             {prefillData?._offMiss
               ? "This barcode isn't in Open Food Facts yet — fill in the details below to add it."
               : "Some details couldn't be found automatically — please fill them in below."}

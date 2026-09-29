@@ -56,7 +56,7 @@ export default function CanListItem({ item, sharedCan, onAddToCrate, selectable,
       <div className="flex flex-col items-end gap-1 pointer-events-none">
         <RarityBadge rarity={rarity} />
         {confidence === 'low' && (
-          <span className="text-2xs font-mono uppercase tracking-wider px-1 py-0.5 rounded text-yellow-400 border border-yellow-400/30">
+          <span className="text-2xs font-mono uppercase tracking-wider px-1 py-0.5 rounded text-caution border border-caution/30">
             Low Conf.
           </span>
         )}

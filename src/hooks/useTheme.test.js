@@ -12,7 +12,7 @@ import { describe, it, expect, vi } from 'vitest';
 // source doesn't matter, but it's written first to match how it executes.
 vi.mock('@/lib/supabaseClient', () => ({ supabase: {} }));
 
-import { getThemeChangeErrorMessage, getRenderedTone, getThemeFamily, THEMES, FAMILY_FONT_URLS, THEME_FAMILIES } from './useTheme';
+import { getThemeChangeErrorMessage, getPolarityChangeErrorMessage, isRetryableThemeError, RETIRED_THEMES, getRenderedTone, getThemeFamily, THEMES, FAMILY_FONT_URLS, THEME_FAMILIES } from './useTheme';
 
 // Only the pure branch of setTheme's onError handler — the optimistic
 // cache update/rollback around it lives inside react-query's own hook
@@ -27,18 +27,71 @@ describe('getThemeChangeErrorMessage', () => {
     expect(getThemeChangeErrorMessage(error)).toBe('That theme is a Pro perk — upgrade to unlock it.');
   });
 
-  it('shows a generic failure message for any other error', () => {
-    const error = new Error('network request failed');
-    expect(getThemeChangeErrorMessage(error)).toBe('Failed to change theme');
+  // online=true is passed explicitly so these don't depend on the test
+  // runner's own navigator.
+  const GENERIC = "Couldn't save your theme, so your previous one is back.";
+  const OFFLINE = "Couldn't save your theme — you seem to be offline. Your previous theme is back.";
+
+  it('says the change was undone for an unexplained failure', () => {
+    expect(getThemeChangeErrorMessage(new Error('permission denied for table'), true)).toBe(GENERIC);
+  });
+
+  it('names the likely cause when the request never reached the server', () => {
+    expect(getThemeChangeErrorMessage(new TypeError('Failed to fetch'), true)).toBe(OFFLINE);
+    expect(getThemeChangeErrorMessage(new Error('anything'), false)).toBe(OFFLINE);
   });
 
   it('does not crash on an error with no message', () => {
-    expect(getThemeChangeErrorMessage(new Error())).toBe('Failed to change theme');
+    expect(getThemeChangeErrorMessage(new Error(), true)).toBe(GENERIC);
   });
 
   it('does not crash on a null/undefined error', () => {
-    expect(getThemeChangeErrorMessage(null)).toBe('Failed to change theme');
-    expect(getThemeChangeErrorMessage(undefined)).toBe('Failed to change theme');
+    expect(getThemeChangeErrorMessage(null, true)).toBe(GENERIC);
+    expect(getThemeChangeErrorMessage(undefined, true)).toBe(GENERIC);
+  });
+});
+
+describe('getPolarityChangeErrorMessage', () => {
+  it('names the mode that failed', () => {
+    expect(getPolarityChangeErrorMessage(new Error('x'), 'light', true)).toBe("Couldn't switch to light mode, so nothing changed.");
+    expect(getPolarityChangeErrorMessage(new Error('x'), 'dark', true)).toBe("Couldn't switch to dark mode, so nothing changed.");
+  });
+
+  it('names being offline when that is the cause', () => {
+    expect(getPolarityChangeErrorMessage(new TypeError('Failed to fetch'), 'light', true)).toBe("Couldn't switch to light mode — you seem to be offline.");
+  });
+});
+
+// Retrying a Pro-lock rejection would only fail the same way.
+describe('isRetryableThemeError', () => {
+  it('offers a retry for everything except the Pro lock', () => {
+    expect(isRetryableThemeError(new Error('theme is Pro-only — upgrade to unlock'))).toBe(false);
+    expect(isRetryableThemeError(new TypeError('Failed to fetch'))).toBe(true);
+    expect(isRetryableThemeError(null)).toBe(true);
+  });
+});
+
+// Every id the retire migrations can write into profiles.retired_theme
+// needs a display name and a still-existing destination, or the Settings
+// note would print a raw id or name a theme that's gone.
+describe('RETIRED_THEMES', () => {
+  it('covers every retired id, each moved to a theme that still exists', () => {
+    const retired = ['mint-fizz', 'strawberry-cream', 'blue-raspberry', 'lemon-pop', 'peach-soda', 'grape-float', 'xp-gold', 'champagne', 'terracotta'];
+    expect(Object.keys(RETIRED_THEMES).sort()).toEqual([...retired].sort());
+    for (const id of retired) {
+      expect(THEMES.some(t => t.id === id), id).toBe(false);
+      expect(THEMES.some(t => t.id === RETIRED_THEMES[id].movedTo), id).toBe(true);
+    }
+  });
+
+  it("matches the retire migrations' backfill", async () => {
+    const { readFileSync } = await import('node:fs');
+    const sql = ['20260929000000_trim_theme_catalogue.sql', '20260929180000_retire_terracotta.sql']
+      .map(f => readFileSync(new URL(`../../supabase/migrations/${f}`, import.meta.url), 'utf8')).join('\n');
+    for (const [id, { movedTo }] of Object.entries(RETIRED_THEMES)) {
+      const pair = new RegExp(`when '${id}'\\s+then '${movedTo}'|retired_theme = '${id}', theme = '${movedTo}'`);
+      expect(pair.test(sql), id).toBe(true);
+    }
   });
 });
 

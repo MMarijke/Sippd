@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useTheme, THEME_FAMILIES, THEMES, getThemeRendering, familyHasPolarityToggle, PICKER_LABEL_FONTS_URL } from '@/hooks/useTheme';
+import { useTheme, THEME_FAMILIES, THEMES, getThemeRendering, familyHasPolarityToggle, PICKER_LABEL_FONTS_URL, RETIRED_THEMES } from '@/hooks/useTheme';
 import { ArrowLeft, ChevronRight, ChevronLeft, Lock, Loader2, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -606,7 +606,7 @@ export default function Settings() {
   const queryClient = useQueryClient();
   const { user, signOut } = useAuth();
   const { isPro, isLoading: isProLoading } = useSubscription();
-  const { theme, polarity, setTheme, setPolarity, isThemeLoading, isPending: themePending } = useTheme();
+  const { theme, polarity, setTheme, setPolarity, isThemeLoading, isPending: themePending, retiredTheme, dismissRetiredTheme } = useTheme();
   // Both queries gate the picker: `theme` reads as Power-Up until the real
   // value loads, so rendering early flashed a Neon Arcade grid with
   // Power-Up pressed (and the Neon-only polarity toggle) for everyone else.
@@ -950,9 +950,34 @@ export default function Settings() {
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
           <div className="px-4 pt-3.5">
             <p className="text-sm font-medium text-foreground">Theme</p>
+            {/* Says what a theme actually changes (was "Pick your look",
+                which restated the control). Free users also get the Pro
+                rule, on its own line so neither sentence buries the other. */}
             <p className="text-xs font-mono text-muted-foreground mt-0.5">
-              {pickerLoading ? 'Loading…' : isPro ? 'Pick your look' : 'One free theme per family — the rest unlock with Pro'}
+              {pickerLoading ? 'Loading…' : 'Changes your colours, fonts and rarity bar.'}
             </p>
+            {!pickerLoading && !isPro && (
+              <p className="text-xs font-mono text-muted-foreground mt-0.5">
+                One free theme per family — the rest unlock with Pro.
+              </p>
+            )}
+            {/* One-time note for users the retire migrations moved
+                (profiles.retired_theme). Without it their look changed with
+                no explanation. Stays until dismissed. */}
+            {!pickerLoading && retiredTheme && RETIRED_THEMES[retiredTheme] && (
+              <div className="flex items-start justify-between gap-2 mt-1.5">
+                <p className="text-2xs font-mono text-foreground pt-0.5">
+                  {RETIRED_THEMES[retiredTheme].label} was retired, so we moved you to{' '}
+                  {THEMES.find(t => t.id === RETIRED_THEMES[retiredTheme].movedTo)?.label}, its closest match.
+                </p>
+                <button
+                  onClick={() => dismissRetiredTheme()}
+                  className={cn(PICKER_FOCUS, 'h-11 -my-3 -mr-2 px-2 flex-shrink-0 rounded-lg text-2xs font-mono text-muted-foreground hover:text-foreground transition-colors')}
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
             <p className="sr-only" role="status" aria-live="polite">{themeAnnouncement}</p>
             {!pickerLoading && unseenNewFamilyCount > 0 && (
               <p className="text-2xs font-mono text-primary mt-1 flex items-center gap-1.5">

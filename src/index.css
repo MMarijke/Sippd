@@ -177,11 +177,11 @@
        plausible extensions of that theme's own hue, not a detour through
        its opposite). Saturation step (+5%/tier) and the per-tier contrast
        fit are unchanged. */
-    --breakdown-common: 152.0 55% 30.2%;
-    --breakdown-uncommon: 167.0 60% 29.0%;
-    --breakdown-rare: 182.0 65% 28.4%;
-    --breakdown-ultra: 197.0 70% 34.2%;
-    --breakdown-legendary: 212.0 75% 43.6%;
+    --breakdown-common: 152.0 100% 50.0%;
+    --breakdown-uncommon: 152.8 75% 48.9%;
+    --breakdown-rare: 158.0 66% 43.2%;
+    --breakdown-ultra: 167.4 62% 36.1%;
+    --breakdown-legendary: 182.0 65% 28.4%;
 
     /* Podium (gold/silver/bronze) and Compare's "in common" -- fixed
        meanings like the status colors, so one hue per role everywhere, but
@@ -255,18 +255,33 @@
     --rarity-ultra: 271 91% 65%;
     --rarity-legendary: 330 81% 60%;
 
-    --breakdown-common: 152.0 55% 30.2%;
-    --breakdown-uncommon: 167.0 60% 29.0%;
-    --breakdown-rare: 182.0 65% 28.4%;
-    --breakdown-ultra: 197.0 70% 34.2%;
-    --breakdown-legendary: 212.0 75% 43.6%;
+    --breakdown-common: 152.0 100% 50.0%;
+    --breakdown-uncommon: 152.8 75% 48.9%;
+    --breakdown-rare: 158.0 66% 43.2%;
+    --breakdown-ultra: 167.4 62% 36.1%;
+    --breakdown-legendary: 182.0 65% 28.4%;
   }
 
   /* ── Neon Arcade family (dark, gamer/cyber/neon) ─────────────────────────
      1 free + 5 Pro. Full glow (--glow-intensity: 1 for every palette --
      no graduated rarity ladder in this flat free/Pro catalogue, unlike the
      old system's Common->Legendary escalation). Font trio inherited from
-     :root, not repeated per palette. */
+     :root, not repeated per palette. (XP Gold retired 2026-09-29: 1 free +
+     4 Pro now.)
+
+     --breakdown-* is HAND-AUTHORED for every Neon Arcade block (2026-09-29),
+     per product direction, using Cosmic's method (even CIELAB steps, ends
+     chosen for a real lightness step, 2:1 floor on any faint end):
+     - Power-Up: scan button -> the blue-green its Rare tier used to be.
+       Both polarities END on the dark polarity's old Rare (182 65% 28.4%):
+       the light polarity's own old Rare matched its green in luminance and
+       stepped only 1.02/tier. :root and .dark mirror Power-Up dark.
+     - Cyberpunk: scan button -> light purple (both polarities).
+     - Plasma DARK: scan button -> blue. Plasma light is unchanged.
+     - Boss Fight: dark -> light orange; light -> lighter pink.
+     - Synthwave: scan button -> deep dark purple (both polarities).
+     With this, the file header's 15deg/tier rotation only still describes
+     Nebula, Amethyst, Forest, Moss, Grape Candy, Sour Apple and Plasma light. */
   [data-theme="power-up"][data-polarity="dark"] {
     --background: 217 37% 7%;
     --foreground: 153 100% 98%;
@@ -286,11 +301,11 @@
     --ring: 152 100% 50%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 152.0 55% 30.2%;
-    --breakdown-uncommon: 167.0 60% 29.0%;
-    --breakdown-rare: 182.0 65% 28.4%;
-    --breakdown-ultra: 197.0 70% 34.2%;
-    --breakdown-legendary: 212.0 75% 43.6%;
+    --breakdown-common: 152.0 100% 50.0%;
+    --breakdown-uncommon: 152.8 75% 48.9%;
+    --breakdown-rare: 158.0 66% 43.2%;
+    --breakdown-ultra: 167.4 62% 36.1%;
+    --breakdown-legendary: 182.0 65% 28.4%;
   }
   [data-theme="cyberpunk"][data-polarity="dark"] {
     --background: 278 38% 6%;
@@ -311,11 +326,11 @@
     --ring: 312 100% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 312.0 55% 44.4%;
-    --breakdown-uncommon: 327.0 60% 45.5%;
-    --breakdown-rare: 342.0 65% 46.2%;
-    --breakdown-ultra: 357.0 70% 46.3%;
-    --breakdown-legendary: 12.0 75% 42.0%;
+    --breakdown-common: 312.0 100% 58.0%;
+    --breakdown-uncommon: 309.3 90% 65.1%;
+    --breakdown-rare: 302.8 77% 68.7%;
+    --breakdown-ultra: 291.2 78% 74.1%;
+    --breakdown-legendary: 275.0 90% 80.0%;
   }
   [data-theme="plasma"][data-polarity="dark"] {
     --background: 204 52% 6%;
@@ -336,11 +351,11 @@
     --ring: 186 100% 50%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 186.0 55% 31.5%;
-    --breakdown-uncommon: 201.0 60% 37.4%;
-    --breakdown-rare: 216.0 65% 46.7%;
-    --breakdown-ultra: 231.0 70% 57.2%;
-    --breakdown-legendary: 246.0 75% 61.2%;
+    --breakdown-common: 186.0 100% 50.0%;
+    --breakdown-uncommon: 197.2 100% 59.9%;
+    --breakdown-rare: 207.9 100% 61.5%;
+    --breakdown-ultra: 216.9 100% 60.5%;
+    --breakdown-legendary: 222.0 100% 56.0%;
   }
   [data-theme="boss-fight"][data-polarity="dark"] {
     --background: 340 33% 5%;
@@ -361,11 +376,11 @@
     --ring: 347 100% 61%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 347.0 55% 46.9%;
-    --breakdown-uncommon: 2.0 60% 46.7%;
-    --breakdown-rare: 17.0 65% 40.7%;
-    --breakdown-ultra: 32.0 70% 33.9%;
-    --breakdown-legendary: 47.0 75% 27.9%;
+    --breakdown-common: 347.0 100% 61.0%;
+    --breakdown-uncommon: 358.3 100% 69.3%;
+    --breakdown-rare: 9.6 100% 70.8%;
+    --breakdown-ultra: 19.9 100% 71.4%;
+    --breakdown-legendary: 30.0 100% 72.0%;
   }
   [data-theme="synthwave"][data-polarity="dark"] {
     --background: 261 55% 6%;
@@ -390,11 +405,11 @@
     --ring: 283 79% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 283.0 55% 48.9%;
-    --breakdown-uncommon: 298.0 60% 43.0%;
-    --breakdown-rare: 313.0 65% 43.1%;
-    --breakdown-ultra: 328.0 70% 44.2%;
-    --breakdown-legendary: 343.0 75% 44.7%;
+    --breakdown-common: 283.0 79% 58.0%;
+    --breakdown-uncommon: 280.5 68% 52.8%;
+    --breakdown-rare: 277.8 66% 47.7%;
+    --breakdown-ultra: 275.0 72% 42.5%;
+    --breakdown-legendary: 272.0 80% 37.4%;
   }
 
   /* ── Neon Arcade, light-polarity counterparts ────────────────────────────
@@ -428,11 +443,11 @@
     --ring: 152 55% 38%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 152.0 55% 36.8%;
-    --breakdown-uncommon: 167.0 60% 35.4%;
-    --breakdown-rare: 182.0 65% 34.6%;
-    --breakdown-ultra: 197.0 70% 41.4%;
-    --breakdown-legendary: 212.0 75% 53.1%;
+    --breakdown-common: 152.0 55% 38.0%;
+    --breakdown-uncommon: 158.4 55% 35.9%;
+    --breakdown-rare: 165.7 55% 33.6%;
+    --breakdown-ultra: 173.7 58% 30.9%;
+    --breakdown-legendary: 182.0 65% 28.4%;
   }
   [data-theme="cyberpunk"][data-polarity="light"] {
     --background: 278 89% 96%;
@@ -454,11 +469,11 @@
     --ring: 312 55% 56%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 312.0 55% 55.1%;
-    --breakdown-uncommon: 327.0 60% 56.4%;
-    --breakdown-rare: 342.0 65% 57.6%;
-    --breakdown-ultra: 357.0 70% 58.4%;
-    --breakdown-legendary: 12.0 75% 51.7%;
+    --breakdown-common: 312.0 55% 56.0%;
+    --breakdown-uncommon: 306.1 52% 60.2%;
+    --breakdown-rare: 297.3 51% 64.7%;
+    --breakdown-ultra: 286.6 62% 71.3%;
+    --breakdown-legendary: 275.0 80% 77.8%;
   }
   [data-theme="plasma"][data-polarity="light"] {
     --background: 203 89% 96%;
@@ -509,11 +524,11 @@
     --ring: 334 55% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 334.0 55% 56.9%;
-    --breakdown-uncommon: 349.0 60% 58.1%;
-    --breakdown-rare: 4.0 65% 56.9%;
-    --breakdown-ultra: 19.0 70% 48.3%;
-    --breakdown-legendary: 34.0 75% 40.1%;
+    --breakdown-common: 334.0 55% 58.0%;
+    --breakdown-uncommon: 334.3 58% 62.5%;
+    --breakdown-rare: 334.4 63% 66.9%;
+    --breakdown-ultra: 334.3 68% 71.3%;
+    --breakdown-legendary: 334.0 75% 75.6%;
   }
   [data-theme="synthwave"][data-polarity="light"] {
     /* shifted -9/-9deg (283, 250 -> 274, 241) to clear Grape Float's dark
@@ -537,11 +552,11 @@
     --ring: 274 55% 62%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 274.0 55% 60.4%;
-    --breakdown-uncommon: 289.0 60% 57.2%;
-    --breakdown-rare: 304.0 65% 52.4%;
-    --breakdown-ultra: 319.0 70% 54.4%;
-    --breakdown-legendary: 334.0 75% 56.0%;
+    --breakdown-common: 274.0 55% 62.0%;
+    --breakdown-uncommon: 273.6 41% 52.1%;
+    --breakdown-rare: 273.1 44% 42.5%;
+    --breakdown-ultra: 272.5 53% 33.2%;
+    --breakdown-legendary: 272.0 70% 24.0%;
   }
 
   /* ============================================================================

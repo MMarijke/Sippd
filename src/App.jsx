@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Toaster } from "@/components/ui/sonner"
+import { MotionConfig } from 'framer-motion';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -70,6 +71,13 @@ function App() {
   usePrefetchTabRoutes();
 
   return (
+    // reducedMotion="user": under the OS's reduce-motion setting, framer
+    // drops transform/layout animation app-wide but keeps opacity and color,
+    // so state changes still read -- a default for every motion component,
+    // including ones (CanCard's press scale) that never checked
+    // usePrefersReducedMotion themselves. Components that already use that
+    // hook for their own tailored alternative keep it. (/impeccable animate)
+    <MotionConfig reducedMotion="user">
     <QueryClientProvider client={queryClientInstance}>
       <AuthProvider>
         <ThemeEffect />
@@ -144,6 +152,7 @@ function App() {
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
+    </MotionConfig>
   )
 }
 

@@ -20,7 +20,7 @@ export default function CrateCard({ crate, collection, onClick, onEdit, onDelete
         {/* Emoji + name */}
         <div className="text-2xl mb-2">{crate.emoji || '📦'}</div>
         <p className="text-sm font-display font-semibold text-foreground leading-tight pr-24 truncate">{crate.name}</p>
-        <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{canCount} can{canCount !== 1 ? 's' : ''}</p>
+        <p className="text-2xs font-mono text-muted-foreground mt-0.5">{canCount} can{canCount !== 1 ? 's' : ''}</p>
 
         {/* Mini preview images */}
         {previewItems.length > 0 && (

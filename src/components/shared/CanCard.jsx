@@ -79,12 +79,12 @@ export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFav
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           <RarityBadge rarity={rarity} />
           {confidence === 'low' && (
-            <span className="text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-background/80 text-yellow-400 border border-yellow-400/30">
+            <span className="text-2xs font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-background/80 text-yellow-400 border border-yellow-400/30">
               Low Conf.
             </span>
           )}
           {confidence === 'unrated' && (
-            <span className="text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-background/80 text-muted-foreground border border-border/60">
+            <span className="text-2xs font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-background/80 text-muted-foreground border border-border/60">
               Unrated
             </span>
           )}
@@ -95,7 +95,7 @@ export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFav
             with a same-corner badge. */}
         {showStatus && can.status && (
           <div className="absolute bottom-2 right-2">
-            <span className={`text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded ${
+            <span className={`text-2xs font-mono uppercase tracking-wider px-1.5 py-0.5 rounded ${
               can.status === 'collected' ? 'bg-rarity-uncommon/20 text-rarity-uncommon' :
               can.status === 'wishlist' ? 'bg-rarity-rare/20 text-rarity-rare' :
               'bg-muted-foreground/20 text-muted-foreground'
@@ -149,7 +149,7 @@ export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFav
 
       <div className="p-3 flex items-end justify-between gap-2 pointer-events-none">
         <div className="min-w-0">
-          <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider truncate">{brand}</p>
+          <p className="text-2xs font-mono text-muted-foreground uppercase tracking-wider truncate">{brand}</p>
           <h3 className="text-sm font-semibold text-foreground truncate mt-0.5">{name}</h3>
           {flavour && (
             <p className="text-xs text-muted-foreground truncate mt-0.5">{flavour}</p>

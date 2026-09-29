@@ -106,7 +106,7 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
               onClick={() => setFilter(opt)}
               aria-pressed={filter === opt}
               className={cn(
-                'h-11 px-2.5 flex items-center rounded-lg border text-[11px] font-mono transition-colors capitalize',
+                'h-11 px-2.5 flex items-center rounded-lg border text-2xs font-mono transition-colors capitalize',
                 filter === opt
                   ? 'bg-primary/10 border-primary/30 text-primary'
                   : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
@@ -209,7 +209,7 @@ function TradeCard({ trade, onDelete, onStatusChange }) {
               >
                 <span
                   className={cn(
-                    'h-9 px-2 flex items-center rounded-md border text-[10px] font-mono transition-colors capitalize',
+                    'h-9 px-2 flex items-center rounded-md border text-2xs font-mono transition-colors capitalize',
                     status === s
                       ? STATUS_STYLES[s].class
                       : 'bg-transparent border-border text-muted-foreground hover:text-foreground'
@@ -221,10 +221,10 @@ function TradeCard({ trade, onDelete, onStatusChange }) {
             ))}
           </div>
           {trade.traded_with && (
-            <span className="text-[11px] font-mono text-muted-foreground truncate">with {trade.traded_with}</span>
+            <span className="text-2xs font-mono text-muted-foreground truncate">with {trade.traded_with}</span>
           )}
           {trade.trade_date && (
-            <span className="text-[11px] font-mono text-muted-foreground">
+            <span className="text-2xs font-mono text-muted-foreground">
               · {format(new Date(trade.trade_date), 'MMM d, yyyy')}
             </span>
           )}
@@ -239,7 +239,7 @@ function TradeCard({ trade, onDelete, onStatusChange }) {
       </div>
 
       {trade.notes && (
-        <p className="text-[11px] font-mono text-muted-foreground italic">{trade.notes}</p>
+        <p className="text-2xs font-mono text-muted-foreground italic">{trade.notes}</p>
       )}
     </div>
   );
@@ -248,7 +248,7 @@ function TradeCard({ trade, onDelete, onStatusChange }) {
 function CanChip({ name, brand, imageUrl, rarity, label }) {
   return (
     <div className="flex-1 min-w-0">
-      <p className="text-[10px] font-mono text-muted-foreground mb-1">{label}</p>
+      <p className="text-2xs font-mono text-muted-foreground mb-1">{label}</p>
       <div className="flex items-center gap-2 bg-secondary rounded-lg px-2 py-1.5">
         <div className="w-7 h-7 rounded-md overflow-hidden border border-border flex-shrink-0" style={{ background: DEFAULT_CAN_BG }}>
           {imageUrl && <img src={imageUrl} alt={name} loading="lazy" decoding="async" className="w-full h-full object-contain" />}
@@ -256,7 +256,7 @@ function CanChip({ name, brand, imageUrl, rarity, label }) {
         <div className="min-w-0">
           <p className="text-xs font-body font-medium text-foreground truncate leading-tight">{name}</p>
           {rarity && (
-            <p className={`text-[10px] font-mono leading-tight ${RARITY_TEXT_CLASS[rarity] || 'text-muted-foreground'}`}>{rarity}</p>
+            <p className={`text-2xs font-mono leading-tight ${RARITY_TEXT_CLASS[rarity] || 'text-muted-foreground'}`}>{rarity}</p>
           )}
         </div>
       </div>

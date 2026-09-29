@@ -43,7 +43,7 @@ export default function RecommendedCans({ collection, sharedCans }) {
     <div className="px-5">
       <div className="flex items-center gap-2 mb-3">
         <Sparkles className="w-3.5 h-3.5 text-primary" />
-        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Recommended for You</p>
+        <p className="text-2xs font-mono text-muted-foreground uppercase tracking-widest">Recommended for You</p>
       </div>
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none -mx-1 px-1">
         {recommendations.map(sc => {
@@ -63,11 +63,11 @@ export default function RecommendedCans({ collection, sharedCans }) {
                 iconSize="w-7 h-7"
               />
               <div className="p-2 space-y-1">
-                <p className="text-[10px] font-mono text-muted-foreground truncate">{sc.brand}</p>
+                <p className="text-2xs font-mono text-muted-foreground truncate">{sc.brand}</p>
                 <p className="text-xs font-semibold text-foreground truncate leading-tight">{sc.name}</p>
                 {rarity
                   ? <RarityBadge rarity={rarity} size="sm" />
-                  : <span className="text-[10px] font-mono text-muted-foreground">? ? ?</span>
+                  : <span className="text-2xs font-mono text-muted-foreground">? ? ?</span>
                 }
               </div>
             </button>

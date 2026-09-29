@@ -356,7 +356,7 @@ export default function Collection() {
                 nothing. Once filtering actually starts, the active-filter
                 chip row already covers this. */}
             {searchQuery.length === 1 && (
-              <p className="text-[11px] font-mono text-muted-foreground mt-1.5 ml-1">
+              <p className="text-2xs font-mono text-muted-foreground mt-1.5 ml-1">
                 Type one more character to search
               </p>
             )}
@@ -382,7 +382,7 @@ export default function Collection() {
           {activeFilterChips.map(chip => (
             <span
               key={chip.key}
-              className="inline-flex items-center gap-1 h-8 pl-3 pr-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-[11px] font-mono"
+              className="inline-flex items-center gap-1 h-8 pl-3 pr-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary text-2xs font-mono"
             >
               {chip.label}
               {/* p-4/-m-4 expands the invisible tap target to a full 44px
@@ -399,7 +399,7 @@ export default function Collection() {
           ))}
           <button
             onClick={clearFilters}
-            className="h-11 px-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+            className="h-11 px-2 text-2xs font-mono text-muted-foreground hover:text-foreground transition-colors"
           >
             Clear all
           </button>

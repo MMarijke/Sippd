@@ -151,7 +151,7 @@ export default function BarcodeScanner({ onDetected }) {
                 ))}
                 <div className="absolute left-0 right-0 h-0.5 bg-primary neon-glow animate-shimmer" style={{ top: '50%' }} />
               </div>
-              <p className="absolute bottom-3 left-0 right-0 text-center text-[11px] font-mono text-white/80">
+              <p className="absolute bottom-3 left-0 right-0 text-center text-2xs font-mono text-white/80">
                 Point the camera at the barcode
               </p>
             </>

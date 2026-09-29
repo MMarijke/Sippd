@@ -116,7 +116,7 @@ export default function SharedCrate() {
           <Zap className="w-5 h-5 text-primary" />
           <div>
             <p className="text-base font-display font-black text-foreground tracking-widest">SIPPD</p>
-            <p className="text-[10px] font-mono text-muted-foreground -mt-0.5">Shared Crate</p>
+            <p className="text-2xs font-mono text-muted-foreground -mt-0.5">Shared Crate</p>
           </div>
         </div>
       </div>
@@ -143,7 +143,7 @@ export default function SharedCrate() {
                     inherited that fix yet. Owner name links to their public
                     profile — previously plain text, the page's only path
                     toward the actual growth loop it exists to create. */}
-                <p className="text-[11px] font-mono text-muted-foreground mt-0.5 flex items-center gap-1">
+                <p className="text-2xs font-mono text-muted-foreground mt-0.5 flex items-center gap-1">
                   Curated by{' '}
                   <Link to={`/u/${crate.owner_id}`} className="text-primary underline inline-flex items-center gap-1">
                     {crate.owner_name}

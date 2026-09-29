@@ -21,7 +21,7 @@ export default function StatBox({ icon, label, value, className, glow, isLoading
           {value != null ? `${value}` : '0'}
         </span>
       )}
-      <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">{label}</span>
+      <span className="text-2xs font-mono text-muted-foreground uppercase tracking-widest">{label}</span>
     </div>
   );
 }

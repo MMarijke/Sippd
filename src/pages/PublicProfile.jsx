@@ -233,7 +233,7 @@ export default function PublicProfile() {
                 displayName already carries the same
                 profileUser?.full_name || 'Collector' fallback used by the
                 h1 below, so this stays correct during loading too. */}
-            <p className="text-[10px] font-mono text-muted-foreground -mt-0.5">{`${displayName}'s Vault`}</p>
+            <p className="text-2xs font-mono text-muted-foreground -mt-0.5">{`${displayName}'s Vault`}</p>
           </div>
         </div>
       </div>

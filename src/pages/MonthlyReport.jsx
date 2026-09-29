@@ -212,11 +212,11 @@ export default function MonthlyReport() {
             {/* Cans Added */}
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-card border border-border rounded-xl p-4">
-                <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1.5">Cans Added</p>
+                <p className="text-2xs font-mono text-muted-foreground uppercase tracking-wider mb-1.5">Cans Added</p>
                 <p className="text-3xl font-display font-black text-primary">{collected.length}</p>
               </div>
               <div className="bg-card border border-border rounded-xl p-4">
-                <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-1.5">Score Gained</p>
+                <p className="text-2xs font-mono text-muted-foreground uppercase tracking-wider mb-1.5">Score Gained</p>
                 <p className="text-3xl font-display font-black text-primary">+{monthScore}</p>
               </div>
             </div>
@@ -227,7 +227,7 @@ export default function MonthlyReport() {
                 <Flame className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Current Streak</p>
+                <p className="text-2xs font-mono text-muted-foreground uppercase tracking-wider">Current Streak</p>
                 <p className="text-xl font-display font-bold text-foreground">{streak ?? 0} days</p>
               </div>
             </div>
@@ -237,7 +237,7 @@ export default function MonthlyReport() {
               <div className="bg-card border border-primary/20 rounded-xl overflow-hidden">
                 <div className="flex items-center gap-2 px-4 pt-4 pb-2">
                   <Trophy className="w-4 h-4 text-primary" />
-                  <p className="text-[10px] font-mono text-primary uppercase tracking-wider font-semibold">Best Pull of the Month</p>
+                  <p className="text-2xs font-mono text-primary uppercase tracking-wider font-semibold">Best Pull of the Month</p>
                 </div>
                 <div className="flex gap-4 px-4 pb-4">
                   <CanImageBox
@@ -248,7 +248,7 @@ export default function MonthlyReport() {
                     iconSize="w-8 h-8"
                   />
                   <div className="flex flex-col justify-center gap-1.5">
-                    <p className="text-[11px] font-mono text-primary/70 uppercase tracking-wider">{bestPull.can_brand}</p>
+                    <p className="text-2xs font-mono text-primary/70 uppercase tracking-wider">{bestPull.can_brand}</p>
                     <p className="text-base font-display font-bold text-foreground leading-tight">{bestPull.can_name}</p>
                     <RarityBadge rarity={bestPullRarity} />
                   </div>
@@ -261,7 +261,7 @@ export default function MonthlyReport() {
               <div className="bg-card border border-border rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Star className="w-4 h-4 text-muted-foreground" />
-                  <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Rarity Breakdown</p>
+                  <p className="text-2xs font-mono text-muted-foreground uppercase tracking-wider">Rarity Breakdown</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="w-24 h-24 flex-shrink-0">
@@ -295,7 +295,7 @@ export default function MonthlyReport() {
               <div className="bg-card border border-border rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Tag className="w-4 h-4 text-muted-foreground" />
-                  <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Cans by Brand</p>
+                  <p className="text-2xs font-mono text-muted-foreground uppercase tracking-wider">Cans by Brand</p>
                 </div>
                 <div className="space-y-2">
                   {brandCounts.map(([brand, count]) => (

@@ -150,7 +150,7 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
       }}>
         {/* "ACHIEVEMENT UNLOCKED" label */}
         <p style={{
-          fontSize: 11,
+          fontSize: '0.6875rem',
           fontFamily: 'monospace',
           fontWeight: 700,
           letterSpacing: '0.2em',
@@ -185,7 +185,7 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
             every className="font-display" surface elsewhere (see
             tailwind.config.js's fontFamily wiring). (/impeccable critique) */}
         <p id="achievement-unlock-title" style={{
-          fontSize: 22,
+          fontSize: '1.375rem',
           fontWeight: 900,
           fontFamily: 'var(--font-display)',
           letterSpacing: '0.08em',
@@ -201,7 +201,7 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
 
         {/* Description */}
         <p style={{
-          fontSize: 13,
+          fontSize: '0.8125rem',
           fontFamily: 'monospace',
           color: 'rgba(240,244,248,0.6)',
           textAlign: 'center',
@@ -212,7 +212,7 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
 
         {/* Tap to dismiss hint */}
         <p style={{
-          fontSize: 10,
+          fontSize: '0.6875rem', // was 10px -- raised to the app's 11px text-2xs floor
           fontFamily: 'monospace',
           color: 'rgba(240,244,248,0.25)',
           marginTop: 8,

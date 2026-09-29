@@ -35,7 +35,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
   if (isLoading) {
     return (
       <div>
-        <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground text-center">
+        <p className="text-2xs font-mono uppercase tracking-widest text-muted-foreground text-center">
           Rarity Breakdown
         </p>
         <div className="relative w-full max-w-[330px] mx-auto mt-2 flex items-end justify-center" style={{ aspectRatio: '2 / 1' }}>
@@ -111,7 +111,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
 
   return (
     <div>
-      <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground text-center">
+      <p className="text-2xs font-mono uppercase tracking-widest text-muted-foreground text-center">
         Rarity Breakdown
       </p>
 
@@ -153,7 +153,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
           <p className="text-4xl font-mono font-black text-foreground leading-none">
             {totalCans}
           </p>
-          <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mt-1">
+          <p className="text-2xs font-mono uppercase tracking-widest text-muted-foreground mt-1">
             cans
           </p>
         </div>

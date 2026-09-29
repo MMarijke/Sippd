@@ -128,7 +128,7 @@ export default function Notifications() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-foreground leading-snug">{getLabel(n)}</p>
-                  <p className="text-[11px] font-mono text-muted-foreground mt-1">
+                  <p className="text-2xs font-mono text-muted-foreground mt-1">
                     {n.created_at ? formatDistanceToNow(new Date(n.created_at), { addSuffix: true }) : ''}
                   </p>
 
@@ -152,7 +152,7 @@ export default function Notifications() {
                     </div>
                   )}
                   {n.type === 'trade_request' && n.trade_status && (
-                    <span className="text-[11px] font-mono text-muted-foreground">
+                    <span className="text-2xs font-mono text-muted-foreground">
                       {n.trade_status === 'accepted' ? '✓ Accepted' : '✗ Declined'}
                       {n.trade_message && ` · "${n.trade_message}"`}
                     </span>
@@ -178,7 +178,7 @@ export default function Notifications() {
                     </div>
                   )}
                   {n.type === 'follow_request' && n.follow_status && (
-                    <span className="text-[11px] font-mono text-muted-foreground">{n.follow_status === 'accepted' ? '✓ Accepted' : '✗ Denied'}</span>
+                    <span className="text-2xs font-mono text-muted-foreground">{n.follow_status === 'accepted' ? '✓ Accepted' : '✗ Denied'}</span>
                   )}
                 </div>
                 {!n.is_read && (

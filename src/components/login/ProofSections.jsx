@@ -37,7 +37,7 @@ export function LeaderboardProof() {
             <p className="flex-1 text-sm font-semibold text-foreground truncate">{r.name}</p>
             <div className="text-right flex-shrink-0">
               <p className="text-sm font-display font-bold tabular-nums text-foreground">{r.cans}</p>
-              <p className="text-[10px] font-mono text-muted-foreground">cans</p>
+              <p className="text-2xs font-mono text-muted-foreground">cans</p>
             </div>
           </div>
         ))}
@@ -60,7 +60,7 @@ export function FeedProof() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground">Wren T.</p>
-            <p className="text-[11px] font-mono text-muted-foreground">2m ago</p>
+            <p className="text-2xs font-mono text-muted-foreground">2m ago</p>
           </div>
         </div>
         <p className="text-xs font-mono text-muted-foreground leading-relaxed">
@@ -92,7 +92,7 @@ export function CollectionProof() {
       </p>
       <div className="max-w-sm rounded-2xl border border-border bg-card p-4">
         <div className="hero-card rounded-2xl p-4 mb-3 text-center">
-          <p className="text-[11px] font-mono uppercase tracking-widest text-foreground">Collection Score</p>
+          <p className="text-2xs font-mono uppercase tracking-widest text-foreground">Collection Score</p>
           <p className="text-4xl font-mono font-black text-foreground tabular-nums">2,140</p>
         </div>
         <div className="grid grid-cols-6 gap-1.5">

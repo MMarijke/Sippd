@@ -101,7 +101,7 @@ export default function ActivityCard({ item, user, myReactionSet, onReact, isPro
             {item.user_name || 'Collector'}
             {isPro && <ProBadge />}
           </button>
-          <p className="text-[11px] font-mono text-muted-foreground">{timeAgo}</p>
+          <p className="text-2xs font-mono text-muted-foreground">{timeAgo}</p>
         </div>
 
         {/* Can thumbnail */}
@@ -150,7 +150,7 @@ export default function ActivityCard({ item, user, myReactionSet, onReact, isPro
           {item.can_rarity ? (
             <RarityBadge rarity={item.can_rarity} />
           ) : (
-            <span className="text-[10px] font-mono text-muted-foreground border border-border rounded px-2 py-0.5">? ? ?</span>
+            <span className="text-2xs font-mono text-muted-foreground border border-border rounded px-2 py-0.5">? ? ?</span>
           )}
         </div>
       )}
@@ -220,7 +220,7 @@ export default function ActivityCard({ item, user, myReactionSet, onReact, isPro
           the other two buttons are disabled above, not just this one
           (/impeccable critique). */}
       {hasReacted && (
-        <p className="text-[11px] font-mono text-muted-foreground -mt-1">
+        <p className="text-2xs font-mono text-muted-foreground -mt-1">
           One reaction per post — choose carefully.
         </p>
       )}

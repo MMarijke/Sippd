@@ -125,7 +125,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
 
           {/* Name */}
           <div className="space-y-1.5">
-            <Label htmlFor="edit-can-name" className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Can Name</Label>
+            <Label htmlFor="edit-can-name" className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">Can Name</Label>
             <Input
               id="edit-can-name"
               value={form.can_name}
@@ -137,7 +137,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
           {/* Brand + Flavour */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="edit-can-brand" className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Brand</Label>
+              <Label htmlFor="edit-can-brand" className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">Brand</Label>
               <Input
                 id="edit-can-brand"
                 value={form.can_brand}
@@ -146,7 +146,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="edit-can-flavour" className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Flavour</Label>
+              <Label htmlFor="edit-can-flavour" className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">Flavour</Label>
               <Input
                 id="edit-can-flavour"
                 value={form.can_flavour}
@@ -158,7 +158,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
 
           {/* Edition */}
           <div className="space-y-1.5">
-            <Label htmlFor="edit-can-edition" className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Edition</Label>
+            <Label htmlFor="edit-can-edition" className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">Edition</Label>
             <Input
               id="edit-can-edition"
               value={form.can_edition}
@@ -172,7 +172,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
               can's shared_cans.beverage_type is the canonical, first-
               contributor-only value elsewhere (AddCanForm.jsx). */}
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Beverage Type</Label>
+            <Label className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">Beverage Type</Label>
             <BeverageTypeToggle
               value={form.can_beverage_type}
               onChange={v => update('can_beverage_type', v)}
@@ -183,7 +183,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
               without one (manual entry, or a scan that didn't resolve)
               could never get one added later. */}
           <div className="space-y-1.5">
-            <Label htmlFor="edit-can-barcode" className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Barcode</Label>
+            <Label htmlFor="edit-can-barcode" className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">Barcode</Label>
             {sharedCan?.barcode ? (
               <p className="h-11 flex items-center px-3 rounded-lg bg-secondary border border-border font-mono text-sm text-foreground">
                 {sharedCan.barcode}
@@ -213,7 +213,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
 
           {/* Image */}
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Image</Label>
+            <Label className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">Image</Label>
             {form.can_image_url ? (
               <div className="relative w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.can_bg_color }}>
                 <img src={form.can_image_url} alt="Can" className="w-full h-full object-contain" />
@@ -286,7 +286,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
 
           {/* Rarity vote — read only */}
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+            <Label className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">
               Your Rarity Vote <span className="normal-case text-muted-foreground">(locked)</span>
             </Label>
             {/* pointer-events-none, not a blanket opacity on the row — see
@@ -320,7 +320,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
 
           {/* Status */}
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Status</Label>
+            <Label className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">Status</Label>
             <div className="flex bg-secondary rounded-xl border border-border p-1 gap-1">
               {STATUS_OPTIONS.map(opt => (
                 <button
@@ -343,13 +343,13 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
 
           {/* Taste Rating */}
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Taste Rating</Label>
+            <Label className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">Taste Rating</Label>
             <TasteRatingStars value={form.taste_rating} onChange={v => update('taste_rating', v)} />
           </div>
 
           {/* Notes */}
           <div className="space-y-1.5">
-            <Label htmlFor="edit-can-notes" className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Notes</Label>
+            <Label htmlFor="edit-can-notes" className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">Notes</Label>
             <Textarea
               id="edit-can-notes"
               value={form.notes}

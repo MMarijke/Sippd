@@ -14,14 +14,14 @@ const CONTACT_EMAIL = 'seedstackstudio@gmail.com';
 export default function LegalFooter({ className = '' }) {
   return (
     <div className={`text-center space-y-2 ${className}`}>
-      <p className="text-[11px] font-mono text-muted-foreground">
+      <p className="text-2xs font-mono text-muted-foreground">
         <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">Terms</Link>
         {' · '}
         <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground">Privacy</Link>
         {' · '}
         <Link to="/refund" className="underline underline-offset-2 hover:text-foreground">Refund Policy</Link>
       </p>
-      <p className="text-[11px] font-mono text-muted-foreground">
+      <p className="text-2xs font-mono text-muted-foreground">
         Questions? <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-2">{CONTACT_EMAIL}</a>
       </p>
     </div>

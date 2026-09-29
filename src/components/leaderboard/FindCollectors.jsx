@@ -108,7 +108,7 @@ export default function FindCollectors({ query, tab }) {
             actually exists; Collectors/Regional never see this line since
             there's no can-search expectation to correct there. */}
         {tab === 'mostwanted' && (
-          <p className="text-[11px] font-mono text-muted-foreground/70 mt-1">
+          <p className="text-2xs font-mono text-muted-foreground/70 mt-1">
             This searches people, not cans — check the list below instead.
           </p>
         )}
@@ -139,7 +139,7 @@ export default function FindCollectors({ query, tab }) {
                 <span className="truncate">{u.full_name}</span>
                 {proUserIds.has(u.id) && <ProBadge />}
               </p>
-              <p className="text-[11px] font-mono text-muted-foreground">{score} pts</p>
+              <p className="text-2xs font-mono text-muted-foreground">{score} pts</p>
             </Link>
             <FollowButton targetUser={u} currentUser={currentUser} />
           </div>

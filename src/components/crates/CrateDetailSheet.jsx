@@ -149,7 +149,7 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
               <SheetTitle asChild>
                 <h2 className="text-base font-display font-bold text-foreground">{crate.name}</h2>
               </SheetTitle>
-              {crate.description && <p className="text-[11px] font-mono text-muted-foreground">{crate.description}</p>}
+              {crate.description && <p className="text-2xs font-mono text-muted-foreground">{crate.description}</p>}
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
@@ -180,7 +180,7 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
         <div className="flex items-center justify-between px-5 pb-3 flex-shrink-0">
           <div>
             <p className="text-xs font-medium text-foreground">Shareable Link</p>
-            <p className="text-[11px] font-mono text-muted-foreground">Anyone with the link can view this crate, even if your account is private</p>
+            <p className="text-2xs font-mono text-muted-foreground">Anyone with the link can view this crate, even if your account is private</p>
           </div>
           <button
             onClick={() => toggleShareable.mutate(!isShareable)}
@@ -301,7 +301,7 @@ function CanRow({ item, action, onAction, disabled }) {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-body font-medium text-foreground truncate">{item.can_name}</p>
-        <p className="text-[11px] font-mono text-muted-foreground">{item.can_brand}</p>
+        <p className="text-2xs font-mono text-muted-foreground">{item.can_brand}</p>
       </div>
       <button
         onClick={onAction}

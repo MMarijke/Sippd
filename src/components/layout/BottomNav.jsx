@@ -35,6 +35,7 @@ export default function BottomNav() {
             <Link
               key={path}
               to={path}
+              aria-current={isActive ? 'page' : undefined}
               className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 ${
                 isActive
                   ? 'text-primary'
@@ -55,7 +56,7 @@ export default function BottomNav() {
               ) : (
                 <Icon className="w-5 h-5 m-1.5" strokeWidth={1.5} />
               )}
-              <span className="text-[10px] font-mono font-medium tracking-wider uppercase">
+              <span className="text-2xs font-mono font-medium tracking-wider uppercase">
                 {label}
               </span>
             </Link>

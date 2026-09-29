@@ -32,6 +32,7 @@ export const THEME_FAMILIES = [
   {
     id: 'neon-arcade',
     label: 'Neon Arcade',
+    displayFont: "'Orbitron', sans-serif",
     themes: [
       { id: 'power-up', label: 'Power-Up', pro: false,
         dark: { swatch: '#00FF87', background: '#0B1018' }, light: { swatch: '#2C9664', background: '#ECF2FE' } },
@@ -48,6 +49,7 @@ export const THEME_FAMILIES = [
   {
     id: 'cosmic',
     label: 'Cosmic',
+    displayFont: "'Michroma', sans-serif",
     isNew: true,
     themes: [
       { id: 'moonlight', label: 'Moonlight', pro: false, dark: { swatch: '#B3BCCD', sup: '#7183AA', background: '#101522' } },
@@ -61,6 +63,7 @@ export const THEME_FAMILIES = [
   {
     id: 'botanical',
     label: 'Botanical',
+    displayFont: "'Fraunces', serif",
     isNew: true,
     themes: [
       { id: 'sage', label: 'Sage', pro: false, light: { swatch: '#628B66', sup: '#3E5140', background: '#F4F0E5' } },
@@ -73,6 +76,7 @@ export const THEME_FAMILIES = [
   {
     id: 'noir',
     label: 'Noir',
+    displayFont: "'Bodoni Moda', serif",
     isNew: true,
     themes: [
       { id: 'carbon', label: 'Carbon', pro: false, dark: { swatch: '#6F7378', sup: '#4D698B', background: '#111214' } },
@@ -86,6 +90,7 @@ export const THEME_FAMILIES = [
   {
     id: 'candy',
     label: 'Candy',
+    displayFont: "'Fredoka', sans-serif",
     isNew: true,
     themes: [
       { id: 'bubblegum', label: 'Bubblegum', pro: false, light: { swatch: '#FF1F76', sup: '#B91D59', background: '#FFF3F8' } },
@@ -129,6 +134,12 @@ export function getThemeFamily(themeId) {
 // index.css's own @import for every visitor. The rest load on demand the
 // first time their family is applied, so a user only ever downloads the
 // one trio they actually see (/impeccable audit).
+// Each family's display face, matching the --font-display its index.css
+// block sets. The Settings picker sets each family's tile label in its own
+// face, so it needs these before the family is ever applied.
+export const PICKER_LABEL_FONTS_URL =
+  'https://fonts.googleapis.com/css2?family=Michroma&family=Fraunces:wght@600&family=Bodoni+Moda:wght@700&family=Fredoka:wght@600&display=swap';
+
 export const FAMILY_FONT_URLS = {
   cosmic: 'https://fonts.googleapis.com/css2?family=Michroma&family=Space+Mono:wght@400;700&family=Manrope:wght@400;500;700&display=swap',
   botanical: 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Karla:wght@400;500;700&display=swap',

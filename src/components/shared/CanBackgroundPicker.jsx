@@ -1,7 +1,7 @@
 import { useId } from 'react';
 import { Palette } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-import { clampToDarkSafeBg, QUICK_PICK_BG_COLORS } from '@/lib/canBgColors';
+import { clampToDarkSafeBg, QUICK_PICK_BG_COLORS, canTileBackground, THEME_CAN_BG } from '@/lib/canBgColors';
 import CanImageBox from '@/components/shared/CanImageBox';
 import { cn } from '@/lib/utils';
 
@@ -43,7 +43,7 @@ export default function CanBackgroundPicker({ value, onChange, label = 'Card Bac
           iconSize="w-6 h-6"
         />
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-mono font-semibold text-foreground uppercase">{value}</p>
+          <p className="text-xs font-mono font-semibold text-foreground uppercase">{canTileBackground(value) === THEME_CAN_BG ? 'Theme colour' : value}</p>
           <p className="text-2xs font-mono text-muted-foreground leading-snug">
             Pick a color below, or Custom for any hue — it's automatically kept dark enough to stay readable.
           </p>
@@ -74,7 +74,7 @@ export default function CanBackgroundPicker({ value, onChange, label = 'Card Bac
                     ? 'border-primary shadow-[0_0_0_2px_hsl(var(--primary)/0.3)]'
                     : 'border-border hover:border-muted-foreground'
                 )}
-                style={{ backgroundColor: hex }}
+                style={{ background: canTileBackground(hex) }}
               />
             );
           })}

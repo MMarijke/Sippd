@@ -242,7 +242,7 @@ export default function CollectorsLeaderboard() {
                 {Math.abs(rankDelta)}
               </span>
             )}
-            <span className={cn('text-sm font-display font-bold', sortBy === 'rare' ? 'text-rarity-ultra' : 'text-primary')}>
+            <span className={cn('text-sm font-display font-bold', sortBy === 'rare' ? 'text-rarity-ultra-text' : 'text-primary')}>
               {isFilteredError ? 'Unavailable' : myMetric > 0 ? (myRank ? `#${myRank}` : '…') : 'Not ranked yet'}
             </span>
           </span>
@@ -330,7 +330,7 @@ export default function CollectorsLeaderboard() {
                 <div className="flex-shrink-0 text-right">
                   <p className={cn(
                     'text-sm font-display font-bold tabular-nums',
-                    sortBy === 'rare' ? 'text-rarity-ultra' : isMe ? 'text-primary' : 'text-foreground'
+                    sortBy === 'rare' ? 'text-rarity-ultra-text' : isMe ? 'text-primary' : 'text-foreground'
                   )}>
                     {score}
                   </p>

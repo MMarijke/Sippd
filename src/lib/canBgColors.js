@@ -1,5 +1,22 @@
 export const DEFAULT_CAN_BG = '#0D2B2B';
 
+// What an unset or default can background actually renders as: the card
+// tinted with the viewer's own theme accent, so a can nobody picked a
+// colour for belongs to whatever theme it's shown in. The fixed teal read
+// as a foreign object on light themes (cream Sage, Candy's pinks) and on
+// Crimson. DEFAULT_CAN_BG stays the STORED default -- AddCanForm writes it
+// into can_bg_color -- so a row holding it means "left at default" and
+// follows the theme too; only a colour someone deliberately picked is kept.
+// Resolved per element (inline var()s), so it also follows a [data-theme]
+// preview. Not for html2canvas captures (RecapCardTemplate), which can't
+// parse color-mix().
+export const THEME_CAN_BG = 'color-mix(in oklab, hsl(var(--primary)) 18%, hsl(var(--card)))';
+
+export function canTileBackground(hex) {
+  if (!hex || hex.toLowerCase() === DEFAULT_CAN_BG.toLowerCase()) return THEME_CAN_BG;
+  return hex;
+}
+
 // Quick-pick presets for CanBackgroundPicker — sit alongside the free-hue
 // native picker rather than replacing it, so the app's own dark neon-glow
 // identity still shows up first at this moment instead of handing the whole
@@ -9,7 +26,8 @@ export const DEFAULT_CAN_BG = '#0D2B2B';
 // Legendary's pink), plus one warm bonus — so picking a background can
 // double as picking "the mood of my best pull," not just a random color.
 export const QUICK_PICK_BG_COLORS = [
-  { label: 'Signature',   hex: '#0D2B2B' },
+  // Stored as DEFAULT_CAN_BG, rendered as the viewer's theme (canTileBackground).
+  { label: 'Theme',       hex: '#0D2B2B' },
   { label: 'Common',      hex: '#1C1C1E' },
   { label: 'Uncommon',    hex: '#0D1F0D' },
   { label: 'Rare',        hex: '#0C1D38' },

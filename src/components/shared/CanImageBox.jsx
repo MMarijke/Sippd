@@ -1,5 +1,5 @@
 import { Package } from 'lucide-react';
-import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
+import { canTileBackground, THEME_CAN_BG } from '@/lib/canBgColors';
 
 /**
  * Reusable image box that applies a background colour behind the can image.
@@ -25,7 +25,11 @@ export default function CanImageBox({
   objectFit = 'contain',
   loading = 'lazy',
 }) {
-  const bg = bgColor || DEFAULT_CAN_BG;
+  const bg = canTileBackground(bgColor);
+  // Placeholder glyph: the theme tile can be light (Sage, Candy), where the
+  // old white/20 vanished; picked colours are always clamped dark
+  // (clampToDarkSafeBg), where white still reads best.
+  const isThemeTile = bg === THEME_CAN_BG;
 
   return (
     <div
@@ -43,7 +47,7 @@ export default function CanImageBox({
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center">
-          <Package className={`${iconSize} text-white/20`} />
+          <Package className={`${iconSize} ${isThemeTile ? 'text-foreground/30' : 'text-white/20'}`} />
         </div>
       )}
     </div>

@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
+import { canTileBackground } from '@/lib/canBgColors';
 
 export default function TradeRequestDialog({ targetUser, currentUser, onClose }) {
   const [offerCanId, setOfferCanId] = useState('');
@@ -99,7 +99,7 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
               <div className="flex items-center gap-3 bg-primary/5 border border-primary/20 rounded-xl px-3 py-2.5">
                 <div
                   className="w-9 h-9 rounded-lg overflow-hidden border border-border flex-shrink-0"
-                  style={{ background: selectedOffer.can_bg_color || DEFAULT_CAN_BG }}
+                  style={{ background: canTileBackground(selectedOffer.can_bg_color) }}
                 >
                   {selectedOffer.can_image_url && (
                     <img src={selectedOffer.can_image_url} alt={selectedOffer.can_name} className="w-full h-full object-contain" />
@@ -131,7 +131,7 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
                     >
                       <div
                         className="w-7 h-7 rounded-md overflow-hidden border border-border flex-shrink-0"
-                        style={{ background: item.can_bg_color || DEFAULT_CAN_BG }}
+                        style={{ background: canTileBackground(item.can_bg_color) }}
                       >
                         {item.can_image_url && <img src={item.can_image_url} alt={item.can_name} loading="lazy" decoding="async" className="w-full h-full object-contain" />}
                       </div>

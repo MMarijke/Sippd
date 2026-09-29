@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
+import { canTileBackground } from '@/lib/canBgColors';
 import { Link } from 'react-router-dom';
 import { Pin, Link2, CupSoda, X, Eye } from 'lucide-react';
 import RarityBadge from '@/components/shared/RarityBadge';
@@ -150,8 +150,11 @@ export default function CollectionCard({
       <div className="hero-card rounded-2xl p-5 mb-3 text-center">
         <p className="text-xs font-mono uppercase tracking-widest text-foreground">Score</p>
         <p className="text-5xl font-mono font-black text-foreground tabular-nums">{score}</p>
+        {/* Rank chip: foreground text on the accent tint. Primary as 12px
+            text is only ~3:1 on light themes (3.13 on Sage); the chip keeps
+            the accent in its fill and border. */}
         {rank && (
-          <span className="inline-block mt-1.5 px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-xs font-mono font-semibold text-primary">
+          <span className="inline-block mt-1.5 px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-xs font-mono font-semibold text-foreground">
             #{rank}
           </span>
         )}
@@ -220,7 +223,7 @@ export default function CollectionCard({
           const isHero = isPro && index === 0;
           const tile = (
             <>
-              <div className="aspect-square" style={{ backgroundColor: item.can_bg_color || DEFAULT_CAN_BG }}>
+              <div className="aspect-square" style={{ background: canTileBackground(item.can_bg_color) }}>
                 {item.can_image_url ? (
                   <>
                     {/* onError swaps to the same icon fallback used for a
@@ -261,7 +264,11 @@ export default function CollectionCard({
             <div
               key={item.id}
               className={cn(
-                'relative rounded-xl overflow-hidden border bg-black/20 transition-colors',
+                // bg-background, not bg-black/20: the page's own "well" colour sits
+                // recessed from the card in both polarities, where a flat black
+                // overlay turned cream themes grey-brown and dragged the rarity
+                // badges on it down to 1.8:1 (Sage, measured).
+                'relative rounded-xl overflow-hidden border bg-background transition-colors',
                 isHero
                   ? 'col-span-2 row-span-2 border-primary/50 shadow-[0_0_24px_-4px_hsl(var(--primary)/0.4)]'
                   : 'border-primary/20 hover:border-primary/40'

@@ -762,13 +762,22 @@
   }
 
   /* ── Botanical family (natural/earthy, mixed polarity) ───────────────────
-     1 free + 5 Pro. Sage/Moss/Meadow are light-background, Forest/Fern/
-     Terracotta are dark-background -- that split is each theme's own fixed
-     identity (confirmed explicitly), not something the polarity toggle
-     controls; the toggle doesn't render for this family at all. Full glow
-     on every one of the six, same as every other family. */
+     1 free + 4 Pro (Terracotta retired 2026-09-29, users moved to Noir's
+     Crimson). Sage/Moss/Meadow are light-background, Forest/Fern are
+     dark-background -- that split is each theme's own fixed identity
+     (confirmed explicitly), not something the polarity toggle controls;
+     the toggle doesn't render for this family at all. Full glow on every
+     one, same as every other family.
+
+     --breakdown-* is HAND-AUTHORED for Sage, Fern and Meadow (2026-09-29),
+     per product direction -- same approach and 2:1 floor rationale as the
+     Candy note. Sage: scan-button sage -> darker sage (all well above 3:1,
+     darker gains contrast on a light card). Meadow: scan-button green ->
+     light faded green, lightest end at 2:1. Fern: darker green at 2:1 ->
+     scan-button green. Each steps evenly in contrast against --card.
+     Forest and Moss are unchanged. */
   [data-theme="sage"], [data-theme="forest"], [data-theme="fern"],
-  [data-theme="moss"], [data-theme="terracotta"], [data-theme="meadow"] {
+  [data-theme="moss"], [data-theme="meadow"] {
     --font-display: 'Fraunces', serif;
     --font-mono: 'IBM Plex Mono', monospace;
     --font-body: 'Karla', sans-serif;
@@ -793,11 +802,11 @@
     --ring: 125.9 17% 46.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 125.9 55% 37.1%;
-    --breakdown-uncommon: 140.9 60% 35.7%;
-    --breakdown-rare: 155.9 65% 34.3%;
-    --breakdown-ultra: 170.9 70% 33.1%;
-    --breakdown-legendary: 185.9 75% 34.4%;
+    --breakdown-common: 125.9 17% 46.5%;
+    --breakdown-uncommon: 126.2 18% 41.3%;
+    --breakdown-rare: 126.5 18% 36.3%;
+    --breakdown-ultra: 126.7 19% 31.6%;
+    --breakdown-legendary: 127.0 19% 27.0%;
   }
   [data-theme="forest"] {
     --background: 150.0 28% 7.1%;
@@ -843,11 +852,11 @@
     --ring: 124.7 27% 53.3%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 124.7 55% 31.8%;
-    --breakdown-uncommon: 139.7 60% 30.8%;
-    --breakdown-rare: 154.7 65% 29.6%;
-    --breakdown-ultra: 169.7 70% 28.5%;
-    --breakdown-legendary: 184.7 75% 29.2%;
+    --breakdown-common: 124.7 32% 26.8%;
+    --breakdown-uncommon: 124.7 31% 32.6%;
+    --breakdown-rare: 124.7 30% 38.6%;
+    --breakdown-ultra: 124.7 28% 45.1%;
+    --breakdown-legendary: 124.7 27% 53.3%;
   }
   [data-theme="moss"] {
     --background: 56.0 33% 91.2%;
@@ -875,31 +884,6 @@
     --breakdown-ultra: 106.3 70% 33.3%;
     --breakdown-legendary: 121.3 75% 32.8%;
   }
-  [data-theme="terracotta"] {
-    --background: 18.8 38% 8.2%;
-    --foreground: 23.3 100% 96.5%;
-    --card: 18.8 36% 12.2%;
-    --card-foreground: 23.3 100% 96.5%;
-    --popover: 18.8 36% 12.2%;
-    --popover-foreground: 23.3 100% 96.5%;
-    --primary: 7.8 49% 46.1%;
-    --primary-foreground: 0.0 0% 98.0%;
-    --secondary: 18.8 34% 22.2%;
-    --secondary-foreground: 23.3 100% 96.5%;
-    --muted: 18.8 32% 13.2%;
-    --accent: 37.7 35% 43.5%;
-    --accent-foreground: 240.0 20% 4.9%;
-    --border: 18.8 36% 21.2%;
-    --input: 18.8 36% 21.2%;
-    --ring: 7.8 49% 46.1%;
-    --glow-intensity: 1;
-    --wash-intensity: 0;
-    --breakdown-common: 7.8 55% 46.7%;
-    --breakdown-uncommon: 22.8 60% 40.1%;
-    --breakdown-rare: 37.8 65% 33.7%;
-    --breakdown-ultra: 52.8 70% 27.8%;
-    --breakdown-legendary: 67.8 75% 25.7%;
-  }
   [data-theme="meadow"] {
     --background: 54.8 53% 91.6%;
     --foreground: 69.1 29% 22.5%;
@@ -920,11 +904,11 @@
     --ring: 99.8 46% 38.8%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 99.8 55% 36.6%;
-    --breakdown-uncommon: 114.8 60% 36.2%;
-    --breakdown-rare: 129.8 65% 35.3%;
-    --breakdown-ultra: 144.8 70% 34.0%;
-    --breakdown-legendary: 159.8 75% 32.8%;
+    --breakdown-common: 99.8 46% 38.8%;
+    --breakdown-uncommon: 99.8 41% 43.2%;
+    --breakdown-rare: 99.9 35% 48.0%;
+    --breakdown-ultra: 100.0 30% 55.1%;
+    --breakdown-legendary: 100.0 24% 62.7%;
   }
 
   /* ── Noir family (dark, luxury/minimalist) ────────────────────────────────

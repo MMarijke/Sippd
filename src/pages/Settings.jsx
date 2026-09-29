@@ -410,8 +410,8 @@ function ThemeFamilyTiles({ viewedFamilyId, onSelectFamily, seenFamilies, polari
 
 function ThemePalettePicker({ family, theme, polarity, setTheme, isPro, isPending, onLockedTap, onBack }) {
   // Botanical is the one family where adjacent swatches can be different
-  // fixed polarities (Sage/Moss/Meadow are light, Forest/Fern/Terracotta
-  // are dark) — tapping between them flips the whole app's light/dark with
+  // fixed polarities (Sage/Moss/Meadow are light, Forest/Fern are
+  // dark) — tapping between them flips the whole app's light/dark with
   // no warning, unlike Neon Arcade where the separate
   // toggle telegraphs that upfront (/impeccable critique). Only families
   // with more than one fixed-polarity kind get the sun/moon glyph — a

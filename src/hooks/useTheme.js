@@ -67,7 +67,6 @@ export const THEME_FAMILIES = [
       { id: 'forest', label: 'Forest', pro: true, dark: { swatch: '#3E765B', sup: '#107848', background: '#0D1712' } },
       { id: 'fern', label: 'Fern', pro: true, dark: { swatch: '#68A86D', sup: '#447547', background: '#0F1911' } },
       { id: 'moss', label: 'Moss', pro: true, light: { swatch: '#828355', sup: '#5A5B37', background: '#F0EFE1' } },
-      { id: 'terracotta', label: 'Terracotta', pro: true, dark: { swatch: '#AF4B3C', sup: '#967948', background: '#1D120D' } },
       { id: 'meadow', label: 'Meadow', pro: true, light: { swatch: '#549135', sup: '#2C491F', background: '#F5F3DE' } },
     ],
   },

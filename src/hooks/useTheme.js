@@ -16,7 +16,8 @@ import { useAuth } from '@/lib/AuthContext';
 // two-tone gradient wherever `sup` exists and falls back to a flat fill
 // otherwise.
 //
-// Phase 1 (Neon Arcade, Vintage Pastel) themes have BOTH `dark` and
+// Neon Arcade (Phase 1; Vintage Pastel, XP Gold and Champagne were retired
+// in 20260929000000_trim_theme_catalogue.sql) themes have BOTH `dark` and
 // `light` -- index.css keys their CSS on [data-theme="x"][data-polarity="y"],
 // and profiles.theme_polarity is a real, user-toggleable second axis for
 // them. Phase 2 (Cosmic, Botanical, Noir, Candy) themes have only ONE of
@@ -40,28 +41,8 @@ export const THEME_FAMILIES = [
         dark: { swatch: '#00E5FF', background: '#071016' }, light: { swatch: '#2E939E', background: '#ECF7FE' } },
       { id: 'boss-fight', label: 'Boss Fight', pro: true,
         dark: { swatch: '#FF3864', background: '#12090C' }, light: { swatch: '#CF598C', background: '#FEECF1' } },
-      { id: 'xp-gold', label: 'XP Gold', pro: true,
-        dark: { swatch: '#FFD43B', background: '#12100A' }, light: { swatch: '#968A2C', background: '#FEF9EC' } },
       { id: 'synthwave', label: 'Synthwave', pro: true,
         dark: { swatch: '#B93FE8', background: '#0D0718' }, light: { swatch: '#A569D3', background: '#F3ECFE' } },
-    ],
-  },
-  {
-    id: 'vintage-pastel',
-    label: 'Vintage Pastel',
-    themes: [
-      { id: 'mint-fizz', label: 'Mint Fizz', pro: false,
-        light: { swatch: '#4C9486', background: '#FFF8E9' }, dark: { swatch: '#1C9C82', background: '#151209' } },
-      { id: 'strawberry-cream', label: 'Strawberry Cream', pro: true,
-        light: { swatch: '#BF707E', background: '#FFF5F0' }, dark: { swatch: '#E25F5A', background: '#150D09' } },
-      { id: 'blue-raspberry', label: 'Blue Raspberry', pro: true,
-        light: { swatch: '#538EB9', background: '#F4FAFC' }, dark: { swatch: '#268ED9', background: '#091215' } },
-      { id: 'lemon-pop', label: 'Lemon Pop', pro: true,
-        light: { swatch: '#AF8133', background: '#FFFBEA' }, dark: { swatch: '#C37822', background: '#151309' } },
-      { id: 'peach-soda', label: 'Peach Soda', pro: true,
-        light: { swatch: '#C96E47', background: '#FFF5EC' }, dark: { swatch: '#DD693C', background: '#150F09' } },
-      { id: 'grape-float', label: 'Grape Float', pro: true,
-        light: { swatch: '#A874B4', background: '#FAF5FC' }, dark: { swatch: '#A46CE5', background: '#120915' } },
     ],
   },
   {
@@ -99,7 +80,6 @@ export const THEME_FAMILIES = [
       { id: 'crimson', label: 'Crimson', pro: true, dark: { swatch: '#B83A4B', sup: '#8A5760', background: '#160B0E' } },
       { id: 'amethyst', label: 'Amethyst', pro: true, dark: { swatch: '#8E6DAB', sup: '#8B3DCB', background: '#120D16' } },
       { id: 'sapphire', label: 'Sapphire', pro: true, dark: { swatch: '#527BB9', sup: '#1961CC', background: '#080F19' } },
-      { id: 'champagne', label: 'Champagne', pro: true, dark: { swatch: '#C79A7A', sup: '#8F684E', background: '#17140E' } },
       { id: 'emerald', label: 'Emerald', pro: true, dark: { swatch: '#458584', sup: '#0A754D', background: '#09130F' } },
     ],
   },
@@ -150,7 +130,6 @@ export function getThemeFamily(themeId) {
 // first time their family is applied, so a user only ever downloads the
 // one trio they actually see (/impeccable audit).
 export const FAMILY_FONT_URLS = {
-  'vintage-pastel': 'https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Courier+Prime:wght@400;700&family=Quicksand:wght@400;500;600;700&display=swap',
   cosmic: 'https://fonts.googleapis.com/css2?family=Michroma&family=Space+Mono:wght@400;700&family=Manrope:wght@400;500;700&display=swap',
   botanical: 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Karla:wght@400;500;700&display=swap',
   noir: 'https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500;700&family=Fragment+Mono&family=Jost:wght@400;500&display=swap',

@@ -1512,10 +1512,10 @@ body {
 
 /* Card surface texture — layered onto every `bg-card` element app-wide
    with zero component changes, via a background-image Tailwind's own
-   generated `.bg-card` utility never sets. --card-texture is 'none' for
-   every Phase 1 theme (Neon Arcade and Vintage Pastel), so this is
-   currently a no-op everywhere — kept as reusable architecture for a
-   future family that wants a texture, same mechanism as before. */
+   generated `.bg-card` utility never sets. --card-texture is 'none'
+   (:root) for every theme except Silver Screen, whose film grain is the
+   one texture in use (see its block). Theme-scoped like everything else,
+   so a [data-theme] preview (RarityStrip) carries its own texture too. */
 .bg-card {
   background-image: var(--card-texture);
   background-repeat: repeat;

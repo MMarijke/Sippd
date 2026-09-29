@@ -80,6 +80,7 @@ module.exports = {
   				bronze: 'hsl(var(--medal-bronze))',
   			},
   			overlap: 'hsl(var(--overlap))',
+  			caution: 'hsl(var(--caution))',
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',

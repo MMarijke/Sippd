@@ -7,6 +7,10 @@ import { getMaxPins } from '@/hooks/useTogglePin';
 import { cn } from '@/lib/utils';
 import { BREAKDOWN_VAR } from '@/lib/rarityConsensus';
 
+// One source for a tier's theme colour, shared by the bar segment and its
+// legend dot so the two can never drift apart.
+const breakdownColor = (rarity) => `hsl(var(${BREAKDOWN_VAR[rarity] || '--breakdown-legendary'}))`;
+
 // The trophy-case presentation shared by Profile.jsx (your own, editable
 // collection) and PublicProfile.jsx (anyone's, read-only) — score hero,
 // stat row, rarity breakdown bar, and can-tile grid, one definition
@@ -153,14 +157,25 @@ export default function CollectionCard({
               <div
                 key={rarity}
                 className="h-full"
-                style={{ width: `${pct}%`, backgroundColor: `hsl(var(${BREAKDOWN_VAR[rarity] || '--breakdown-legendary'}))` }}
+                style={{ width: `${pct}%`, backgroundColor: breakdownColor(rarity) }}
               />
             ))}
           </div>
+          {/* Colour key per tier, same dot as RarityHero's donut legend on
+              Home. Without it the only way to map a segment of the 6px bar
+              to its tier was its position -- several themes' ramps are
+              single-hue with deliberately soft ends (index.css family
+              notes), so the key matters more there than anywhere.
+              aria-hidden: the tier name beside it already says it. */}
           <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
             {rarityBreakdown.map(({ rarity, count }) => (
-              <span key={rarity} className="text-xs font-mono text-muted-foreground">
-                {rarity} <span className="text-foreground">{count}</span>
+              <span key={rarity} className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground">
+                <span
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: breakdownColor(rarity) }}
+                  aria-hidden="true"
+                />
+                <span>{rarity} <span className="text-foreground">{count}</span></span>
               </span>
             ))}
           </div>

@@ -96,8 +96,8 @@ export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFav
         {showStatus && can.status && (
           <div className="absolute bottom-2 right-2">
             <span className={`text-2xs font-mono uppercase tracking-wider px-1.5 py-0.5 rounded ${
-              can.status === 'collected' ? 'bg-rarity-uncommon/20 text-rarity-uncommon' :
-              can.status === 'wishlist' ? 'bg-rarity-rare/20 text-rarity-rare' :
+              can.status === 'collected' ? 'bg-rarity-uncommon/20 text-rarity-uncommon-text' :
+              can.status === 'wishlist' ? 'bg-rarity-rare/20 text-rarity-rare-text' :
               'bg-muted-foreground/20 text-muted-foreground'
             }`}>
               {can.status === 'collected' ? '✓ Vault' : can.status === 'wishlist' ? '★ Want' : '⊕ Dupe'}

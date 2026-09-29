@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import { RARITY_TEXT_CLASS } from '@/lib/rarityConsensus';
-import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
+import { THEME_CAN_BG } from '@/lib/canBgColors';
 
 const STATUS_STYLES = {
   pending:   { label: 'Pending',   class: 'bg-warning/10 text-warning border-warning/20' },
@@ -92,8 +92,8 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
             <span className="text-xs font-mono text-muted-foreground">({trades.length})</span>
           )}
         </div>
-        <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-primary/20 text-primary hover:bg-primary/10" onClick={onLogTrade}>
-          <Plus className="w-3.5 h-3.5" /> Log Trade
+        <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-primary/20 text-foreground hover:bg-primary/10" onClick={onLogTrade}>
+          <Plus className="w-3.5 h-3.5 text-primary" /> Log Trade
         </Button>
       </div>
 
@@ -145,8 +145,8 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
         <div className="bg-card border border-border rounded-xl p-6 text-center">
           <ArrowRightLeft className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" />
           <p className="text-sm font-mono text-muted-foreground">No trades logged yet.</p>
-          <Button size="sm" variant="ghost" className="h-11 mt-2 font-mono text-xs text-primary" onClick={onLogTrade}>
-            <Plus className="w-3.5 h-3.5 mr-1" /> Log your first trade
+          <Button size="sm" variant="ghost" className="h-11 mt-2 font-mono text-xs text-foreground" onClick={onLogTrade}>
+            <Plus className="w-3.5 h-3.5 mr-1 text-primary" /> Log your first trade
           </Button>
         </div>
       )}
@@ -250,7 +250,7 @@ function CanChip({ name, brand, imageUrl, rarity, label }) {
     <div className="flex-1 min-w-0">
       <p className="text-2xs font-mono text-muted-foreground mb-1">{label}</p>
       <div className="flex items-center gap-2 bg-secondary rounded-lg px-2 py-1.5">
-        <div className="w-7 h-7 rounded-md overflow-hidden border border-border flex-shrink-0" style={{ background: DEFAULT_CAN_BG }}>
+        <div className="w-7 h-7 rounded-md overflow-hidden border border-border flex-shrink-0" style={{ background: THEME_CAN_BG }}>
           {imageUrl && <img src={imageUrl} alt={name} loading="lazy" decoding="async" className="w-full h-full object-contain" />}
         </div>
         <div className="min-w-0">

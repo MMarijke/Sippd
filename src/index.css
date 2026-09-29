@@ -201,6 +201,19 @@
        icon/component floor (see file header) and reads 2.9:1 as small
        text on light themes. Same amber values as --overlap, same checks. */
     --caution: 38 92% 60%;
+
+    /* Rarity TEXT (badges, status chips, the leaderboard's rare column):
+       each tier's own hue and saturation, with lightness tuned per tone to
+       clear 4.6:1 on every theme's background, card and the badge's own
+       tinted fill. --rarity-* itself stays theme-invariant (fills, glows,
+       borders): a tier keeps its colour identity for every viewer, it just
+       gets a legible text shade on light themes, where the fixed hues read
+       1.9-3.3:1 (Uncommon 1.87 on Sage). Product decision, 2026-09-29. */
+    --rarity-common-text: 220 9% 64.5%;
+    --rarity-uncommon-text: 142 71% 45%;
+    --rarity-rare-text: 217 91% 69%;
+    --rarity-ultra-text: 271 91% 73.5%;
+    --rarity-legendary-text: 330 81% 69%;
   }
 
   :root[data-tone="light"] {
@@ -209,6 +222,11 @@
     --medal-bronze: 24 72% 30%;
     --overlap: 35 92% 25%;
     --caution: 35 92% 25%;
+    --rarity-common-text: 220 9% 38.5%;
+    --rarity-uncommon-text: 142 71% 25.5%;
+    --rarity-rare-text: 217 91% 42.5%;
+    --rarity-ultra-text: 271 91% 48%;
+    --rarity-legendary-text: 330 81% 38.5%;
   }
 
   .dark {
@@ -1308,6 +1326,18 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+
+  /* One solid keyboard focus ring for every plain button and link that
+     doesn't style its own. The fallback above only tints the browser's
+     default 1px outline at 50% alpha, which measured ~1.7:1 on light themes
+     (Sage). --ring tracks --primary, which every theme tunes to >=3:1 on
+     its own background -- the non-text contrast floor. In @layer base, so
+     any component's focus-visible:outline-none + ring utilities (shadcn
+     inputs, the theme picker) still win. */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
 
   body {

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
+import { canTileBackground } from '@/lib/canBgColors';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -369,7 +369,7 @@ function CanPicker({ label, items, selected, search, onSearch, onSelect, onClear
         <div className="flex items-center gap-3 bg-primary/5 border border-primary/20 rounded-xl px-3 py-2.5">
           <div
             className="w-9 h-9 rounded-lg overflow-hidden border border-border flex-shrink-0"
-            style={{ background: selected.can_bg_color || DEFAULT_CAN_BG }}
+            style={{ background: canTileBackground(selected.can_bg_color) }}
           >
             {selected.can_image_url && (
               <img src={selected.can_image_url} alt={selected.can_name} loading="lazy" decoding="async" className="w-full h-full object-contain" />
@@ -402,7 +402,7 @@ function CanPicker({ label, items, selected, search, onSearch, onSelect, onClear
                 >
                   <div
                     className="w-7 h-7 rounded-md overflow-hidden border border-border flex-shrink-0"
-                    style={{ background: item.can_bg_color || DEFAULT_CAN_BG }}
+                    style={{ background: canTileBackground(item.can_bg_color) }}
                   >
                     {item.can_image_url && (
                       <img src={item.can_image_url} alt={item.can_name} loading="lazy" decoding="async" className="w-full h-full object-contain" />

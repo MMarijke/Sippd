@@ -45,8 +45,8 @@ export default function CanListItem({ item, sharedCan, onAddToCrate, selectable,
         <div className="flex items-center gap-2 mt-0.5">
           <span className="text-2xs font-mono text-muted-foreground">{item.can_brand}</span>
           <span className={`text-2xs font-mono uppercase px-1.5 py-0.5 rounded ${
-            item.status === 'collected' ? 'bg-rarity-uncommon/15 text-rarity-uncommon' :
-            item.status === 'wishlist' ? 'bg-rarity-rare/15 text-rarity-rare' :
+            item.status === 'collected' ? 'bg-rarity-uncommon/15 text-rarity-uncommon-text' :
+            item.status === 'wishlist' ? 'bg-rarity-rare/15 text-rarity-rare-text' :
             'bg-muted text-muted-foreground'
           }`}>
             {item.status === 'collected' ? 'Vault' : item.status === 'wishlist' ? 'Want' : 'Dupe'}

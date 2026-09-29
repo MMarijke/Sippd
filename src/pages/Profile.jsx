@@ -234,7 +234,7 @@ export default function Profile() {
         ) : (
           <>
             <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-display font-bold text-primary">
+              <span className="text-sm font-display font-bold text-foreground">
                 {profile?.full_name?.[0]?.toUpperCase() || '?'}
               </span>
             </div>
@@ -369,10 +369,13 @@ export default function Profile() {
       <div className="px-5 space-y-1">
         <Button
           variant="ghost"
-          className="w-full justify-start font-mono text-xs gap-2 text-destructive hover:bg-destructive/10"
+          className="w-full justify-start font-mono text-xs gap-2 text-foreground hover:bg-destructive/10"
           onClick={() => setShowLogoutConfirm(true)}
         >
-          <LogOut className="w-4 h-4" /> Log Out
+          {/* Red stays on the icon (still flags the exit), not the 12px
+              label: --destructive is tuned to 3:1 for icons and read
+              3.78 on Sage, 4.43 on Power-Up as text. */}
+          <LogOut className="w-4 h-4 text-destructive" /> Log Out
         </Button>
       </div>
 

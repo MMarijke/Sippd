@@ -73,6 +73,11 @@ module.exports = {
   				rare: 'hsl(var(--rarity-rare))',
   				ultra: 'hsl(var(--rarity-ultra))',
   				legendary: 'hsl(var(--rarity-legendary))',
+  				'common-text': 'hsl(var(--rarity-common-text))',
+  				'uncommon-text': 'hsl(var(--rarity-uncommon-text))',
+  				'rare-text': 'hsl(var(--rarity-rare-text))',
+  				'ultra-text': 'hsl(var(--rarity-ultra-text))',
+  				'legendary-text': 'hsl(var(--rarity-legendary-text))',
   			},
   			medal: {
   				gold: 'hsl(var(--medal-gold))',

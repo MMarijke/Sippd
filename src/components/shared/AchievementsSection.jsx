@@ -41,7 +41,7 @@ export default function AchievementsSection({ achievements, showViewAll = false 
         ))}
       </div>
       {showViewAll && (
-        <Link to="/achievements" className="block text-center text-xs font-mono text-primary hover:text-primary/80 transition-colors">
+        <Link to="/achievements" className="block text-center text-xs font-mono text-foreground hover:text-primary transition-colors">
           View All →
         </Link>
       )}

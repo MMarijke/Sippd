@@ -603,7 +603,20 @@
   /* ── Cosmic family (dark, space/astronomy) ───────────────────────────────
      1 free + 5 Pro. Full glow, same treatment as every other theme now
      (see the .home-gradient-bg-layer comment -- light and dark no longer
-     get different ambient treatments). */
+     get different ambient treatments).
+
+     --breakdown-* is HAND-AUTHORED for Moonlight, Solar Flare, Aurora,
+     Deep Space and Stellar Gold (2026-09-29), per product direction, and
+     interpolated evenly in CIELAB rather than by contrast alone -- two of
+     these ramps move mostly in hue, and Sapphire's old ramp proved a large
+     hue difference at one luminance still blends on a 6px bar, so each
+     end was also chosen to give a real lightness step. Moonlight: scan
+     button -> greyish blue (its own supporting hue). Solar Flare: deep
+     orange -> deep yellow. Aurora: scan-button green -> pale sky blue
+     (the weakest lightness step here, ~1.06/tier, capped by how bright its
+     green already is; the ~14 dE hue shift carries the rest). Deep Space:
+     scan-button blue -> deep indigo-purple at the 2:1 floor. Stellar Gold:
+     scan-button pale gold -> rich yellowish gold. Nebula is unchanged. */
   [data-theme="moonlight"], [data-theme="nebula"], [data-theme="solar-flare"],
   [data-theme="aurora"], [data-theme="deep-space"], [data-theme="stellar-gold"] {
     --font-display: 'Michroma', sans-serif;
@@ -629,11 +642,11 @@
     --ring: 219.2 21% 75.3%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 219.2 55% 49.8%;
-    --breakdown-uncommon: 234.2 60% 58.1%;
-    --breakdown-rare: 249.2 65% 60.2%;
-    --breakdown-ultra: 264.2 70% 58.1%;
-    --breakdown-legendary: 279.2 75% 53.1%;
+    --breakdown-common: 219.2 21% 75.3%;
+    --breakdown-uncommon: 221.0 23% 69.5%;
+    --breakdown-rare: 221.7 24% 63.7%;
+    --breakdown-ultra: 221.6 25% 57.9%;
+    --breakdown-legendary: 221.0 26% 52.0%;
   }
   [data-theme="nebula"] {
     --background: 262.9 49% 8.4%;
@@ -679,11 +692,11 @@
     --ring: 14.4 100% 63.1%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 14.4 55% 43.1%;
-    --breakdown-uncommon: 29.4 60% 36.7%;
-    --breakdown-rare: 44.4 65% 30.6%;
-    --breakdown-ultra: 59.4 70% 25.5%;
-    --breakdown-legendary: 74.4 75% 25.7%;
+    --breakdown-common: 16.0 95% 50.0%;
+    --breakdown-uncommon: 24.8 97% 50.1%;
+    --breakdown-rare: 31.7 99% 50.2%;
+    --breakdown-ultra: 38.0 100% 50.1%;
+    --breakdown-legendary: 44.0 100% 50.0%;
   }
   [data-theme="aurora"] {
     --background: 176.0 48% 6.1%;
@@ -704,11 +717,11 @@
     --ring: 161.4 71% 57.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 161.4 55% 30.7%;
-    --breakdown-uncommon: 176.4 60% 29.5%;
-    --breakdown-rare: 191.4 65% 32.8%;
-    --breakdown-ultra: 206.4 70% 40.7%;
-    --breakdown-legendary: 221.4 75% 52.5%;
+    --breakdown-common: 161.4 71% 57.5%;
+    --breakdown-uncommon: 164.4 66% 65.9%;
+    --breakdown-rare: 172.0 60% 72.3%;
+    --breakdown-ultra: 187.1 62% 79.2%;
+    --breakdown-legendary: 207.0 100% 88.0%;
   }
   [data-theme="deep-space"] {
     --background: 228.0 56% 7.1%;
@@ -729,11 +742,11 @@
     --ring: 228.4 52% 55.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 228.4 55% 53.3%;
-    --breakdown-uncommon: 243.4 60% 58.7%;
-    --breakdown-rare: 258.4 65% 57.2%;
-    --breakdown-ultra: 273.4 70% 53.6%;
-    --breakdown-legendary: 288.4 75% 45.8%;
+    --breakdown-common: 228.4 52% 55.5%;
+    --breakdown-uncommon: 236.6 49% 54.8%;
+    --breakdown-rare: 244.9 48% 52.0%;
+    --breakdown-ultra: 251.9 53% 47.8%;
+    --breakdown-legendary: 258.0 65% 43.0%;
   }
   [data-theme="stellar-gold"] {
     --background: 45.0 35% 6.7%;
@@ -754,11 +767,11 @@
     --ring: 45.7 69% 65.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 45.7 55% 32.3%;
-    --breakdown-uncommon: 60.7 60% 27.3%;
-    --breakdown-rare: 75.7 65% 27.7%;
-    --breakdown-ultra: 90.7 70% 27.8%;
-    --breakdown-legendary: 105.7 75% 27.9%;
+    --breakdown-common: 45.7 69% 65.5%;
+    --breakdown-uncommon: 44.8 68% 60.5%;
+    --breakdown-rare: 44.4 66% 55.3%;
+    --breakdown-ultra: 44.5 67% 49.3%;
+    --breakdown-legendary: 46.0 100% 40.0%;
   }
 
   /* ── Botanical family (natural/earthy, mixed polarity) ───────────────────

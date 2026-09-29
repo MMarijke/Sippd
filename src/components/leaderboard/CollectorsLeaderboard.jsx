@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { Trophy, Zap, Crown, Info, AlertCircle, RefreshCw, TrendingUp, TrendingDown } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Crown, Info, AlertCircle, RefreshCw, TrendingUp, TrendingDown } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
@@ -22,16 +22,30 @@ const CATEGORY_OPTIONS = [
   { value: 'soft_drink',   label: 'Soft Drinks'  },
 ];
 
+// Score is the same weighted Collection Score shown on your Profile, where
+// "Rank #N" links here; Total and Rare were the only global views before.
+const SORT_OPTIONS = ['total', 'rare', 'score'];
+const METRIC_COLUMN = { total: 'total_cans', rare: 'rare_pulls', score: 'score' };
+const METRIC_UNIT = { total: 'cans', rare: 'rare', score: 'pts' };
+
 export default function CollectorsLeaderboard() {
-  const [sortBy, setSortBy] = useState('total'); // 'total' | 'rare'
+  // ?sort=score&jump=me is Profile's "Rank #N" deep link: open on that view
+  // and scroll to your own row once it's rendered.
+  const [searchParams] = useSearchParams();
+  const initialSort = SORT_OPTIONS.includes(searchParams.get('sort')) ? searchParams.get('sort') : 'total';
+  const [sortBy, setSortBy] = useState(initialSort); // 'total' | 'rare' | 'score'
   // Query-time filter, not a schema split or a second leaderboard system:
   // 'all' reads the existing denormalized leaderboard_scores table exactly
   // as before; any other category calls get_category_leaderboard() to
   // compute a live, filtered ranking on demand instead.
-  const [category, setCategory] = useState('all');
+  const [categoryChoice, setCategoryChoice] = useState('all');
+  // Score is ranked across all drinks only: get_category_leaderboard doesn't
+  // return a per-category score, so the Score view pins the filter to All
+  // (buttons disabled below) rather than showing wrong numbers.
+  const category = sortBy === 'score' ? 'all' : categoryChoice;
   const { user: currentUser } = useAuth();
 
-  const metricColumn = sortBy === 'total' ? 'total_cans' : 'rare_pulls';
+  const metricColumn = METRIC_COLUMN[sortBy];
 
   const {
     data: scores = [],
@@ -166,27 +180,47 @@ export default function CollectorsLeaderboard() {
     }
   };
 
+  // Deep-link arrival: jump once, after your row can actually be in the DOM.
+  const jumpedOnArrival = useRef(false);
+  useEffect(() => {
+    if (jumpedOnArrival.current || searchParams.get('jump') !== 'me') return;
+    if (isLoading || !myRank || displayedRows.length === 0) return;
+    jumpedOnArrival.current = true;
+    requestAnimationFrame(() => handleJumpToRank());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, myRank, displayedRows.length]);
+
   const rankDelta = useRankDelta(`collectors:${sortBy}:${category}`, myRank, currentUser?.id);
 
   return (
     <div className="px-5">
       <div className="flex items-center gap-1.5 mb-3">
-        <div className="flex flex-1 bg-secondary rounded-lg border border-border p-0.5">
+        {/* Text-only, tight padding: a third view (Score) plus the info
+            button overflowed 375px by ~90px with the old leading icons. */}
+        <div className="flex flex-1 min-w-0 bg-secondary rounded-lg border border-border p-0.5">
           <Button
             variant="ghost"
             aria-pressed={sortBy === 'total'}
-            className={cn('flex-1 h-11 font-mono text-xs', sortBy === 'total' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            className={cn('flex-1 min-w-0 h-11 px-2 font-mono text-xs', sortBy === 'total' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setSortBy('total')}
           >
-            <Zap className="w-3.5 h-3.5 mr-1.5" /> Total Cans
+            Total Cans
           </Button>
           <Button
             variant="ghost"
             aria-pressed={sortBy === 'rare'}
-            className={cn('flex-1 h-11 font-mono text-xs', sortBy === 'rare' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            className={cn('flex-1 min-w-0 h-11 px-2 font-mono text-xs', sortBy === 'rare' ? 'bg-card text-primary' : 'text-muted-foreground')}
             onClick={() => setSortBy('rare')}
           >
-            <Trophy className="w-3.5 h-3.5 mr-1.5" /> Rare Pulls
+            Rare Pulls
+          </Button>
+          <Button
+            variant="ghost"
+            aria-pressed={sortBy === 'score'}
+            className={cn('flex-1 min-w-0 h-11 px-2 font-mono text-xs', sortBy === 'score' ? 'bg-card text-primary' : 'text-muted-foreground')}
+            onClick={() => setSortBy('score')}
+          >
+            Score
           </Button>
         </div>
         <Popover>
@@ -199,7 +233,7 @@ export default function CollectorsLeaderboard() {
           <PopoverContent className="w-64 text-xs font-mono leading-relaxed" side="bottom" align="end">
             <p className="font-semibold text-foreground mb-1">How ranking works</p>
             <p className="text-muted-foreground">
-              Total Cans ranks by raw can count. Rare Pulls ranks by how many Rare, Ultra Rare, and Legendary cans you've logged. Your Collection Score (on your profile) weights rarity into one number — that's what the Regional tab ranks by instead, not a metric here on Global.
+              Total Cans ranks by raw can count. Rare Pulls ranks by how many Rare, Ultra Rare, and Legendary cans you've logged. Score is your Collection Score from your profile, which weights rarity into one number (the Regional tab ranks by it too). Score covers all drinks, so the drink filter is off in that view.
             </p>
           </PopoverContent>
         </Popover>
@@ -211,10 +245,11 @@ export default function CollectorsLeaderboard() {
             key={opt.value}
             type="button"
             aria-pressed={category === opt.value}
-            className={cn('flex-1 h-11 font-mono text-xs rounded-md transition-colors',
+            aria-disabled={(sortBy === 'score' && opt.value !== 'all') || undefined}
+            className={cn('flex-1 h-11 font-mono text-xs rounded-md transition-colors aria-disabled:opacity-40 aria-disabled:cursor-not-allowed',
               category === opt.value ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
             )}
-            onClick={() => setCategory(opt.value)}
+            onClick={() => { if (sortBy !== 'score') setCategoryChoice(opt.value); }}
           >
             {opt.label}
           </button>
@@ -335,7 +370,7 @@ export default function CollectorsLeaderboard() {
                     {score}
                   </p>
                   <p className="text-2xs font-mono text-muted-foreground">
-                    {sortBy === 'total' ? 'cans' : 'rare'}
+                    {METRIC_UNIT[sortBy]}
                   </p>
                 </div>
               </div>

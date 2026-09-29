@@ -160,7 +160,9 @@ export default function Profile() {
   const {
     collected, showcase, totalCount, rarityBreakdown, getEffectiveRarity,
     score, rarePulls, rank, isRankError,
+    rankTotal, nextRank, pointsToNextRank, weeklyPoints,
   } = useProfileShowcase({
+    withRankGap: true,
     userId: user?.id,
     collection,
     sharedCansMap,
@@ -174,6 +176,22 @@ export default function Profile() {
     () => computeAchievements(collection, streak, votes.length, user?.created_at),
     [collection, streak, votes.length, user?.created_at]
   );
+
+  // follows_select_participant lets you read every row you're either side
+  // of, so both counts are plain head:true counts -- no RPC needed.
+  const { data: followCounts } = useQuery({
+    queryKey: ['follow-counts', user?.id],
+    queryFn: async () => {
+      const [followers, following] = await Promise.all([
+        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', user.id).eq('status', 'accepted'),
+        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', user.id).eq('status', 'accepted'),
+      ]);
+      if (followers.error) throw followers.error;
+      if (following.error) throw following.error;
+      return { followers: followers.count || 0, following: following.count || 0 };
+    },
+    enabled: !!user?.id,
+  });
 
   const { togglePin, isPending: pinPending } = useTogglePin();
   const pinnedCount = collected.filter(c => c.pinned_at).length;
@@ -256,6 +274,7 @@ export default function Profile() {
                 </button>
               </div>
             ) : (
+              <div className="min-w-0">
               <div className="flex items-center gap-1.5 min-w-0">
                 <h2 className="text-base font-display font-bold text-foreground truncate">{profile?.full_name || 'Collector'}</h2>
                 <button onClick={startEdit} aria-label="Edit display name" className="p-4 text-muted-foreground hover:text-primary transition-colors flex-shrink-0">
@@ -264,6 +283,18 @@ export default function Profile() {
                 {profile?.region && (
                   <span className="text-xs font-mono text-muted-foreground truncate">· 📍 {profile.region}</span>
                 )}
+              </div>
+              {/* Your social standing next to your name -- the other half of
+                  the competitive layer. Accepted follows only; pending
+                  requests to a private account aren't followers yet. */}
+              {followCounts && (
+                <p className="-mt-2 text-xs font-mono text-muted-foreground">
+                  <span className="font-semibold text-foreground">{followCounts.followers}</span>{' '}
+                  {followCounts.followers === 1 ? 'follower' : 'followers'}
+                  {' · '}
+                  <span className="font-semibold text-foreground">{followCounts.following}</span> following
+                </p>
+              )}
               </div>
             )}
           </>
@@ -334,6 +365,11 @@ export default function Profile() {
                 onPreview={() => navigate(`/u/${user.id}?preview=true`)}
                 score={score}
                 rank={rank}
+                rankTotal={rankTotal}
+                nextRank={nextRank}
+                pointsToNextRank={pointsToNextRank}
+                rankHref="/leaderboard?tab=collectors&sort=score&jump=me"
+                weeklyPoints={weeklyPoints}
                 canEdit
                 stats={[
                   { icon: Zap, label: 'Cans', value: totalCount },

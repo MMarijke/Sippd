@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeConsensus, computeTrustedStats, getConfidence, getDisplayRarity, getItemScore } from './rarityConsensus';
+import { computeConsensus, computeTrustedStats, pointsAddedSince, getConfidence, getDisplayRarity, getItemScore } from './rarityConsensus';
 
 describe('getConfidence', () => {
   it('is unrated below 5 votes', () => {
@@ -91,5 +91,23 @@ describe('computeTrustedStats', () => {
 
   it('skips items with no shared can, like the SQL inner join', () => {
     expect(computeTrustedStats([{ can_id: 'missing', can_rarity: 'Rare' }], map)).toEqual({ score: 0, rarePulls: 0 });
+  });
+});
+
+describe('pointsAddedSince', () => {
+  const map = { a: { consensus_rarity: 'Legendary' }, b: { consensus_rarity: 'Rare' } };
+  const since = new Date('2026-09-22T00:00:00Z');
+
+  it('sums trusted points for cans added on or after the cutoff', () => {
+    const items = [
+      { can_id: 'a', created_at: '2026-09-28T10:00:00Z' },
+      { can_id: 'b', created_at: '2026-09-22T00:00:00Z' },
+      { can_id: 'b', created_at: '2026-09-21T23:59:59Z' },
+    ];
+    expect(pointsAddedSince(items, map, since)).toBe(8);
+  });
+
+  it('ignores items with no created_at instead of guessing', () => {
+    expect(pointsAddedSince([{ can_id: 'a' }], map, since)).toBe(0);
   });
 });

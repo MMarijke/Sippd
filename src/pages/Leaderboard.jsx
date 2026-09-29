@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Trophy, Star, Search, MapPin, X, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,11 @@ import FindCollectors from '@/components/leaderboard/FindCollectors';
 import FeedContent from '@/components/feed/FeedContent';
 
 export default function Leaderboard() {
-  const [tab, setTab] = useState('collectors');
+  // ?tab= lets a deep link (Profile's "Rank #N") open a specific view.
+  const [searchParams] = useSearchParams();
+  const [tab, setTab] = useState(() => (
+    ['collectors', 'mostwanted', 'regional', 'feed'].includes(searchParams.get('tab')) ? searchParams.get('tab') : 'collectors'
+  ));
   const [searchQuery, setSearchQuery] = useState('');
 
   return (

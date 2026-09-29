@@ -11,7 +11,16 @@
 -- runs as postgres, which profiles_lock_columns() already exempts, so the
 -- Pro-lock doesn't block moving a lapsed-Pro user between two Pro themes.
 
-update profiles set theme = case theme
+-- Records which retired theme a user was moved off, so Settings can tell
+-- them once ("Mint Fizz was retired, so we moved you to Power-Up") instead
+-- of their look changing silently. Null for everyone else. A plain
+-- cosmetic column like theme_polarity: the user clears it themselves by
+-- dismissing the note (own row, existing RLS), and it gates nothing, so
+-- it needs no lock-trigger branch. Not personal data beyond a theme id;
+-- cleared on dismiss, and deleted with the profile row.
+alter table profiles add column retired_theme text;
+
+update profiles set retired_theme = theme, theme = case theme
   when 'mint-fizz'        then 'power-up'
   when 'strawberry-cream' then 'boss-fight'
   when 'blue-raspberry'   then 'plasma'

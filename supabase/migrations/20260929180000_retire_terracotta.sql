@@ -5,7 +5,9 @@
 -- postgres, which profiles_lock_columns() exempts. The lock function is
 -- untouched (Terracotta was never on its free list).
 
-update profiles set theme = 'crimson' where theme = 'terracotta';
+-- retired_theme (added in 20260929000000) drives Settings' one-time
+-- "your theme was retired" note.
+update profiles set retired_theme = 'terracotta', theme = 'crimson' where theme = 'terracotta';
 
 alter table profiles drop constraint profiles_theme_valid;
 

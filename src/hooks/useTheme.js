@@ -189,11 +189,53 @@ const DEFAULT_POLARITY = 'dark';
  * 20260909000000_add_profile_theme.sql), which is the only signal this
  * client has for *why* the update was rejected.
  */
-export function getThemeChangeErrorMessage(error) {
-  return error?.message?.includes('Pro-only')
-    ? 'That theme is a Pro perk — upgrade to unlock it.'
-    : 'Failed to change theme';
+export function getThemeChangeErrorMessage(error, online = typeof navigator === 'undefined' ? true : navigator.onLine) {
+  if (isProLockError(error)) return 'That theme is a Pro perk — upgrade to unlock it.';
+  // The optimistic reskin has already been rolled back by the time this
+  // shows, so say so: the user saw the new theme flash and vanish.
+  if (isOfflineError(error, online)) return "Couldn't save your theme — you seem to be offline. Your previous theme is back.";
+  return "Couldn't save your theme, so your previous one is back.";
 }
+
+// Same shape for the light/dark toggle; always retryable (it isn't gated).
+export function getPolarityChangeErrorMessage(error, nextPolarity, online = typeof navigator === 'undefined' ? true : navigator.onLine) {
+  const target = nextPolarity === 'light' ? 'light' : 'dark';
+  if (isOfflineError(error, online)) return `Couldn't switch to ${target} mode — you seem to be offline.`;
+  return `Couldn't switch to ${target} mode, so nothing changed.`;
+}
+
+// A Pro-lock rejection is final until the user upgrades, so offering
+// "Try again" there would only fail the same way.
+export function isRetryableThemeError(error) {
+  return !isProLockError(error);
+}
+
+function isProLockError(error) {
+  return !!error?.message?.includes('Pro-only');
+}
+
+function isOfflineError(error, online) {
+  return !online || /failed to fetch|network|load failed/i.test(error?.message ?? '');
+}
+
+// Retired theme ids no longer live in THEME_FAMILIES, but Settings still
+// has to name them in the one-time "your theme was retired" note (see
+// profiles.retired_theme). `movedTo` mirrors the retire migrations'
+// backfill (20260929000000_trim_theme_catalogue.sql,
+// 20260929180000_retire_terracotta.sql) and must stay in step with them:
+// the user's current theme may have changed since, so it can't be read
+// from `theme`.
+export const RETIRED_THEMES = {
+  'mint-fizz': { label: 'Mint Fizz', movedTo: 'power-up' },
+  'strawberry-cream': { label: 'Strawberry Cream', movedTo: 'boss-fight' },
+  'blue-raspberry': { label: 'Blue Raspberry', movedTo: 'plasma' },
+  'lemon-pop': { label: 'Lemon Pop', movedTo: 'power-up' },
+  'peach-soda': { label: 'Peach Soda', movedTo: 'boss-fight' },
+  'grape-float': { label: 'Grape Float', movedTo: 'synthwave' },
+  'xp-gold': { label: 'XP Gold', movedTo: 'stellar-gold' },
+  champagne: { label: 'Champagne', movedTo: 'stellar-gold' },
+  terracotta: { label: 'Terracotta', movedTo: 'crimson' },
+};
 
 /**
  * Reads and applies the current user's theme + polarity (via [data-theme]
@@ -217,19 +259,21 @@ export function useTheme() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('theme, theme_polarity')
+        .select('theme, theme_polarity, retired_theme')
         .eq('id', user.id)
         .single();
       if (error) throw error;
       return {
         theme: data.theme || DEFAULT_THEME,
         polarity: data.theme_polarity || DEFAULT_POLARITY,
+        retiredTheme: data.retired_theme ?? null,
       };
     },
     enabled: !!user?.id,
   });
   const theme = data?.theme ?? DEFAULT_THEME;
   const polarity = data?.polarity ?? DEFAULT_POLARITY;
+  const retiredTheme = data?.retiredTheme ?? null;
 
   useEffect(() => {
     const match = THEMES.find(t => t.id === theme);
@@ -265,9 +309,11 @@ export function useTheme() {
       queryClient.setQueryData(['my-theme', user?.id], old => ({ ...old, theme: nextTheme }));
       return { previous };
     },
-    onError: (error, _nextTheme, context) => {
+    onError: (error, nextTheme, context) => {
       if (context?.previous) queryClient.setQueryData(['my-theme', user?.id], context.previous);
-      toast.error(getThemeChangeErrorMessage(error));
+      toast.error(getThemeChangeErrorMessage(error), isRetryableThemeError(error)
+        ? { action: { label: 'Try again', onClick: () => setTheme(nextTheme) } }
+        : undefined);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['my-theme', user?.id] });
@@ -290,14 +336,42 @@ export function useTheme() {
       queryClient.setQueryData(['my-theme', user?.id], old => ({ ...old, polarity: nextPolarity }));
       return { previous };
     },
-    onError: (error, _nextPolarity, context) => {
+    onError: (error, nextPolarity, context) => {
       if (context?.previous) queryClient.setQueryData(['my-theme', user?.id], context.previous);
-      toast.error('Failed to change light/dark mode');
+      toast.error(getPolarityChangeErrorMessage(error, nextPolarity), {
+        action: { label: 'Try again', onClick: () => setPolarity(nextPolarity) },
+      });
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['my-theme', user?.id] });
     },
   });
 
-  return { theme, polarity, setTheme, setPolarity, isThemeLoading, isPending: isThemePending || isPolarityPending };
+  // Clears the one-time retired-theme note. Optimistic: dismissing is a
+  // plain cosmetic write on the user's own row; if it fails the note just
+  // comes back next visit, so no toast.
+  const { mutate: dismissRetiredTheme } = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ retired_theme: null })
+        .eq('id', user.id);
+      if (error) throw error;
+    },
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ['my-theme', user?.id] });
+      const previous = queryClient.getQueryData(['my-theme', user?.id]);
+      queryClient.setQueryData(['my-theme', user?.id], old => ({ ...old, retiredTheme: null }));
+      return { previous };
+    },
+    onError: (_error, _vars, context) => {
+      if (context?.previous) queryClient.setQueryData(['my-theme', user?.id], context.previous);
+    },
+  });
+
+  return {
+    theme, polarity, setTheme, setPolarity, isThemeLoading,
+    isPending: isThemePending || isPolarityPending,
+    retiredTheme, dismissRetiredTheme,
+  };
 }

@@ -33,6 +33,7 @@ export const THEME_FAMILIES = [
     id: 'neon-arcade',
     label: 'Neon Arcade',
     displayFont: "'Orbitron', sans-serif",
+    labelSize: '0.6875rem',
     themes: [
       { id: 'power-up', label: 'Power-Up', pro: false,
         dark: { swatch: '#00FF87', background: '#0B1018' }, light: { swatch: '#2C9664', background: '#ECF2FE' } },
@@ -50,6 +51,7 @@ export const THEME_FAMILIES = [
     id: 'cosmic',
     label: 'Cosmic',
     displayFont: "'Michroma', sans-serif",
+    labelSize: '0.6875rem',
     isNew: true,
     themes: [
       { id: 'moonlight', label: 'Moonlight', pro: false, dark: { swatch: '#B3BCCD', sup: '#7183AA', background: '#101522' } },
@@ -64,6 +66,7 @@ export const THEME_FAMILIES = [
     id: 'botanical',
     label: 'Botanical',
     displayFont: "'Fraunces', serif",
+    labelSize: '0.8125rem',
     isNew: true,
     themes: [
       { id: 'sage', label: 'Sage', pro: false, light: { swatch: '#628B66', sup: '#3E5140', background: '#F4F0E5' } },
@@ -77,6 +80,7 @@ export const THEME_FAMILIES = [
     id: 'noir',
     label: 'Noir',
     displayFont: "'Bodoni Moda', serif",
+    labelSize: '0.875rem',
     isNew: true,
     themes: [
       { id: 'carbon', label: 'Carbon', pro: false, dark: { swatch: '#6F7378', sup: '#4D698B', background: '#111214' } },
@@ -91,6 +95,7 @@ export const THEME_FAMILIES = [
     id: 'candy',
     label: 'Candy',
     displayFont: "'Fredoka', sans-serif",
+    labelSize: '0.75rem',
     isNew: true,
     themes: [
       { id: 'bubblegum', label: 'Bubblegum', pro: false, light: { swatch: '#FF1F76', sup: '#B91D59', background: '#FFF3F8' } },
@@ -134,6 +139,12 @@ export function getThemeFamily(themeId) {
 // index.css's own @import for every visitor. The rest load on demand the
 // first time their family is applied, so a user only ever downloads the
 // one trio they actually see (/impeccable audit).
+// labelSize (per family above) sizes that face's picker label so all five
+// read at one optical size: their x-heights run 0.46 (Bodoni Moda) to 0.58
+// (Orbitron), measured, so one font-size made "Noir" look a size smaller
+// than "Neon Arcade". Target x-height ~0.52 of 12px. CSS font-size-adjust
+// was tried first and didn't hold: Chrome reads Bodoni's and Fraunces'
+// declared x-height metric, not the drawn glyphs, so they never grew.
 // Each family's display face, matching the --font-display its index.css
 // block sets. The Settings picker sets each family's tile label in its own
 // face, so it needs these before the family is ever applied.

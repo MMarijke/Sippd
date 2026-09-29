@@ -304,7 +304,10 @@ function StarDots() {
 function PolarityToggle({ theme, polarity, onSelectPolarity, isPending }) {
   const match = THEMES.find(t => t.id === theme);
   return (
-    <div className="px-4 pb-3.5">
+    // pt-3: the header above has no bottom padding, so without it the
+    // last header line ("N new families", the retired note) sat ~6px off
+    // these buttons while every other group gets 12-16px.
+    <div className="px-4 pt-3 pb-3.5">
       <div className="flex items-center gap-2">
         {['dark', 'light'].map(p => {
           const selected = polarity === p;
@@ -420,12 +423,13 @@ function FamilyTile({ family, polarity, isCurrent, showNewBadge, onSelect, focus
         {family.id === 'cosmic' && <StarDots />}
       </div>
       {/* Each family names itself in its own display face -- the one part
-          of a theme a swatch can't show. text-xs, not the 2xs mono labels
-          elsewhere: display faces set small, and Michroma/Orbitron run
-          wide, so they need the extra size to read at all. */}
+          of a theme a swatch can't show. Sized per family
+          (THEME_FAMILIES.labelSize, 11-14px) rather than one class: the
+          five faces' x-heights differ enough that a single size made
+          "Noir" read a size smaller than "Neon Arcade" (see useTheme.js). */}
       <span
-        className="text-xs text-foreground text-center leading-tight"
-        style={{ fontFamily: family.displayFont }}
+        className="text-foreground text-center leading-tight"
+        style={{ fontFamily: family.displayFont, fontSize: family.labelSize }}
       >
         {family.label}
       </span>

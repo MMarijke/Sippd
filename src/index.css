@@ -929,11 +929,22 @@
 
   /* ── Noir family (dark, luxury/minimalist) ────────────────────────────────
      1 free + 5 Pro. Carbon's near-zero main saturation (4%) is intentional
-     -- the one theme in the whole catalogue meant to read as nearly
-     colorless -- its supporting color carries a real hue (29% saturation)
-     so derived chrome isn't gray-on-gray. */
+     -- nearly colorless, but its supporting color carries a real hue (29%
+     saturation) so derived chrome isn't gray-on-gray. Silver Screen
+     (2026-09-29) is the fully colorless one -- see its own block.
+
+     --breakdown-* is HAND-AUTHORED for Carbon, Crimson, Sapphire, Emerald
+     and Silver Screen (2026-09-29), per product direction, not the hue
+     rotation the rest of the file uses -- same approach and 2:1 floor
+     rationale as the Candy note below. Emerald: scan-button teal -> deep
+     green. Crimson: scan-button red -> deep red. Sapphire keeps its blue ->
+     violet drift but now steps down in lightness too (its old tiers were
+     all one luminance, 1.00:1 apart, so they blended). Carbon: cool
+     charcoal -> light silver and Silver Screen: grey -> white, both
+     rarer = brighter. Every ramp steps evenly in contrast against --card;
+     the darkest end of each sits at 2:1. Amethyst is unchanged. */
   [data-theme="carbon"], [data-theme="crimson"], [data-theme="amethyst"],
-  [data-theme="sapphire"], [data-theme="emerald"] {
+  [data-theme="sapphire"], [data-theme="emerald"], [data-theme="silver-screen"] {
     --font-display: 'Bodoni Moda', serif;
     --font-mono: 'Fragment Mono', monospace;
     --font-body: 'Jost', sans-serif;
@@ -957,11 +968,11 @@
     --ring: 213.3 4% 45.3%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 213.3 55% 44.9%;
-    --breakdown-uncommon: 228.3 60% 54.8%;
-    --breakdown-rare: 243.3 65% 60.4%;
-    --breakdown-ultra: 258.3 70% 58.8%;
-    --breakdown-legendary: 273.3 75% 54.9%;
+    --breakdown-common: 220.0 5% 30.7%;
+    --breakdown-uncommon: 218.8 6% 41.4%;
+    --breakdown-rare: 217.5 7% 52.9%;
+    --breakdown-ultra: 216.3 7% 65.5%;
+    --breakdown-legendary: 215.0 8% 80.0%;
   }
   [data-theme="crimson"] {
     --background: 343.6 33% 6.5%;
@@ -982,11 +993,11 @@
     --ring: 351.9 52% 47.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 351.9 55% 47.9%;
-    --breakdown-uncommon: 6.9 60% 45.5%;
-    --breakdown-rare: 21.9 65% 38.9%;
-    --breakdown-ultra: 36.9 70% 32.4%;
-    --breakdown-legendary: 51.9 75% 26.6%;
+    --breakdown-common: 351.9 52% 47.5%;
+    --breakdown-uncommon: 352.7 59% 43.7%;
+    --breakdown-rare: 353.4 66% 39.9%;
+    --breakdown-ultra: 354.2 73% 36.1%;
+    --breakdown-legendary: 355.0 80% 32.2%;
   }
   [data-theme="amethyst"] {
     --background: 273.3 26% 6.9%;
@@ -1032,11 +1043,11 @@
     --ring: 216.1 42% 52.4%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 216.1 55% 46.1%;
-    --breakdown-uncommon: 231.1 60% 55.7%;
-    --breakdown-rare: 246.1 65% 59.5%;
-    --breakdown-ultra: 261.1 70% 57.6%;
-    --breakdown-legendary: 276.1 75% 53.0%;
+    --breakdown-common: 216.1 55% 52.0%;
+    --breakdown-uncommon: 231.1 60% 56.4%;
+    --breakdown-rare: 246.1 65% 56.6%;
+    --breakdown-ultra: 261.1 70% 49.7%;
+    --breakdown-legendary: 276.1 75% 37.7%;
   }
   [data-theme="emerald"] {
     --background: 156.0 36% 5.5%;
@@ -1057,11 +1068,48 @@
     --ring: 179.1 32% 39.6%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 179.1 55% 29.7%;
-    --breakdown-uncommon: 194.1 60% 34.1%;
-    --breakdown-rare: 209.1 65% 41.7%;
-    --breakdown-ultra: 224.1 70% 53.5%;
-    --breakdown-legendary: 239.1 75% 61.7%;
+    --breakdown-common: 179.1 32% 39.6%;
+    --breakdown-uncommon: 171.8 42% 34.0%;
+    --breakdown-rare: 164.6 51% 29.0%;
+    --breakdown-ultra: 157.3 61% 24.6%;
+    --breakdown-legendary: 150.0 70% 20.6%;
+  }
+  /* Silver Screen -- a black-and-white movie. Every value the theme owns
+     is 0% saturation; can rarity badges, status colors and the medal/
+     caution tokens stay in color on purpose (product decision: their
+     meaning must read the same for every viewer). Near-black, not pure
+     black, so cards and borders can still separate from the page. The one
+     authored touch is a faint film grain on every card via the existing
+     --card-texture hook: white speckle at <=7% alpha, which keeps
+     muted text >= 6:1 even at the grain's brightest point. Glow is dialed
+     to 0.6 -- a white primary at full glow blooms like an overexposed
+     frame rather than a projector's soft halo. */
+  [data-theme="silver-screen"] {
+    --background: 0.0 0% 4.0%;
+    --foreground: 0.0 0% 95.0%;
+    --card: 0.0 0% 8.0%;
+    --card-foreground: 0.0 0% 95.0%;
+    --popover: 0.0 0% 8.0%;
+    --popover-foreground: 0.0 0% 95.0%;
+    --primary: 0.0 0% 95.0%;
+    --primary-foreground: 0.0 0% 4.0%;
+    --secondary: 0.0 0% 18.0%;
+    --secondary-foreground: 0.0 0% 95.0%;
+    --muted: 0.0 0% 9.0%;
+    --muted-foreground: 0.0 0% 63.0%;
+    --accent: 0.0 0% 72.0%;
+    --accent-foreground: 0.0 0% 4.0%;
+    --border: 0.0 0% 19.0%;
+    --input: 0.0 0% 19.0%;
+    --ring: 0.0 0% 95.0%;
+    --glow-intensity: 0.6;
+    --wash-intensity: 0;
+    --card-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.07 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    --breakdown-common: 0.0 0% 28.2%;
+    --breakdown-uncommon: 0.0 0% 42.3%;
+    --breakdown-rare: 0.0 0% 58.1%;
+    --breakdown-ultra: 0.0 0% 76.9%;
+    --breakdown-legendary: 0.0 0% 100.0%;
   }
 
   /* ── Candy family (light, playful) ────────────────────────────────────────

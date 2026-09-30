@@ -114,7 +114,10 @@ export default function PublicProfile() {
         p_profile_id: userId,
       });
       if (error) throw error;
-      return data;
+      // setof never comes back null from PostgREST, but a null here
+      // white-screened the page (profileItems.filter), and the `= []`
+      // default only covers undefined. Cheap insurance.
+      return data ?? [];
     },
     enabled: !!userId,
   });
@@ -256,17 +259,22 @@ export default function PublicProfile() {
           </div>
         ) : (
           <>
+            {/* Two rows: identity, then actions. Sharing one row with Trade +
+                Compare (or "Sign In to Follow") squeezed the name to "Sa…"
+                at 375px -- on the page strangers land on from a shared link. */}
+            <div className="space-y-3">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center neon-glow flex-shrink-0">
-                <span className="text-2xl font-display font-bold text-primary">{initial}</span>
+                <span className="text-2xl font-display font-bold text-foreground">{initial}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-display font-bold text-foreground truncate">{displayName}</h1>
+                  <h1 className="text-xl font-display font-bold text-foreground line-clamp-2 break-words">{displayName}</h1>
                   {isOwnerPro && <ProBadge />}
                   {isPrivate && <Lock className="w-4 h-4 text-muted-foreground flex-shrink-0" />}
                 </div>
               </div>
+            </div>
               {/* Suppressed (not just empty) when the profile is private
                   and this visitor can't see it — the gate card below owns
                   that exact same action alone in that state. Rendering
@@ -274,7 +282,7 @@ export default function PublicProfile() {
                   "Follow" (or "Sign In to Follow") buttons on screen at
                   once, which reads as a duplication bug, not emphasis. */}
               {canViewContent && (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {currentUser ? (
                     <>
                       <FollowButton targetUser={profileUser} currentUser={currentUser} />

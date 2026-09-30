@@ -325,7 +325,10 @@ export default function CollectionCard({
                 )}
               </div>
               <div className="p-1.5 space-y-0.5">
-                <p className={cn('font-semibold text-foreground truncate', isHero ? 'text-sm' : 'text-xs')}>{item.can_name}</p>
+                {/* title: the full name on hover for a truncated one
+                    ("Winter Editi…"); screen readers get it from the
+                    link's aria-label. */}
+                <p title={item.can_name} className={cn('font-semibold text-foreground truncate', isHero ? 'text-sm' : 'text-xs')}>{item.can_name}</p>
                 <RarityBadge rarity={getEffectiveRarity(item)} size={isHero ? undefined : 'sm'} />
               </div>
             </>

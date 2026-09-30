@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { AlertCircle, LogOut, RefreshCw, Settings, Pencil, Check, X, ScanLine, Zap, Star, Flame, ArrowRightLeft, ChevronRight } from 'lucide-react';
+import { AlertCircle, LogOut, RefreshCw, Settings, Pencil, Check, X, ScanLine, Zap, Star, Flame, ArrowRightLeft, ChevronRight, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link, useNavigate } from 'react-router-dom';
@@ -303,7 +303,10 @@ export default function Profile() {
                   <Pencil className="w-3 h-3" />
                 </button>
                 {profile?.region && (
-                  <span className="text-xs font-mono text-muted-foreground truncate">· 📍 {profile.region}</span>
+                  <span className="flex items-center gap-1 min-w-0 text-xs font-mono text-muted-foreground">
+                    <MapPin className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                    <span className="truncate">{profile.region}</span>
+                  </span>
                 )}
               </div>
               {/* Your social standing next to your name -- the other half of
@@ -354,8 +357,28 @@ export default function Profile() {
               generated snapshot, because a month that's already over
               has nothing left to go stale. */}
           {contentLoading ? (
-            <div className="px-5">
-              <div className="h-64 rounded-2xl bg-card/40 border border-border/30 animate-pulse" />
+            // Shaped like what's coming (card: hero, stats, grid; then the
+            // achievements shelf), not one 256px block standing in for
+            // ~1,400px of content -- that made everything below it jump when
+            // the data landed.
+            <div className="px-5 space-y-5" aria-busy="true">
+              <p className="sr-only" role="status">Loading your collection</p>
+              <div className="rounded-2xl border border-border/30 bg-card/40 p-5 space-y-4" aria-hidden="true">
+                <div className="h-11 w-2/5 rounded-lg bg-secondary/60 animate-pulse" />
+                <div className="h-40 rounded-2xl bg-secondary/60 animate-pulse" />
+                <div className="h-14 rounded-lg bg-secondary/60 animate-pulse" />
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="col-span-2 row-span-2 aspect-square rounded-xl bg-secondary/60 animate-pulse" />
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="aspect-square rounded-xl bg-secondary/60 animate-pulse" />
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2" aria-hidden="true">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="h-16 rounded-xl border border-border/30 bg-card/40 animate-pulse" />
+                ))}
+              </div>
             </div>
           ) : collected.length === 0 ? (
             <div className="px-5">

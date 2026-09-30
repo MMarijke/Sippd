@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -43,7 +42,6 @@ function loadSavedDefaults() {
 }
 
 export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCancel }) {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user: currentUser } = useAuth();
   const [showReveal, setShowReveal] = useState(false);
@@ -245,12 +243,13 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
       // can this user already voted on (e.g. logging a duplicate) is now
       // silently skipped server-side instead of blocking the
       // user_collection insert below it. See its migration's doc comment.
+      // Numbers match vote_on_can (20260925000001_vote_on_can_beverage_type.sql):
+      // 30 votes per rolling hour, and 10 barcode scans per rolling 24 hours.
+      // Plain limits, no upsell: PRODUCT.md keeps scanning free.
       if (error?.message?.includes('rate_limit_exceeded')) {
-        toast.error('You are adding cans too quickly — try again in an hour');
+        toast.error("You've added 30 cans in the last hour. Take a short break, then try again.");
       } else if (error?.message?.includes('daily_scan_limit_reached')) {
-        toast.error('Daily scan limit reached — upgrade to Pro for unlimited scans', {
-          action: { label: 'Upgrade', onClick: () => navigate('/pro') },
-        });
+        toast.error("You've scanned 10 barcodes in the last 24 hours, the daily limit. You can scan more once the oldest scan is a day old.");
       } else {
         console.error('Failed to add can:', error);
         toast.error('Failed to add can — please try again.');

@@ -50,7 +50,22 @@ export default function Profile() {
     setTimeout(() => inputRef.current?.focus(), 50);
   };
 
-  const cancelEdit = () => setEditing(false);
+  // Leaving edit mode unmounts the input and re-mounts the pencil, which
+  // dropped keyboard focus to <body>. Flag it, then focus the pencil once
+  // it's back (effect below) -- only after an edit, never on first load.
+  const pencilRef = useRef(null);
+  const returnFocusToPencil = useRef(false);
+  useEffect(() => {
+    if (!editing && returnFocusToPencil.current) {
+      returnFocusToPencil.current = false;
+      pencilRef.current?.focus();
+    }
+  }, [editing]);
+
+  const cancelEdit = () => {
+    returnFocusToPencil.current = true;
+    setEditing(false);
+  };
 
   const saveEdit = async () => {
     if (!nameInput.trim()) return;
@@ -68,6 +83,7 @@ export default function Profile() {
     queryClient.invalidateQueries({ queryKey: ['my-profile', user.id] });
     queryClient.invalidateQueries({ queryKey: ['user-collection'] });
     toast.success('Display name updated!');
+    returnFocusToPencil.current = true;
     setEditing(false);
   };
 
@@ -265,6 +281,7 @@ export default function Profile() {
                   value={nameInput}
                   onChange={e => setNameInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') cancelEdit(); }}
+                  aria-label="Display name"
                   className="h-8 text-sm font-display bg-secondary border-primary/30 focus-visible:ring-primary/50 px-2"
                   maxLength={40}
                 />
@@ -279,7 +296,7 @@ export default function Profile() {
               <div className="min-w-0">
               <div className="flex items-center gap-1.5 min-w-0">
                 <h2 className="text-base font-display font-bold text-foreground truncate">{profile?.full_name || 'Collector'}</h2>
-                <button onClick={startEdit} aria-label="Edit display name" className="p-4 text-muted-foreground hover:text-primary transition-colors flex-shrink-0">
+                <button ref={pencilRef} onClick={startEdit} aria-label="Edit display name" className="p-4 text-muted-foreground hover:text-primary transition-colors flex-shrink-0">
                   <Pencil className="w-3 h-3" />
                 </button>
                 {profile?.region && (
@@ -432,7 +449,7 @@ export default function Profile() {
       <div className="px-5 space-y-1">
         <Button
           variant="ghost"
-          className="w-full justify-start font-mono text-xs gap-2 text-foreground hover:bg-destructive/10"
+          className="w-full h-11 justify-start font-mono text-xs gap-2 text-foreground hover:bg-destructive/10"
           onClick={() => setShowLogoutConfirm(true)}
         >
           {/* Red stays on the icon (still flags the exit), not the 12px

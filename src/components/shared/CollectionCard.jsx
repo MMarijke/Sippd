@@ -141,9 +141,11 @@ export default function CollectionCard({
           <button
             onClick={dismissShareHint}
             aria-label="Dismiss"
-            className="p-2 -m-2 text-muted-foreground hover:text-foreground flex-shrink-0"
+            // 44px hit area (was ~28px) pulled back with negative margin so
+            // the glyph keeps its place beside the hint.
+            className="w-11 h-11 -m-3 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground flex-shrink-0"
           >
-            <X className="w-3 h-3" />
+            <X className="w-3 h-3" aria-hidden="true" />
           </button>
         </div>
       )}
@@ -303,10 +305,7 @@ export default function CollectionCard({
                 )}
               </div>
               <div className="p-1.5 space-y-0.5">
-                <p className={cn('font-semibold text-foreground truncate', isHero ? 'text-sm' : 'text-xs')}>
-                  {item.can_name}
-                  {isAuto && <span className="sr-only"> (auto-filled)</span>}
-                </p>
+                <p className={cn('font-semibold text-foreground truncate', isHero ? 'text-sm' : 'text-xs')}>{item.can_name}</p>
                 <RarityBadge rarity={getEffectiveRarity(item)} size={isHero ? undefined : 'sm'} />
               </div>
             </>
@@ -327,7 +326,15 @@ export default function CollectionCard({
               )}
             >
               {canEdit ? (
-                <Link to={`/can/${item.can_id}`} className="block">{tile}</Link>
+                // One explicit name: the name and rarity badge ran together
+                // as "Ice PopCOMMON", and the Auto chip is visual-only.
+                <Link
+                  to={`/can/${item.can_id}`}
+                  aria-label={[item.can_name, getEffectiveRarity(item), isAuto && 'auto-filled'].filter(Boolean).join(', ')}
+                  className="block"
+                >
+                  {tile}
+                </Link>
               ) : (
                 <div>{tile}</div>
               )}
@@ -343,12 +350,14 @@ export default function CollectionCard({
                 <button
                   onClick={() => onTogglePin(item)}
                   disabled={pinPending || atCap}
+                  // Names the can: six to ten identical "Pin to showcase"
+                  // buttons gave no way to tell which one you were on.
                   aria-label={
                     item.pinned_at
-                      ? 'Unpin from showcase'
+                      ? `Unpin ${item.can_name} from showcase`
                       : atCap
-                        ? `Pin to showcase (${maxPins} already pinned — unpin one first)`
-                        : 'Pin to showcase'
+                        ? `Pin ${item.can_name} to showcase (${maxPins} already pinned — unpin one first)`
+                        : `Pin ${item.can_name} to showcase`
                   }
                   className={cn(
                     'absolute top-0 right-0 w-11 h-11 rounded-full flex items-center justify-center transition-colors',

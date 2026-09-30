@@ -23,12 +23,18 @@ const STATUS_OPTIONS = [
 // rarity filter reads as the rarity system rather than a plain dropdown.
 const RARITY_OPTIONS = [
   { value: 'all',        label: 'Any rarity', tone: 'border-border text-foreground',                                  on: 'bg-card border-foreground/40' },
-  { value: 'Common',     label: 'Common',     tone: 'border-rarity-common/40 text-rarity-common-text',              on: 'bg-rarity-common/15 border-rarity-common' },
-  { value: 'Uncommon',   label: 'Uncommon',   tone: 'border-rarity-uncommon/40 text-rarity-uncommon-text',          on: 'bg-rarity-uncommon/15 border-rarity-uncommon' },
-  { value: 'Rare',       label: 'Rare',       tone: 'border-rarity-rare/40 text-rarity-rare-text',                  on: 'bg-rarity-rare/15 border-rarity-rare' },
-  { value: 'Ultra Rare', label: 'Ultra Rare', tone: 'border-rarity-ultra/40 text-rarity-ultra-text',                on: 'bg-rarity-ultra/15 border-rarity-ultra' },
-  { value: 'Legendary',  label: 'Legendary',  tone: 'border-rarity-legendary/40 text-rarity-legendary-text',        on: 'bg-rarity-legendary/15 border-rarity-legendary' },
+  { value: 'Common',     label: 'Common',     tone: 'border-rarity-common/40 text-rarity-common-text',              on: 'bg-rarity-common/10 border-rarity-common' },
+  { value: 'Uncommon',   label: 'Uncommon',   tone: 'border-rarity-uncommon/40 text-rarity-uncommon-text',          on: 'bg-rarity-uncommon/10 border-rarity-uncommon' },
+  { value: 'Rare',       label: 'Rare',       tone: 'border-rarity-rare/40 text-rarity-rare-text',                  on: 'bg-rarity-rare/10 border-rarity-rare' },
+  { value: 'Ultra Rare', label: 'Ultra Rare', tone: 'border-rarity-ultra/40 text-rarity-ultra-text',                on: 'bg-rarity-ultra/10 border-rarity-ultra' },
+  { value: 'Legendary',  label: 'Legendary',  tone: 'border-rarity-legendary/40 text-rarity-legendary-text',        on: 'bg-rarity-legendary/10 border-rarity-legendary' },
 ];
+
+// Choice pills sit on the sheet's background, never on bg-secondary: muted
+// text on secondary is under 4.5:1 in 51 of 56 theme/polarity pairs (Sage
+// 3.96, Power-Up 4.08), while muted on background passes in all of them.
+const PILL_ON = 'bg-card border-foreground/40 text-foreground font-semibold';
+const PILL_OFF = 'border-border text-muted-foreground hover:text-foreground';
 
 // One word each, so Sort fits beside Filters and the view toggle at 320px.
 const SORT_OPTIONS = [
@@ -67,7 +73,7 @@ export default function FilterBar({ filters, onFiltersChange, viewMode, onViewMo
         aria-haspopup="dialog"
         aria-label={activeCount ? `Filters, ${activeCount} active` : 'Filters'}
         className={cn('h-11 px-3 gap-1.5 font-mono text-xs flex-shrink-0',
-          activeCount ? 'border-primary/50 bg-primary/10 text-foreground' : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
+          activeCount ? 'border-primary/50 bg-primary/10 text-foreground' : 'bg-transparent border-border text-muted-foreground hover:text-foreground'
         )}
       >
         <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
@@ -80,7 +86,7 @@ export default function FilterBar({ filters, onFiltersChange, viewMode, onViewMo
       </Button>
 
       <Select value={filters.sort || 'date_desc'} onValueChange={v => update('sort', v)}>
-        <SelectTrigger aria-label="Sort by" className="flex-1 min-w-0 bg-secondary border-border text-xs font-mono h-11">
+        <SelectTrigger aria-label="Sort by" className="flex-1 min-w-0 bg-transparent border-border text-foreground text-xs font-mono h-11">
           <SelectValue placeholder="Sort" />
         </SelectTrigger>
         <SelectContent>
@@ -98,7 +104,7 @@ export default function FilterBar({ filters, onFiltersChange, viewMode, onViewMo
         aria-label="List view"
         aria-pressed={viewMode === 'list'}
         title={viewMode === 'list' ? 'Show as grid' : 'Show as list'}
-        className="h-11 w-11 flex-shrink-0 bg-secondary border-border text-muted-foreground hover:text-foreground"
+        className="h-11 w-11 flex-shrink-0 bg-transparent border-border text-muted-foreground hover:text-foreground"
       >
         {viewMode === 'list' ? <LayoutGrid className="w-4 h-4" aria-hidden="true" /> : <List className="w-4 h-4" aria-hidden="true" />}
       </Button>
@@ -109,13 +115,13 @@ export default function FilterBar({ filters, onFiltersChange, viewMode, onViewMo
           <SheetDescription className="sr-only">Narrow down the cans shown in your haul.</SheetDescription>
 
           <Group label="Drink">
-            <div className="flex bg-secondary rounded-lg p-0.5">
+            <div className="flex flex-wrap gap-2">
               {BEVERAGE_TYPE_OPTIONS.map(opt => (
                 <Choice
                   key={opt.value}
                   checked={filters.beverageType === opt.value}
                   onSelect={() => update('beverageType', opt.value)}
-                  className={cn('flex-1 rounded-md', filters.beverageType === opt.value ? 'bg-card text-foreground font-semibold shadow-sm' : 'text-muted-foreground hover:text-foreground')}
+                  className={cn('px-3 rounded-full border', filters.beverageType === opt.value ? PILL_ON : PILL_OFF)}
                 >
                   {opt.label}
                 </Choice>
@@ -130,9 +136,7 @@ export default function FilterBar({ filters, onFiltersChange, viewMode, onViewMo
                   key={opt.value}
                   checked={filters.status === opt.value}
                   onSelect={() => update('status', opt.value)}
-                  className={cn('px-3 rounded-full border',
-                    filters.status === opt.value ? 'bg-card border-foreground/40 text-foreground font-semibold' : 'border-border text-muted-foreground hover:text-foreground'
-                  )}
+                  className={cn('px-3 rounded-full border', filters.status === opt.value ? PILL_ON : PILL_OFF)}
                 >
                   {opt.label}
                 </Choice>

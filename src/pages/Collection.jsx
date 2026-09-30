@@ -19,6 +19,7 @@ import { useAchievementUnlock } from '@/hooks/useAchievementUnlock';
 import AchievementUnlockAnimation from '@/components/achievements/AchievementUnlockAnimation';
 import { useStreak } from '@/lib/useStreak';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 60;
 
@@ -195,6 +196,8 @@ export default function Collection() {
   // them, so it can't be the reason a search+filter combination landed on
   // zero results and doesn't need a "clear" affordance of its own.
   const hasActiveFilters = filters.status !== 'all' || filters.rarity !== 'all' || filters.beverageType !== 'all' || filters.favourites || searchQuery.length >= 2;
+  // The sheet's Clear resets only what the sheet sets, not your search.
+  const clearSheetFilters = () => setFilters(prev => ({ ...prev, status: 'all', rarity: 'all', beverageType: 'all', favourites: false }));
   const clearFilters = () => {
     setFilters(prev => ({ ...prev, status: 'all', rarity: 'all', beverageType: 'all', favourites: false }));
     setSearchQuery('');
@@ -300,49 +303,27 @@ export default function Collection() {
       <div className="relative">
         <div className="home-gradient-bg-layer" aria-hidden="true" />
         <div className="relative z-10 space-y-4">
+          {/* Title and Scan only. Select and Crates moved to the count line
+              above the grid: four header actions squeezed "Your Haul" to
+              "You…" at 375px and to nothing at 320px (/impeccable critique). */}
           <PageHeader
             title="Your Haul"
-            subtitle={selectionMode ? `${selectedIds.size} selected` : `${collection.length} cans total`}
             action={
-              selectionMode ? (
-                <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-border text-muted-foreground" onClick={toggleSelectionMode}>
-                  <X className="w-4 h-4" /> Cancel
-                </Button>
-              ) : (
-                <div className="flex items-center gap-2">
-                  {/* asChild renders Link as the actual DOM element (via Radix's
-                      Slot) instead of nesting a <button> inside an <a> — see
-                      the sibling-overlay comment on CanCard/CanListItem for
-                      the same underlying reason. This exact fix was applied
-                      once already (fix/collection-button-link-nesting) but a
-                      later merge with a PR that also touched this header
-                      silently reverted these two sites — reapplying it. */}
-                  {collection.length > 0 && (
-                    <Button size="sm" variant="outline" className="h-11 w-11 p-0 font-mono text-xs border-border text-muted-foreground hover:text-foreground" onClick={toggleSelectionMode} aria-label="Select multiple cans">
-                      <CheckSquare className="w-4 h-4" />
-                    </Button>
-                  )}
-                  <Button asChild size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
-                    <Link to="/crates">
-                      <PackageOpen className="w-4 h-4" /> Crates
-                    </Link>
-                  </Button>
-                  {/* Filled primary, not outline — matches Home's Scan
-                      button exactly (same destination, same weight as the
-                      app's other primary-nav Scan entry point). */}
-                  <Button asChild size="sm" className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
-                    <Link to="/scan">
-                      <ScanLine className="w-4 h-4" /> Scan
-                    </Link>
-                  </Button>
-                </div>
-              )
+              // Filled primary, not outline — matches Home's Scan button
+              // exactly (same destination, same weight as the app's other
+              // primary-nav Scan entry point). asChild renders the Link as
+              // the element itself rather than a <button> inside an <a>.
+              <Button asChild size="sm" className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+                <Link to="/scan">
+                  <ScanLine className="w-4 h-4" aria-hidden="true" /> Scan
+                </Link>
+              </Button>
             }
           />
 
           <div className="px-5">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
               <Input
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
@@ -362,17 +343,15 @@ export default function Collection() {
             )}
           </div>
 
-          {/* FilterBar included in the gradient zone, not just header+search
-              — the fade was cutting off far shorter than Home's equivalent
-              hero zone (header+RarityHero+Score), reading as an abrupt,
-              much weaker echo of it rather than a matching treatment. A
-              direct child here, same as PageHeader and the search block
-              above — space-y-4 on this wrapper already spaces it. */}
+          {/* Inside the gradient zone with the header and search, so the fade
+              matches Home's hero zone. */}
           <FilterBar
             filters={filters}
             onFiltersChange={setFilters}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
+            resultCount={filtered.length}
+            onClearFilters={clearSheetFilters}
           />
         </div>
       </div>
@@ -403,6 +382,39 @@ export default function Collection() {
           >
             Clear all
           </button>
+        </div>
+      )}
+
+      {/* Count line: what you're looking at, plus the two collection-wide
+          actions that used to crowd the header. */}
+      {!isLoading && !hasLoadError && (
+        <div className="px-5 -my-1 flex items-center justify-between gap-2">
+          <p className="text-xs font-mono text-muted-foreground min-w-0 truncate" aria-live="polite">
+            {selectionMode
+              ? `${selectedIds.size} selected`
+              : hasActiveFilters
+                ? `${filtered.length} of ${collection.length} cans`
+                : `${collection.length} can${collection.length === 1 ? '' : 's'}`}
+          </p>
+          <div className="flex items-center flex-shrink-0">
+            {collection.length > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={toggleSelectionMode}
+                aria-pressed={selectionMode}
+                className={cn('h-11 px-3 gap-1.5 font-mono text-xs', selectionMode ? 'text-primary' : 'text-muted-foreground hover:text-foreground')}
+              >
+                {selectionMode ? <X className="w-4 h-4" aria-hidden="true" /> : <CheckSquare className="w-4 h-4" aria-hidden="true" />}
+                {selectionMode ? 'Done' : 'Select'}
+              </Button>
+            )}
+            <Button asChild variant="ghost" className="h-11 px-3 gap-1.5 font-mono text-xs text-muted-foreground hover:text-foreground">
+              <Link to="/crates">
+                <PackageOpen className="w-4 h-4" aria-hidden="true" /> Crates
+              </Link>
+            </Button>
+          </div>
         </div>
       )}
 

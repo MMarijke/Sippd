@@ -132,15 +132,19 @@ export default function MostWanted() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      // Skeleton rows like the Collectors and Regional boards, so switching
+      // tabs doesn't swap loading languages.
+      <div className="px-5 space-y-2" aria-busy="true" aria-label="Loading Most Wanted">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="h-20 rounded-xl bg-card/40 border border-border/30 animate-pulse" />
+        ))}
       </div>
     );
   }
 
   if (isSharedCansError) {
     return (
-      <div className="px-5 pt-4">
+      <div className="px-5">
         <div className="bg-card border border-destructive/30 rounded-2xl p-10 flex flex-col items-center text-center">
           <AlertCircle className="w-10 h-10 text-destructive mb-3" />
           <p className="text-sm font-display font-semibold text-foreground">Couldn't load Most Wanted</p>
@@ -159,7 +163,7 @@ export default function MostWanted() {
 
   if (ranked.length === 0) {
     return (
-      <div className="px-5 pt-4">
+      <div className="px-5">
         <div className="bg-card border border-border rounded-2xl p-10 flex flex-col items-center text-center">
           <Star className="w-10 h-10 text-primary mb-3" />
           <p className="text-sm font-display font-semibold text-foreground">Nothing's trending yet</p>
@@ -170,7 +174,7 @@ export default function MostWanted() {
   }
 
   return (
-    <div className="px-5 pt-4 space-y-2">
+    <div className="px-5 space-y-2">
       {ranked.slice(0, visibleCount).map((can, i) => {
         const myItem = myCollectionMap[can.id];
         const isMedal = i < 3;

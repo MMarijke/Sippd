@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Trophy, Star, Search, MapPin, X, Activity } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import PageHeader from '@/components/shared/PageHeader';
 import CollectorsLeaderboard from '@/components/leaderboard/CollectorsLeaderboard';
@@ -11,119 +10,125 @@ import RegionalLeaderboard from '@/components/leaderboard/RegionalLeaderboard';
 import FindCollectors from '@/components/leaderboard/FindCollectors';
 import FeedContent from '@/components/feed/FeedContent';
 
+// Text-only and sized to their labels: with icons and equal widths, every
+// label truncated to two letters at 375px ("Co…", "Mo…"), since each got 28px
+// of the 72px "Collectors" needs (/impeccable critique). "Wanted" keeps the
+// four within 280px at 320.
+const TABS = [
+  { value: 'collectors', label: 'Collectors' },
+  { value: 'mostwanted', label: 'Wanted' },
+  { value: 'regional',   label: 'Regional' },
+  { value: 'feed',       label: 'Feed' },
+];
+const TAB_VALUES = TABS.map(t => t.value);
+
 export default function Leaderboard() {
-  // ?tab= lets a deep link (Profile's "Rank #N") open a specific view.
-  const [searchParams] = useSearchParams();
-  const [tab, setTab] = useState(() => (
-    ['collectors', 'mostwanted', 'regional', 'feed'].includes(searchParams.get('tab')) ? searchParams.get('tab') : 'collectors'
-  ));
+  // The tab lives in the URL (?tab=) rather than local state, so a reload or
+  // shared link keeps it and a link to another tab works even when Ranks is
+  // already mounted (Feed's "Find Collectors" used to go nowhere).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = TAB_VALUES.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'collectors';
+  // A tab's own view params (?sort=, ?drink=, ?jump=) don't carry across.
+  const setTab = value => setSearchParams({ tab: value }, { replace: true });
+
+  // Search is page-wide (it finds people from any tab), so it opens from the
+  // header rather than sitting between the tabs and a tab's own controls,
+  // where it read as tab-scoped and cost 56px on every visit.
+  const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const searchButtonRef = useRef(null);
+
+  // ?find=1 (Feed's empty-state button) opens the search straight away.
+  useEffect(() => {
+    if (searchParams.get('find') !== '1') return;
+    setSearchOpen(true);
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.delete('find');
+      return next;
+    }, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setSearchQuery('');
+    requestAnimationFrame(() => searchButtonRef.current?.focus());
+  };
 
   return (
     <div className="space-y-0">
-      <PageHeader title="Ranks" subtitle={
-        tab === 'collectors' ? 'Global Collector Leaderboard' :
-        tab === 'regional' ? 'Regional Leaderboard' :
-        tab === 'feed' ? 'Community Activity' :
-        'Community Most Wanted'
-      } />
+      <PageHeader
+        title="Ranks"
+        action={
+          <button
+            ref={searchButtonRef}
+            type="button"
+            onClick={() => (searchOpen ? closeSearch() : setSearchOpen(true))}
+            aria-label={searchOpen ? 'Close collector search' : 'Find collectors'}
+            aria-expanded={searchOpen}
+            className={cn('h-11 w-11 rounded-md border flex items-center justify-center transition-colors',
+              searchOpen ? 'bg-card border-primary/50 text-foreground' : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <Search className="w-4 h-4" aria-hidden="true" />
+          </button>
+        }
+      />
 
-      {/* Tab toggle — rendered above the search bar so the search dropdown
-          (which floats below the search input) never has to compete with
-          primary navigation for stacking order. It used to sit below the
-          search bar with the dropdown positioned on top of it: any open
-          result set fully occluded the tab row and blocked pointer events
-          to it, so switching tabs required first clearing the search text
-          (/impeccable critique). Now the dropdown only ever overlays the
-          scrollable list content beneath it, which is the same benign
-          overlay pattern TradeLogDialog.jsx's own search already uses. */}
-      <div className="px-5 pb-4">
-        {/* min-w-0 on each flex-1 Button lets it actually shrink below its
-            whitespace-nowrap content width instead of overflowing the
-            tablist — at 390px "Regional" previously spilled ~25px past the
-            container's right edge (/impeccable critique). The label itself
-            truncates rather than the Button, so the fixed-size icon next to
-            it never gets squeezed. */}
-        {/* Segmented filter, not a tab set — standardized on aria-pressed
-            (see Feed.jsx/CompareCollection.jsx for the same change and
-            reasoning: role="tab"/tablist implies arrow-key navigation none
-            of these ever implemented). */}
-        <div aria-label="Leaderboard view" className="flex bg-secondary rounded-lg border border-border p-0.5">
-          <Button
-            variant="ghost"
-            aria-pressed={tab === 'collectors'}
-            className={cn('flex-1 min-w-0 h-11 font-mono text-xs gap-1.5', tab === 'collectors' ? 'bg-card text-primary' : 'text-muted-foreground')}
-            onClick={() => setTab('collectors')}
-          >
-            <Trophy className="w-3.5 h-3.5 shrink-0" /> <span className="truncate">Collectors</span>
-          </Button>
-          <Button
-            variant="ghost"
-            aria-pressed={tab === 'mostwanted'}
-            className={cn('flex-1 min-w-0 h-11 font-mono text-xs gap-1.5', tab === 'mostwanted' ? 'bg-card text-primary' : 'text-muted-foreground')}
-            onClick={() => setTab('mostwanted')}
-          >
-            <Star className="w-3.5 h-3.5 shrink-0" /> <span className="truncate">Most Wanted</span>
-          </Button>
-          <Button
-            variant="ghost"
-            aria-pressed={tab === 'regional'}
-            className={cn('flex-1 min-w-0 h-11 font-mono text-xs gap-1.5', tab === 'regional' ? 'bg-card text-primary' : 'text-muted-foreground')}
-            onClick={() => setTab('regional')}
-          >
-            <MapPin className="w-3.5 h-3.5 shrink-0" /> <span className="truncate">Regional</span>
-          </Button>
-          {/* Feed merged in here (/impeccable critique: bottom nav was
-              crowded at 6 items) — same segmented-tab pattern as the three
-              tabs above it, not a new interaction to learn. */}
-          <Button
-            variant="ghost"
-            aria-pressed={tab === 'feed'}
-            className={cn('flex-1 min-w-0 h-11 font-mono text-xs gap-1.5', tab === 'feed' ? 'bg-card text-primary' : 'text-muted-foreground')}
-            onClick={() => setTab('feed')}
-          >
-            <Activity className="w-3.5 h-3.5 shrink-0" /> <span className="truncate">Feed</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* Find Collectors search — the dropdown is a floating overlay
-          (matching TradeLogDialog.jsx's own trade-partner search: same
-          absolute top-full/z-10/shadow-lg convention), not in normal
-          document flow. It used to push the tab toggle and whatever tab
-          was active downward while typing (/impeccable critique) —
-          exactly the moment a one-handed mobile user least wants the
-          layout moving under their thumb. */}
-      <div className="px-5 pb-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Find Collectors by name..."
-            className="h-11 pl-9 pr-11 bg-secondary border-border font-body"
-          />
-          {/* The only way to dismiss a search used to be manually deleting
-              every typed character — no visible affordance for it, and
-              (before the dropdown-occlusion fix) it was also the only way
-              to make the tab toggle clickable again while typing
-              (/impeccable critique). */}
-          {searchQuery.length > 0 && (
+      {searchOpen && (
+        <div className="px-5 pb-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Input
+              autoFocus
+              type="search"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Escape') closeSearch(); }}
+              aria-label="Find collectors by name"
+              placeholder="Find collectors by name"
+              className="h-11 pl-9 pr-11 bg-secondary border-border font-body [&::-webkit-search-cancel-button]:hidden"
+            />
             <button
               type="button"
-              onClick={() => setSearchQuery('')}
-              aria-label="Clear search"
+              onClick={closeSearch}
+              aria-label="Close search"
               className="absolute right-0 top-0 h-11 w-11 flex items-center justify-center text-muted-foreground hover:text-foreground"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
-          )}
-          {searchQuery.length >= 2 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl overflow-hidden z-10 max-h-80 overflow-y-auto shadow-lg">
-              <FindCollectors query={searchQuery} tab={tab} />
-            </div>
-          )}
+            {/* Floating overlay, not in flow, so typing never shifts the
+                tabs or list under your thumb. */}
+            {searchQuery.length >= 2 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl overflow-hidden z-20 max-h-80 overflow-y-auto shadow-lg">
+                <FindCollectors query={searchQuery} tab={tab} />
+              </div>
+            )}
+          </div>
         </div>
+      )}
+
+      {/* Underlined page navigation, so it no longer wears the same filled
+          segmented skin as the filters below it: five identical bars made
+          every control look equally important (/impeccable critique). */}
+      <div role="group" aria-label="Ranks view" className="mx-5 mb-4 flex justify-between gap-2 border-b border-border">
+        {TABS.map(t => (
+          <button
+            key={t.value}
+            type="button"
+            aria-pressed={tab === t.value}
+            onClick={() => setTab(t.value)}
+            className={cn('relative h-11 px-1.5 font-mono text-xs whitespace-nowrap transition-colors',
+              tab === t.value ? 'text-foreground font-semibold' : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {t.label}
+            <span
+              aria-hidden="true"
+              className={cn('absolute inset-x-0 -bottom-px h-0.5 rounded-full transition-colors', tab === t.value ? 'bg-primary' : 'bg-transparent')}
+            />
+          </button>
+        ))}
       </div>
 
       {tab === 'collectors' ? <CollectorsLeaderboard />

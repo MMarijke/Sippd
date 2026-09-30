@@ -23,6 +23,10 @@ export function useJumpToHighlight() {
   const jumpToTarget = useCallback(() => {
     if (!targetRef.current) return false;
     targetRef.current.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' });
+    // Move focus too, so a keyboard or screen-reader user lands on the row
+    // they were sent to instead of staying on the button. The row needs
+    // tabIndex={-1}.
+    targetRef.current.focus({ preventScroll: true });
     clearTimeout(timeoutRef.current);
     setHighlighted(true);
     timeoutRef.current = setTimeout(() => setHighlighted(false), HIGHLIGHT_MS);

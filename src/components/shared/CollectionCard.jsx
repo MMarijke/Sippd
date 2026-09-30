@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { canTileBackground } from '@/lib/canBgColors';
+import { rarityTileBackground } from '@/lib/canBgColors';
 import { Link } from 'react-router-dom';
 import { Pin, Link2, CupSoda, X, Eye, TrendingUp, ChevronRight, Info } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -294,7 +294,7 @@ export default function CollectionCard({
           const isAuto = canEdit && !item.pinned_at;
           const tile = (
             <>
-              <div className="aspect-square" style={{ background: canTileBackground(item.can_bg_color) }}>
+              <div className="aspect-square" style={{ background: rarityTileBackground(getEffectiveRarity(item)) }}>
                 {item.can_image_url ? (
                   <>
                     {/* onError swaps to the same icon fallback used for a

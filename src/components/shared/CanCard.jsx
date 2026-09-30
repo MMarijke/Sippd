@@ -71,7 +71,7 @@ export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFav
       <div className="aspect-square relative overflow-hidden pointer-events-none">
         <CanImageBox
           imageUrl={imageUrl}
-          bgColor={can.can_bg_color}
+          rarity={rarity}
           alt={name}
           className="w-full h-full group-hover:scale-105 transition-transform duration-300"
           iconSize="w-10 h-10"

@@ -1,13 +1,14 @@
 import { Package } from 'lucide-react';
-import { canTileBackground, THEME_CAN_BG } from '@/lib/canBgColors';
+import { rarityTileBackground } from '@/lib/canBgColors';
 
 /**
- * Reusable image box that applies a background colour behind the can image.
- * Used on: CanCard, CanDetail, PublicProfile, MonthlyReport.
+ * Reusable image box behind a can image, washed with the can's rarity hue.
+ * Used on: CanCard, CanDetail, PublicProfile, MonthlyReport, Wishlist, ...
  *
  * Props:
  *   imageUrl   — can image URL (optional)
- *   bgColor    — hex background colour (defaults to Deep Teal)
+ *   rarity     — the rarity the tile shows ("Rare", "Ultra Rare", ...);
+ *                unrated/unknown gets the theme tile
  *   alt        — img alt text
  *   className  — extra classes on the container div
  *   style      — extra inline styles on the container
@@ -17,7 +18,7 @@ import { canTileBackground, THEME_CAN_BG } from '@/lib/canBgColors';
  */
 export default function CanImageBox({
   imageUrl,
-  bgColor,
+  rarity,
   alt = '',
   className = '',
   style = {},
@@ -25,16 +26,10 @@ export default function CanImageBox({
   objectFit = 'contain',
   loading = 'lazy',
 }) {
-  const bg = canTileBackground(bgColor);
-  // Placeholder glyph: the theme tile can be light (Sage, Candy), where the
-  // old white/20 vanished; picked colours are always clamped dark
-  // (clampToDarkSafeBg), where white still reads best.
-  const isThemeTile = bg === THEME_CAN_BG;
-
   return (
     <div
       className={`relative overflow-hidden ${className}`}
-      style={{ backgroundColor: bg, ...style }}
+      style={{ background: rarityTileBackground(rarity), ...style }}
     >
       {imageUrl ? (
         <img
@@ -47,7 +42,10 @@ export default function CanImageBox({
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center">
-          <Package className={`${iconSize} ${isThemeTile ? 'text-foreground/30' : 'text-white/20'}`} />
+          {/* The tile is always a light wash of the card, so the glyph takes
+              the foreground colour on every theme (white/20 vanished on
+              light ones). */}
+          <Package className={`${iconSize} text-foreground/30`} aria-hidden="true" />
         </div>
       )}
     </div>

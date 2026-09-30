@@ -67,7 +67,7 @@ export default function AchievementsSection({ achievements, showViewAll = false 
         })}
       </ul>
       {showViewAll && (
-        <Link to="/achievements" className="block text-center text-xs font-mono text-foreground hover:text-primary transition-colors">
+        <Link to="/achievements" className="min-h-11 flex items-center justify-center rounded-lg text-xs font-mono text-foreground hover:text-primary transition-colors">
           View All →
         </Link>
       )}

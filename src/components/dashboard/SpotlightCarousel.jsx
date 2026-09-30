@@ -77,7 +77,7 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
                 <div className="rounded-2xl overflow-hidden border border-border">
                   <CanImageBox
                     imageUrl={item.can_image_url}
-                    bgColor={item.can_bg_color}
+                    rarity={rarity}
                     alt={item.can_name}
                     className="w-full h-[140px]"
                     iconSize="w-10 h-10"

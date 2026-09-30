@@ -18,7 +18,6 @@ import { cn } from '@/lib/utils';
 import { RARITY_ORDER, getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import CanImageBox from '@/components/shared/CanImageBox';
-import CanBackgroundPicker from '@/components/shared/CanBackgroundPicker';
 import TasteRatingStars from '@/components/shared/TasteRatingStars';
 import BeverageTypeToggle from '@/components/shared/BeverageTypeToggle';
 
@@ -153,6 +152,9 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
 
   const alreadyVoted = !!existingVote;
   const consensusRarity = prefillData ? getDisplayRarity(prefillData) : null;
+  // The rarity the new tile will wear: the same rule the insert below saves
+  // as can_rarity (community consensus if there is one, else your vote).
+  const tileRarity = prefillData?.consensus_rarity || form.rarity;
   const totalVotes = prefillData?.total_votes || 0;
   const confidence = getConfidence(totalVotes);
 
@@ -317,7 +319,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
       <AddedConfirmation
         canName={form.name}
         imageUrl={pendingCan?.can_image_url}
-        bgColor={pendingCan?.can_bg_color}
+        rarity={pendingCan?.can_rarity}
         onComplete={() => {
           setShowAddedConfirmation(false);
           onSuccess?.(pendingCan);
@@ -640,7 +642,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           aria-label={showPersonalize ? 'Hide personalize fields' : 'Show personalize fields'}
         >
           <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
-            Personalize <span className="normal-case text-muted-foreground/70">— taste, photo, background, notes</span>
+            Personalize <span className="normal-case text-muted-foreground/70">— taste, photo, notes</span>
           </span>
           <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform flex-shrink-0', showPersonalize && 'rotate-180')} />
         </CollapsibleTrigger>
@@ -654,12 +656,12 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
             <div className="space-y-1.5">
               <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Image (optional)</Label>
               {form.image_url ? (
-                // Same component as the real tile, so it previews the
-                // background picker below truthfully (see EditEntrySheet).
+                // Same component as the real tile, so it shows the tile you'll
+                // get, rarity wash included.
                 <div className="relative">
                   <CanImageBox
                     imageUrl={form.image_url}
-                    bgColor={form.bg_color}
+                    rarity={tileRarity}
                     alt={form.name || 'Can'}
                     className="w-full h-40 rounded-xl border border-border"
                     loading="eager"
@@ -725,28 +727,12 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           {prefillData?.id && prefillData.image_url && (
             <CanImageBox
               imageUrl={prefillData.image_url}
-              bgColor={form.bg_color}
+              rarity={tileRarity}
               alt={form.name || 'Can'}
               className="w-full h-40 rounded-xl border border-border"
               loading="eager"
             />
           )}
-
-          {/* Independent of whether an image exists — can_bg_color is also the
-              fallback tile background behind the generic can icon when a can
-              has no image at all (see CollectionCard.jsx), so it's worth
-              setting either way, and always available even when voting on an
-              existing catalog can whose community-sourced image can't be
-              replaced here. */}
-          <CanBackgroundPicker
-            value={form.bg_color}
-            onChange={v => update('bg_color', v)}
-            // A catalog can shows its community image; a new can shows only
-            // what's in the form, so removing the photo removes it here too
-            // (the old fallback kept previewing the scanned photo).
-            imageUrl={prefillData?.id ? prefillData.image_url : form.image_url}
-            previewAlt={form.name || 'Can preview'}
-          />
 
           <div className="space-y-1.5">
             <Label htmlFor="addcan-notes" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Notes (optional)</Label>

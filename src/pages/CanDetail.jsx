@@ -221,7 +221,7 @@ export default function CanDetail() {
         <div className="w-full aspect-[4/3] relative overflow-hidden max-h-[55vw] min-h-[240px]">
           <CanImageBox
             imageUrl={imageUrl}
-            bgColor={item?.can_bg_color}
+            rarity={rarity}
             alt={name}
             className="w-full h-full"
             iconSize="w-24 h-24"

@@ -10,10 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Save, Upload, Link as LinkIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { RARITY_ORDER } from '@/lib/rarityConsensus';
-import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
+import { RARITY_ORDER, getConfidence, getDisplayRarity } from '@/lib/rarityConsensus';
 import CanImageBox from '@/components/shared/CanImageBox';
-import CanBackgroundPicker from '@/components/shared/CanBackgroundPicker';
 import TasteRatingStars from '@/components/shared/TasteRatingStars';
 import BeverageTypeToggle from '@/components/shared/BeverageTypeToggle';
 
@@ -60,11 +58,15 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
     can_edition:  item?.can_edition  || '',
     can_beverage_type: item?.can_beverage_type || 'energy_drink',
     can_image_url: item?.can_image_url || '',
-    can_bg_color: item?.can_bg_color || DEFAULT_CAN_BG,
     taste_rating: item?.taste_rating || null,
   });
 
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
+
+  // Same rule as CanCard, so the photo preview matches the Haul tile.
+  const tileRarity = sharedCan && getConfidence(sharedCan.total_votes) === 'unrated'
+    ? null
+    : (sharedCan ? getDisplayRarity(sharedCan) : item?.can_rarity);
 
   // Barcode lives on shared_cans (the community catalog), not on this
   // user_collection row, so it can't just be another field in `form` — it's
@@ -216,14 +218,12 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
           <div className="space-y-1.5">
             <Label className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">Image</Label>
             {form.can_image_url ? (
-              // Drawn by CanImageBox, the same component as the real tile, so
-              // this is the preview for the background picker below. It used
-              // to paint the stored hex raw, so the Theme default showed as
-              // dark teal while the saved tile came out as the theme tint.
+              // Drawn by CanImageBox with the rarity rule CanCard uses, so it
+              // shows exactly the tile this can gets in Haul.
               <div className="relative">
                 <CanImageBox
                   imageUrl={form.can_image_url}
-                  bgColor={form.can_bg_color}
+                  rarity={tileRarity}
                   alt={form.can_name || 'Can'}
                   className="w-full h-40 rounded-xl border border-border"
                   loading="eager"
@@ -284,16 +284,6 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
               </div>
             )}
           </div>
-
-          {/* Independent of whether an image is set — can_bg_color also
-              backs the fallback tile shown behind the generic can icon
-              when there's no image at all (see CollectionCard.jsx). */}
-          <CanBackgroundPicker
-            value={form.can_bg_color}
-            onChange={v => update('can_bg_color', v)}
-            imageUrl={form.can_image_url}
-            previewAlt={form.can_name || 'Can preview'}
-          />
 
           {/* Rarity vote — read only */}
           <div className="space-y-1.5">

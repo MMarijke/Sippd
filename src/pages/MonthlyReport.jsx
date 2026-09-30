@@ -242,7 +242,7 @@ export default function MonthlyReport() {
                 <div className="flex gap-4 px-4 pb-4">
                   <CanImageBox
                     imageUrl={bestPullImage}
-                    bgColor={bestPull?.can_bg_color}
+                    rarity={bestPullRarity}
                     alt={bestPull.can_name}
                     className="w-20 h-20 rounded-xl flex-shrink-0"
                     iconSize="w-8 h-8"

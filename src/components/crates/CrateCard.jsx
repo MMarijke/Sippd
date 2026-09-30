@@ -1,5 +1,5 @@
 import { Pencil, Trash2 } from 'lucide-react';
-import { canTileBackground } from '@/lib/canBgColors';
+import { rarityTileBackground } from '@/lib/canBgColors';
 
 export default function CrateCard({ crate, collection, onClick, onEdit, onDelete }) {
   const canCount = (crate.can_ids || []).filter(id => collection.some(c => c.id === id)).length;
@@ -29,7 +29,7 @@ export default function CrateCard({ crate, collection, onClick, onEdit, onDelete
               <div
                 key={item.id}
                 className="w-8 h-8 rounded-lg overflow-hidden border border-border flex-shrink-0"
-                style={{ background: canTileBackground(item.can_bg_color) }}
+                style={{ background: rarityTileBackground(item.can_rarity) }}
               >
                 {item.can_image_url && (
                   <img src={item.can_image_url} alt={item.can_name} loading="lazy" decoding="async" className="w-full h-full object-contain" />

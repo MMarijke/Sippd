@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { Zap, CupSoda } from 'lucide-react';
-import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
+import { rarityTileBackground } from '@/lib/canBgColors';
 import { proxyImageUrl } from '@/lib/cardCapture';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { BREAKDOWN_VAR } from '@/lib/rarityConsensus';
@@ -14,10 +14,10 @@ import { BREAKDOWN_VAR } from '@/lib/rarityConsensus';
 // which stays fixed for a different reason: it's the one true rarity
 // value being asserted, not a personalization choice).
 
-function CanTile({ image, bgColor, name, rarityBadge }) {
+function CanTile({ image, rarity, name, rarityBadge }) {
   return (
     <div className="rounded-xl overflow-hidden border border-primary/20" style={{ backgroundColor: 'hsl(var(--background) / 0.5)' }}>
-      <div className="aspect-square relative" style={{ backgroundColor: bgColor || DEFAULT_CAN_BG }}>
+      <div className="aspect-square relative" style={{ background: rarityTileBackground(rarity) }}>
         {image ? (
           <>
             <img
@@ -177,7 +177,7 @@ const RecapCardTemplate = forwardRef(function RecapCardTemplate(
         {bestPull ? (
           <div className="flex items-center gap-3 rounded-xl p-3 mb-4 border border-primary/20" style={{ backgroundColor: 'hsl(var(--background) / 0.35)' }}>
             <div className="w-16 h-16 flex-shrink-0">
-              <CanTile image={bestPullImage} bgColor={bestPull.can_bg_color} name="" rarityBadge={null} />
+              <CanTile image={bestPullImage} rarity={bestPullRarity} name="" rarityBadge={null} />
             </div>
             {/* No `truncate` — same html2canvas text-corruption bug as
                 the header and CanTile's name, see those notes. */}

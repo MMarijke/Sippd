@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Check, ScanLine } from 'lucide-react';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
@@ -19,6 +20,11 @@ export default function AddedConfirmation({ canName, imageUrl, rarity, onComplet
   // ever works against whichever choice the user hadn't made yet, most
   // often "Scan Next" on a page whose stated common case is logging
   // several cans back-to-back. (/impeccable critique)
+  // The add form that held focus is gone; land on Scan Next, the common
+  // next step, so keyboard and screen-reader users aren't left on <body>.
+  const scanNextRef = useRef(null);
+  useEffect(() => { scanNextRef.current?.focus(); }, []);
+
   const handleTap = () => {
     onComplete();
   };
@@ -61,11 +67,12 @@ export default function AddedConfirmation({ canName, imageUrl, rarity, onComplet
 
         <div className="flex items-center gap-2 mt-5" onClick={e => e.stopPropagation()}>
           <button
+            ref={scanNextRef}
             type="button"
             onClick={handleScanNext}
             className="h-11 px-4 rounded-full border border-primary/30 text-primary text-xs font-mono font-semibold flex items-center gap-1.5 hover:bg-primary/10 transition-colors"
           >
-            <ScanLine className="w-3.5 h-3.5" /> Scan Next
+            <ScanLine className="w-3.5 h-3.5" aria-hidden="true" /> Scan Next
           </button>
           <button
             type="button"

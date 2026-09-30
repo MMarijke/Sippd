@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
@@ -10,9 +11,16 @@ import { useNotifications } from '@/hooks/useNotifications';
 // resolves the same way everywhere instead of each page inventing its own
 // back affordance (or, as Achievements previously did, hand-rolling an
 // entire header from scratch just to get one). (/impeccable critique)
-export default function PageHeader({ title, subtitle, action, showBell = true, onBack }) {
+// focusTitle: move focus to the title when this header mounts, for a view
+// that swaps in place (Scan's scanner <-> add form), so focus doesn't fall
+// back to <body> when the element that had it disappears.
+export default function PageHeader({ title, subtitle, action, showBell = true, onBack, focusTitle = false }) {
   const { user } = useAuth();
   const { unreadCount } = useNotifications(user);
+  const titleRef = useRef(null);
+  useEffect(() => {
+    if (focusTitle) titleRef.current?.focus();
+  }, [focusTitle]);
 
   return (
     <div className="flex items-center justify-between px-5 pt-6 pb-4">
@@ -27,7 +35,13 @@ export default function PageHeader({ title, subtitle, action, showBell = true, o
           </button>
         )}
         <div className="min-w-0">
-          <h1 className="text-xl font-display font-bold text-foreground tracking-wide truncate">{title}</h1>
+          <h1
+            ref={titleRef}
+            tabIndex={focusTitle ? -1 : undefined}
+            className="text-xl font-display font-bold text-foreground tracking-wide truncate focus:outline-none"
+          >
+            {title}
+          </h1>
           {subtitle && <p className="text-xs font-mono text-muted-foreground mt-1">{subtitle}</p>}
         </div>
       </div>

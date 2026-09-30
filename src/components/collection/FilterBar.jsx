@@ -1,120 +1,209 @@
+import { useId, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LayoutGrid, List, Star } from 'lucide-react';
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
+import { LayoutGrid, List, SlidersHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const BEVERAGE_TYPE_FILTERS = [
-  { value: 'all',           label: 'All'          },
-  { value: 'energy_drink',  label: 'Energy Drink' },
-  { value: 'soft_drink',    label: 'Soft Drink'   },
+const BEVERAGE_TYPE_OPTIONS = [
+  { value: 'all',          label: 'All drinks' },
+  { value: 'energy_drink', label: 'Energy'     },
+  { value: 'soft_drink',   label: 'Soft'       },
 ];
 
-export default function FilterBar({ filters, onFiltersChange, viewMode, onViewModeChange }) {
+const STATUS_OPTIONS = [
+  { value: 'all',       label: 'Any'        },
+  { value: 'collected', label: 'In Vault'   },
+  { value: 'wishlist',  label: 'Wishlist'   },
+  { value: 'duplicate', label: 'Duplicates' },
+];
+
+// Each tier wears its own rarity colour, the app's signature ladder, so the
+// rarity filter reads as the rarity system rather than a plain dropdown.
+const RARITY_OPTIONS = [
+  { value: 'all',        label: 'Any rarity', tone: 'border-border text-foreground',                                  on: 'bg-card border-foreground/40' },
+  { value: 'Common',     label: 'Common',     tone: 'border-rarity-common/40 text-rarity-common-text',              on: 'bg-rarity-common/15 border-rarity-common' },
+  { value: 'Uncommon',   label: 'Uncommon',   tone: 'border-rarity-uncommon/40 text-rarity-uncommon-text',          on: 'bg-rarity-uncommon/15 border-rarity-uncommon' },
+  { value: 'Rare',       label: 'Rare',       tone: 'border-rarity-rare/40 text-rarity-rare-text',                  on: 'bg-rarity-rare/15 border-rarity-rare' },
+  { value: 'Ultra Rare', label: 'Ultra Rare', tone: 'border-rarity-ultra/40 text-rarity-ultra-text',                on: 'bg-rarity-ultra/15 border-rarity-ultra' },
+  { value: 'Legendary',  label: 'Legendary',  tone: 'border-rarity-legendary/40 text-rarity-legendary-text',        on: 'bg-rarity-legendary/15 border-rarity-legendary' },
+];
+
+// One word each, so Sort fits beside Filters and the view toggle at 320px.
+const SORT_OPTIONS = [
+  { value: 'date_desc',   label: 'Newest' },
+  { value: 'date_asc',    label: 'Oldest' },
+  { value: 'brand_asc',   label: 'Brand A–Z' },
+  { value: 'brand_desc',  label: 'Brand Z–A' },
+  { value: 'rarity_desc', label: 'Rarest' },
+  { value: 'rarity_asc',  label: 'Least rare' },
+];
+
+// One row under the search: Filters (opens a sheet), Sort, and the view
+// toggle. It replaces three stacked rows (drink type; status, rarity and
+// grid/list; favourites and sort) that pushed the first can to y356 at
+// 375px, and at 320px overflowed sideways by 38px because the two selects
+// wouldn't shrink (/impeccable critique). Filters change the page live;
+// the sheet's button just closes it, showing how many cans match.
+export default function FilterBar({ filters, onFiltersChange, viewMode, onViewModeChange, resultCount, onClearFilters }) {
+  const [open, setOpen] = useState(false);
+  const favId = useId();
   const update = (key, value) => onFiltersChange({ ...filters, [key]: value });
 
+  const activeCount = [
+    filters.beverageType !== 'all',
+    filters.status !== 'all',
+    filters.rarity !== 'all',
+    filters.favourites,
+  ].filter(Boolean).length;
+
   return (
-    <div className="px-5 space-y-2">
-      {/* Its own row, not a third Select in the row below — that row is
-          already tight with Status + Rarity + the view-mode toggle
-          (documented crowding history from an earlier /impeccable pass). */}
-      <div className="flex bg-secondary rounded-lg border border-border p-0.5" aria-label="Filter by beverage type">
-        {BEVERAGE_TYPE_FILTERS.map(opt => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => update('beverageType', opt.value)}
-            aria-pressed={(filters.beverageType || 'all') === opt.value}
-            className={cn(
-              'flex-1 h-11 font-mono text-xs rounded-md transition-colors',
-              (filters.beverageType || 'all') === opt.value ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+    <div className="px-5 flex items-center gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => setOpen(true)}
+        aria-haspopup="dialog"
+        aria-label={activeCount ? `Filters, ${activeCount} active` : 'Filters'}
+        className={cn('h-11 px-3 gap-1.5 font-mono text-xs flex-shrink-0',
+          activeCount ? 'border-primary/50 bg-primary/10 text-foreground' : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
+        )}
+      >
+        <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
+        Filters
+        {activeCount > 0 && (
+          <span className="min-w-5 h-5 px-1 rounded-full bg-primary text-primary-foreground text-2xs font-bold flex items-center justify-center" aria-hidden="true">
+            {activeCount}
+          </span>
+        )}
+      </Button>
 
-      <div className="flex items-center gap-2">
-        <Select value={filters.status} onValueChange={v => update('status', v)}>
-          <SelectTrigger aria-label="Filter by status" className="flex-1 bg-secondary border-border text-xs font-mono h-11">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="collected">In Vault</SelectItem>
-            <SelectItem value="wishlist">Wishlist</SelectItem>
-            <SelectItem value="duplicate">Duplicates</SelectItem>
-          </SelectContent>
-        </Select>
+      <Select value={filters.sort || 'date_desc'} onValueChange={v => update('sort', v)}>
+        <SelectTrigger aria-label="Sort by" className="flex-1 min-w-0 bg-secondary border-border text-xs font-mono h-11">
+          <SelectValue placeholder="Sort" />
+        </SelectTrigger>
+        <SelectContent>
+          {SORT_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+        </SelectContent>
+      </Select>
 
-        <Select value={filters.rarity} onValueChange={v => update('rarity', v)}>
-          <SelectTrigger aria-label="Filter by rarity" className="flex-1 bg-secondary border-border text-xs font-mono h-11">
-            <SelectValue placeholder="Rarity" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Rarity</SelectItem>
-            <SelectItem value="Common">Common</SelectItem>
-            <SelectItem value="Uncommon">Uncommon</SelectItem>
-            <SelectItem value="Rare">Rare</SelectItem>
-            <SelectItem value="Ultra Rare">Ultra Rare</SelectItem>
-            <SelectItem value="Legendary">Legendary</SelectItem>
-          </SelectContent>
-        </Select>
+      {/* One toggle showing the view you'd switch to; a two-button group
+          cost 48px more and was what overflowed at 320px. */}
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        onClick={() => onViewModeChange(viewMode === 'list' ? 'grid' : 'list')}
+        aria-label="List view"
+        aria-pressed={viewMode === 'list'}
+        title={viewMode === 'list' ? 'Show as grid' : 'Show as list'}
+        className="h-11 w-11 flex-shrink-0 bg-secondary border-border text-muted-foreground hover:text-foreground"
+      >
+        {viewMode === 'list' ? <LayoutGrid className="w-4 h-4" aria-hidden="true" /> : <List className="w-4 h-4" aria-hidden="true" />}
+      </Button>
 
-        <div className="flex bg-secondary rounded-lg border border-border p-0.5">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Grid view"
-            aria-pressed={viewMode === 'grid'}
-            className={`h-11 w-11 ${viewMode === 'grid' ? 'bg-card text-primary' : 'text-muted-foreground'}`}
-            onClick={() => onViewModeChange('grid')}
-          >
-            <LayoutGrid className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="List view"
-            aria-pressed={viewMode === 'list'}
-            className={`h-11 w-11 ${viewMode === 'list' ? 'bg-card text-primary' : 'text-muted-foreground'}`}
-            onClick={() => onViewModeChange('list')}
-          >
-            <List className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-w-lg mx-auto p-5 pb-6 max-h-[85dvh] overflow-y-auto">
+          <SheetTitle className="text-base font-display font-bold text-foreground pr-12">Filters</SheetTitle>
+          <SheetDescription className="sr-only">Narrow down the cans shown in your haul.</SheetDescription>
 
-      {/* Second row: favourites + sort */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => update('favourites', !filters.favourites)}
-          aria-pressed={filters.favourites}
-          className={cn(
-            'flex items-center gap-1.5 h-11 px-3 rounded-lg border text-xs font-mono transition-colors',
-            filters.favourites
-              ? 'bg-primary/10 border-primary/40 text-primary'
-              : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
-          )}
-        >
-          <Star className={cn('w-3.5 h-3.5', filters.favourites && 'fill-primary')} />
-          Favourites
-        </button>
+          <Group label="Drink">
+            <div className="flex bg-secondary rounded-lg p-0.5">
+              {BEVERAGE_TYPE_OPTIONS.map(opt => (
+                <Choice
+                  key={opt.value}
+                  checked={filters.beverageType === opt.value}
+                  onSelect={() => update('beverageType', opt.value)}
+                  className={cn('flex-1 rounded-md', filters.beverageType === opt.value ? 'bg-card text-foreground font-semibold shadow-sm' : 'text-muted-foreground hover:text-foreground')}
+                >
+                  {opt.label}
+                </Choice>
+              ))}
+            </div>
+          </Group>
 
-        <Select value={filters.sort || 'date_desc'} onValueChange={v => update('sort', v)}>
-          <SelectTrigger aria-label="Sort by" className="flex-1 bg-secondary border-border text-xs font-mono h-11">
-            <SelectValue placeholder="Sort" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date_desc">Newest First</SelectItem>
-            <SelectItem value="date_asc">Oldest First</SelectItem>
-            <SelectItem value="brand_asc">Brand A–Z</SelectItem>
-            <SelectItem value="brand_desc">Brand Z–A</SelectItem>
-            <SelectItem value="rarity_desc">Rarity High–Low</SelectItem>
-            <SelectItem value="rarity_asc">Rarity Low–High</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+          <Group label="Status">
+            <div className="flex flex-wrap gap-2">
+              {STATUS_OPTIONS.map(opt => (
+                <Choice
+                  key={opt.value}
+                  checked={filters.status === opt.value}
+                  onSelect={() => update('status', opt.value)}
+                  className={cn('px-3 rounded-full border',
+                    filters.status === opt.value ? 'bg-card border-foreground/40 text-foreground font-semibold' : 'border-border text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {opt.label}
+                </Choice>
+              ))}
+            </div>
+          </Group>
+
+          <Group label="Rarity">
+            <div className="flex flex-wrap gap-2">
+              {RARITY_OPTIONS.map(opt => (
+                <Choice
+                  key={opt.value}
+                  checked={filters.rarity === opt.value}
+                  onSelect={() => update('rarity', opt.value)}
+                  className={cn('px-3 rounded-full border uppercase tracking-wider', opt.tone, filters.rarity === opt.value && cn(opt.on, 'font-semibold'))}
+                >
+                  {opt.label}
+                </Choice>
+              ))}
+            </div>
+          </Group>
+
+          <label htmlFor={favId} className="mt-5 min-h-12 flex items-center justify-between gap-3 border-t border-border pt-3 cursor-pointer">
+            <span className="text-sm text-foreground">Favourites only</span>
+            <Switch id={favId} checked={filters.favourites} onCheckedChange={v => update('favourites', v)} />
+          </label>
+
+          <div className="mt-4 flex items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onClearFilters}
+              disabled={activeCount === 0}
+              className="h-11 font-mono text-xs text-muted-foreground hover:text-foreground"
+            >
+              Clear
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="flex-1 h-11 font-mono text-xs bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              {resultCount === 0 ? 'No cans match' : `Show ${resultCount} can${resultCount === 1 ? '' : 's'}`}
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
+  );
+}
+
+function Group({ label, children }) {
+  const id = useId();
+  return (
+    <div role="radiogroup" aria-labelledby={id} className="mt-5">
+      <p id={id} className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2">{label}</p>
+      {children}
+    </div>
+  );
+}
+
+function Choice({ checked, onSelect, className, children }) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={checked}
+      onClick={onSelect}
+      className={cn('h-11 font-mono text-xs transition-colors', className)}
+    >
+      {children}
+    </button>
   );
 }

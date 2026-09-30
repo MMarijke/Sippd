@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { MapPin, Crown, AlertCircle, RefreshCw, Info, TrendingUp, TrendingDown } from 'lucide-react';
+import { MapPin, Crown, AlertCircle, RefreshCw, Info } from 'lucide-react';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -12,7 +12,8 @@ import { useJumpToHighlight } from '@/hooks/useJumpToHighlight';
 import { useRankDelta } from '@/hooks/useRankDelta';
 import { useProStatus } from '@/hooks/useProStatus';
 import ProBadge from '@/components/shared/ProBadge';
-import { withCompetitionRank } from '@/lib/ranking';
+import YourRankBar from '@/components/leaderboard/YourRankBar';
+import { withCompetitionRank, rankLabel, medalIndex, shortName } from '@/lib/ranking';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 
@@ -105,6 +106,23 @@ export default function RegionalLeaderboard() {
     enabled: !!currentUser?.id && !!profile?.region && myScore > 0,
   });
 
+  // The collector directly above you in your region, for the rank bar's gap.
+  const { data: rival } = useQuery({
+    queryKey: ['rival-above-regional', profile?.region, myScore],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('leaderboard_scores')
+        .select('*')
+        .ilike('region', profile?.region || '')
+        .gt('score', myScore)
+        .order('score', { ascending: true })
+        .limit(1);
+      if (error) throw error;
+      return data?.[0] ?? null;
+    },
+    enabled: !!currentUser?.id && !!profile?.region && myScore > 0,
+  });
+
   const { targetRef: myRowRef, highlighted, jumpToTarget } = useJumpToHighlight();
   const rankDelta = useRankDelta('regional', myRegionalRank, currentUser?.id);
 
@@ -172,7 +190,7 @@ export default function RegionalLeaderboard() {
         </span>
         <Popover>
           <PopoverTrigger
-            className="w-11 h-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 -mr-3.5"
+            className="w-11 h-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 -mr-3"
             aria-label="How regional ranking works"
           >
             <Info className="w-4 h-4" />
@@ -180,38 +198,11 @@ export default function RegionalLeaderboard() {
           <PopoverContent className="w-64 text-xs font-mono leading-relaxed" side="bottom" align="end">
             <p className="font-semibold text-foreground mb-1">How regional ranking works</p>
             <p className="text-muted-foreground">
-              Regional ranks by your Collection Score (the same number shown on your profile, weighting rarity into one figure) — not raw can count or Rare Pulls, which is what the Global tab ranks by instead.
+              Regional ranks by your Collection Score (the same number shown on your profile, weighting rarity into one figure) — not raw can count or Rare Pulls, which the Collectors tab can also rank by.
             </p>
           </PopoverContent>
         </Popover>
       </div>
-      {currentUser && (
-        <button
-          type="button"
-          onClick={handleJumpToRank}
-          aria-label="Jump to your rank"
-          className="w-full min-h-11 bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-between hover:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <span className="text-xs font-mono text-muted-foreground">Your Rank</span>
-          <span className="flex items-center gap-1.5">
-            {rankDelta != null && rankDelta !== 0 && (
-              <span
-                className={cn(
-                  'flex items-center gap-0.5 text-2xs font-mono font-semibold',
-                  rankDelta > 0 ? 'text-success' : 'text-muted-foreground'
-                )}
-                title={`${rankDelta > 0 ? 'Up' : 'Down'} ${Math.abs(rankDelta)} rank${Math.abs(rankDelta) === 1 ? '' : 's'} since your last visit`}
-              >
-                {rankDelta > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                {Math.abs(rankDelta)}
-              </span>
-            )}
-            <span className="text-sm font-display font-bold text-primary">
-              {isScoresError ? 'Unavailable' : myScore > 0 ? (myRegionalRank ? `#${myRegionalRank}` : '…') : 'Not ranked yet'}
-            </span>
-          </span>
-        </button>
-      )}
       {isLoadingProfile || isLoading ? (
         <>
           {Array.from({ length: 5 }).map((_, i) => (
@@ -238,16 +229,17 @@ export default function RegionalLeaderboard() {
           <p className="text-xs font-mono text-muted-foreground mt-1">{profile.region}</p>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
+        <ol aria-label={`Collectors in ${profile?.region}`} className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
           {rankedWithRank.map((entry) => {
             const isMe = entry.user_id === currentUser?.id;
-            const isMedal = entry.rank <= 3;
+            const medal = medalIndex(entry);
             const name = entry.full_name || 'Collector';
             const initial = name.charAt(0).toUpperCase();
             return (
-              <div
+              <li
                 key={entry.user_id}
                 ref={isMe ? myRowRef : undefined}
+                tabIndex={isMe ? -1 : undefined}
                 className={cn(
                   'flex items-center gap-3 px-4 py-3 transition-colors',
                   isMe && 'bg-primary/5 border-l-2 border-primary',
@@ -260,12 +252,13 @@ export default function RegionalLeaderboard() {
                     "#N" now always renders, so the medal is decorative on
                     top of it rather than a replacement for it. */}
                 <div className="w-7 flex-shrink-0 flex flex-col items-center justify-center gap-0.5">
-                  {isMedal && (
+                  {medal != null && (
                     <span className="text-base leading-none" aria-hidden="true">
-                      {MEDAL[entry.rank - 1]}
+                      {MEDAL[medal]}
                     </span>
                   )}
-                  <span className="text-xs font-mono text-muted-foreground leading-none">#{entry.rank}</span>
+                  <span className="text-xs font-mono text-muted-foreground leading-none" aria-hidden="true">{rankLabel(entry)}</span>
+                  <span className="sr-only">Rank {entry.rank}{entry.tieSize > 1 ? ', tied' : ''}</span>
                 </div>
                 {/* See CollectorsLeaderboard.jsx's matching row for why this
                     is now a Link — same fix, same reasoning, ported here so
@@ -290,12 +283,25 @@ export default function RegionalLeaderboard() {
                   <p className={cn('text-sm font-display font-bold tabular-nums', isMe ? 'text-primary' : 'text-foreground')}>
                     {entry.score}
                   </p>
-                  <p className="text-2xs font-mono text-muted-foreground">score</p>
+                  <p className="text-2xs font-mono text-muted-foreground">pts</p>
                 </div>
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ol>
+      )}
+
+      {currentUser && (
+        <YourRankBar
+          status={isScoresError ? 'error' : myScore > 0 ? (myRegionalRank ? 'ranked' : 'loading') : 'unranked'}
+          rank={myRegionalRank}
+          scope={`in ${profile?.region ?? 'your region'}`}
+          rival={rival ? { name: shortName(rival.full_name), gap: rival.score - myScore } : null}
+          unit="pts"
+          rankDelta={rankDelta}
+          rowRef={myRowRef}
+          onJump={handleJumpToRank}
+        />
       )}
     </div>
   );

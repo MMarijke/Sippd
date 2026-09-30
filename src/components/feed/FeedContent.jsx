@@ -221,7 +221,7 @@ export default function FeedContent({ defaultTab = 'global' }) {
               </p>
               <Button
                 size="sm"
-                onClick={() => navigate('/leaderboard')}
+                onClick={() => navigate('/leaderboard?tab=collectors&find=1')}
                 className="font-mono text-xs bg-primary text-primary-foreground"
               >
                 Find Collectors

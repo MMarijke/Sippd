@@ -2,43 +2,64 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { Crown, Info, AlertCircle, RefreshCw, TrendingUp, TrendingDown } from 'lucide-react';
+import { Crown, AlertCircle, RefreshCw, ChevronDown, Check } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useJumpToHighlight } from '@/hooks/useJumpToHighlight';
 import { useRankDelta } from '@/hooks/useRankDelta';
 import { useProStatus } from '@/hooks/useProStatus';
 import ProBadge from '@/components/shared/ProBadge';
-import { withCompetitionRank } from '@/lib/ranking';
+import YourRankBar from '@/components/leaderboard/YourRankBar';
+import { withCompetitionRank, rankLabel, medalIndex, rivalAbove, shortName } from '@/lib/ranking';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 
+// short: the chip's label on the control row; label: the sheet's option.
 const CATEGORY_OPTIONS = [
-  { value: 'all',          label: 'All'          },
-  { value: 'energy_drink', label: 'Energy Drinks' },
-  { value: 'soft_drink',   label: 'Soft Drinks'  },
+  { value: 'all',          short: 'All drinks', label: 'All drinks'    },
+  { value: 'energy_drink', short: 'Energy',     label: 'Energy drinks' },
+  { value: 'soft_drink',   short: 'Soft',       label: 'Soft drinks'   },
 ];
+const CATEGORY_VALUES = CATEGORY_OPTIONS.map(o => o.value);
 
 // Score is the same weighted Collection Score shown on your Profile, where
-// "Rank #N" links here; Total and Rare were the only global views before.
-const SORT_OPTIONS = ['total', 'rare', 'score'];
+// "Rank #N" links here, and the only metric Regional ranks by, so it's the
+// default view. Labels are one word so three fit beside the drinks chip at
+// 320px (the rows below carry the full unit).
+const SORT_OPTIONS = [
+  { value: 'score', label: 'Score' },
+  { value: 'rare',  label: 'Rare'  },
+  { value: 'total', label: 'Cans'  },
+];
+const SORT_VALUES = SORT_OPTIONS.map(o => o.value);
 const METRIC_COLUMN = { total: 'total_cans', rare: 'rare_pulls', score: 'score' };
 const METRIC_UNIT = { total: 'cans', rare: 'rare', score: 'pts' };
+const METRIC_SCOPE = { total: 'by cans', rare: 'by rare pulls', score: 'by Score' };
+const GAP_UNIT = { total: 'cans', rare: 'rare pulls', score: 'pts' };
 
 export default function CollectorsLeaderboard() {
-  // ?sort=score&jump=me is Profile's "Rank #N" deep link: open on that view
-  // and scroll to your own row once it's rendered.
-  const [searchParams] = useSearchParams();
-  const initialSort = SORT_OPTIONS.includes(searchParams.get('sort')) ? searchParams.get('sort') : 'total';
-  const [sortBy, setSortBy] = useState(initialSort); // 'total' | 'rare' | 'score'
+  // View state lives in the URL (?sort=, ?drink=) so a reload or a shared
+  // link keeps it. ?sort=score&jump=me is Profile's "Rank #N" deep link:
+  // open on that view and scroll to your own row once it's rendered.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sortBy = SORT_VALUES.includes(searchParams.get('sort')) ? searchParams.get('sort') : 'score';
   // Query-time filter, not a schema split or a second leaderboard system:
   // 'all' reads the existing denormalized leaderboard_scores table exactly
   // as before; any other category calls get_category_leaderboard() to
   // compute a live, filtered ranking on demand instead.
-  const [categoryChoice, setCategoryChoice] = useState('all');
+  const categoryChoice = CATEGORY_VALUES.includes(searchParams.get('drink')) ? searchParams.get('drink') : 'all';
+  const setView = (key, value) => setSearchParams(prev => {
+    const next = new URLSearchParams(prev);
+    next.set(key, value);
+    next.delete('jump');
+    return next;
+  }, { replace: true });
+  const setSortBy = value => setView('sort', value);
+  const setCategoryChoice = value => setView('drink', value);
+  const [sheetOpen, setSheetOpen] = useState(false);
   // Score is ranked across all drinks only: get_category_leaderboard doesn't
   // return a per-category score, so the Score view pins the filter to All
   // (buttons disabled below) rather than showing wrong numbers.
@@ -80,7 +101,7 @@ export default function CollectorsLeaderboard() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_category_leaderboard', { p_beverage_type: category });
       if (error) throw error;
-      return data;
+      return data ?? [];
     },
     enabled: category !== 'all',
   });
@@ -163,6 +184,27 @@ export default function CollectorsLeaderboard() {
   const myMetric = category === 'all' ? (myScoreRowAll?.[metricColumn] ?? 0) : (myCategoryEntry?.[metricColumn] ?? 0);
   const myRank = category === 'all' ? myRankAll : (myCategoryEntry?.rank ?? null);
 
+  // The collector directly above you, for "6 pts behind Priya S.". 'all'
+  // asks the table (you may be outside the top 50 it lists); a category's
+  // list is already complete.
+  const { data: rivalAll } = useQuery({
+    queryKey: ['rival-above', sortBy, myMetric],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('leaderboard_scores')
+        .select('*')
+        .gt(metricColumn, myMetric)
+        .order(metricColumn, { ascending: true })
+        .limit(1);
+      if (error) throw error;
+      return data?.[0] ?? null;
+    },
+    enabled: !!currentUser?.id && category === 'all' && myMetric > 0,
+  });
+  const rival = category === 'all'
+    ? (rivalAll ? { entry: rivalAll, gap: rivalAll[metricColumn] - myMetric } : null)
+    : rivalAbove(ranked, metricColumn, myMetric);
+
   const { targetRef: myRowRef, highlighted, jumpToTarget } = useJumpToHighlight();
 
   // /impeccable critique: the banner announced a rank number with no way to
@@ -192,97 +234,83 @@ export default function CollectorsLeaderboard() {
 
   const rankDelta = useRankDelta(`collectors:${sortBy}:${category}`, myRank, currentUser?.id);
 
+  const drinkOption = CATEGORY_OPTIONS.find(o => o.value === category);
+  const rankScope = category === 'all' ? METRIC_SCOPE[sortBy] : `${METRIC_SCOPE[sortBy]} · ${drinkOption.label}`;
+  const rankStatus = isFilteredError ? 'error' : myMetric > 0 ? (myRank ? 'ranked' : 'loading') : 'unranked';
+
   return (
     <div className="px-5">
-      <div className="flex items-center gap-1.5 mb-3">
-        {/* Text-only, tight padding: a third view (Score) plus the info
-            button overflowed 375px by ~90px with the old leading icons. */}
-        <div className="flex flex-1 min-w-0 bg-secondary rounded-lg border border-border p-0.5">
-          <Button
-            variant="ghost"
-            aria-pressed={sortBy === 'total'}
-            className={cn('flex-1 min-w-0 h-11 px-2 font-mono text-xs', sortBy === 'total' ? 'bg-card text-primary' : 'text-muted-foreground')}
-            onClick={() => setSortBy('total')}
-          >
-            Total Cans
-          </Button>
-          <Button
-            variant="ghost"
-            aria-pressed={sortBy === 'rare'}
-            className={cn('flex-1 min-w-0 h-11 px-2 font-mono text-xs', sortBy === 'rare' ? 'bg-card text-primary' : 'text-muted-foreground')}
-            onClick={() => setSortBy('rare')}
-          >
-            Rare Pulls
-          </Button>
-          <Button
-            variant="ghost"
-            aria-pressed={sortBy === 'score'}
-            className={cn('flex-1 min-w-0 h-11 px-2 font-mono text-xs', sortBy === 'score' ? 'bg-card text-primary' : 'text-muted-foreground')}
-            onClick={() => setSortBy('score')}
-          >
-            Score
-          </Button>
+      {/* One row instead of two stacked bars: the metric stays one tap away,
+          the drink type (a less frequent choice) and the ranking explainer
+          move into a sheet. The old sort bar, info button and drink bar took
+          ~112px, and at 320px "Total Cans"/"Rare Pulls" ran into each other
+          (/impeccable critique). */}
+      <div className="flex items-center gap-2 mb-3">
+        <div role="group" aria-label="Rank by" className="flex flex-1 min-w-0 bg-secondary rounded-lg p-0.5">
+          {SORT_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              type="button"
+              aria-pressed={sortBy === opt.value}
+              onClick={() => setSortBy(opt.value)}
+              className={cn('flex-1 min-w-0 h-11 px-1 rounded-md font-mono text-xs transition-colors',
+                sortBy === opt.value ? 'bg-card text-foreground font-semibold shadow-sm' : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
         </div>
-        <Popover>
-          <PopoverTrigger
-            className="w-11 h-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-            aria-label="How ranking works"
-          >
-            <Info className="w-4 h-4" />
-          </PopoverTrigger>
-          <PopoverContent className="w-64 text-xs font-mono leading-relaxed" side="bottom" align="end">
-            <p className="font-semibold text-foreground mb-1">How ranking works</p>
-            <p className="text-muted-foreground">
-              Total Cans ranks by raw can count. Rare Pulls ranks by how many Rare, Ultra Rare, and Legendary cans you've logged. Score is your Collection Score from your profile, which weights rarity into one number (the Regional tab ranks by it too). Score covers all drinks, so the drink filter is off in that view.
-            </p>
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      <div className="flex bg-secondary rounded-lg border border-border p-0.5 mb-3" aria-label="Filter by beverage type">
-        {CATEGORY_OPTIONS.map(opt => (
-          <button
-            key={opt.value}
-            type="button"
-            aria-pressed={category === opt.value}
-            aria-disabled={(sortBy === 'score' && opt.value !== 'all') || undefined}
-            className={cn('flex-1 h-11 font-mono text-xs rounded-md transition-colors aria-disabled:opacity-40 aria-disabled:cursor-not-allowed',
-              category === opt.value ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
-            )}
-            onClick={() => { if (sortBy !== 'score') setCategoryChoice(opt.value); }}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-
-      {currentUser && (
         <button
           type="button"
-          onClick={handleJumpToRank}
-          aria-label="Jump to your rank"
-          className="w-full min-h-11 bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 mb-3 flex items-center justify-between hover:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          onClick={() => setSheetOpen(true)}
+          aria-haspopup="dialog"
+          aria-label={`Drinks: ${drinkOption.label}. Change drinks or see how ranking works`}
+          className={cn('h-12 pl-3 pr-2 rounded-lg border flex items-center gap-1 font-mono text-xs flex-shrink-0 transition-colors',
+            category === 'all' ? 'border-border text-muted-foreground hover:text-foreground' : 'border-primary/50 text-foreground'
+          )}
         >
-          <span className="text-xs font-mono text-muted-foreground">Your Rank</span>
-          <span className="flex items-center gap-1.5">
-            {rankDelta != null && rankDelta !== 0 && (
-              <span
-                className={cn(
-                  'flex items-center gap-0.5 text-2xs font-mono font-semibold',
-                  rankDelta > 0 ? 'text-success' : 'text-muted-foreground'
-                )}
-                title={`${rankDelta > 0 ? 'Up' : 'Down'} ${Math.abs(rankDelta)} rank${Math.abs(rankDelta) === 1 ? '' : 's'} since your last visit`}
-              >
-                {rankDelta > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                {Math.abs(rankDelta)}
-              </span>
-            )}
-            <span className={cn('text-sm font-display font-bold', sortBy === 'rare' ? 'text-rarity-ultra-text' : 'text-primary')}>
-              {isFilteredError ? 'Unavailable' : myMetric > 0 ? (myRank ? `#${myRank}` : '…') : 'Not ranked yet'}
-            </span>
-          </span>
+          {drinkOption.short}
+          <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
         </button>
-      )}
+      </div>
+
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-w-lg mx-auto p-5 pb-8">
+          <SheetTitle className="text-base font-display font-bold text-foreground pr-12">Drinks</SheetTitle>
+          <SheetDescription className="text-xs font-mono text-muted-foreground mt-1 pr-12">
+            {sortBy === 'score'
+              ? 'Score always covers all drinks. Switch to Rare or Cans to rank one drink type.'
+              : 'Rank collectors by one drink type, or all of them.'}
+          </SheetDescription>
+          <div role="radiogroup" aria-label="Drink type" className="mt-4 divide-y divide-border border border-border rounded-xl overflow-hidden">
+            {CATEGORY_OPTIONS.map(opt => {
+              const locked = sortBy === 'score' && opt.value !== 'all';
+              const checked = category === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={checked}
+                  disabled={locked}
+                  onClick={() => { setCategoryChoice(opt.value); setSheetOpen(false); }}
+                  className="w-full min-h-12 px-4 flex items-center justify-between text-sm text-foreground hover:bg-secondary transition-colors disabled:text-muted-foreground disabled:hover:bg-transparent"
+                >
+                  {opt.label}
+                  {checked && <Check className="w-4 h-4 text-primary" aria-hidden="true" />}
+                </button>
+              );
+            })}
+          </div>
+          <h3 className="text-sm font-display font-semibold text-foreground mt-6">How ranking works</h3>
+          <dl className="mt-2 space-y-2 text-xs font-mono leading-relaxed text-muted-foreground">
+            <div><dt className="inline text-foreground">Score: </dt><dd className="inline">your Collection Score from your profile, which weights rarity into one number. Regional ranks by it too.</dd></div>
+            <div><dt className="inline text-foreground">Rare: </dt><dd className="inline">how many Rare, Ultra Rare and Legendary cans you've logged.</dd></div>
+            <div><dt className="inline text-foreground">Cans: </dt><dd className="inline">your raw can count.</dd></div>
+          </dl>
+        </SheetContent>
+      </Sheet>
 
       {isLoading ? (
         <>
@@ -310,17 +338,18 @@ export default function CollectorsLeaderboard() {
           <p className="text-xs font-mono text-muted-foreground mt-1">Add cans to your vault to appear here.</p>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
+        <ol aria-label={`Collectors ${rankScope}`} className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
           {displayedRows.map((entry) => {
             const isMe = entry.user_id === currentUser?.id;
-            const isMedal = entry.rank <= 3;
+            const medal = medalIndex(entry);
             const score = entry[metricColumn];
             const name = entry.full_name || 'Collector';
             const initial = name.charAt(0).toUpperCase();
             return (
-              <div
+              <li
                 key={entry.user_id}
                 ref={isMe ? myRowRef : undefined}
+                tabIndex={isMe ? -1 : undefined}
                 className={cn(
                   'flex items-center gap-3 px-4 py-3 transition-colors',
                   isMe && 'bg-primary/5 border-l-2 border-primary',
@@ -331,14 +360,16 @@ export default function CollectorsLeaderboard() {
                     the one thing every row exists to convey (rank) less
                     legible exactly for the top 3 (/impeccable critique) —
                     "#N" now always renders, so the medal is decorative on
-                    top of it rather than a replacement for it. */}
+                    top of it rather than a replacement for it. Shared ranks
+                    read "=3", and a big tie gets no medal at all. */}
                 <div className="w-7 flex-shrink-0 flex flex-col items-center justify-center gap-0.5">
-                  {isMedal && (
+                  {medal != null && (
                     <span className="text-base leading-none" aria-hidden="true">
-                      {MEDAL[entry.rank - 1]}
+                      {MEDAL[medal]}
                     </span>
                   )}
-                  <span className="text-xs font-mono text-muted-foreground leading-none">#{entry.rank}</span>
+                  <span className="text-xs font-mono text-muted-foreground leading-none" aria-hidden="true">{rankLabel(entry)}</span>
+                  <span className="sr-only">Rank {entry.rank}{entry.tieSize > 1 ? ', tied' : ''}</span>
                 </div>
                 {/* Previously plain, unclickable divs — the only way to reach
                     a collector's profile (and the Follow button that lives
@@ -373,11 +404,25 @@ export default function CollectorsLeaderboard() {
                     {METRIC_UNIT[sortBy]}
                   </p>
                 </div>
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ol>
+      )}
+
+      {currentUser && (
+        <YourRankBar
+          status={rankStatus}
+          rank={myRank}
+          scope={rankScope}
+          rival={rival ? { name: shortName(rival.entry.full_name), gap: rival.gap } : null}
+          unit={GAP_UNIT[sortBy]}
+          rankDelta={rankDelta}
+          rowRef={myRowRef}
+          onJump={handleJumpToRank}
+        />
       )}
     </div>
   );
 }
+

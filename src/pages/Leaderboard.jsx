@@ -56,7 +56,7 @@ export default function Leaderboard() {
   };
 
   return (
-    <div className="space-y-0">
+    <div>
       <PageHeader
         title="Ranks"
         action={
@@ -111,6 +111,8 @@ export default function Leaderboard() {
       {/* Underlined page navigation, so it no longer wears the same filled
           segmented skin as the filters below it: five identical bars made
           every control look equally important (/impeccable critique). */}
+      {/* mb-4 keeps a 16px gap to the view's own controls below. (The old
+          space-y-0 wrapper zeroed it: its sibling selector outranks mb-4.) */}
       <div role="group" aria-label="Ranks view" className="mx-5 mb-4 flex justify-between gap-2 border-b border-border">
         {TABS.map(t => (
           <button

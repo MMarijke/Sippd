@@ -17,6 +17,7 @@ import AddedConfirmation from './AddedConfirmation';
 import { cn } from '@/lib/utils';
 import { RARITY_ORDER, getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
+import CanImageBox from '@/components/shared/CanImageBox';
 import CanBackgroundPicker from '@/components/shared/CanBackgroundPicker';
 import TasteRatingStars from '@/components/shared/TasteRatingStars';
 import BeverageTypeToggle from '@/components/shared/BeverageTypeToggle';
@@ -653,8 +654,16 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
             <div className="space-y-1.5">
               <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Image (optional)</Label>
               {form.image_url ? (
-                <div className="relative w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.bg_color }}>
-                  <img src={form.image_url} alt="Can" className="w-full h-full object-contain" />
+                // Same component as the real tile, so it previews the
+                // background picker below truthfully (see EditEntrySheet).
+                <div className="relative">
+                  <CanImageBox
+                    imageUrl={form.image_url}
+                    bgColor={form.bg_color}
+                    alt={form.name || 'Can'}
+                    className="w-full h-40 rounded-xl border border-border"
+                    loading="eager"
+                  />
                   <button
                     onClick={() => update('image_url', '')}
                     aria-label="Remove image"
@@ -714,9 +723,13 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           )}
 
           {prefillData?.id && prefillData.image_url && (
-            <div className="w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.bg_color }}>
-              <img src={prefillData.image_url} alt="Can" className="w-full h-full object-contain" />
-            </div>
+            <CanImageBox
+              imageUrl={prefillData.image_url}
+              bgColor={form.bg_color}
+              alt={form.name || 'Can'}
+              className="w-full h-40 rounded-xl border border-border"
+              loading="eager"
+            />
           )}
 
           {/* Independent of whether an image exists — can_bg_color is also the
@@ -728,7 +741,10 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           <CanBackgroundPicker
             value={form.bg_color}
             onChange={v => update('bg_color', v)}
-            imageUrl={form.image_url || prefillData?.image_url}
+            // A catalog can shows its community image; a new can shows only
+            // what's in the form, so removing the photo removes it here too
+            // (the old fallback kept previewing the scanned photo).
+            imageUrl={prefillData?.id ? prefillData.image_url : form.image_url}
             previewAlt={form.name || 'Can preview'}
           />
 

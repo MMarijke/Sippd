@@ -32,16 +32,19 @@ export default function CanBackgroundPicker({ value, onChange, label = 'Card Bac
       <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">{label}</Label>
 
       <div className="flex items-center gap-3">
-        {/* Live preview — without this, picking a color had zero visual
-            feedback whenever there was no photo yet (the common case,
-            since Image is optional), beyond a hex string. */}
-        <CanImageBox
-          imageUrl={imageUrl}
-          bgColor={value}
-          alt={previewAlt || 'Card background preview'}
-          className="w-16 h-16 rounded-xl border border-border flex-shrink-0"
-          iconSize="w-6 h-6"
-        />
+        {/* Live preview for a can with no photo (the common case, since
+            Image is optional). With a photo, both forms already show it in
+            a large CanImageBox right above this picker, so a second, tiny
+            preview of the same tile is left out: one preview, drawn by the
+            same component as the real tile. */}
+        {!imageUrl && (
+          <CanImageBox
+            bgColor={value}
+            alt={previewAlt || 'Card background preview'}
+            className="w-16 h-16 rounded-xl border border-border flex-shrink-0"
+            iconSize="w-6 h-6"
+          />
+        )}
         <div className="flex-1 min-w-0">
           <p className="text-xs font-mono font-semibold text-foreground uppercase">{canTileBackground(value) === THEME_CAN_BG ? 'Theme colour' : value}</p>
           <p className="text-2xs font-mono text-muted-foreground leading-snug">

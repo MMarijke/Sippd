@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { RARITY_ORDER } from '@/lib/rarityConsensus';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
+import CanImageBox from '@/components/shared/CanImageBox';
 import CanBackgroundPicker from '@/components/shared/CanBackgroundPicker';
 import TasteRatingStars from '@/components/shared/TasteRatingStars';
 import BeverageTypeToggle from '@/components/shared/BeverageTypeToggle';
@@ -215,8 +216,18 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
           <div className="space-y-1.5">
             <Label className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">Image</Label>
             {form.can_image_url ? (
-              <div className="relative w-full h-40 rounded-xl overflow-hidden" style={{ backgroundColor: form.can_bg_color }}>
-                <img src={form.can_image_url} alt="Can" className="w-full h-full object-contain" />
+              // Drawn by CanImageBox, the same component as the real tile, so
+              // this is the preview for the background picker below. It used
+              // to paint the stored hex raw, so the Theme default showed as
+              // dark teal while the saved tile came out as the theme tint.
+              <div className="relative">
+                <CanImageBox
+                  imageUrl={form.can_image_url}
+                  bgColor={form.can_bg_color}
+                  alt={form.can_name || 'Can'}
+                  className="w-full h-40 rounded-xl border border-border"
+                  loading="eager"
+                />
                 <button
                   onClick={() => update('can_image_url', '')}
                   aria-label="Remove image"

@@ -263,10 +263,13 @@ export default function CollectionCard({
           // but the common case is now prevented, not just explained
           // after the fact.
           const atCap = canEdit && !item.pinned_at && pinnedCount >= maxPins;
-          // Trophy Case: the showcase's first tile gets a spotlight
-          // treatment when its owner is Pro — genuinely new layout, not a
-          // toggle, since every tile rendered identically before this.
-          const isHero = isPro && index === 0;
+          // Spotlight tile for every collector: index 0 is chosen by
+          // buildShowcase (the rarest can for free; your first pin for Pro,
+          // the custom hero being the Pro perk alongside extra slots).
+          const isHero = index === 0;
+          // Owner view only: tiles you didn't pin were filled automatically
+          // by rarity, and looked identical to ones you chose.
+          const isAuto = canEdit && !item.pinned_at;
           const tile = (
             <>
               <div className="aspect-square" style={{ background: canTileBackground(item.can_bg_color) }}>
@@ -300,7 +303,10 @@ export default function CollectionCard({
                 )}
               </div>
               <div className="p-1.5 space-y-0.5">
-                <p className={cn('font-semibold text-foreground truncate', isHero ? 'text-sm' : 'text-xs')}>{item.can_name}</p>
+                <p className={cn('font-semibold text-foreground truncate', isHero ? 'text-sm' : 'text-xs')}>
+                  {item.can_name}
+                  {isAuto && <span className="sr-only"> (auto-filled)</span>}
+                </p>
                 <RarityBadge rarity={getEffectiveRarity(item)} size={isHero ? undefined : 'sm'} />
               </div>
             </>
@@ -324,6 +330,14 @@ export default function CollectionCard({
                 <Link to={`/can/${item.can_id}`} className="block">{tile}</Link>
               ) : (
                 <div>{tile}</div>
+              )}
+              {isAuto && (
+                <span
+                  aria-hidden="true"
+                  className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-background/85 text-2xs font-mono uppercase tracking-wider text-muted-foreground pointer-events-none"
+                >
+                  Auto
+                </span>
               )}
               {canEdit && (
                 <button
@@ -360,7 +374,7 @@ export default function CollectionCard({
       </div>
       {canEdit && (
         <p className="text-xs font-mono text-muted-foreground mt-2">
-          {pinnedCount}/{maxPins} pinned
+          {pinnedCount}/{maxPins} pinned · <span className="uppercase tracking-wider">Auto</span> slots fill with your rarest cans
         </p>
       )}
       {footer}

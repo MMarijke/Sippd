@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTrades } from '@/hooks/useTrades';
 import { supabase } from '@/lib/supabaseClient';
 import { AlertCircle, ArrowRightLeft, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,10 @@ const STATUS_STYLES = {
 
 const FILTER_OPTIONS = ['all', 'pending', 'completed', 'cancelled'];
 
-export default function TradeHistory({ userId, user, onLogTrade }) {
+// hideTitle: the Trades page already names the view in its own header, so
+// it drops this section's duplicate "Trade History" title (the count and
+// Log Trade button stay).
+export default function TradeHistory({ userId, user, onLogTrade, hideTitle = false }) {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState('all');
   const [tradeToDelete, setTradeToDelete] = useState(null);
@@ -28,19 +32,7 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
     isLoading,
     isError,
     refetch: refetchTrades,
-  } = useQuery({
-    queryKey: ['trades', userId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('trades')
-        .select('*')
-        .eq('owner_id', userId)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!userId,
-  });
+  } = useTrades(userId);
 
   useEffect(() => {
     if (isError) toast.error('Could not load your trade history');
@@ -86,10 +78,16 @@ export default function TradeHistory({ userId, user, onLogTrade }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <ArrowRightLeft className="w-4 h-4 text-primary" />
-          <h2 className="text-sm font-display font-bold text-foreground tracking-wide">Trade History</h2>
+          {!hideTitle && (
+            <>
+              <ArrowRightLeft className="w-4 h-4 text-primary" />
+              <h2 className="text-sm font-display font-bold text-foreground tracking-wide">Trade History</h2>
+            </>
+          )}
           {trades.length > 0 && (
-            <span className="text-xs font-mono text-muted-foreground">({trades.length})</span>
+            <span className="text-xs font-mono text-muted-foreground">
+              {hideTitle ? `${trades.length} trade${trades.length === 1 ? '' : 's'}` : `(${trades.length})`}
+            </span>
           )}
         </div>
         <Button size="sm" variant="outline" className="h-11 font-mono text-xs gap-1.5 border-primary/20 text-foreground hover:bg-primary/10" onClick={onLogTrade}>

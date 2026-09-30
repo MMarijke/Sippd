@@ -21,6 +21,27 @@ export function sortPinnedFirst(items, getEffectiveRarity) {
   return [...pinned, ...rest];
 }
 
+/**
+ * The showcase grid, in display order; index 0 is CollectionCard's
+ * spotlight (hero) tile, for every collector now, not just Pro.
+ * - Pro: pinned first (oldest pin first), so the first can you pin IS your
+ *   hero -- the custom hero is the Pro perk, along with the extra slots.
+ * - Free: the same capped set, with its rarest can moved to the front, so
+ *   everyone gets a peak moment. Within the showcase only: a pick you
+ *   pinned is never pushed out to make room (unfilled slots already fill
+ *   by rarity, so the rarest cans are in the set whenever there's room).
+ *   Ties keep their existing order, so a pinned can wins a tie.
+ */
+export function buildShowcase(collected, getEffectiveRarity, isPro) {
+  const showcase = sortPinnedFirst(collected, getEffectiveRarity).slice(0, getMaxPins(isPro));
+  if (isPro || showcase.length < 2) return showcase;
+  let best = 0;
+  showcase.forEach((item, i) => {
+    if ((RARITY_RANK[getEffectiveRarity(item)] || 0) > (RARITY_RANK[getEffectiveRarity(showcase[best])] || 0)) best = i;
+  });
+  return [showcase[best], ...showcase.filter((_, i) => i !== best)];
+}
+
 // Feeds Profile's live "Top Pulls" hero (CollectionCard) — top-N,
 // rarity-breakdown, and latest-achievement computation in one place after
 // an earlier version of this logic lived duplicated inline in Profile.jsx
@@ -37,10 +58,10 @@ export function useCollectionHighlights({ collection, sharedCansMap, streak = 0,
   // hardcoded 6 that just happened to match useTogglePin's own MAX_PINS; a
   // Pro user pinning a 7th-10th item would otherwise succeed at the DB
   // layer and then never actually render anywhere. (/impeccable critique)
-  const topPulls = useMemo(() => {
-    const maxPins = getMaxPins(isPro);
-    return sortPinnedFirst(collected, getEffectiveRarity).slice(0, maxPins);
-  }, [collected, sharedCansMap, isPro]);
+  const topPulls = useMemo(
+    () => buildShowcase(collected, getEffectiveRarity, isPro),
+    [collected, sharedCansMap, isPro]
+  );
 
   const rarityBreakdown = useMemo(() => {
     const counts = {};

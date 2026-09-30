@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
-import { AlertCircle, LogOut, RefreshCw, Settings, Pencil, Check, X, ScanLine, Zap, Star, Flame } from 'lucide-react';
+import { AlertCircle, LogOut, RefreshCw, Settings, Pencil, Check, X, ScanLine, Zap, Star, Flame, ArrowRightLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link, useNavigate } from 'react-router-dom';
@@ -16,8 +16,7 @@ import { useTogglePin } from '@/hooks/useTogglePin';
 import { useShare } from '@/hooks/useShare';
 import { useSubscription } from '@/hooks/useSubscription';
 import { computeAchievements } from '@/lib/achievements';
-import TradeHistory from '@/components/profile/TradeHistory';
-import TradeLogDialog from '@/components/profile/TradeLogDialog';
+import { useTrades } from '@/hooks/useTrades';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 
 export default function Profile() {
@@ -25,7 +24,6 @@ export default function Profile() {
   const queryClient = useQueryClient();
   const { user, signOut } = useAuth();
   const streak = useStreak();
-  const [showTradeLog, setShowTradeLog] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [editing, setEditing] = useState(false);
   const [nameInput, setNameInput] = useState('');
@@ -192,6 +190,10 @@ export default function Profile() {
     },
     enabled: !!user?.id,
   });
+
+  // Same query/cache as the Trades page, for the one-line summary.
+  const { data: trades = [], isLoading: tradesLoading, isError: tradesError } = useTrades(user?.id);
+  const pendingTrades = trades.filter(t => t.status === 'pending').length;
 
   const { togglePin, isPending: pinPending } = useTogglePin();
   const pinnedCount = collected.filter(c => c.pinned_at).length;
@@ -398,7 +400,32 @@ export default function Profile() {
         </>
       )}
 
-      <TradeHistory userId={user?.id} user={user} onLogTrade={() => setShowTradeLog(true)} />
+      {/* The ledger itself lives on /trades: an unbounded list with filters
+          and per-trade actions was a working tool sitting on the trophy
+          shelf. One line here says what's there and opens it. */}
+      <div className="px-5">
+        <Link
+          to="/trades"
+          className="min-h-11 flex items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3 hover:border-primary/30 transition-colors"
+        >
+          <span className="flex items-center gap-2">
+            <ArrowRightLeft className="w-4 h-4 text-primary" aria-hidden="true" />
+            <span className="text-sm font-display font-bold text-foreground tracking-wide">Trades</span>
+          </span>
+          <span className="flex items-center gap-1 text-xs font-mono text-muted-foreground">
+            {tradesLoading ? '…'
+              : tradesError ? 'Couldn’t load'
+              : trades.length === 0 ? 'None yet'
+              : (
+                <>
+                  <span className="text-foreground">{trades.length}</span> {trades.length === 1 ? 'trade' : 'trades'}
+                  {pendingTrades > 0 && <> · <span className="text-foreground">{pendingTrades}</span> pending</>}
+                </>
+              )}
+            <ChevronRight className="w-4 h-4" aria-hidden="true" />
+          </span>
+        </Link>
+      </div>
 
       {/* Utility tier: log out — stays last, the standard trailing position.
           Settings now lives as the gear icon in the header. */}
@@ -424,9 +451,6 @@ export default function Profile() {
         confirmLabel="Log Out"
       />
 
-      {showTradeLog && (
-        <TradeLogDialog collection={collection} onClose={() => setShowTradeLog(false)} />
-      )}
     </div>
   );
 }

@@ -1,32 +1,17 @@
 import { Link } from 'react-router-dom';
 import { Medal } from 'lucide-react';
-import AchievementBadge from '@/components/achievements/AchievementBadge';
-import { selectHighlightAchievements } from '@/lib/achievements';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { selectShelfAchievements } from '@/lib/achievements';
 
-// The achievements strip shared by Profile.jsx (your own) and
-// PublicProfile.jsx (anyone's) — one definition instead of two that
-// quietly drift, the same fix already applied to the score/breakdown/
-// can-grid card. Before this, Profile showed a 5-column grid of
-// AchievementBadge (unlocked achievements plus near-unlock ones, with
-// lock icons and progress bars) while PublicProfile re-implemented a
-// much thinner version: an unlocked-only horizontal-scroll strip with
-// no lock state, no progress, no description. Both render the exact
-// same computeAchievements() output — there was no reason for the
-// presentation to differ, so this adopts Profile's richer treatment for
-// both. Achievement progress isn't sensitive (it's the same kind of
-// gamification stat as Score or Rarity Breakdown, both already fully
-// visible on a public profile), so a stranger seeing "80% of the way to
-// X" is a feature, not a leak.
-//
-// `showViewAll` is the one thing that has to stay page-specific: the
-// destination, /achievements, always shows the CURRENT viewer's own
-// achievements — it has no per-profile mode. Linking a stranger there
-// from someone else's public profile would navigate to the viewer's own
-// page (or a login wall), not the profile they were just looking at, so
-// PublicProfile never passes it.
+// Shared by Profile and PublicProfile. A short shelf, not a strip: the three
+// most recent unlocks, then the two closest to unlocking with their progress
+// (selectShelfAchievements). The old 10-tile, 5-column strip was ~70% locked
+// grey with every title truncated at 375px; full titles now wrap instead,
+// and the whole collection lives one tap away under View All.
 export default function AchievementsSection({ achievements, showViewAll = false }) {
   const unlockedCount = achievements.filter(a => a.unlocked).length;
-  const highlightAchievements = selectHighlightAchievements(achievements, 10);
+  const shelf = selectShelfAchievements(achievements);
 
   return (
     <div className="space-y-3">
@@ -35,11 +20,52 @@ export default function AchievementsSection({ achievements, showViewAll = false 
         <h2 className="text-sm font-display font-bold text-foreground tracking-wide">Achievements</h2>
         <span className="text-xs font-mono text-muted-foreground">Unlocked {unlockedCount}/{achievements.length}</span>
       </div>
-      <div className="grid grid-cols-5 gap-x-2 gap-y-4">
-        {highlightAchievements.map(a => (
-          <AchievementBadge key={a.key} achievement={a} size="compact" />
-        ))}
-      </div>
+      <ul className="space-y-2">
+        {shelf.map(a => {
+          const current = a.progress?.current ?? 0;
+          const goal = a.progress?.goal ?? 0;
+          const pct = goal ? Math.min(100, (current / goal) * 100) : 0;
+          return (
+            <li key={a.key} className="flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-2.5">
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'w-10 h-10 rounded-lg flex items-center justify-center text-lg flex-shrink-0 border',
+                  a.unlocked ? 'bg-primary/10 border-primary/30' : 'bg-secondary border-border grayscale opacity-60'
+                )}
+              >
+                {a.icon}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-foreground leading-snug">{a.title}</p>
+                {a.unlocked ? (
+                  <p className="text-xs font-mono text-muted-foreground">
+                    Unlocked{a.unlockedAt ? ` · ${format(new Date(a.unlockedAt), 'd MMM yyyy')}` : ''}
+                  </p>
+                ) : a.incremental && a.progress ? (
+                  <div className="mt-1.5 flex items-center gap-2">
+                    <div
+                      role="progressbar"
+                      aria-label={`${a.title} progress`}
+                      aria-valuemin={0}
+                      aria-valuemax={goal}
+                      aria-valuenow={current}
+                      className="h-1.5 flex-1 rounded-full bg-secondary overflow-hidden"
+                    >
+                      <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="text-xs font-mono text-muted-foreground tabular-nums whitespace-nowrap">
+                      {current}/{goal} {a.progress.label}
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-xs font-mono text-muted-foreground">{a.description}</p>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
       {showViewAll && (
         <Link to="/achievements" className="block text-center text-xs font-mono text-foreground hover:text-primary transition-colors">
           View All →

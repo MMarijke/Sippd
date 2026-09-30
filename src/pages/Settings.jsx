@@ -9,7 +9,6 @@ import { ArrowLeft, ChevronRight, ChevronLeft, Lock, Loader2, Sun, Moon } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -18,7 +17,6 @@ import LegalFooter from '@/components/legal/LegalFooter';
 import { exportUserData, downloadJson } from '@/lib/exportUserData';
 
 const STATUSES = ['collected', 'wishlist'];
-const RARITIES = ['Common', 'Uncommon', 'Rare', 'Ultra Rare', 'Legendary'];
 const PREFS_KEY = 'canvolt_prefs';
 const FOLLOW_NOTIFY_OPTIONS = [
   { value: 'off', label: 'Off' },
@@ -812,7 +810,6 @@ export default function Settings() {
   };
 
   const defaultStatus = prefs.defaultStatus || 'collected';
-  const defaultRarity = prefs.defaultRarity || 'Common';
 
   const handleExportData = async () => {
     if (isExporting) return;
@@ -1084,29 +1081,6 @@ export default function Settings() {
               value={defaultStatus}
               onChange={v => updatePref('defaultStatus', v)}
             />
-          </div>
-          <div>
-            <div className="px-4 pt-3.5 pb-2">
-              <p className="text-sm font-medium text-foreground">Default Rarity Vote</p>
-              <p className="text-xs font-mono text-muted-foreground mt-0.5">Pre-selected when voting</p>
-            </div>
-            {/* A 5-option chip row put every rarity on screen at once, over
-                the ≤4-visible-options guideline this app applies elsewhere
-                (see FilterBar's Select for Status/Rarity/Sort) — a select
-                shows one value at a time and reaches the same 44px target
-                the chips needed anyway. */}
-            <div className="px-4 pb-3.5">
-              <Select value={defaultRarity} onValueChange={v => updatePref('defaultRarity', v)}>
-                <SelectTrigger className="h-11 bg-secondary border-border text-xs font-mono">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {RARITIES.map(r => (
-                    <SelectItem key={r} value={r}>{r}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
         </div>
 

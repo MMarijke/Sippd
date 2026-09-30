@@ -85,7 +85,11 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
       brand:      prefillData?.brand   || '',
       flavour:    prefillData?.flavour || '',
       edition:    prefillData?.edition || '',
-      rarity:     prefillData?.consensus_rarity || prefillData?.rarity || savedDefaults.defaultRarity || 'Common',
+      // Starts unselected. It used to start on the community's answer (or a
+      // Settings default), so a vote that can never be changed could be cast
+      // without anyone choosing it, and votes drifted toward the consensus.
+      // The community's answer now shows as a hint beside the pills.
+      rarity:     null,
       image_url:  prefillData?.image_url || '',
       barcode:    prefillData?.barcode || '',
       // Existing catalog can: its own established beverage_type (read-only
@@ -124,6 +128,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
     if (pendingRarity === r) {
       update('rarity', r);
       setPendingRarity(null);
+      setVoteNudge(false);
     } else if (form.rarity === r) {
       // Tapping the already-confirmed pill while a different one is
       // pending reads as "actually, keep this one" — clear the pending
@@ -157,6 +162,8 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
   const tileRarity = prefillData?.consensus_rarity || form.rarity;
   const totalVotes = prefillData?.total_votes || 0;
   const confidence = getConfidence(totalVotes);
+  // The community's answer, shown as a hint next to the vote, never pre-picked.
+  const communityHint = prefillData?.id && confidence !== 'unrated' ? consensusRarity : null;
 
   const validate = () => {
     const e = {};
@@ -192,7 +199,8 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
         sharedCan = data;
       }
 
-      const displayRarity = sharedCan.consensus_rarity || form.rarity;
+      const myVote = alreadyVoted ? existingVote?.voted_rarity : form.rarity;
+      const displayRarity = sharedCan.consensus_rarity || myVote;
 
       const { data: insertedRow, error: insertError } = await supabase.from('user_collection').insert({
         owner_id:         currentUser.id,
@@ -207,7 +215,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
         can_edition:       form.edition   || sharedCan.edition,
         can_beverage_type: form.beverage_type || sharedCan.beverage_type,
         can_bg_color:      form.bg_color  || DEFAULT_CAN_BG,
-        user_rarity_vote:  form.rarity,
+        user_rarity_vote:  myVote,
         taste_rating:      form.taste_rating,
       }).select().single();
       if (insertError) throw insertError;
@@ -250,7 +258,17 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
     },
   });
 
+  const [voteNudge, setVoteNudge] = useState(false);
+  const voteGroupRef = useRef(null);
+  const needsVote = !alreadyVoted && !form.rarity;
+
   const handleSubmit = () => {
+    if (needsVote && !pendingRarity) {
+      setVoteNudge(true);
+      voteGroupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      voteGroupRef.current?.querySelector('button')?.focus({ preventScroll: true });
+      return;
+    }
     // An unconfirmed rarity tap shouldn't silently submit the previous
     // value — that would look to the user like their tap did nothing,
     // when really it just never got confirmed.
@@ -421,7 +439,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           onChange={e => update('name', e.target.value)}
           placeholder="e.g. Monster Ultra Paradise"
           readOnly={!!prefillData?.id}
-          className={cn('bg-secondary border-border font-body', errors.name && 'border-destructive', prefillData?.id && 'opacity-60 cursor-default')}
+          className={cn('h-11 bg-secondary border-border font-body', errors.name && 'border-destructive', prefillData?.id && 'opacity-60 cursor-default')}
         />
       </div>
 
@@ -436,7 +454,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
             onChange={e => update('brand', e.target.value)}
             placeholder="Monster"
             readOnly={!!prefillData?.id}
-            className={cn('bg-secondary border-border font-body', errors.brand && 'border-destructive', prefillData?.id && 'opacity-60 cursor-default')}
+            className={cn('h-11 bg-secondary border-border font-body', errors.brand && 'border-destructive', prefillData?.id && 'opacity-60 cursor-default')}
           />
         </div>
         <div className="space-y-1.5">
@@ -447,7 +465,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
             onChange={e => update('flavour', e.target.value)}
             placeholder="Ultra Paradise"
             readOnly={!!prefillData?.id}
-            className={cn('bg-secondary border-border font-body', prefillData?.id && 'opacity-60 cursor-default')}
+            className={cn('h-11 bg-secondary border-border font-body', prefillData?.id && 'opacity-60 cursor-default')}
           />
         </div>
       </div>
@@ -461,7 +479,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
             onChange={e => update('edition', e.target.value)}
             placeholder="2024 Special"
             readOnly={!!prefillData?.id}
-            className={cn('bg-secondary border-border font-body', prefillData?.id && 'opacity-60 cursor-default')}
+            className={cn('h-11 bg-secondary border-border font-body', prefillData?.id && 'opacity-60 cursor-default')}
           />
         </div>
         <div className="space-y-1.5">
@@ -471,7 +489,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
             type="date"
             value={form.date_added}
             onChange={e => update('date_added', e.target.value)}
-            className="bg-secondary border-border font-mono text-sm"
+            className="h-11 bg-secondary border-border font-mono text-sm"
           />
         </div>
       </div>
@@ -485,7 +503,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
             onChange={e => update('barcode', e.target.value.replace(/\D/g, ''))}
             placeholder="e.g. 5000112548167"
             inputMode="numeric"
-            className="bg-secondary border-border font-mono text-sm"
+            className="h-11 bg-secondary border-border font-mono text-sm"
           />
         </div>
       )}
@@ -512,7 +530,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
                   aria-checked={selected}
                   aria-disabled="true"
                   className={cn(
-                    'h-10 px-3 flex items-center justify-center rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider',
+                    'h-11 px-2 flex items-center justify-center text-center rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider',
                     selected
                       ? 'bg-primary border-primary text-primary-foreground shadow'
                       : 'border-border text-muted-foreground opacity-60'
@@ -530,27 +548,36 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
                 without claiming role="radio"/arrow-key nav this never
                 implements, same reasoning as BeverageTypeToggle.jsx.
                 (/impeccable critique) */}
-            <div className="grid grid-cols-3 gap-2" role="group" aria-label="Your rarity vote">
+            {communityHint && (
+              <p className="text-xs font-mono text-muted-foreground">
+                Community says <span className="text-foreground font-semibold">{communityHint}</span> — your vote is your own call.
+              </p>
+            )}
+            <div ref={voteGroupRef} className="grid grid-cols-3 gap-2" role="group" aria-label="Your rarity vote">
               {RARITIES.map(r => {
                 const isPending = pendingRarity === r;
                 const isConfirmed = form.rarity === r && !isPending;
+                const isCommunity = communityHint === r;
                 return (
                   <button
                     key={r}
                     type="button"
                     onClick={() => selectRarity(r)}
                     aria-pressed={isConfirmed}
-                    aria-label={isPending ? `Confirm ${r}` : r}
+                    aria-label={`${isPending ? `Confirm ${r}` : r}${isCommunity ? ', community pick' : ''}`}
                     className={cn(
-                      'h-10 px-3 flex items-center justify-center rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider transition-all',
+                      'h-11 px-2 flex flex-col items-center justify-center text-center rounded-lg border text-xs font-mono font-semibold uppercase tracking-wider leading-tight transition-all',
                       isConfirmed
                         ? 'bg-primary border-primary text-primary-foreground shadow'
                         : isPending
                           ? 'bg-primary/15 border-primary text-primary ring-2 ring-primary/40'
-                          : 'border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground'
+                          : cn('text-muted-foreground hover:border-muted-foreground hover:text-foreground', isCommunity ? 'border-dashed border-foreground/40' : 'border-border')
                     )}
                   >
-                    {isPending ? 'Confirm?' : r}
+                    {r}
+                    {/* The tier name stays on the pill being confirmed; it
+                        used to be replaced by "Confirm?". */}
+                    {isPending && <span className="text-2xs normal-case tracking-normal font-normal">tap again</span>}
                   </button>
                 );
               })}
@@ -561,10 +588,12 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
                 can has no explanation anywhere before this commits. This
                 stays visible unconditionally so the warning is never gated
                 behind an optional interaction. */}
-            <p className="text-2xs font-mono text-muted-foreground" aria-live="polite">
+            <p className={cn('text-xs font-mono', voteNudge ? 'text-destructive' : 'text-muted-foreground')} aria-live="polite">
               {pendingRarity
                 ? `Tap ${pendingRarity} again to lock it in.`
-                : 'Vote locks once cast — choose carefully.'}
+                : voteNudge
+                  ? 'Pick a rarity first. Your vote locks once cast.'
+                  : 'Vote locks once cast — choose carefully.'}
             </p>
           </div>
         )}
@@ -588,7 +617,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           disabled={!!prefillData?.id}
         />
         {!prefillData?.id && !prefillData?._offSource && (
-          <p className="text-2xs font-mono text-muted-foreground">You can change this anytime.</p>
+          <p className="text-xs font-mono text-muted-foreground">You can change this anytime.</p>
         )}
         {/* Three distinct states a silent value can't tell apart on its own:
             an existing catalog can (locked, someone already decided this);
@@ -600,17 +629,17 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
             with nothing telling the one person able to catch it that it
             was ever in question. (/impeccable critique) */}
         {prefillData?.id ? (
-          <p className="text-2xs font-mono text-muted-foreground">Set by this can's catalog entry.</p>
+          <p className="text-xs font-mono text-muted-foreground">Set by this can's catalog entry.</p>
         ) : prefillData?._offSource && prefillData?.beverage_type ? (
-          <p className="text-2xs font-mono text-primary">Guessed from Open Food Facts — tap to change if wrong.</p>
+          <p className="text-xs font-mono text-primary">Guessed from Open Food Facts — tap to change if wrong.</p>
         ) : prefillData?._offSource ? (
-          <p className="text-2xs font-mono text-warning">Open Food Facts didn't specify a category — defaulted to Energy Drink, please confirm.</p>
+          <p className="text-xs font-mono text-warning">Open Food Facts didn't specify a category — defaulted to Energy Drink, please confirm.</p>
         ) : null}
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Status</Label>
-        <div className="flex bg-secondary rounded-xl border border-border p-1 gap-1">
+        <Label id="addcan-status-label" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Status</Label>
+        <div role="group" aria-labelledby="addcan-status-label" className="flex bg-secondary rounded-xl border border-border p-1 gap-1">
           {STATUS_OPTIONS.map(opt => (
             <button
               key={opt.value}
@@ -685,7 +714,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
                       type="button"
                       onClick={() => setImageMode('upload')}
                       aria-pressed={imageMode === 'upload'}
-                      className={cn('h-10 px-3 rounded-md text-xs font-mono transition-all flex items-center gap-1.5',
+                      className={cn('h-11 px-3 rounded-md text-xs font-mono transition-all flex items-center gap-1.5',
                         imageMode === 'upload' ? 'bg-card text-foreground' : 'text-muted-foreground')}
                     >
                       <Upload className="w-3 h-3" /> Upload
@@ -694,21 +723,23 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
                       type="button"
                       onClick={() => setImageMode('url')}
                       aria-pressed={imageMode === 'url'}
-                      className={cn('h-10 px-3 rounded-md text-xs font-mono transition-all flex items-center gap-1.5',
+                      className={cn('h-11 px-3 rounded-md text-xs font-mono transition-all flex items-center gap-1.5',
                         imageMode === 'url' ? 'bg-card text-foreground' : 'text-muted-foreground')}
                     >
                       <LinkIcon className="w-3 h-3" /> Paste URL
                     </button>
                   </div>
                   {imageMode === 'upload' ? (
-                    <label className="flex items-center justify-center gap-2 p-5 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/40 transition-colors">
+                    <label className="flex items-center justify-center gap-2 p-5 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/40 transition-colors focus-within:ring-2 focus-within:ring-ring">
                       {uploading
                         ? <Loader2 className="w-5 h-5 animate-spin text-primary" />
                         : <Upload className="w-5 h-5 text-muted-foreground" />}
                       <span className="text-sm text-muted-foreground font-mono">
                         {uploading ? 'Uploading...' : 'Tap to choose a photo'}
                       </span>
-                      <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                      {/* sr-only, not hidden: display:none took the picker out of the tab
+                          order, so a photo couldn't be added by keyboard. */}
+                      <input type="file" accept="image/*" className="sr-only" onChange={handleImageUpload} />
                     </label>
                   ) : (
                     <Input
@@ -716,7 +747,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
                       value={form.image_url}
                       onChange={e => update('image_url', e.target.value)}
                       placeholder="https://example.com/can.jpg"
-                      className="bg-secondary border-border font-mono text-sm"
+                      className="h-11 bg-secondary border-border font-mono text-sm"
                     />
                   )}
                 </div>
@@ -767,7 +798,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           {createMutation.isPending
             ? <Loader2 className="w-4 h-4 animate-spin" />
             : <Zap className="w-4 h-4" />}
-          {alreadyVoted ? 'Add to Vault' : 'Vote & Add to Vault'}
+          {alreadyVoted ? 'Add to Vault' : needsVote && !pendingRarity ? 'Pick a rarity to add' : 'Vote & Add to Vault'}
         </Button>
       </div>
     </div>

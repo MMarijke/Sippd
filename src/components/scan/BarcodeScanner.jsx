@@ -18,19 +18,24 @@ function describeCameraError(err) {
   switch (err?.name) {
     case 'NotAllowedError':
     case 'PermissionDeniedError':
-      return "Camera access was denied. Enable it in your browser's site settings to scan, or search manually below.";
+      return "Camera access was denied. Enable it in your browser's site settings to scan, or search manually above.";
     case 'NotFoundError':
     case 'DevicesNotFoundError':
-      return 'No camera found on this device. Search manually below instead.';
+      return 'No camera found on this device. Search manually above instead.';
     case 'NotReadableError':
     case 'TrackStartError':
-      return 'Camera is already in use by another app. Close it and try again, or search manually below.';
+      return 'Camera is already in use by another app. Close it and try again, or search manually above.';
     default:
-      return "Couldn't start the camera. Search manually below instead.";
+      return "Couldn't start the camera. Search manually above instead.";
   }
 }
 
-export default function BarcodeScanner({ onDetected }) {
+// autoStart: start the camera on mount (Scan passes it after "Scan Next").
+// The camera also starts by itself whenever this site already has camera
+// permission, so only a first-ever visit needs "Tap to Scan". Browsers that
+// can't report the permission (Firefox) fall back to the tap.
+// onAnnounce: tells the page's live region what the camera is doing.
+export default function BarcodeScanner({ onDetected, autoStart = false, onAnnounce }) {
   const [status, setStatus] = useState('idle'); // idle | starting | scanning | error
   const [errorMessage, setErrorMessage] = useState('');
   const [slowStart, setSlowStart] = useState(false);
@@ -72,7 +77,7 @@ export default function BarcodeScanner({ onDetected }) {
   const startScanning = async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setStatus('error');
-      setErrorMessage("This browser can't access the camera. Search manually below instead.");
+      setErrorMessage("This browser can't access the camera. Search manually above instead.");
       return;
     }
 
@@ -117,9 +122,36 @@ export default function BarcodeScanner({ onDetected }) {
     }
   };
 
+  // Once per mount. startScanning is recreated every render and only needs
+  // to run the first time, so it is read through a ref.
+  const startRef = useRef(startScanning);
+  startRef.current = startScanning;
+  useEffect(() => {
+    let cancelled = false;
+    const begin = () => { if (!cancelled && mountedRef.current) startRef.current(); };
+    if (autoStart) {
+      begin();
+    } else {
+      navigator.permissions?.query({ name: 'camera' })
+        .then(result => { if (result.state === 'granted') begin(); })
+        .catch(() => {});
+    }
+    return () => { cancelled = true; };
+  }, [autoStart]);
+
+  // Spoken camera states. Errors also render as role="alert" below.
+  useEffect(() => {
+    if (status === 'starting') onAnnounce?.('Starting camera.');
+    if (status === 'scanning') onAnnounce?.('Camera on. Point it at the barcode.');
+  }, [status, onAnnounce]);
+
+  // The X that had focus disappears with the camera view, so hand focus to
+  // the Tap to Scan button that replaces it.
+  const tapRef = useRef(null);
   const cancelScanning = () => {
     stopScanning();
     setStatus('idle');
+    requestAnimationFrame(() => tapRef.current?.focus());
   };
 
   if (status === 'scanning' || status === 'starting') {
@@ -130,7 +162,9 @@ export default function BarcodeScanner({ onDetected }) {
 
           {status === 'starting' && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/60 px-8">
-              <p className="text-xs font-mono text-muted-foreground text-center leading-relaxed">
+              {/* White, not text-muted-foreground: this overlay is always black, and
+                  the muted token is dark grey on light themes. */}
+              <p className="text-xs font-mono text-white/85 text-center leading-relaxed">
                 {slowStart
                   ? 'Still waiting on your camera — tap the X to cancel and search manually instead.'
                   : 'Starting camera…'}
@@ -151,7 +185,7 @@ export default function BarcodeScanner({ onDetected }) {
                 ))}
                 <div className="absolute left-0 right-0 h-0.5 bg-primary neon-glow animate-shimmer" style={{ top: '50%' }} />
               </div>
-              <p className="absolute bottom-3 left-0 right-0 text-center text-2xs font-mono text-white/80">
+              <p className="absolute bottom-3 left-0 right-0 text-center text-xs font-mono text-white/85">
                 Point the camera at the barcode
               </p>
             </>
@@ -162,7 +196,7 @@ export default function BarcodeScanner({ onDetected }) {
             aria-label="Cancel scanning"
             className="absolute top-3 right-3 w-11 h-11 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80 transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -172,15 +206,17 @@ export default function BarcodeScanner({ onDetected }) {
   return (
     <div className="px-5 space-y-3">
       <button
+        ref={tapRef}
+        type="button"
         onClick={startScanning}
         className="w-full bg-card border border-primary/20 rounded-2xl p-8 flex flex-col items-center gap-4 hover:border-primary/40 hover:bg-primary/5 transition-all active:scale-[0.98]"
       >
         <div className="relative w-24 h-24">
           <div className="absolute inset-0 rounded-xl bg-primary/10 flex items-center justify-center">
             {status === 'error' ? (
-              <CameraOff className="w-11 h-11 text-muted-foreground" />
+              <CameraOff className="w-11 h-11 text-muted-foreground" aria-hidden="true" />
             ) : (
-              <ScanLine className="w-11 h-11 text-primary" />
+              <ScanLine className="w-11 h-11 text-primary" aria-hidden="true" />
             )}
           </div>
           {[
@@ -206,8 +242,8 @@ export default function BarcodeScanner({ onDetected }) {
       </button>
 
       {status === 'error' && (
-        <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-4">
-          <p className="text-xs font-mono text-muted-foreground leading-relaxed">{errorMessage}</p>
+        <div role="alert" className="bg-destructive/5 border border-destructive/20 rounded-xl p-4">
+          <p className="text-xs font-mono text-foreground leading-relaxed">{errorMessage}</p>
         </div>
       )}
     </div>

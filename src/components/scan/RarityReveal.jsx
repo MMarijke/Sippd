@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ScanLine } from 'lucide-react';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
@@ -66,6 +67,11 @@ export default function RarityReveal({ rarity, canName, onComplete, onScanNext }
   // (handleTap, bound to the whole screen) already covers "I'm done here,"
   // so there's nothing left for a timer to do that isn't actively working
   // against the app's own stated common case. (/impeccable critique)
+  // The add form that held focus is gone; land on Scan Next, the common
+  // next step, so keyboard and screen-reader users aren't left on <body>.
+  const scanNextRef = useRef(null);
+  useEffect(() => { scanNextRef.current?.focus(); }, []);
+
   const handleTap = () => {
     onComplete();
   };
@@ -244,12 +250,13 @@ export default function RarityReveal({ rarity, canName, onComplete, onScanNext }
           onClick={e => e.stopPropagation()}
         >
           <button
+            ref={scanNextRef}
             type="button"
             onClick={handleScanNext}
             className="h-11 px-5 rounded-full border text-xs font-mono font-semibold uppercase tracking-wider flex items-center gap-1.5 transition-colors"
             style={{ borderColor: config.accent + '60', color: config.accent }}
           >
-            <ScanLine className="w-3.5 h-3.5" /> Scan Next
+            <ScanLine className="w-3.5 h-3.5" aria-hidden="true" /> Scan Next
           </button>
           <button
             type="button"

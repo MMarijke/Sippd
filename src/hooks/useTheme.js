@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
+import { readThemeCache, writeThemeCache, cachedThemeFor } from '@/lib/themeCache';
 
 // Keep in sync with index.css's [data-theme] blocks and the
 // profiles_theme_valid / profiles_theme_polarity_valid check constraints.
@@ -282,16 +283,26 @@ export function useTheme() {
     },
     enabled: !!user?.id,
   });
-  const theme = data?.theme ?? DEFAULT_THEME;
-  const polarity = data?.polarity ?? DEFAULT_POLARITY;
+  // Until the profile answers (or if it fails), show the theme this device
+  // last rendered for this user, not the Power-Up default: a refresh used
+  // to flash Power-Up, and stayed on it whenever the profile query failed.
+  const cached = cachedThemeFor(readThemeCache(), user?.id);
+  const cachedTheme = cached && THEMES.some(t => t.id === cached.theme) ? cached : null;
+  const theme = data?.theme ?? cachedTheme?.theme ?? DEFAULT_THEME;
+  const polarity = data?.polarity ?? cachedTheme?.polarity ?? DEFAULT_POLARITY;
   const retiredTheme = data?.retiredTheme ?? null;
 
   useEffect(() => {
     const match = THEMES.find(t => t.id === theme);
+    const tone = getRenderedTone(match, polarity);
     document.documentElement.dataset.theme = theme;
     document.documentElement.dataset.polarity = polarity;
-    document.documentElement.dataset.tone = getRenderedTone(match, polarity);
+    document.documentElement.dataset.tone = tone;
     ensureFamilyFonts(getThemeFamily(theme)?.id);
+    // Only a theme the profile actually returned is remembered.
+    if (data && user?.id) {
+      writeThemeCache({ userId: user.id, theme, polarity, tone, background: getThemeRendering(match, polarity)?.background });
+    }
 
     // Mobile browser chrome (the address bar / status bar strip) doesn't
     // read CSS variables, so it has to be told the active background
@@ -303,7 +314,7 @@ export function useTheme() {
     const meta = document.querySelector('meta[name="theme-color"]');
     const rendering = getThemeRendering(match, polarity);
     if (meta && rendering) meta.setAttribute('content', rendering.background);
-  }, [theme, polarity]);
+  }, [theme, polarity, data, user?.id]);
 
   const { mutate: setTheme, isPending: isThemePending } = useMutation({
     mutationFn: async (nextTheme) => {

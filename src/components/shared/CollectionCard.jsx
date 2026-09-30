@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { canTileBackground } from '@/lib/canBgColors';
 import { Link } from 'react-router-dom';
-import { Pin, Link2, CupSoda, X, Eye, TrendingUp, ChevronRight } from 'lucide-react';
+import { Pin, Link2, CupSoda, X, Eye, TrendingUp, ChevronRight, Info } from 'lucide-react';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { getMaxPins } from '@/hooks/useTogglePin';
 import { cn } from '@/lib/utils';
-import { BREAKDOWN_VAR } from '@/lib/rarityConsensus';
+import { BREAKDOWN_VAR, RARITY_POINTS } from '@/lib/rarityConsensus';
 
 // One source for a tier's theme colour, shared by the bar segment and its
 // legend dot so the two can never drift apart.
@@ -136,7 +137,7 @@ export default function CollectionCard({
       {onShare && !shareHintSeen && (
         <div className="flex items-start justify-between gap-2 -mt-2 mb-4 px-0.5">
           <p className="text-2xs font-mono text-muted-foreground leading-snug">
-            New: tap the link icon above to share your live profile — no more downloading an image.
+            Tap the link icon to share your live profile. It updates as your vault grows, and Preview shows what others will see.
           </p>
           <button
             onClick={dismissShareHint}
@@ -158,7 +159,26 @@ export default function CollectionCard({
           2.3-4.2:1 on 5 of 6 themes against .hero-card's opaque surface,
           the same class of WCAG failure already fixed on Home's equivalent
           label (text-foreground stays theme-invariant at 14.7-16.8:1). */}
-      <div className="hero-card rounded-2xl p-5 mb-3 text-center">
+      <div className="relative hero-card rounded-2xl p-5 mb-3 text-center">
+        {/* What Score is, one tap away: nothing on the page said how it's
+            calculated or what it ranks against. Points come straight from
+            RARITY_POINTS so the explanation can't drift from the scoring. */}
+        <Popover>
+          <PopoverTrigger
+            aria-label="How Score works"
+            className="absolute top-1 right-1 w-11 h-11 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Info className="w-4 h-4" aria-hidden="true" />
+          </PopoverTrigger>
+          <PopoverContent className="w-64 text-xs font-mono leading-relaxed text-left" side="bottom" align="end">
+            <p className="font-semibold text-foreground mb-1">How Score works</p>
+            <p className="text-muted-foreground">
+              Each can you&apos;ve collected earns points for its community-voted rarity:{' '}
+              {Object.entries(RARITY_POINTS).map(([tier, pts]) => `${tier} ${pts}`).join(' · ')}.
+              Cans without enough votes yet count as 1. Your Score is the total, and it&apos;s what the Score leaderboard ranks.
+            </p>
+          </PopoverContent>
+        </Popover>
         <p className="text-xs font-mono uppercase tracking-widest text-foreground">Score</p>
         <p className="text-5xl font-mono font-black text-foreground tabular-nums">{score}</p>
         {/* This week's movement, directly under the number it moves. */}
@@ -383,7 +403,9 @@ export default function CollectionCard({
       </div>
       {canEdit && (
         <p className="text-xs font-mono text-muted-foreground mt-2">
-          {pinnedCount}/{maxPins} pinned · <span className="uppercase tracking-wider">Auto</span> slots fill with your rarest cans
+          {/* What pinning does, where you pin. */}
+          Pinned {pinnedCount}/{maxPins}: pinned cans stay in your showcase{isPro ? ', and your first pin is the spotlight' : ''}.{' '}
+          <span className="uppercase tracking-wider">Auto</span> slots fill with your rarest cans.
         </p>
       )}
       {footer}

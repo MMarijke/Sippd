@@ -295,8 +295,11 @@ export default function Profile() {
             ) : (
               <div className="min-w-0">
               <div className="flex items-center gap-1.5 min-w-0">
-                <h2 className="text-base font-display font-bold text-foreground truncate">{profile?.full_name || 'Collector'}</h2>
-                <button ref={pencilRef} onClick={startEdit} aria-label="Edit display name" className="p-4 text-muted-foreground hover:text-primary transition-colors flex-shrink-0">
+                {/* Wraps to two lines instead of truncating: it's the one
+                    place the full name shows (40-char max, so two lines
+                    covers it); break-words handles a single unbroken word. */}
+                <h2 className="text-base font-display font-bold text-foreground line-clamp-2 break-words">{profile?.full_name || 'Collector'}</h2>
+                <button ref={pencilRef} onClick={startEdit} aria-label="Edit display name" className="p-4 -my-3 text-muted-foreground hover:text-primary transition-colors flex-shrink-0">
                   <Pencil className="w-3 h-3" />
                 </button>
                 {profile?.region && (
@@ -305,9 +308,12 @@ export default function Profile() {
               </div>
               {/* Your social standing next to your name -- the other half of
                   the competitive layer. Accepted follows only; pending
-                  requests to a private account aren't followers yet. */}
+                  requests to a private account aren't followers yet. No
+                  negative margin: the pencil's 44px hit area overhangs via
+                  -my-3 instead of making the row tall, so this sits right
+                  under the name at any length, one line or two. */}
               {followCounts && (
-                <p className="-mt-2 text-xs font-mono text-muted-foreground">
+                <p className="mt-0.5 text-xs font-mono text-muted-foreground">
                   <span className="font-semibold text-foreground">{followCounts.followers}</span>{' '}
                   {followCounts.followers === 1 ? 'follower' : 'followers'}
                   {' · '}
@@ -372,7 +378,10 @@ export default function Profile() {
           ) : (
             <div className="px-5">
               <CollectionCard
-                headerTitle={`${profile?.full_name || 'Collector'}’s Collection`}
+                // Not your name: the name row right above already carries it,
+                // and a long name truncated this to "Maximilian Alexander Feathe…",
+                // losing the part that said what the card is.
+                headerTitle="Your collection"
                 items={showcase}
                 isPro={isPro}
                 rarityBreakdown={rarityBreakdown}

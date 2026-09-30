@@ -8,6 +8,21 @@
          useTheme.js keeps this in sync with whichever theme is actually
          active on every change. -->
     <meta name="theme-color" content="#0B1018" />
+    <!-- Paint this device's last theme before the app loads, instead of
+         Power-Up until the profile answers. Same key and shape as
+         src/lib/themeCache.js; useTheme.js takes over once it mounts. -->
+    <script>
+      try {
+        var t = JSON.parse(localStorage.getItem('sippd-theme') || 'null');
+        if (t && typeof t.theme === 'string' && typeof t.polarity === 'string') {
+          var d = document.documentElement.dataset;
+          d.theme = t.theme;
+          d.polarity = t.polarity;
+          if (t.tone) d.tone = t.tone;
+          if (t.background) document.querySelector('meta[name="theme-color"]').setAttribute('content', t.background);
+        }
+      } catch (e) {}
+    </script>
     <link rel="manifest" href="/manifest.json" />
     <title>Sippd: Can Collection Tracker</title>
   </head>

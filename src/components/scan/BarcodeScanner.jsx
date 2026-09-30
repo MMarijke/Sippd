@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { motion } from 'framer-motion';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { BarcodeFormat, DecodeHintType, NotFoundException } from '@zxing/library';
@@ -106,9 +107,16 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
       return;
     }
 
-    setStatus('starting');
-    setErrorKind(null);
-    setFound(null);
+    // flushSync so the <video> below is in the DOM before the reader is
+    // given videoRef.current. Without it the ref was still null here (the
+    // idle card has no video), and zxing then decodes into a detached video
+    // it creates itself, so the on-screen preview never got the stream and
+    // the "found" state had no frame to hold.
+    flushSync(() => {
+      setStatus('starting');
+      setErrorKind(null);
+      setFound(null);
+    });
     detectedRef.current = false;
     readerRef.current ??= new BrowserMultiFormatReader(HINTS);
 
@@ -161,7 +169,10 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
     const begin = () => { if (!cancelled && mountedRef.current) startRef.current(); };
     if (!cameraSupported()) return;
     if (autoStart) {
-      begin();
+      // A tick later, outside the effect, so startScanning's flushSync can
+      // render the video element.
+      const timer = setTimeout(begin, 0);
+      return () => { cancelled = true; clearTimeout(timer); };
     } else {
       navigator.permissions?.query({ name: 'camera' })
         .then(result => { if (result.state === 'granted') begin(); })

@@ -32,13 +32,15 @@ function wash(token, alpha) {
   return `linear-gradient(${layer}, ${layer}), hsl(var(--card))`;
 }
 
-// Unrated or unknown rarity: the theme's own accent, as before.
-export const THEME_CAN_BG = wash('primary', 0.18);
+// Unrated or unknown rarity: a faint neutral wash of the text colour. It
+// used to be the theme's accent, which in Power-Up (green) made an unrated
+// '? ? ?' tile look Uncommon; a tile only carries a hue once it has a rarity.
+export const UNRATED_CAN_BG = wash('foreground', 0.06);
 
 // Accepts the app's display names ("Ultra Rare") and stored variants
 // ("ultra_rare", "ULTRA RARE"). Use as a `background` shorthand value.
 export function rarityTileBackground(rarity) {
   const key = String(rarity ?? '').trim().toLowerCase().replace(/_/g, ' ');
   const entry = RARITY_TOKEN[key];
-  return entry ? wash(`rarity-${entry[0]}`, entry[1]) : THEME_CAN_BG;
+  return entry ? wash(`rarity-${entry[0]}`, entry[1]) : UNRATED_CAN_BG;
 }

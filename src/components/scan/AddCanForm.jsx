@@ -587,7 +587,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
                 can has no explanation anywhere before this commits. This
                 stays visible unconditionally so the warning is never gated
                 behind an optional interaction. */}
-            <p className={cn('text-xs font-mono', voteNudge ? 'text-destructive' : 'text-muted-foreground')} aria-live="polite">
+            <p className={cn('text-xs font-mono', voteNudge && !pendingRarity ? 'text-destructive' : 'text-muted-foreground')} aria-live="polite">
               {pendingRarity
                 ? `Tap ${pendingRarity} again to lock it in.`
                 : voteNudge

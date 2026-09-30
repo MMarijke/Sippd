@@ -218,6 +218,7 @@ export default function Scan() {
             screen-reader users land at the top of the form instead of on
             <body> after the scanner or search results disappear. */}
         <PageHeader
+          key="add-header"
           title={selectedCan?.id ? 'Confirm Pull' : 'New Can'}
           subtitle={selectedCan?.id ? 'Add to your vault' : 'Add a new can to the database'}
           focusTitle
@@ -244,6 +245,7 @@ export default function Scan() {
     <div className="flex flex-col gap-0">
       {liveRegion}
       <PageHeader
+        key="scan-header"
         title="Scan / Search"
         subtitle="Find a can or add a new one"
         focusTitle={returning}

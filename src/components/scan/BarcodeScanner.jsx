@@ -15,6 +15,21 @@ HINTS.set(DecodeHintType.POSSIBLE_FORMATS, [
   BarcodeFormat.UPC_E,
   BarcodeFormat.CODE_128,
 ]);
+// Tested on a real webcam frame of a can (barcode 6009907414877): without
+// TRY_HARDER the reader gave up on it; with it, it decoded. Cans are curved
+// and a held-close can is slightly soft, which is exactly where the default
+// pass is too strict.
+HINTS.set(DecodeHintType.TRY_HARDER, true);
+
+// A sharper picture than the browser default (often 640x480): ideal sizes
+// and continuous focus are requests, not requirements, so a camera that
+// can't do them still opens.
+const VIDEO_CONSTRAINTS = {
+  facingMode: 'environment',
+  width: { ideal: 1280 },
+  height: { ideal: 720 },
+  advanced: [{ focusMode: 'continuous' }],
+};
 
 // Exponential ease-out: the "found it" motion lands fast and settles.
 const EASE_OUT = [0.16, 1, 0.3, 1];
@@ -122,7 +137,7 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
 
     try {
       const controls = await readerRef.current.decodeFromConstraints(
-        { video: { facingMode: 'environment' } },
+        { video: VIDEO_CONSTRAINTS },
         videoRef.current,
         (result, err) => {
           if (!mountedRef.current) return;

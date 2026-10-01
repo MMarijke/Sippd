@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import { RARITY_TEXT_CLASS } from '@/lib/rarityConsensus';
-import { THEME_CAN_BG } from '@/lib/canBgColors';
+import { rarityTileBackground } from '@/lib/canBgColors';
 
 const STATUS_STYLES = {
   pending:   { label: 'Pending',   class: 'bg-warning/10 text-warning border-warning/20' },
@@ -248,7 +248,7 @@ function CanChip({ name, brand, imageUrl, rarity, label }) {
     <div className="flex-1 min-w-0">
       <p className="text-2xs font-mono text-muted-foreground mb-1">{label}</p>
       <div className="flex items-center gap-2 bg-secondary rounded-lg px-2 py-1.5">
-        <div className="w-7 h-7 rounded-md overflow-hidden border border-border flex-shrink-0" style={{ background: THEME_CAN_BG }}>
+        <div className="w-7 h-7 rounded-md overflow-hidden border border-border flex-shrink-0" style={{ background: rarityTileBackground(rarity) }}>
           {imageUrl && <img src={imageUrl} alt={name} loading="lazy" decoding="async" className="w-full h-full object-contain" />}
         </div>
         <div className="min-w-0">

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { rarityTileBackground, THEME_CAN_BG } from './canBgColors';
+import { rarityTileBackground, UNRATED_CAN_BG } from './canBgColors';
 
 describe('rarityTileBackground', () => {
   it('washes the card with the rarity hue', () => {
@@ -22,15 +22,17 @@ describe('rarityTileBackground', () => {
     expect(new Set(tiers).size).toBe(tiers.length);
   });
 
-  it('falls back to the theme tile when unrated or unknown', () => {
-    expect(rarityTileBackground('???')).toBe(THEME_CAN_BG);
-    expect(rarityTileBackground(null)).toBe(THEME_CAN_BG);
-    expect(rarityTileBackground(undefined)).toBe(THEME_CAN_BG);
-    expect(rarityTileBackground('Mythic')).toBe(THEME_CAN_BG);
+  it('gives unrated or unknown cans a neutral tile, not a rarity or accent hue', () => {
+    expect(UNRATED_CAN_BG).toContain('--foreground');
+    expect(UNRATED_CAN_BG).not.toContain('--primary');
+    expect(rarityTileBackground('???')).toBe(UNRATED_CAN_BG);
+    expect(rarityTileBackground(null)).toBe(UNRATED_CAN_BG);
+    expect(rarityTileBackground(undefined)).toBe(UNRATED_CAN_BG);
+    expect(rarityTileBackground('Mythic')).toBe(UNRATED_CAN_BG);
   });
 
   it('avoids color-mix, which the recap image export cannot parse', () => {
     expect(rarityTileBackground('Rare')).not.toMatch(/color-mix/);
-    expect(THEME_CAN_BG).not.toMatch(/color-mix/);
+    expect(UNRATED_CAN_BG).not.toMatch(/color-mix/);
   });
 });

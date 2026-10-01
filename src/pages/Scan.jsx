@@ -47,13 +47,15 @@ export default function Scan() {
   const [mode, setMode] = useState('search');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCan, setSelectedCan] = useState(null);
-  const [offLookup, setOffLookup] = useState(false);
-  // Escalation UI + cancel affordance for a lookup that's taking a while --
-  // this fetch previously had no timeout and no way out if it stalled
-  // (unlike BarcodeScanner's own "still waiting, tap X" pattern for a stuck
-  // camera permission prompt), trapping a user in an indefinite spinner on
-  // a slow connection. (/impeccable critique)
-  const [offLookupSlow, setOffLookupSlow] = useState(false);
+  // Where a barcode lookup is: 'catalog' (our shared_cans), 'off' (Open
+  // Food Facts), 'off-slow' (OFF taking a while: escalated copy plus a way
+  // out, since a stalled fetch used to trap people in a spinner), or null.
+  // A camera read shows this inside the camera frame; a typed barcode shows
+  // it under the search box.
+  const [lookup, setLookup] = useState(null);
+  const [lookupFromCamera, setLookupFromCamera] = useState(false);
+  const offLookup = lookup === 'off' || lookup === 'off-slow';
+  const offLookupSlow = lookup === 'off-slow';
   const offLookupControllerRef = useRef(null);
   // True once the add form has been shown and closed, so returning to the
   // scanner moves focus to its title instead of dropping it on <body>.
@@ -105,8 +107,10 @@ export default function Scan() {
     if (isSharedCansError) toast.error('Could not load the can database');
   }, [isSharedCansError]);
 
-  const handleBarcodeLookup = async (barcode) => {
+  const handleBarcodeLookup = async (barcode, { fromCamera = false } = {}) => {
     announce(`Barcode ${barcode} read. Looking it up.`);
+    setLookupFromCamera(fromCamera);
+    setLookup('catalog');
     // Asked of the server, not the client list above: that list is only the
     // newest 500 catalog cans, so an older can's barcode used to look like a
     // miss and get routed to Open Food Facts as a brand-new can, and the
@@ -122,18 +126,19 @@ export default function Scan() {
       // catalog a second time, so stop here instead.
       toast.error("Can't verify that barcode against the database right now — try again in a moment.");
       announce("Couldn't check that barcode. Try again in a moment.");
+      setLookup(null);
       return;
     }
     if (match) {
+      setLookup(null);
       openAddForm(match);
       return;
     }
-    setOffLookup(true);
-    setOffLookupSlow(false);
+    setLookup('off');
     const controller = new AbortController();
     controller.barcode = barcode; // stashed so a mid-flight cancel can still prefill the manual form
     offLookupControllerRef.current = controller;
-    const slowTimer = setTimeout(() => setOffLookupSlow(true), 5000);
+    const slowTimer = setTimeout(() => setLookup('off-slow'), 5000);
     // Client-side ceiling in case the fetch itself never settles (the
     // browser's own connect/read timeouts can be far longer than a user
     // would ever wait) -- aborts with a distinguishable reason so the catch
@@ -156,8 +161,7 @@ export default function Scan() {
       clearTimeout(slowTimer);
       clearTimeout(hardTimeout);
       offLookupControllerRef.current = null;
-      setOffLookup(false);
-      setOffLookupSlow(false);
+      setLookup(null);
     }
   };
 
@@ -214,6 +218,7 @@ export default function Scan() {
             screen-reader users land at the top of the form instead of on
             <body> after the scanner or search results disappear. */}
         <PageHeader
+          key="add-header"
           title={selectedCan?.id ? 'Confirm Pull' : 'New Can'}
           subtitle={selectedCan?.id ? 'Add to your vault' : 'Add a new can to the database'}
           focusTitle
@@ -240,6 +245,7 @@ export default function Scan() {
     <div className="flex flex-col gap-0">
       {liveRegion}
       <PageHeader
+        key="scan-header"
         title="Scan / Search"
         subtitle="Find a can or add a new one"
         focusTitle={returning}
@@ -269,7 +275,7 @@ export default function Scan() {
           />
         </div>
 
-        {offLookup && (
+        {offLookup && !lookupFromCamera && (
           // Not gated behind searchQuery.length — a camera-triggered scan
           // (the primary intended path) leaves the search box empty, and
           // this lookup still needs to show it's working either way.
@@ -367,7 +373,13 @@ export default function Scan() {
       </div>
 
       <div className="mt-6">
-        <BarcodeScanner onDetected={handleBarcodeLookup} autoStart={autoStartCamera} onAnnounce={announce} />
+        <BarcodeScanner
+          onDetected={code => handleBarcodeLookup(code, { fromCamera: true })}
+          autoStart={autoStartCamera}
+          onAnnounce={announce}
+          lookup={lookupFromCamera ? lookup : null}
+          onCancelLookup={cancelOffLookup}
+        />
       </div>
 
       <div className="flex items-center gap-3 px-5 mt-6">

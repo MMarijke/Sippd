@@ -152,7 +152,17 @@
     --rarity-ultra: 271 91% 65%;
     --rarity-legendary: 330 81% 60%;
 
-    /* Multi-hue per-theme ramp, not the single-hue monochromatic version
+    /* ORDER RULE (applies to every theme's --breakdown-* ramp below):
+       Legendary is the standout step. Its contrast against the theme's
+       --card must be at least Common's, so the rarest slice of a
+       collection reads loudest in the Home gauge, Profile's breakdown bar
+       and the recap image. Fourteen ramps had it the other way round (on
+       Power-Up dark, Legendary sat at 3.2:1 against Common's 13:1) and
+       were reversed: same colours, opposite order. Hue-only ramps whose
+       ends match in contrast keep their authored order. (/impeccable
+       colorize, 2026-10)
+
+       Multi-hue per-theme ramp, not the single-hue monochromatic version
        first tried in this restructure -- see the file header. Common
        through Legendary rotate through 5 hues anchored on this theme's own
        --primary (guarantees separation even when a theme's main and
@@ -177,11 +187,11 @@
        plausible extensions of that theme's own hue, not a detour through
        its opposite). Saturation step (+5%/tier) and the per-tier contrast
        fit are unchanged. */
-    --breakdown-common: 152.0 100% 50.0%;
-    --breakdown-uncommon: 152.8 75% 48.9%;
+    --breakdown-common: 182.0 65% 28.4%;
+    --breakdown-uncommon: 167.4 62% 36.1%;
     --breakdown-rare: 158.0 66% 43.2%;
-    --breakdown-ultra: 167.4 62% 36.1%;
-    --breakdown-legendary: 182.0 65% 28.4%;
+    --breakdown-ultra: 152.8 75% 48.9%;
+    --breakdown-legendary: 152.0 100% 50.0%;
 
     /* Podium (gold/silver/bronze) and Compare's "in common" -- fixed
        meanings like the status colors, so one hue per role everywhere, but
@@ -273,11 +283,11 @@
     --rarity-ultra: 271 91% 65%;
     --rarity-legendary: 330 81% 60%;
 
-    --breakdown-common: 152.0 100% 50.0%;
-    --breakdown-uncommon: 152.8 75% 48.9%;
+    --breakdown-common: 182.0 65% 28.4%;
+    --breakdown-uncommon: 167.4 62% 36.1%;
     --breakdown-rare: 158.0 66% 43.2%;
-    --breakdown-ultra: 167.4 62% 36.1%;
-    --breakdown-legendary: 182.0 65% 28.4%;
+    --breakdown-ultra: 152.8 75% 48.9%;
+    --breakdown-legendary: 152.0 100% 50.0%;
   }
 
   /* ── Neon Arcade family (dark, gamer/cyber/neon) ─────────────────────────
@@ -319,11 +329,11 @@
     --ring: 152 100% 50%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 152.0 100% 50.0%;
-    --breakdown-uncommon: 152.8 75% 48.9%;
+    --breakdown-common: 182.0 65% 28.4%;
+    --breakdown-uncommon: 167.4 62% 36.1%;
     --breakdown-rare: 158.0 66% 43.2%;
-    --breakdown-ultra: 167.4 62% 36.1%;
-    --breakdown-legendary: 182.0 65% 28.4%;
+    --breakdown-ultra: 152.8 75% 48.9%;
+    --breakdown-legendary: 152.0 100% 50.0%;
   }
   [data-theme="cyberpunk"][data-polarity="dark"] {
     --background: 278 38% 6%;
@@ -369,11 +379,11 @@
     --ring: 186 100% 50%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 186.0 100% 50.0%;
-    --breakdown-uncommon: 197.2 100% 59.9%;
+    --breakdown-common: 222.0 100% 56.0%;
+    --breakdown-uncommon: 216.9 100% 60.5%;
     --breakdown-rare: 207.9 100% 61.5%;
-    --breakdown-ultra: 216.9 100% 60.5%;
-    --breakdown-legendary: 222.0 100% 56.0%;
+    --breakdown-ultra: 197.2 100% 59.9%;
+    --breakdown-legendary: 186.0 100% 50.0%;
   }
   [data-theme="boss-fight"][data-polarity="dark"] {
     --background: 340 33% 5%;
@@ -423,11 +433,11 @@
     --ring: 283 79% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 283.0 79% 58.0%;
-    --breakdown-uncommon: 280.5 68% 52.8%;
+    --breakdown-common: 272.0 80% 37.4%;
+    --breakdown-uncommon: 275.0 72% 42.5%;
     --breakdown-rare: 277.8 66% 47.7%;
-    --breakdown-ultra: 275.0 72% 42.5%;
-    --breakdown-legendary: 272.0 80% 37.4%;
+    --breakdown-ultra: 280.5 68% 52.8%;
+    --breakdown-legendary: 283.0 79% 58.0%;
   }
 
   /* ── Neon Arcade, light-polarity counterparts ────────────────────────────
@@ -487,11 +497,11 @@
     --ring: 312 55% 56%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 312.0 55% 56.0%;
-    --breakdown-uncommon: 306.1 52% 60.2%;
+    --breakdown-common: 275.0 80% 77.8%;
+    --breakdown-uncommon: 286.6 62% 71.3%;
     --breakdown-rare: 297.3 51% 64.7%;
-    --breakdown-ultra: 286.6 62% 71.3%;
-    --breakdown-legendary: 275.0 80% 77.8%;
+    --breakdown-ultra: 306.1 52% 60.2%;
+    --breakdown-legendary: 312.0 55% 56.0%;
   }
   [data-theme="plasma"][data-polarity="light"] {
     --background: 203 89% 96%;
@@ -542,11 +552,11 @@
     --ring: 334 55% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 334.0 55% 58.0%;
-    --breakdown-uncommon: 334.3 58% 62.5%;
+    --breakdown-common: 334.0 75% 75.6%;
+    --breakdown-uncommon: 334.3 68% 71.3%;
     --breakdown-rare: 334.4 63% 66.9%;
-    --breakdown-ultra: 334.3 68% 71.3%;
-    --breakdown-legendary: 334.0 75% 75.6%;
+    --breakdown-ultra: 334.3 58% 62.5%;
+    --breakdown-legendary: 334.0 55% 58.0%;
   }
   [data-theme="synthwave"][data-polarity="light"] {
     /* shifted -9/-9deg (283, 250 -> 274, 241) to clear Grape Float's dark
@@ -675,11 +685,11 @@
     --ring: 219.2 21% 75.3%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 219.2 21% 75.3%;
-    --breakdown-uncommon: 221.0 23% 69.5%;
+    --breakdown-common: 221.0 26% 52.0%;
+    --breakdown-uncommon: 221.6 25% 57.9%;
     --breakdown-rare: 221.7 24% 63.7%;
-    --breakdown-ultra: 221.6 25% 57.9%;
-    --breakdown-legendary: 221.0 26% 52.0%;
+    --breakdown-ultra: 221.0 23% 69.5%;
+    --breakdown-legendary: 219.2 21% 75.3%;
   }
   [data-theme="nebula"] {
     --background: 262.9 49% 8.4%;
@@ -775,11 +785,11 @@
     --ring: 228.4 52% 55.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 228.4 52% 55.5%;
-    --breakdown-uncommon: 236.6 49% 54.8%;
+    --breakdown-common: 258.0 65% 43.0%;
+    --breakdown-uncommon: 251.9 53% 47.8%;
     --breakdown-rare: 244.9 48% 52.0%;
-    --breakdown-ultra: 251.9 53% 47.8%;
-    --breakdown-legendary: 258.0 65% 43.0%;
+    --breakdown-ultra: 236.6 49% 54.8%;
+    --breakdown-legendary: 228.4 52% 55.5%;
   }
   [data-theme="stellar-gold"] {
     --background: 45.0 35% 6.7%;
@@ -800,11 +810,11 @@
     --ring: 45.7 69% 65.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 45.7 69% 65.5%;
-    --breakdown-uncommon: 44.8 68% 60.5%;
+    --breakdown-common: 46.0 100% 40.0%;
+    --breakdown-uncommon: 44.5 67% 49.3%;
     --breakdown-rare: 44.4 66% 55.3%;
-    --breakdown-ultra: 44.5 67% 49.3%;
-    --breakdown-legendary: 46.0 100% 40.0%;
+    --breakdown-ultra: 44.8 68% 60.5%;
+    --breakdown-legendary: 45.7 69% 65.5%;
   }
 
   /* ── Botanical family (natural/earthy, mixed polarity) ───────────────────
@@ -950,11 +960,11 @@
     --ring: 99.8 46% 38.8%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 99.8 46% 38.8%;
-    --breakdown-uncommon: 99.8 41% 43.2%;
+    --breakdown-common: 100.0 24% 62.7%;
+    --breakdown-uncommon: 100.0 30% 55.1%;
     --breakdown-rare: 99.9 35% 48.0%;
-    --breakdown-ultra: 100.0 30% 55.1%;
-    --breakdown-legendary: 100.0 24% 62.7%;
+    --breakdown-ultra: 99.8 41% 43.2%;
+    --breakdown-legendary: 99.8 46% 38.8%;
   }
 
   /* ── Noir family (dark, luxury/minimalist) ────────────────────────────────
@@ -1023,11 +1033,11 @@
     --ring: 351.9 52% 47.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 351.9 52% 47.5%;
-    --breakdown-uncommon: 352.7 59% 43.7%;
+    --breakdown-common: 355.0 80% 32.2%;
+    --breakdown-uncommon: 354.2 73% 36.1%;
     --breakdown-rare: 353.4 66% 39.9%;
-    --breakdown-ultra: 354.2 73% 36.1%;
-    --breakdown-legendary: 355.0 80% 32.2%;
+    --breakdown-ultra: 352.7 59% 43.7%;
+    --breakdown-legendary: 351.9 52% 47.5%;
   }
   [data-theme="amethyst"] {
     --background: 273.3 26% 6.9%;
@@ -1073,11 +1083,11 @@
     --ring: 216.1 42% 52.4%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 216.1 55% 52.0%;
-    --breakdown-uncommon: 231.1 60% 56.4%;
+    --breakdown-common: 276.1 75% 37.7%;
+    --breakdown-uncommon: 261.1 70% 49.7%;
     --breakdown-rare: 246.1 65% 56.6%;
-    --breakdown-ultra: 261.1 70% 49.7%;
-    --breakdown-legendary: 276.1 75% 37.7%;
+    --breakdown-ultra: 231.1 60% 56.4%;
+    --breakdown-legendary: 216.1 55% 52.0%;
   }
   [data-theme="emerald"] {
     --background: 156.0 36% 5.5%;
@@ -1098,11 +1108,11 @@
     --ring: 179.1 32% 39.6%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 179.1 32% 39.6%;
-    --breakdown-uncommon: 171.8 42% 34.0%;
+    --breakdown-common: 150.0 70% 20.6%;
+    --breakdown-uncommon: 157.3 61% 24.6%;
     --breakdown-rare: 164.6 51% 29.0%;
-    --breakdown-ultra: 157.3 61% 24.6%;
-    --breakdown-legendary: 150.0 70% 20.6%;
+    --breakdown-ultra: 171.8 42% 34.0%;
+    --breakdown-legendary: 179.1 32% 39.6%;
   }
   /* Silver Screen -- a black-and-white movie. Every value the theme owns
      is 0% saturation; can rarity badges, status colors and the medal/

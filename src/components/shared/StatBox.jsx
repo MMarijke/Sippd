@@ -1,14 +1,23 @@
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
-export default function StatBox({ icon, label, value, className, glow, isLoading }) {
+// to: makes the whole box the link (Home's Wishlist). It used to be wrapped
+// in <Link className="contents">, which has no box of its own: keyboard
+// focus skipped it and a focus ring had nothing to draw on.
+export default function StatBox({ icon, label, value, className, glow, isLoading, to }) {
   const Icon = icon;
+  const Root = to ? Link : 'div';
   return (
-    <div className={cn(
-      'bg-card border border-border rounded-xl p-4 flex flex-col items-center gap-1',
-      glow && 'neon-border',
-      className
-    )}>
-      {Icon && <Icon className="w-5 h-5 text-primary mb-1" />}
+    <Root
+      {...(to ? { to } : {})}
+      className={cn(
+        'bg-card border border-border rounded-xl p-4 flex flex-col items-center gap-1',
+        glow && 'neon-border',
+        to && 'hover:border-primary/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        className
+      )}
+    >
+      {Icon && <Icon className="w-5 h-5 text-primary mb-1" aria-hidden="true" />}
       {/* A literal '—' placeholder here read as visible clutter rather
           than "still loading" — a skeleton bar says the same thing
           without ever putting a dash on screen, and (unlike falling back
@@ -22,6 +31,6 @@ export default function StatBox({ icon, label, value, className, glow, isLoading
         </span>
       )}
       <span className="text-2xs font-mono text-muted-foreground uppercase tracking-widest">{label}</span>
-    </div>
+    </Root>
   );
 }

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import CanImageBox from '@/components/shared/CanImageBox';
 import RarityBadge from '@/components/shared/RarityBadge';
-import { getDisplayRarity, RARITY_ORDER } from '@/lib/rarityConsensus';
+import { getDisplayRarity, getConfidence, RARITY_ORDER } from '@/lib/rarityConsensus';
 import { cn } from '@/lib/utils';
 
 // Card width tracks 80vw, capped at 280px so it doesn't get absurd on
@@ -23,8 +23,12 @@ const tierIndex = rarity => RARITY_ORDER.indexOf(rarity);
 // Rarest is your best ones, rarest tier first and newest first within it.
 // `filters` (the brand chips) render between the heading and the cards.
 export default function SpotlightCarousel({ collected, sharedCansMap, selectedBrand, isLoading = false, view = 'recent', onViewChange, filters = null }) {
+  // Same rule as CanCard: a can without enough community votes is unrated
+  // ('???', the neutral tile and badge), not shown as Common. Unrated sorts
+  // last in the Rarest view.
   const rarityOf = item => {
     const sharedCan = sharedCansMap[item.can_id];
+    if (sharedCan && getConfidence(sharedCan.total_votes) === 'unrated') return '???';
     return sharedCan ? getDisplayRarity(sharedCan) : (item.can_rarity || 'Common');
   };
   const filtered = selectedBrand && selectedBrand !== 'All'

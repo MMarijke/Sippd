@@ -79,7 +79,7 @@ export default function Achievements() {
     [achievements]
   );
 
-  const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements, user?.id);
+  const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements, user?.id, user?.created_at);
 
   return (
     <div className="min-h-screen bg-background">

@@ -25,7 +25,7 @@ const CARD_RARITY_STYLES = {
   'Legendary': 'border-rarity-legendary/40 bg-rarity-legendary/5 rarity-glow-legendary',
 };
 
-export default function ActivityCard({ item, user, myReactionSet, onReact, isPro = false }) {
+export default function ActivityCard({ item, myReactionSet, onReact, isPro = false }) {
   const navigate = useNavigate();
   const reducedMotion = usePrefersReducedMotion();
 

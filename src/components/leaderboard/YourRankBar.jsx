@@ -34,7 +34,9 @@ export default function YourRankBar({ status, rank, scope, rival, unit, rankDelt
         'sticky bottom-3 z-10 mt-3 transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none',
         rowVisible && 'opacity-0 translate-y-2 pointer-events-none'
       )}
-      inert={rowVisible || undefined}
+      // A string, not true: React 18 doesn't know `inert` and warns on a
+      // boolean; the empty string sets the attribute.
+      inert={rowVisible ? '' : undefined}
       aria-hidden={rowVisible || undefined}
     >
       <button

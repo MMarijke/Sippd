@@ -229,7 +229,7 @@ export default function CollectorsLeaderboard() {
     if (isLoading || !myRank || displayedRows.length === 0) return;
     jumpedOnArrival.current = true;
     requestAnimationFrame(() => handleJumpToRank());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [isLoading, myRank, displayedRows.length]);
 
   const rankDelta = useRankDelta(`collectors:${sortBy}:${category}`, myRank, currentUser?.id);

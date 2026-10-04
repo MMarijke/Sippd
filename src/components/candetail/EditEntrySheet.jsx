@@ -43,7 +43,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
         .from('can-images')
         .getPublicUrl(fileName);
       update('can_image_url', publicUrl);
-    } catch (err) {
+    } catch {
       toast.error('Failed to upload image');
     }
     setUploading(false);

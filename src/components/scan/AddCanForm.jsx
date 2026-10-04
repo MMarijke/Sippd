@@ -306,7 +306,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
         .from('can-images')
         .getPublicUrl(fileName);
       update('image_url', publicUrl);
-    } catch (err) {
+    } catch {
       toast.error('Failed to upload image');
     }
     setUploading(false);

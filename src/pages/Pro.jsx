@@ -18,7 +18,10 @@ const FEATURES = [
   'Unlimited barcode scans (free: 10/day)',
   `${PRO_THEME_COUNT} exclusive themes across all ${THEME_FAMILIES.length} collections`,
   'Pro badge on your profile, leaderboard, and feed posts',
-  'Bigger pinned showcase (10 vs. 6) with a hero spotlight slot',
+  // Every collector's showcase has a spotlight (their rarest can); Pro picks
+  // it (their first pin). "with a hero spotlight slot" claimed the slot
+  // itself was Pro-only.
+  'Bigger pinned showcase (10 vs. 6), and you choose your spotlight can',
   'Support indie development',
 ];
 

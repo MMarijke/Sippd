@@ -47,7 +47,7 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
 
   const contents = useMemo(
     () => applySorting(collection.filter(c => crateCanIds.has(c.id))),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [collection, crateCanIds, sort]
   );
   const available = useMemo(

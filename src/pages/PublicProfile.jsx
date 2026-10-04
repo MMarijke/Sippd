@@ -178,7 +178,7 @@ export default function PublicProfile() {
   const [visibleCount, setVisibleCount] = useState(ALL_CANS_PAGE_SIZE);
   const allSorted = useMemo(
     () => (expanded ? sortPinnedFirst(collected, getEffectiveRarity) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [expanded, collected, sharedCansMap]
   );
   const gridItems = expanded ? allSorted.slice(0, visibleCount) : showcase;

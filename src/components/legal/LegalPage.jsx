@@ -80,7 +80,9 @@ export default function LegalPage({ title, markdown }) {
         >
           <ChevronLeft className="w-4 h-4 text-foreground" />
         </button>
-        <h1 className="text-base font-display font-bold text-foreground tracking-wide">{title}</h1>
+        {/* Not an h1: the document's own "# Title" is the page heading, and
+            two h1s announced the title twice. */}
+        <p className="text-base font-display font-bold text-foreground tracking-wide">{title}</p>
       </div>
 
       <div className={cn('px-5 pt-6 max-w-2xl mx-auto')}>

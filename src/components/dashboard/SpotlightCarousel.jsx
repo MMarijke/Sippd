@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import CanImageBox from '@/components/shared/CanImageBox';
 import RarityBadge from '@/components/shared/RarityBadge';
-import { getDisplayRarity } from '@/lib/rarityConsensus';
+import { getDisplayRarity, RARITY_ORDER } from '@/lib/rarityConsensus';
+import { cn } from '@/lib/utils';
 
 // Card width tracks 80vw, capped at 280px so it doesn't get absurd on
 // tablet-width viewports. At the common 375px mobile viewport, the 280px
@@ -10,18 +11,58 @@ import { getDisplayRarity } from '@/lib/rarityConsensus';
 // narrower than 80vw's own ~20% margin, since the cap is doing the work.
 const CARD_WIDTH = 'min(80vw, 280px)';
 
-export default function SpotlightCarousel({ collected, sharedCansMap, selectedBrand, isLoading = false }) {
+const VIEWS = [
+  { value: 'recent', label: 'Recent' },
+  { value: 'rarest', label: 'Rarest' },
+];
+
+const tierIndex = rarity => RARITY_ORDER.indexOf(rarity);
+
+// Your cans, second on Home right after your standing (they used to sit
+// ~1000px down, under the stats and the feed). Recent is your latest pulls;
+// Rarest is your best ones, rarest tier first and newest first within it.
+// `filters` (the brand chips) render between the heading and the cards.
+export default function SpotlightCarousel({ collected, sharedCansMap, selectedBrand, isLoading = false, view = 'recent', onViewChange, filters = null }) {
+  const rarityOf = item => {
+    const sharedCan = sharedCansMap[item.can_id];
+    return sharedCan ? getDisplayRarity(sharedCan) : (item.can_rarity || 'Common');
+  };
   const filtered = selectedBrand && selectedBrand !== 'All'
     ? collected.filter(item => item.can_brand === selectedBrand)
     : collected;
-  const items = filtered.slice(0, 8);
+  const ordered = view === 'rarest'
+    // Stable sort: equal tiers keep the collection's newest-first order.
+    ? [...filtered].sort((a, b) => tierIndex(rarityOf(b)) - tierIndex(rarityOf(a)))
+    : filtered;
+  const items = ordered.slice(0, 8);
+
+  const header = (
+    <div className="flex items-center justify-between gap-3 px-5 mb-3">
+      <h2 className="text-base font-display font-bold text-foreground">Your cans</h2>
+      {onViewChange && (
+        <div role="group" aria-label="Show" className="flex rounded-lg border border-border p-0.5">
+          {VIEWS.map(v => (
+            <button
+              key={v.value}
+              type="button"
+              aria-pressed={view === v.value}
+              onClick={() => onViewChange(v.value)}
+              className={cn('h-11 px-3 rounded-md font-mono text-xs transition-colors',
+                view === v.value ? 'bg-card text-foreground font-semibold shadow-sm' : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   if (isLoading) {
     return (
-      <div>
-        <div className="flex items-center justify-between px-5 mb-3">
-          <h3 className="text-base font-display font-bold text-foreground">Recent Pulls</h3>
-        </div>
+      <section aria-label="Your cans">
+        {header}
         <div className="flex gap-3 overflow-x-auto scrollbar-none px-5 pb-1">
           {[0, 1].map(i => (
             <div
@@ -37,18 +78,14 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
             </div>
           ))}
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between px-5 mb-3">
-        <h3 className="text-base font-display font-bold text-foreground">Recent Pulls</h3>
-        {items.length > 0 && (
-          <span className="text-2xs font-mono text-muted-foreground">Swipe →</span>
-        )}
-      </div>
+    <section aria-label="Your cans">
+      {header}
+      {filters}
 
       {items.length === 0 ? (
         <div className="px-5">
@@ -62,11 +99,11 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
           </div>
         </div>
       ) : (
-        <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-none px-5 pb-1">
+        // scroll-px-5: snap points respect the page gutter, so the first
+        // card no longer snaps flush against the screen edge.
+        <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-px-5 scrollbar-none px-5 pb-1">
           {items.map(item => {
-            const sharedCan = sharedCansMap[item.can_id];
-            const rarity = sharedCan ? getDisplayRarity(sharedCan) : (item.can_rarity || 'Common');
-
+            const rarity = rarityOf(item);
             return (
               <Link
                 key={item.id}
@@ -95,6 +132,6 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
           })}
         </div>
       )}
-    </div>
+    </section>
   );
 }

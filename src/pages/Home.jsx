@@ -11,7 +11,8 @@ import StatsRow from '@/components/dashboard/StatsRow';
 import RarityHero from '@/components/dashboard/RarityHero';
 import FeedPreview from '@/components/dashboard/FeedPreview';
 import SpotlightCarousel from '@/components/dashboard/SpotlightCarousel';
-import { getItemScore, getDisplayRarity } from '@/lib/rarityConsensus';
+import StandingCard from '@/components/dashboard/StandingCard';
+import { useProfileShowcase } from '@/hooks/useProfileShowcase';
 import { useStreakStatus } from '@/lib/useStreak';
 import { format } from 'date-fns';
 import { computeAchievements } from '@/lib/achievements';
@@ -21,6 +22,7 @@ import AchievementUnlockAnimation from '@/components/achievements/AchievementUnl
 export default function Home() {
   const { user } = useAuth();
   const [selectedBrand, setSelectedBrand] = useState('All');
+  const [canView, setCanView] = useState('recent');
 
   const { data: profile } = useQuery({
     queryKey: ['my-profile', user?.id],
@@ -117,22 +119,19 @@ export default function Home() {
     [collection]
   );
 
-  const getEffectiveRarity = (item) => {
-    const sc = sharedCansMap[item.can_id];
-    return sc ? getDisplayRarity(sc) : (item.can_rarity || 'Common');
-  };
-
-  const rarePulls = useMemo(
-    () => collected.filter(c =>
-      ['Rare', 'Ultra Rare', 'Legendary'].includes(getEffectiveRarity(c))
-    ).length,
-    [collected, sharedCansMap]
-  );
-
-  const score = useMemo(
-    () => collected.reduce((acc, c) => acc + getItemScore(c, sharedCansMap[c.can_id]), 0),
-    [collected, sharedCansMap]
-  );
+  // The leaderboard's own numbers (the synced leaderboard_scores row, with a
+  // client mirror of the same rule as fallback), so Home can never show a
+  // different score or rare-pull count from Ranks and Profile. Home used to
+  // compute its own with getItemScore/getDisplayRarity, which could differ.
+  const standing = useProfileShowcase({
+    withRankGap: true,
+    userId: user?.id,
+    collection,
+    sharedCansMap,
+    streak,
+    voteCount: votes.length,
+    userCreatedDate: user?.created_at,
+  });
 
   const wishlistCount = useMemo(
     () => collection.filter(c => c.status === 'wishlist').length,
@@ -153,33 +152,70 @@ export default function Home() {
   // "welcome, add your first can" message.
   const isNewUser = !isLoading && !hasCollectionError && collected.length === 0;
 
+  // Brand chips, now inside the "Your cans" section they filter.
+  const brandChips = brands.length > 1 ? (
+    <div className="flex gap-2 overflow-x-auto scroll-px-5 px-5 pb-3 scrollbar-none" role="group" aria-label="Filter your cans by brand">
+      {brands.map(brand => (
+        <button
+          key={brand}
+          type="button"
+          onClick={() => setSelectedBrand(brand)}
+          aria-pressed={selectedBrand === brand}
+          className={cn(
+            'flex-shrink-0 h-11 px-4 flex items-center rounded-full text-xs font-mono font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            selectedBrand === brand
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-secondary border border-border text-muted-foreground hover:border-primary/30'
+          )}
+        >
+          {brand}
+        </button>
+      ))}
+    </div>
+  ) : null;
+
+  const statsRow = (
+    <StatsRow
+      showRarePulls={isNewUser}
+      rarePulls={standing.rarePulls}
+      streak={`${streak}d`}
+      wishlistCount={wishlistCount}
+      isLoadingRarePulls={isLoading}
+      isLoadingStreak={isLoading || streakLoading}
+      isLoadingWishlist={isLoading}
+    />
+  );
+
+  // Reading order (/impeccable layout): where you stand, your cans, your
+  // collection's make-up, then what everyone else is doing. It used to open
+  // on a rarity gauge, a score card and three stat boxes, with the first
+  // can ~1000px down and no rank anywhere.
   return (
-    <div>
+    <div className="pb-2">
       {toAnimate && <AchievementUnlockAnimation achievement={toAnimate} onDismiss={dismissCurrent} />}
 
-      {/* Hero zone: header + whichever of welcome-card/RarityHero/Score/
-          error-card is showing. The gradient layer is absolutely
-          positioned and fills this wrapper, so it's sized to this
-          zone's actual rendered content, not a fixed pixel guess —
-          a short first-time-user stack and a taller returning-user one
-          each get a gradient that fits them specifically. */}
+      {/* Hero zone: header plus your standing (or the welcome/error card).
+          The gradient layer fills this wrapper, so it fits whichever is
+          showing. */}
       <div className="relative">
         <div className="home-gradient-bg-layer" aria-hidden="true" />
-        <div className="relative z-10">
+        <div className="relative z-10 pb-1">
           <PageHeader
             title="SIPPD"
             subtitle={profile?.full_name ? `${profile.full_name}'s vault` : 'Your Vault'}
             action={
-              <Link to="/scan">
-                <Button size="sm" className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
-                  <ScanLine className="w-4 h-4" /> Scan
-                </Button>
-              </Link>
+              // asChild: one focusable link styled as a button, not a button
+              // nested inside a link (two Tab stops for one action).
+              <Button asChild size="sm" className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+                <Link to="/scan">
+                  <ScanLine className="w-4 h-4" aria-hidden="true" /> Scan
+                </Link>
+              </Button>
             }
           />
 
           {hasCollectionError ? (
-            <div className="px-5 mt-5">
+            <div className="px-5 mt-1">
               <div className="glass-card-destructive rounded-2xl p-5 text-center">
                 <p className="text-sm font-display font-semibold text-foreground">Couldn't load your vault</p>
                 <p className="text-xs font-mono text-muted-foreground mt-1.5">
@@ -191,88 +227,74 @@ export default function Home() {
                   className="h-11 font-mono text-xs gap-1.5 mt-3 border-destructive/30 text-destructive hover:bg-destructive/10"
                   onClick={retryCollection}
                 >
-                  <RefreshCw className="w-4 h-4" /> Retry
+                  <RefreshCw className="w-4 h-4" aria-hidden="true" /> Retry
+                </Button>
+              </div>
+            </div>
+          ) : isNewUser ? (
+            <div className="px-5 mt-1">
+              <div className="glass-card rounded-2xl p-5 text-center">
+                <p className="text-sm font-display font-semibold text-foreground">Welcome to Sippd</p>
+                <p className="text-xs font-mono text-muted-foreground mt-1.5">
+                  Scan your first can to start building your vault.
+                </p>
+                <Button asChild size="sm" className="h-11 mt-3 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Link to="/scan">
+                    <ScanLine className="w-4 h-4" aria-hidden="true" /> Scan Your First Can
+                  </Link>
                 </Button>
               </div>
             </div>
           ) : (
-            <>
-              {isNewUser && (
-                <div className="px-5 mt-5">
-                  <div className="glass-card rounded-2xl p-5 text-center">
-                    <p className="text-sm font-display font-semibold text-foreground">Welcome to Sippd</p>
-                    <p className="text-xs font-mono text-muted-foreground mt-1.5">
-                      Scan your first can to start building your vault.
-                    </p>
-                    <Link to="/scan" className="inline-block mt-3">
-                      <Button size="sm" className="font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
-                        <ScanLine className="w-4 h-4" /> Scan Your First Can
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              )}
-
-              {!isNewUser && (
-                <div className="px-5 mt-5">
-                  <RarityHero collected={collected} sharedCansMap={sharedCansMap} isLoading={isLoading} />
-                </div>
-              )}
-
-              {!isNewUser && (
-                <div className="px-5 mt-5">
-                  {/* .glass-card-hero, not .glass-card — Score is the page's
-                      headline metric and needs to read as categorically
-                      different from the welcome/error cards' neutral glass,
-                      not just another instance of it. */}
-                  <div className="glass-card-hero rounded-2xl p-5">
-                    {/* text-foreground, not text-primary — on Ultra/Voidglass
-                        this label's own theme color measured ~4.2:1 against
-                        .glass-card-hero's translucent surface, under WCAG
-                        AA's 4.5:1 floor for 10px text. --foreground stays
-                        theme-invariant at ~17.5:1+ margins on every theme
-                        (see index.css's theme-redesign comment), so this
-                        guarantees the fix without per-theme tuning. The
-                        card's own primary-tinted border/glow still carries
-                        the themed identity. */}
-                    <p className="text-2xs font-mono uppercase tracking-widest text-foreground">
-                      COLLECTION SCORE
-                    </p>
-                    <p className="text-5xl font-mono font-black text-foreground neon-text">
-                      {isLoading ? (
-                        <span className="inline-block h-10 w-24 rounded bg-foreground/10 animate-pulse align-middle" />
-                      ) : score}
-                    </p>
-                    <p className="text-xs font-mono text-muted-foreground">
-                      Your Vault
-                    </p>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* StatsRow's own cards are opaque (bg-card), so the gradient
-              layer doesn't show through them directly -- but keeping it
-              inside the hero-zone wrapper still extends the ambient
-              atmosphere into the gaps and margins around them, rather
-              than cutting off abruptly right after the Score card. */}
-          {!hasCollectionError && (
-            <div className="mt-5">
-              <StatsRow
-                rarePulls={rarePulls}
-                streak={`${streak}d`}
-                wishlistCount={wishlistCount}
-                isLoadingRarePulls={isLoading}
-                isLoadingStreak={isLoading || streakLoading}
-                isLoadingWishlist={isLoading}
+            <div className="px-5 mt-1">
+              <StandingCard
+                isLoading={isLoading || standing.isStatsLoading}
+                isRankError={standing.isRankError}
+                rank={standing.rank}
+                rankTotal={standing.rankTotal}
+                score={standing.score}
+                rarePulls={standing.rarePulls}
+                weeklyPoints={standing.weeklyPoints}
+                gap={standing.pointsToNextRank}
+                nextRank={standing.nextRank}
+                rivalName={standing.rivalName}
               />
             </div>
           )}
         </div>
       </div>
 
-      <div className="px-5 mt-5">
+      {!hasCollectionError && !isNewUser && (
+        <div className="mt-8">
+          <SpotlightCarousel
+            collected={collected}
+            sharedCansMap={sharedCansMap}
+            selectedBrand={selectedBrand}
+            isLoading={isLoading}
+            view={canView}
+            onViewChange={setCanView}
+            filters={brandChips}
+          />
+        </div>
+      )}
+
+      {!hasCollectionError && !isNewUser && (
+        <section className="mt-8" aria-labelledby="home-collection-heading">
+          <h2 id="home-collection-heading" className="px-5 mb-3 text-base font-display font-bold text-foreground">
+            Your collection
+          </h2>
+          <div className="px-5">
+            <div className="bg-card border border-border rounded-2xl px-4 pt-4 pb-3">
+              <RarityHero compact collected={collected} sharedCansMap={sharedCansMap} isLoading={isLoading} />
+            </div>
+          </div>
+          <div className="mt-3">{statsRow}</div>
+        </section>
+      )}
+
+      {isNewUser && <div className="mt-5">{statsRow}</div>}
+
+      <div className="px-5 mt-8">
         {isNewUser && (
           <p className="text-xs font-mono text-muted-foreground mb-2">
             While you're getting started, see what other collectors are up to:
@@ -281,44 +303,9 @@ export default function Home() {
         <FeedPreview />
       </div>
 
-      {!isLoading && !hasCollectionError && collected.length > 0 && brands.length > 1 && (
+      {isNewUser && (
         <div className="mt-5">
-          <div className="px-5 mb-2 flex items-center justify-between">
-            <p className="text-2xs font-mono uppercase tracking-widest text-muted-foreground">
-              Browse by Brand
-            </p>
-            {brands.length > 4 && (
-              <span className="text-2xs font-mono text-muted-foreground">Swipe →</span>
-            )}
-          </div>
-          <div className="flex gap-3 overflow-x-auto px-5 pb-1 scrollbar-none">
-            {brands.map(brand => (
-              <button
-                key={brand}
-                onClick={() => setSelectedBrand(brand)}
-                aria-pressed={selectedBrand === brand}
-                className={cn(
-                  'flex-shrink-0 h-11 px-4 flex items-center rounded-full text-xs font-mono font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  selectedBrand === brand
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary border border-border text-muted-foreground hover:border-primary/30'
-                )}
-              >
-                {brand}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {!hasCollectionError && (
-        <div className="mt-5">
-          <SpotlightCarousel
-            collected={collected}
-            sharedCansMap={sharedCansMap}
-            selectedBrand={selectedBrand}
-            isLoading={isLoading}
-          />
+          <SpotlightCarousel collected={collected} sharedCansMap={sharedCansMap} selectedBrand="All" isLoading={isLoading} />
         </div>
       )}
 
@@ -326,13 +313,13 @@ export default function Home() {
       <Link to="/monthly-report" className="block px-5 mt-5">
         <div className="flex items-center gap-4 bg-card border border-primary/20 rounded-xl p-4 hover:border-primary/40 transition-colors cursor-pointer">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <BarChart2 className="w-5 h-5 text-primary" />
+            <BarChart2 className="w-5 h-5 text-primary" aria-hidden="true" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-display font-semibold text-foreground tracking-wide">Monthly Report</p>
             <p className="text-2xs font-mono text-muted-foreground mt-0.5">{format(new Date(), 'MMMM yyyy')} · Tap to view</p>
           </div>
-          <span className="text-xs font-mono text-primary">→</span>
+          <span className="text-xs font-mono text-primary" aria-hidden="true">→</span>
         </div>
       </Link>
     </div>

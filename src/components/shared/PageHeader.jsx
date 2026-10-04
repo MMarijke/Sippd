@@ -42,7 +42,10 @@ export default function PageHeader({ title, subtitle, action, showBell = true, o
           >
             {title}
           </h1>
-          {subtitle && <p className="text-xs font-mono text-muted-foreground mt-1">{subtitle}</p>}
+          {/* text-foreground, not muted-foreground: on Home and Haul this sits
+              on the hero gradient, where muted measured 2.6-3.2:1 (and 80%
+              strength still fell to 4.2:1 on Sage). */}
+          {subtitle && <p className="text-xs font-mono text-foreground mt-1">{subtitle}</p>}
         </div>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">

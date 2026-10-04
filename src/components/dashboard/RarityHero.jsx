@@ -118,16 +118,26 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
     );
   };
 
+  // What a screen reader hears instead of the chart: it used to read the
+  // bare arc counts ("5 3 3 1 1") with no tier names, after landing on an
+  // unlabelled focusable node recharts adds to the pie.
+  const summary = isEmpty
+    ? 'Rarity breakdown: no cans yet'
+    : `Rarity breakdown: ${totalCans} ${totalCans === 1 ? 'can' : 'cans'}, ${tiers.map(t => `${t.value} ${t.name}`).join(', ')}`;
+
   return (
     <div>
-      <p className="text-2xs font-mono uppercase tracking-widest text-muted-foreground text-center">
+      <p className="text-2xs font-mono uppercase tracking-widest text-muted-foreground text-center" aria-hidden="true">
         Rarity Breakdown
       </p>
 
-      <div ref={wrapperRef} className={`relative w-full ${boxWidth} mx-auto mt-2`} style={{ aspectRatio: '2 / 1' }}>
+      {/* role="img" + label: one spoken summary; everything inside (arcs,
+          counts, the total) is presentational. */}
+      <div ref={wrapperRef} role="img" aria-label={summary} className={`relative w-full ${boxWidth} mx-auto mt-2`} style={{ aspectRatio: '2 / 1' }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
+              rootTabIndex={-1}
               data={data}
               cx="50%"
               cy="100%"
@@ -169,7 +179,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
       </div>
 
       {!isEmpty && (
-        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mt-4">
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mt-4" aria-hidden="true">
           {tiers.map(({ name }) => (
             <div key={name} className="flex items-center gap-1.5">
               <div

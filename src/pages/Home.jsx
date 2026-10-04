@@ -165,7 +165,9 @@ export default function Home() {
             'flex-shrink-0 h-11 px-4 flex items-center rounded-full text-xs font-mono font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
             selectedBrand === brand
               ? 'bg-primary text-primary-foreground'
-              : 'bg-secondary border border-border text-muted-foreground hover:border-primary/30'
+              // Outlined on the page background, not filled bg-secondary: muted
+              // text on secondary measured 4.08:1 (Power-Up) and 3.96:1 (Sage).
+              : 'bg-transparent border border-border text-foreground/80 hover:border-primary/40 hover:text-foreground'
           )}
         >
           {brand}

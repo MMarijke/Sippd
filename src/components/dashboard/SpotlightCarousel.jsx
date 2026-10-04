@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
 import CanImageBox from '@/components/shared/CanImageBox';
 import RarityBadge from '@/components/shared/RarityBadge';
-import { getDisplayRarity, getConfidence, RARITY_ORDER } from '@/lib/rarityConsensus';
-import { cn } from '@/lib/utils';
+import { getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
 import { byAcquiredDesc } from '@/lib/canDate';
 
 // Card width tracks 80vw, capped at 280px so it doesn't get absurd on
@@ -12,21 +11,9 @@ import { byAcquiredDesc } from '@/lib/canDate';
 // narrower than 80vw's own ~20% margin, since the cap is doing the work.
 const CARD_WIDTH = 'min(80vw, 280px)';
 
-const VIEWS = [
-  { value: 'recent', label: 'Recent' },
-  { value: 'rarest', label: 'Rarest' },
-];
-
-const tierIndex = rarity => RARITY_ORDER.indexOf(rarity);
-
-// Your cans, second on Home right after your standing (they used to sit
-// ~1000px down, under the stats and the feed). Recent is your latest pulls;
-// Rarest is your best ones, rarest tier first and newest first within it.
-// `filters` (the brand chips) render between the heading and the cards.
-export default function SpotlightCarousel({ collected, sharedCansMap, selectedBrand, isLoading = false, view = 'recent', onViewChange, filters = null }) {
+export default function SpotlightCarousel({ collected, sharedCansMap, selectedBrand, isLoading = false }) {
   // Same rule as CanCard: a can without enough community votes is unrated
-  // ('???', the neutral tile and badge), not shown as Common. Unrated sorts
-  // last in the Rarest view.
+  // ('???', the neutral tile and badge), not shown as Common.
   const rarityOf = item => {
     const sharedCan = sharedCansMap[item.can_id];
     if (sharedCan && getConfidence(sharedCan.total_votes) === 'unrated') return '???';
@@ -35,41 +22,16 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
   const filtered = selectedBrand && selectedBrand !== 'All'
     ? collected.filter(item => item.can_brand === selectedBrand)
     : collected;
-  // Recent: by when the collector got each can (their own date, else when
-  // logged). Rarest: rarest tier first, newest first within it (stable sort).
-  const recent = [...filtered].sort(byAcquiredDesc);
-  const ordered = view === 'rarest'
-    ? [...recent].sort((a, b) => tierIndex(rarityOf(b)) - tierIndex(rarityOf(a)))
-    : recent;
-  const items = ordered.slice(0, 8);
-
-  const header = (
-    <div className="flex items-center justify-between gap-3 px-5 mb-3">
-      <h2 className="text-base font-display font-bold text-foreground">Your cans</h2>
-      {onViewChange && (
-        <div role="group" aria-label="Show" className="flex rounded-lg border border-border p-0.5">
-          {VIEWS.map(v => (
-            <button
-              key={v.value}
-              type="button"
-              aria-pressed={view === v.value}
-              onClick={() => onViewChange(v.value)}
-              className={cn('h-11 px-3 rounded-md font-mono text-xs transition-colors',
-                view === v.value ? 'bg-card text-foreground font-semibold shadow-sm' : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {v.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  // Newest first by when the collector got each can (their own date, else
+  // when logged).
+  const items = [...filtered].sort(byAcquiredDesc).slice(0, 8);
 
   if (isLoading) {
     return (
-      <section aria-label="Your cans">
-        {header}
+      <div>
+        <div className="flex items-center justify-between px-5 mb-3">
+          <h2 className="text-base font-display font-bold text-foreground">Recent Pulls</h2>
+        </div>
         <div className="flex gap-3 overflow-x-auto scrollbar-none px-5 pb-1">
           {[0, 1].map(i => (
             <div
@@ -85,14 +47,18 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
             </div>
           ))}
         </div>
-      </section>
+      </div>
     );
   }
 
   return (
-    <section aria-label="Your cans">
-      {header}
-      {filters}
+    <div>
+      <div className="flex items-center justify-between px-5 mb-3">
+        <h2 className="text-base font-display font-bold text-foreground">Recent Pulls</h2>
+        {items.length > 0 && (
+          <span className="text-2xs font-mono text-muted-foreground">Swipe →</span>
+        )}
+      </div>
 
       {items.length === 0 ? (
         <div className="px-5">
@@ -106,11 +72,10 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
           </div>
         </div>
       ) : (
-        // scroll-px-5: snap points respect the page gutter, so the first
-        // card no longer snaps flush against the screen edge.
         <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-px-5 scrollbar-none px-5 pb-1">
           {items.map(item => {
             const rarity = rarityOf(item);
+
             return (
               <Link
                 key={item.id}
@@ -139,6 +104,6 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
           })}
         </div>
       )}
-    </section>
+    </div>
   );
 }

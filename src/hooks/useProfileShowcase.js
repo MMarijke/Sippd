@@ -109,21 +109,19 @@ export function useProfileShowcase({
     queryFn: async () => {
       const { data, error } = await supabase
         .from('leaderboard_scores')
-        .select('score, full_name')
+        .select('score')
         .gt('score', boardRow.score)
         .order('score', { ascending: true })
         .limit(1);
       if (error) throw error;
       const nextScore = data?.[0]?.score;
-      // Who's there: the collector you'd pass next (one of them, on a tie).
-      const rivalName = data?.[0]?.full_name ?? null;
       if (nextScore == null) return null;
       const { count, error: countError } = await supabase
         .from('leaderboard_scores')
         .select('*', { count: 'exact', head: true })
         .gt('score', nextScore);
       if (countError) throw countError;
-      return { gap: nextScore - boardRow.score, rank: (count || 0) + 1, rivalName };
+      return { gap: nextScore - boardRow.score, rank: (count || 0) + 1 };
     },
     enabled: withRankGap && canReadLeaderboard && !!rank && rank > 1,
   });
@@ -147,7 +145,6 @@ export function useProfileShowcase({
     rankTotal: rankTotal ?? null,
     nextRank: nextUp?.rank ?? null,
     pointsToNextRank: nextUp?.gap ?? null,
-    rivalName: nextUp?.rivalName ?? null,
     weeklyPoints,
     streak,
     isStatsLoading: canReadLeaderboard && !!userId && isBoardLoading,

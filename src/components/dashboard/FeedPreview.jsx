@@ -82,7 +82,7 @@ export default function FeedPreview() {
       />
       <div className="relative flex items-center justify-between mb-3">
         <div className="pointer-events-none">
-          <h3 className="text-sm font-display font-semibold text-foreground tracking-wide">Feed</h3>
+          <h2 className="text-sm font-display font-semibold text-foreground tracking-wide">Feed</h2>
           <p className="text-2xs font-mono text-muted-foreground">Community activity</p>
         </div>
         <button

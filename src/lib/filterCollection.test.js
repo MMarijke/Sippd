@@ -168,6 +168,12 @@ describe('filterAndSortCollection', () => {
       expect(result.map(i => i.id)).toEqual(['early', 'mid', 'late']);
     });
 
+    it('date sorts use the collector date over when the can was logged', () => {
+      const backdated = makeItem({ id: 'backdated', can_brand: 'X', acquired_on: '2025-01-01', created_at: '2026-04-01T00:00:00Z' });
+      const result = filterAndSortCollection([...items, backdated], { ...baseFilters, sort: 'date_asc' }, '', effectiveRarity);
+      expect(result[0].id).toBe('backdated');
+    });
+
     it('falls back to date_desc when filters.sort is unset', () => {
       const { sort, ...withoutSort } = baseFilters;
       const result = filterAndSortCollection(items, withoutSort, '', effectiveRarity);

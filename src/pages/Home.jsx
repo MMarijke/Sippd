@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import PageHeader from '@/components/shared/PageHeader';
 import StatsRow from '@/components/dashboard/StatsRow';
-import RarityHero from '@/components/dashboard/RarityHero';
 import FeedPreview from '@/components/dashboard/FeedPreview';
 import SpotlightCarousel from '@/components/dashboard/SpotlightCarousel';
 import StandingCard from '@/components/dashboard/StandingCard';
@@ -19,6 +18,20 @@ import { format } from 'date-fns';
 import { computeAchievements } from '@/lib/achievements';
 import { useAchievementUnlock } from '@/hooks/useAchievementUnlock';
 import AchievementUnlockAnimation from '@/components/achievements/AchievementUnlockAnimation';
+
+// Loaded on demand: it carries the charting library (recharts), the
+// biggest dependency in the first download, for a chart that now sits
+// below the fold. Home and Login load eagerly, so anything they import
+// directly ships to every visitor before the first paint.
+const RarityHero = lazy(() => import('@/components/dashboard/RarityHero'));
+
+function GaugePlaceholder() {
+  return (
+    <div className="relative w-full max-w-[220px] mx-auto mt-6 flex items-end justify-center" style={{ aspectRatio: '2 / 1' }} aria-hidden="true">
+      <div className="w-3/4 h-3/4 rounded-t-full bg-secondary/60 animate-pulse" />
+    </div>
+  );
+}
 
 export default function Home() {
   const { user } = useAuth();
@@ -288,7 +301,9 @@ export default function Home() {
           </h2>
           <div className="px-5">
             <div className="bg-card border border-border rounded-2xl px-4 pt-4 pb-3">
-              <RarityHero compact collected={collected} sharedCansMap={sharedCansMap} isLoading={isLoading} />
+              <Suspense fallback={<GaugePlaceholder />}>
+                <RarityHero compact collected={collected} sharedCansMap={sharedCansMap} isLoading={isLoading} />
+              </Suspense>
             </div>
           </div>
           <div className="mt-3">{statsRow}</div>

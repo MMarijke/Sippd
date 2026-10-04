@@ -672,7 +672,7 @@ export default function Settings() {
       // as the original seed -- opening a tile is what persists it.
       if (realFamilyId) setSeenFamilies(prev => (prev.has(realFamilyId) ? prev : new Set(prev).add(realFamilyId)));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [isThemeLoading]);
   // The toggle changes the polarity of the ACTIVE theme, not whichever
   // family is currently being browsed — so its visibility depends on the

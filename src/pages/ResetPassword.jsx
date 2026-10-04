@@ -98,11 +98,11 @@ export default function ResetPassword() {
   if (status === 'invalid') {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-5 text-center gap-3">
-        <p className="text-sm font-display font-semibold text-foreground">This reset link is invalid or has expired</p>
+        <h1 className="text-sm font-display font-semibold text-foreground">This reset link is invalid or has expired</h1>
         <p className="text-xs font-mono text-muted-foreground">Request a new one from the sign-in page.</p>
         <Button
           size="sm"
-          className="mt-2 font-mono text-xs bg-primary text-primary-foreground hover:bg-primary/90"
+          className="h-11 mt-2 font-mono text-xs bg-primary text-primary-foreground hover:bg-primary/90"
           onClick={() => navigate('/login')}
         >
           Back to Sign In

@@ -22,7 +22,7 @@ const FILTER_OPTIONS = ['all', 'pending', 'completed', 'cancelled'];
 // hideTitle: the Trades page already names the view in its own header, so
 // it drops this section's duplicate "Trade History" title (the count and
 // Log Trade button stay).
-export default function TradeHistory({ userId, user, onLogTrade, hideTitle = false }) {
+export default function TradeHistory({ userId, onLogTrade, hideTitle = false }) {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState('all');
   const [tradeToDelete, setTradeToDelete] = useState(null);
@@ -176,7 +176,6 @@ export default function TradeHistory({ userId, user, onLogTrade, hideTitle = fal
 
 function TradeCard({ trade, onDelete, onStatusChange }) {
   const status = trade.status || 'pending';
-  const style = STATUS_STYLES[status];
 
   return (
     <div className="bg-card border border-border rounded-xl p-3.5 space-y-2.5">
@@ -243,7 +242,7 @@ function TradeCard({ trade, onDelete, onStatusChange }) {
   );
 }
 
-function CanChip({ name, brand, imageUrl, rarity, label }) {
+function CanChip({ name, imageUrl, rarity, label }) {
   return (
     <div className="flex-1 min-w-0">
       <p className="text-2xs font-mono text-muted-foreground mb-1">{label}</p>

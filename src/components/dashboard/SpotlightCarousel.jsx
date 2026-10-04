@@ -3,6 +3,7 @@ import CanImageBox from '@/components/shared/CanImageBox';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { getDisplayRarity, getConfidence, RARITY_ORDER } from '@/lib/rarityConsensus';
 import { cn } from '@/lib/utils';
+import { byAcquiredDesc } from '@/lib/canDate';
 
 // Card width tracks 80vw, capped at 280px so it doesn't get absurd on
 // tablet-width viewports. At the common 375px mobile viewport, the 280px
@@ -34,10 +35,12 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
   const filtered = selectedBrand && selectedBrand !== 'All'
     ? collected.filter(item => item.can_brand === selectedBrand)
     : collected;
+  // Recent: by when the collector got each can (their own date, else when
+  // logged). Rarest: rarest tier first, newest first within it (stable sort).
+  const recent = [...filtered].sort(byAcquiredDesc);
   const ordered = view === 'rarest'
-    // Stable sort: equal tiers keep the collection's newest-first order.
-    ? [...filtered].sort((a, b) => tierIndex(rarityOf(b)) - tierIndex(rarityOf(a)))
-    : filtered;
+    ? [...recent].sort((a, b) => tierIndex(rarityOf(b)) - tierIndex(rarityOf(a)))
+    : recent;
   const items = ordered.slice(0, 8);
 
   const header = (

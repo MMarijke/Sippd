@@ -2,26 +2,6 @@ import { useEffect, useState, useRef } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
-function Particle({ x, y, color, size, angle, speed, opacity }) {
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: x,
-        top: y,
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        background: color,
-        opacity,
-        transform: `rotate(${angle}deg) translateY(-${speed}px)`,
-        transition: 'none',
-        pointerEvents: 'none',
-      }}
-    />
-  );
-}
-
 export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
   const [phase, setPhase] = useState('enter'); // enter → show → exit
   const [particles, setParticles] = useState([]);
@@ -68,7 +48,6 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
     setTimeout(onDismiss, reducedMotion ? 0 : 400);
   };
 
-  const isEnter = phase === 'enter';
   const isExit = phase === 'exit';
 
   // Below, every `transition` string still runs its normal duration when
@@ -79,8 +58,6 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
 
   const content = (
     <DialogPrimitive.Content
-      aria-labelledby="achievement-unlock-title"
-      aria-describedby={undefined}
       onClick={dismiss}
       style={{
         position: 'fixed',
@@ -184,7 +161,12 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
             Fraunces under Field Guide, Outfit under Origami Fold, same as
             every className="font-display" surface elsewhere (see
             tailwind.config.js's fontFamily wiring). (/impeccable critique) */}
-        <p id="achievement-unlock-title" style={{
+        {/* Radix Title/Description (asChild keeps these elements; Radix wires
+            the ids and the dialog's aria-labelledby/describedby itself):
+            without them the dialog had no accessible title by Radix's own
+            check, and logged an error on every page that shows it. */}
+        <DialogPrimitive.Title asChild>
+        <p style={{
           fontSize: '1.375rem',
           fontWeight: 900,
           fontFamily: 'var(--font-display)',
@@ -198,8 +180,10 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
         }}>
           {achievement.title}
         </p>
+        </DialogPrimitive.Title>
 
         {/* Description */}
+        <DialogPrimitive.Description asChild>
         <p style={{
           fontSize: '0.8125rem',
           fontFamily: 'var(--font-mono)',
@@ -209,6 +193,7 @@ export default function AchievementUnlockAnimation({ achievement, onDismiss }) {
         }}>
           {achievement.description}
         </p>
+        </DialogPrimitive.Description>
 
         {/* Tap to dismiss hint */}
         <p style={{

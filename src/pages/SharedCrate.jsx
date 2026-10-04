@@ -92,12 +92,14 @@ export default function SharedCrate() {
       .map(r => ({ rarity: r, count: counts[r], pct: cans.length ? (counts[r] / cans.length) * 100 : 0 }));
   }, [cans, sharedCansMap]);
 
-  if (!isLoading && isError) {
+  // !crate too: an empty reply (no error, no crate) used to fall through to
+  // crate.emoji below and crash the whole page on the app's error screen.
+  if (!isLoading && (isError || !crate)) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3 px-5">
         <Package className="w-14 h-14 text-muted-foreground/20" />
-        <p className="text-sm font-mono text-muted-foreground">This crate doesn&rsquo;t exist or has been deleted</p>
-        <button onClick={() => navigate('/')} className="text-xs font-mono text-primary underline">Go to Sippd</button>
+        <h1 className="text-sm font-mono text-muted-foreground">This crate doesn&rsquo;t exist or has been deleted</h1>
+        <button onClick={() => navigate('/')} className="h-11 px-3 text-xs font-mono text-primary underline">Go to Sippd</button>
       </div>
     );
   }

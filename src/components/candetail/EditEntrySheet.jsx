@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Save, Upload, Link as LinkIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { acquiredAt } from '@/lib/canDate';
 import { RARITY_ORDER, getConfidence, getDisplayRarity } from '@/lib/rarityConsensus';
 import CanImageBox from '@/components/shared/CanImageBox';
 import TasteRatingStars from '@/components/shared/TasteRatingStars';
@@ -43,7 +45,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
         .from('can-images')
         .getPublicUrl(fileName);
       update('can_image_url', publicUrl);
-    } catch (err) {
+    } catch {
       toast.error('Failed to upload image');
     }
     setUploading(false);
@@ -59,6 +61,9 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
     can_beverage_type: item?.can_beverage_type || 'energy_drink',
     can_image_url: item?.can_image_url || '',
     taste_rating: item?.taste_rating || null,
+    // When they got it (user_collection.acquired_on), shown as the date
+    // this can already uses: their own date, else when it was logged.
+    acquired_on: acquiredAt(item) ? format(acquiredAt(item), 'yyyy-MM-dd') : '',
   });
 
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
@@ -101,7 +106,10 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from('user_collection').update(form).eq('id', item.id);
+      const { error } = await supabase
+        .from('user_collection')
+        .update({ ...form, acquired_on: form.acquired_on || null })
+        .eq('id', item.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -167,6 +175,19 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
               value={form.can_edition}
               onChange={e => update('can_edition', e.target.value)}
               className="bg-secondary border-border font-body"
+            />
+          </div>
+
+          {/* Date added */}
+          <div className="space-y-1.5">
+            <Label htmlFor="edit-can-acquired" className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">Date Added</Label>
+            <Input
+              id="edit-can-acquired"
+              type="date"
+              max={format(new Date(), 'yyyy-MM-dd')}
+              value={form.acquired_on}
+              onChange={e => update('acquired_on', e.target.value)}
+              className="h-11 bg-secondary border-border font-mono text-sm"
             />
           </div>
 

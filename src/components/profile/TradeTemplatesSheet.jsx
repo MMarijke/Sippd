@@ -137,7 +137,7 @@ export default function TradeTemplatesSheet({ onClose, onUseTemplate }) {
   );
 }
 
-function CanChip({ name, brand, imageUrl, rarity, label }) {
+function CanChip({ name, imageUrl, rarity, label }) {
   return (
     <div className="flex-1 min-w-0">
       <p className="text-2xs font-mono text-muted-foreground mb-1">{label}</p>

@@ -13,6 +13,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useShare } from '@/hooks/useShare';
 import { cn } from '@/lib/utils';
 import ProGate from '@/components/shared/ProGate';
+import { byAcquiredDesc } from '@/lib/canDate';
 
 const FREE_CRATE_CAN_LIMIT = 10;
 
@@ -36,8 +37,8 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
   const atCanLimit = canIds.length >= FREE_CRATE_CAN_LIMIT && !isPro;
 
   const applySorting = (items) => items.slice().sort((a, b) => {
-    if (sort === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
-    if (sort === 'date_desc') return new Date(b.created_at) - new Date(a.created_at);
+    if (sort === 'date_asc') return byAcquiredDesc(b, a);
+    if (sort === 'date_desc') return byAcquiredDesc(a, b);
     if (sort === 'brand_asc') return (a.can_brand || '').localeCompare(b.can_brand || '');
     if (sort === 'brand_desc') return (b.can_brand || '').localeCompare(a.can_brand || '');
     if (sort === 'rarity_desc') return RARITY_ORDER.indexOf(b.can_rarity || 'Common') - RARITY_ORDER.indexOf(a.can_rarity || 'Common');
@@ -47,7 +48,7 @@ export default function CrateDetailSheet({ crate, collection, onClose, onCrateUp
 
   const contents = useMemo(
     () => applySorting(collection.filter(c => crateCanIds.has(c.id))),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [collection, crateCanIds, sort]
   );
   const available = useMemo(

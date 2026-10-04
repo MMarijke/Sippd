@@ -124,10 +124,10 @@ export default function CompareCollection() {
       <div className="min-h-screen bg-background pb-10 flex flex-col items-center justify-center px-8 text-center gap-4">
         <GitCompare className="w-12 h-12 text-muted-foreground/20" />
         <div>
-          <p className="text-sm font-display font-semibold text-foreground">No collector selected</p>
+          <h1 className="text-sm font-display font-semibold text-foreground">No collector selected</h1>
           <p className="text-xs font-mono text-muted-foreground mt-1">Open another collector's profile and tap "Compare" to see how your collections stack up.</p>
         </div>
-        <Button onClick={() => navigate(-1)} variant="outline" className="font-mono text-xs">
+        <Button onClick={() => navigate(-1)} variant="outline" className="h-11 font-mono text-xs">
           Go Back
         </Button>
       </div>

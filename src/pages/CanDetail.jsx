@@ -11,6 +11,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { useFavourite } from '@/hooks/useFavourite';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
+import { acquiredAt } from '@/lib/canDate';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { getDisplayRarity, getConfidence, RARITY_ORDER, RARITY_TEXT_CLASS } from '@/lib/rarityConsensus';
 import { cn } from '@/lib/utils';
@@ -401,14 +402,14 @@ export default function CanDetail() {
               <p className="text-sm font-semibold text-foreground">{edition}</p>
             </div>
           )}
-          {item?.created_at && (
+          {acquiredAt(item) && (
             <div className="bg-card border border-border rounded-xl p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <Calendar className="w-3 h-3 text-muted-foreground" />
                 <span className="text-2xs font-mono text-muted-foreground uppercase tracking-wider">Added</span>
               </div>
               <p className="text-sm font-semibold text-foreground">
-                {format(new Date(item.created_at), 'MMM d, yyyy')}
+                {format(acquiredAt(item), 'MMM d, yyyy')}
               </p>
             </div>
           )}

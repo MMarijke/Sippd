@@ -1,4 +1,5 @@
 import { RARITY_ORDER } from '@/lib/rarityConsensus';
+import { byAcquiredDesc } from '@/lib/canDate';
 
 /**
  * Filters and sorts a user_collection array by the same rules Collection.jsx's
@@ -30,8 +31,9 @@ export function filterAndSortCollection(collection, filters, searchQuery, getEff
     })
     .sort((a, b) => {
       const sort = filters.sort || 'date_desc';
-      if (sort === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
-      if (sort === 'date_desc') return new Date(b.created_at) - new Date(a.created_at);
+      // By when the collector got the can (their own date, else when logged).
+      if (sort === 'date_asc') return byAcquiredDesc(b, a);
+      if (sort === 'date_desc') return byAcquiredDesc(a, b);
       if (sort === 'brand_asc') return (a.can_brand || '').localeCompare(b.can_brand || '');
       if (sort === 'brand_desc') return (b.can_brand || '').localeCompare(a.can_brand || '');
       if (sort === 'rarity_desc') return RARITY_ORDER.indexOf(getEffectiveRarity(b)) - RARITY_ORDER.indexOf(getEffectiveRarity(a));

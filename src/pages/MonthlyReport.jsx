@@ -5,7 +5,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, Share2, Package, Flame, Trophy, Tag, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, subMonths, addMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, isWithinInterval, subMonths, addMonths } from 'date-fns';
+import { acquiredAt } from '@/lib/canDate';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { RARITY_POINTS, RARITY_ORDER, BREAKDOWN_VAR, getEffectiveRarity as getEffectiveRarityBase } from '@/lib/rarityConsensus';
 
@@ -72,7 +73,9 @@ export default function MonthlyReport() {
   const monthItems = useMemo(() =>
     collection.filter(item => {
       try {
-        return isWithinInterval(parseISO(item.created_at), monthInterval);
+        // The month the collector got it (their own date, else when logged).
+        const when = acquiredAt(item);
+        return !!when && isWithinInterval(when, monthInterval);
       } catch { return false; }
     }),
     [collection, monthInterval]

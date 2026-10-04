@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ function loadSavedDefaults() {
 }
 
 export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCancel }) {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user: currentUser } = useAuth();
   const [showReveal, setShowReveal] = useState(false);
@@ -215,6 +217,8 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
         can_bg_color:      form.bg_color  || DEFAULT_CAN_BG,
         user_rarity_vote:  myVote,
         taste_rating:      form.taste_rating,
+        // The "Date Added" field below; it was never saved before.
+        acquired_on:       form.date_added || null,
       }).select().single();
       if (insertError) throw insertError;
 
@@ -245,11 +249,15 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
       // user_collection insert below it. See its migration's doc comment.
       // Numbers match vote_on_can (20260925000001_vote_on_can_beverage_type.sql):
       // 30 votes per rolling hour, and 10 barcode scans per rolling 24 hours.
-      // Plain limits, no upsell: PRODUCT.md keeps scanning free.
+      // The hourly limit is anti-spam for everyone; the daily scan cap is a
+      // free-tier limit that Pro removes (PRODUCT.md, the Pro page), so its
+      // message says so plainly.
       if (error?.message?.includes('rate_limit_exceeded')) {
         toast.error("You've added 30 cans in the last hour. Take a short break, then try again.");
       } else if (error?.message?.includes('daily_scan_limit_reached')) {
-        toast.error("You've scanned 10 barcodes in the last 24 hours, the daily limit. You can scan more once the oldest scan is a day old.");
+        toast.error("You've scanned 10 barcodes in the last 24 hours, the free daily limit. You can scan more once the oldest scan is a day old. Pro removes the limit.", {
+          action: { label: 'See Pro', onClick: () => navigate('/pro') },
+        });
       } else {
         console.error('Failed to add can:', error);
         toast.error('Failed to add can — please try again.');
@@ -486,6 +494,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           <Input
             id="addcan-date-added"
             type="date"
+            max={format(new Date(), 'yyyy-MM-dd')}
             value={form.date_added}
             onChange={e => update('date_added', e.target.value)}
             className="h-11 bg-secondary border-border font-mono text-sm"

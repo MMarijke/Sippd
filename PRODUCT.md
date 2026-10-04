@@ -62,7 +62,7 @@ Mobile-first, in-the-moment usage — the Scan flow implies logging a can at the
   - Account deletion is server-side via the Auth Admin API with full cascade + array sweeps.
   - Edge function deploys require an explicit `supabase functions deploy <name>` — they do not deploy on `git push`.
   - Feature-branch workflow for every change, no exceptions.
-- Monetization: core tracking (scan/log/collect) stays free; a paid tier unlocks extras. Which specific features sit behind the paid tier is not yet decided — do not invent specifics.
+- Monetization: core tracking (scan/log/collect) is free, with free barcode scanning capped at 10 scans per rolling 24 hours (adding cans by search or manually is uncapped); Sippd Pro removes the cap and unlocks extras. Current Pro features are listed on the Pro page (src/pages/Pro.jsx); do not invent others.
 
 ## Brand Commitments
 
@@ -77,5 +77,5 @@ Codebase at the project root with working routes/components for every feature li
 1. Collecting is competitive and social by default — core features reinforce the leaderboard/feed/achievement loop, not just personal cataloging.
 2. Security boundaries are real, not decorative — RLS plus column-level triggers protect collection data and paid-tier state from client tampering, matching Strk's proven pattern.
 3. Cross-user features must be server-synced — leaderboards, feeds, and collection comparisons reflect true shared state, never client-only stubs.
-4. Free core, paid extras — scanning, logging, and collecting stay free; monetization sits on top via clearly separated premium features (specifics still open).
+4. Free core, paid extras — logging and collecting stay free, and so does scanning up to a daily cap (10 barcode scans per 24 hours; Pro is unlimited). Monetization sits on top via clearly separated premium features listed on the Pro page.
 5. The migration preserved product behavior — moving Base44 → Supabase/Paddle/Vercel changed infrastructure, not the feature set or workflows already shipped.

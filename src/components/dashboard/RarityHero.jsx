@@ -11,7 +11,10 @@ import { getDisplayRarity, RARITY_ORDER, BREAKDOWN_VAR } from '@/lib/rarityConse
 // relied on that via hsl(var(--secondary)) before this change).
 const breakdownColor = (name) => `hsl(var(${BREAKDOWN_VAR[name] || BREAKDOWN_VAR.Common}))`;
 
-export default function RarityHero({ collected, sharedCansMap = {}, isLoading = false }) {
+// compact: the smaller gauge Home shows under your standing and your cans,
+// where it supports rather than leads (/impeccable layout).
+export default function RarityHero({ collected, sharedCansMap = {}, isLoading = false, compact = false }) {
+  const boxWidth = compact ? 'max-w-[220px]' : 'max-w-[330px]';
   // Recharts sizes percentage-based innerRadius/outerRadius off a generic
   // min(width,height)/2 rule that has no idea our Pie's cy sits at the
   // bottom edge (cy="100%") with only the top half in use — so "100%"
@@ -19,8 +22,13 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
   // matter what percentage is requested. Measuring the box ourselves and
   // passing real pixel radii is the only way around that.
   const wrapperRef = useRef(null);
-  const [size, setSize] = useState({ width: 330, height: 165 });
+  const [size, setSize] = useState(() => (compact ? { width: 220, height: 110 } : { width: 330, height: 165 }));
 
+  // Re-attached when loading ends: the loading skeleton has no wrapperRef,
+  // so attaching only on mount (as before) never measured anything when the
+  // gauge mounted mid-load, and the default size stuck. That happened to
+  // match the old 330px box; the compact one drew a ring far bigger than
+  // its box, clipping it and its count labels.
   useEffect(() => {
     const el = wrapperRef.current;
     if (!el) return;
@@ -30,7 +38,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [isLoading]);
 
   if (isLoading) {
     return (
@@ -38,17 +46,18 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
         <p className="text-2xs font-mono uppercase tracking-widest text-muted-foreground text-center">
           Rarity Breakdown
         </p>
-        <div className="relative w-full max-w-[330px] mx-auto mt-2 flex items-end justify-center" style={{ aspectRatio: '2 / 1' }}>
+        <div className={`relative w-full ${boxWidth} mx-auto mt-2 flex items-end justify-center`} style={{ aspectRatio: '2 / 1' }}>
           <div className="w-3/4 h-3/4 rounded-t-full bg-secondary/60 animate-pulse" />
         </div>
       </div>
     );
   }
 
-  // 78% of the box height for the ring's outer edge — leaves headroom for
-  // the on-arc labels (which sit further out still) without touching the
-  // container's top or side edges.
-  const outerRadius = size.height * 0.78;
+  // The ring's outer edge, leaving headroom for the on-arc count labels
+  // (which sit further out still): capped by height AND by width, since at
+  // 320px the 78%-of-height ring pushed two labels outside the SVG.
+  const labelGap = compact ? 11 : 16;
+  const outerRadius = Math.min(size.height * 0.78, size.width / 2 - labelGap - 8);
   const innerRadius = outerRadius * 0.82;
 
   const rarityCounts = {};
@@ -77,7 +86,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
     const color = breakdownColor(name);
     const pathRadius = (innerRadius + outerRadius) / 2;
     const strokeWidth = outerRadius - innerRadius;
-    const labelRadius = outerRadius + 16;
+    const labelRadius = outerRadius + labelGap;
     const lx = cx + labelRadius * Math.cos(-midAngle * RADIAN);
     const ly = cy + labelRadius * Math.sin(-midAngle * RADIAN);
 
@@ -101,7 +110,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
           y={ly}
           textAnchor="middle"
           dominantBaseline="middle"
-          style={{ fill: 'hsl(var(--foreground))', fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-mono)' }}
+          style={{ fill: 'hsl(var(--foreground))', fontSize: compact ? 11 : 13, fontWeight: 700, fontFamily: 'var(--font-mono)' }}
         >
           {value}
         </text>
@@ -115,7 +124,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
         Rarity Breakdown
       </p>
 
-      <div ref={wrapperRef} className="relative w-full max-w-[330px] mx-auto mt-2" style={{ aspectRatio: '2 / 1' }}>
+      <div ref={wrapperRef} className={`relative w-full ${boxWidth} mx-auto mt-2`} style={{ aspectRatio: '2 / 1' }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -150,7 +159,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
         </ResponsiveContainer>
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col items-center pb-1">
-          <p className="text-4xl font-mono font-black text-foreground leading-none">
+          <p className={`${compact ? 'text-2xl' : 'text-4xl'} font-mono font-black text-foreground leading-none`}>
             {totalCans}
           </p>
           <p className="text-2xs font-mono uppercase tracking-widest text-muted-foreground mt-1">

@@ -12,6 +12,7 @@ import RarityHero from '@/components/dashboard/RarityHero';
 import FeedPreview from '@/components/dashboard/FeedPreview';
 import SpotlightCarousel from '@/components/dashboard/SpotlightCarousel';
 import StandingCard from '@/components/dashboard/StandingCard';
+import RarityPrimer from '@/components/dashboard/RarityPrimer';
 import { useProfileShowcase } from '@/hooks/useProfileShowcase';
 import { useStreakStatus } from '@/lib/useStreak';
 import { format } from 'date-fns';
@@ -107,7 +108,7 @@ export default function Home() {
     () => computeAchievements(collection, streak, votes.length, user?.created_at),
     [collection, streak, votes.length, user?.created_at]
   );
-  const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements, user?.id);
+  const { current: toAnimate, dismissCurrent } = useAchievementUnlock(achievements, user?.id, user?.created_at);
 
   const sharedCansMap = useMemo(
     () => Object.fromEntries(sharedCans.map(c => [c.id, c])),
@@ -178,7 +179,7 @@ export default function Home() {
 
   const statsRow = (
     <StatsRow
-      showRarePulls={isNewUser}
+      showRarePulls={false}
       rarePulls={standing.rarePulls}
       streak={`${streak}d`}
       wishlistCount={wishlistCount}
@@ -294,7 +295,14 @@ export default function Home() {
         </section>
       )}
 
-      {isNewUser && <div className="mt-5">{statsRow}</div>}
+      {/* First visit: what makes a can valuable, instead of a row of zeros,
+          an empty carousel and a report for an empty month. Those appear
+          with the first can. */}
+      {isNewUser && (
+        <div className="px-5 mt-5">
+          <RarityPrimer />
+        </div>
+      )}
 
       <div className="px-5 mt-8">
         {isNewUser && (
@@ -305,25 +313,21 @@ export default function Home() {
         <FeedPreview />
       </div>
 
-      {isNewUser && (
-        <div className="mt-5">
-          <SpotlightCarousel collected={collected} sharedCansMap={sharedCansMap} selectedBrand="All" isLoading={isLoading} />
-        </div>
+      {/* Monthly Report CTA, once there's a month to report on. */}
+      {!isNewUser && (
+        <Link to="/monthly-report" className="block px-5 mt-5">
+          <div className="flex items-center gap-4 bg-card border border-primary/20 rounded-xl p-4 hover:border-primary/40 transition-colors cursor-pointer">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <BarChart2 className="w-5 h-5 text-primary" aria-hidden="true" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-display font-semibold text-foreground tracking-wide">Monthly Report</p>
+              <p className="text-2xs font-mono text-muted-foreground mt-0.5">{format(new Date(), 'MMMM yyyy')} · Tap to view</p>
+            </div>
+            <span className="text-xs font-mono text-primary" aria-hidden="true">→</span>
+          </div>
+        </Link>
       )}
-
-      {/* Monthly Report CTA */}
-      <Link to="/monthly-report" className="block px-5 mt-5">
-        <div className="flex items-center gap-4 bg-card border border-primary/20 rounded-xl p-4 hover:border-primary/40 transition-colors cursor-pointer">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <BarChart2 className="w-5 h-5 text-primary" aria-hidden="true" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-display font-semibold text-foreground tracking-wide">Monthly Report</p>
-            <p className="text-2xs font-mono text-muted-foreground mt-0.5">{format(new Date(), 'MMMM yyyy')} · Tap to view</p>
-          </div>
-          <span className="text-xs font-mono text-primary" aria-hidden="true">→</span>
-        </div>
-      </Link>
     </div>
   );
 }

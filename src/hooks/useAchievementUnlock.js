@@ -1,37 +1,63 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabaseClient';
 import { postActivity } from '@/hooks/usePostActivity';
+import { planUnlocks, summaryText } from '@/lib/achievementUnlocks';
 
-const STORAGE_KEY = 'canvolt_unlocked_achievements';
+const STORAGE_KEY = 'sippd_unlocked_achievements';
+// Pre-rename key: read once so existing users keep what they've seen.
+const LEGACY_KEY = 'canvolt_unlocked_achievements';
+// Set once this device has evaluated achievements, even with none unlocked,
+// so a brand-new collector isn't mistaken for a new device.
+const INIT_KEY = 'sippd_achievements_initialized';
+const DAY_MS = 86400000;
 
-function getStoredKeys() {
+function readJson(key) {
   try {
-    return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+    return JSON.parse(localStorage.getItem(key) || 'null');
   } catch {
-    return new Set();
+    return null;
   }
 }
 
-function saveKeys(keys) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify([...keys]));
+function getStoredKeys() {
+  const keys = readJson(STORAGE_KEY) ?? readJson(LEGACY_KEY) ?? [];
+  return new Set(Array.isArray(keys) ? keys : []);
+}
+
+function isInitialized() {
+  try {
+    return localStorage.getItem(INIT_KEY) === '1' || localStorage.getItem(LEGACY_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function persist(keys) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...keys]));
+    localStorage.setItem(INIT_KEY, '1');
+  } catch {
+    // Not being able to store this only means a summary note next time.
+  }
 }
 
 /**
- * Given the current list of computed achievements, detects newly unlocked ones
- * and returns a queue + dismiss handler for the animation. Also posts each
- * newly unlocked achievement to activity_items so it shows up in the Feed --
- * previously nothing did (see usePostActivity.js). userId is needed to fetch
- * the caller's own full_name/is_private for the post; a failure there never
- * blocks the animation queue itself (achievements have no server-side
- * representation to keep in sync, so this is a best-effort cosmetic post).
+ * Given the current list of computed achievements, detects newly unlocked
+ * ones and decides how to announce them (see lib/achievementUnlocks.js):
+ * a single unlock earned just now gets the full pop-up (returned as
+ * `current`); a batch, or catch-up on a new device, gets one summary note
+ * instead of a chain of full-screen pop-ups. New unlocks are posted to the
+ * feed; catch-up on a new device isn't, since those were posted when earned.
  *
- * Known limitation: unlock detection is a per-device localStorage diff, so
- * switching devices or clearing storage can post an already-unlocked
- * achievement again -- the same pre-existing imperfection the toast/animation
- * itself already has, not a new regression.
+ * userCreatedAt: an account less than a day old counts as a known device, so
+ * a new collector's first achievements (e.g. Early Adopter at sign-up) are
+ * celebrated rather than summarised.
  */
-export function useAchievementUnlock(achievements, userId) {
+export function useAchievementUnlock(achievements, userId, userCreatedAt) {
+  const navigate = useNavigate();
   const [queue, setQueue] = useState([]); // achievements waiting to animate
   const seenRef = useRef(getStoredKeys());
 
@@ -57,20 +83,23 @@ export function useAchievementUnlock(achievements, userId) {
     // already-seen keys never get a second chance once saved.
     if (userId && profileLoading) return;
 
-    const newlyUnlocked = achievements.filter(
-      a => a.unlocked && !seenRef.current.has(a.key)
-    );
+    const newAccount = userCreatedAt && Date.now() - new Date(userCreatedAt).getTime() < DAY_MS;
+    const plan = planUnlocks(achievements, seenRef.current, isInitialized() || !!newAccount);
 
-    if (newlyUnlocked.length === 0) return;
+    if (plan.fresh.length === 0) {
+      // Still mark the device as evaluated, so its first real unlock later
+      // is celebrated, not treated as catch-up.
+      persist(seenRef.current);
+      return;
+    }
 
-    // Persist so we don't re-fire on next render
     const updated = new Set(seenRef.current);
-    newlyUnlocked.forEach(a => updated.add(a.key));
+    plan.fresh.forEach(a => updated.add(a.key));
     seenRef.current = updated;
-    saveKeys(updated);
+    persist(updated);
 
     if (userId) {
-      newlyUnlocked.forEach(a => {
+      plan.post.forEach(a => {
         postActivity({
           user: { id: userId, full_name: profile?.full_name },
           type: 'achievement_unlocked',
@@ -80,8 +109,15 @@ export function useAchievementUnlock(achievements, userId) {
       });
     }
 
-    setQueue(prev => [...prev, ...newlyUnlocked]);
-  }, [achievements, userId, profile, profileLoading]);
+    if (plan.summary.length > 0) {
+      const { title, description } = summaryText(plan.summary);
+      toast.success(title, {
+        description,
+        action: { label: 'View', onClick: () => navigate('/achievements') },
+      });
+    }
+    if (plan.animate.length > 0) setQueue(prev => [...prev, ...plan.animate]);
+  }, [achievements, userId, userCreatedAt, profile, profileLoading, navigate]);
 
   const dismissCurrent = () => {
     setQueue(prev => prev.slice(1));

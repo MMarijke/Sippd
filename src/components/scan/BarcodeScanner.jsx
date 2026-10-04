@@ -3,9 +3,10 @@ import { flushSync } from 'react-dom';
 import { motion } from 'framer-motion';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { BarcodeFormat, DecodeHintType, NotFoundException } from '@zxing/library';
-import { ScanLine, X, CameraOff, Check, Loader2 } from 'lucide-react';
+import { ScanLine, X, CameraOff, Check, Loader2, Camera } from 'lucide-react';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { CAMERA_ERRORS, cameraErrorKind, cameraSupported } from '@/lib/cameraErrors';
+import { getNativeDetector, detectNative, downscaleToCanvas } from '@/lib/barcodeDecode';
 
 const HINTS = new Map();
 HINTS.set(DecodeHintType.POSSIBLE_FORMATS, [
@@ -76,6 +77,9 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
   const [errorKind, setErrorKind] = useState(() => (cameraSupported() ? null : 'unsupported'));
   const [slowStart, setSlowStart] = useState(false);
   const [found, setFound] = useState(null); // { code, frame }
+  const [photoError, setPhotoError] = useState(false);
+  const photoInputRef = useRef(null);
+  const photoButtonRef = useRef(null);
   const reducedMotion = usePrefersReducedMotion();
   const videoRef = useRef(null);
   const readerRef = useRef(null);
@@ -115,6 +119,52 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
     setErrorKind(cameraErrorKind(err));
   };
 
+  // The "found it" moment, shared by the device's reader, zxing and photos:
+  // hold the frame, a short buzz, then the lookup plays out in the same
+  // place the can was scanned. It used to snap straight back to "Tap to
+  // Scan" with the progress shown up in the search area.
+  const handleDetected = (code, frame) => {
+    if (detectedRef.current) return;
+    detectedRef.current = true;
+    setFound({ code, frame: frame ?? captureFrame(videoRef.current) });
+    navigator.vibrate?.(40);
+    stopScanning();
+    setStatus('found');
+    onDetected(code);
+  };
+
+  // Live scanning with the device's own reader: poll the visible video a
+  // few times a second. Returns zxing-style controls so stopScanning works
+  // the same for both.
+  const startNative = async (detector) => {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: VIDEO_CONSTRAINTS });
+    const video = videoRef.current;
+    if (video) {
+      video.srcObject = stream;
+      try { await video.play(); } catch { /* autoplay attribute covers it */ }
+    }
+    let stopped = false;
+    let timer = null;
+    const tick = async () => {
+      if (stopped) return;
+      const code = video ? await detectNative(detector, video) : null;
+      if (stopped) return;
+      if (code) {
+        handleDetected(code);
+        return;
+      }
+      timer = setTimeout(tick, 150);
+    };
+    tick();
+    return {
+      stop() {
+        stopped = true;
+        clearTimeout(timer);
+        stream.getTracks().forEach(t => t.stop());
+      },
+    };
+  };
+
   const startScanning = async () => {
     if (!cameraSupported()) {
       setStatus('error');
@@ -133,33 +183,32 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
       setFound(null);
     });
     detectedRef.current = false;
-    readerRef.current ??= new BrowserMultiFormatReader(HINTS);
+    setPhotoError(false);
 
     try {
-      const controls = await readerRef.current.decodeFromConstraints(
-        { video: VIDEO_CONSTRAINTS },
-        videoRef.current,
-        (result, err) => {
-          if (!mountedRef.current) return;
-          if (result && !detectedRef.current) {
-            detectedRef.current = true;
-            const code = result.getText();
-            // The "found it" moment: hold the frame, a short buzz, then the
-            // lookup plays out in the same place the can was scanned. It used
-            // to snap straight back to "Tap to Scan" with the progress shown
-            // up in the search area.
-            setFound({ code, frame: captureFrame(videoRef.current) });
-            navigator.vibrate?.(40);
-            stopScanning();
-            setStatus('found');
-            onDetected(code);
-            return;
+      // The device's own reader where the browser has one (Android Chrome,
+      // Samsung Internet, macOS/ChromeOS Chrome); zxing everywhere else.
+      const detector = await getNativeDetector();
+      let controls;
+      if (detector) {
+        controls = await startNative(detector);
+      } else {
+        readerRef.current ??= new BrowserMultiFormatReader(HINTS);
+        controls = await readerRef.current.decodeFromConstraints(
+          { video: VIDEO_CONSTRAINTS },
+          videoRef.current,
+          (result, err) => {
+            if (!mountedRef.current) return;
+            if (result) {
+              handleDetected(result.getText());
+              return;
+            }
+            // NotFoundException fires on every frame with no barcode in view —
+            // that's the normal, silent case while the camera is live.
+            if (err && !(err instanceof NotFoundException)) fail(err);
           }
-          // NotFoundException fires on every frame with no barcode in view —
-          // that's the normal, silent case while the camera is live.
-          if (err && !(err instanceof NotFoundException)) fail(err);
-        }
-      );
+        );
+      }
 
       // The component may have unmounted while the permission prompt/stream
       // setup above was pending — don't leave the camera running behind it.
@@ -167,8 +216,14 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
         controls.stop();
         return;
       }
+      // A read can land before the controls are stored here, when
+      // handleDetected's stopScanning had nothing to stop yet.
+      if (detectedRef.current) {
+        controls.stop();
+        return;
+      }
       controlsRef.current = controls;
-      if (!detectedRef.current) setStatus('scanning');
+      setStatus('scanning');
     } catch (err) {
       if (!mountedRef.current) return;
       fail(err);
@@ -200,6 +255,7 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
   useEffect(() => {
     if (status === 'starting') onAnnounce?.('Starting camera.');
     if (status === 'scanning') onAnnounce?.('Camera on. Point it at the barcode.');
+    if (status === 'photo') onAnnounce?.('Reading the photo.');
   }, [status, onAnnounce]);
 
   // The found state holds until the page moves on. If the lookup ends and
@@ -217,9 +273,11 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
       return;
     }
     const reset = () => {
-      setStatus('idle');
+      // A photo read on a camera-less device goes back to its notice, not
+      // to a Tap to Scan card that can't work there.
+      setStatus(cameraSupported() ? 'idle' : 'error');
       setFound(null);
-      requestAnimationFrame(() => tapRef.current?.focus());
+      requestAnimationFrame(() => (tapRef.current ?? photoButtonRef.current)?.focus());
     };
     if (sawLookupRef.current) {
       reset();
@@ -229,6 +287,45 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
     return () => clearTimeout(timer);
   }, [status, lookup]);
 
+  // "Take a photo instead": the phone's own camera app (real autofocus,
+  // flash, zoom; no live-camera permission needed), then read the barcode
+  // from the photo. The device's reader first where there is one, zxing
+  // (which also tries the photo rotated) otherwise.
+  const openPhotoPicker = () => photoInputRef.current?.click();
+  const readPhoto = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = ''; // so the same photo can be picked again
+    if (!file) return;
+    stopScanning();
+    setPhotoError(false);
+    setStatus('photo');
+    detectedRef.current = false;
+    let code = null;
+    let frame = null;
+    try {
+      const bitmap = await createImageBitmap(file);
+      const canvas = downscaleToCanvas(bitmap);
+      bitmap.close?.();
+      frame = canvas.toDataURL('image/jpeg', 0.7);
+      const detector = await getNativeDetector();
+      if (detector) code = await detectNative(detector, canvas);
+      if (!code) {
+        readerRef.current ??= new BrowserMultiFormatReader(HINTS);
+        try { code = readerRef.current.decodeFromCanvas(canvas).getText(); } catch { /* none found */ }
+      }
+    } catch {
+      code = null; // unreadable file
+    }
+    if (!mountedRef.current) return;
+    if (code) {
+      handleDetected(code, frame);
+      return;
+    }
+    setStatus(cameraSupported() ? 'idle' : 'error');
+    setPhotoError(true);
+    requestAnimationFrame(() => photoButtonRef.current?.focus());
+  };
+
   // The X that had focus disappears with the camera view, so hand focus to
   // the Tap to Scan button that replaces it.
   const cancelScanning = () => {
@@ -236,6 +333,50 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
     setStatus('idle');
     requestAnimationFrame(() => tapRef.current?.focus());
   };
+
+  // capture="environment" opens the phone's rear camera app; desktops ignore
+  // it and show a file picker, which still reads a saved photo.
+  const photoInput = (
+    <input
+      ref={photoInputRef}
+      type="file"
+      accept="image/*"
+      capture="environment"
+      className="hidden"
+      tabIndex={-1}
+      aria-hidden="true"
+      onChange={readPhoto}
+    />
+  );
+  const photoOption = (label = 'Take a photo instead') => (
+    <>
+      {photoInput}
+      <button
+        ref={photoButtonRef}
+        type="button"
+        onClick={openPhotoPicker}
+        className="w-full h-11 rounded-xl border border-border bg-transparent text-xs font-mono text-foreground flex items-center justify-center gap-2 hover:border-primary/40 transition-colors"
+      >
+        <Camera className="w-4 h-4" aria-hidden="true" /> {label}
+      </button>
+      {photoError && (
+        <p role="alert" className="text-xs font-mono text-foreground/80 leading-relaxed text-center">
+          No barcode found in that photo. Try again with the barcode flat, in focus and filling more of the picture.
+        </p>
+      )}
+    </>
+  );
+
+  if (status === 'photo') {
+    return (
+      <div className="px-5">
+        <div className="w-full bg-card border border-primary/20 rounded-2xl p-8 flex flex-col items-center gap-3 text-center">
+          <Loader2 className="w-8 h-8 text-primary animate-spin motion-reduce:animate-none" aria-hidden="true" />
+          <p className="text-sm font-display font-bold text-foreground tracking-wide">Reading the photo…</p>
+        </div>
+      </div>
+    );
+  }
 
   if (status === 'found') {
     return (
@@ -338,6 +479,9 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
             <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
+        {/* For when the live view won't read: a webcam that can't focus
+            close, glare on the can, or a slow phone. */}
+        <div className="mt-3 space-y-2">{photoOption('Not reading? Take a photo instead')}</div>
       </div>
     );
   }
@@ -345,10 +489,11 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
   const error = status === 'error' ? CAMERA_ERRORS[errorKind] ?? CAMERA_ERRORS.other : null;
 
   // No camera, or a browser that can't use one: a big "Try Again" card
-  // would only fail again, so say so plainly and point at search instead.
+  // would only fail again, so say so plainly. A photo still works here (the
+  // phone's camera app, or a saved picture), so it leads.
   if (error && !error.canRetry) {
     return (
-      <div className="px-5">
+      <div className="px-5 space-y-3">
         <div role="alert" className="bg-card border border-border rounded-2xl p-5 flex items-start gap-3">
           <CameraOff className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" aria-hidden="true" />
           <div>
@@ -356,6 +501,7 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
             <p className="text-xs font-mono text-muted-foreground leading-relaxed mt-1">{error.message}</p>
           </div>
         </div>
+        {photoOption('Take a photo of the barcode')}
       </div>
     );
   }
@@ -394,6 +540,8 @@ export default function BarcodeScanner({ onDetected, autoStart = false, onAnnoun
           <span className="text-sm font-mono text-primary font-semibold">{error ? 'Retry camera' : 'Start Scanning'}</span>
         </div>
       </button>
+
+      {photoOption()}
 
       {error && (
         <div role="alert" className="bg-destructive/5 border border-destructive/20 rounded-xl p-4 flex items-start gap-2.5">

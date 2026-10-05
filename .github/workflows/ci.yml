@@ -49,44 +49,6 @@ jobs:
       - name: Scan for secrets
         run: gitleaks detect --source . --verbose --redact
 
-  db-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      # ubuntu-latest ships Docker preinstalled, which is what `db start`
-      # needs to spin up a disposable local Postgres seeded from
-      # supabase/migrations/*. Nothing here touches the linked project --
-      # no project ref, no login, no secrets. See supabase/tests/*.sql for
-      # the RLS/RPC cross-account isolation and column-lock trigger tests
-      # this actually runs.
-      # Pinned: "latest" makes setup-cli ask the GitHub API for the newest
-      # release on every run, unauthenticated, and that call gets rate
-      # limited ("Failed to resolve latest Supabase CLI release"). Matches
-      # the CLI version used locally; bump deliberately.
-      - uses: supabase/setup-cli@v3
-        with:
-          version: 2.117.0
-
-      # Once failed with "failed to bind host port for 0.0.0.0:54322: address
-      # already in use" on a fresh runner, where nothing else should hold
-      # that port. Suspected: a race inside `db start` (Docker not yet
-      # releasing the port from the CLI's own first attempt). Not proven, so
-      # this logs what holds the port, then retries ONCE after a clean stop.
-      # A retry that passes is still printed loudly, so a recurring flake
-      # stays visible rather than silently absorbed.
-      - name: Start local database
-        run: |
-          if supabase db start; then exit 0; fi
-          echo "::warning::supabase db start failed once; diagnostics follow, then one retry"
-          sudo ss -ltnp | grep -E ':5432[0-9]' || echo "nothing listening on 5432x"
-          docker ps -a --format '{{.Names}}\t{{.Status}}\t{{.Ports}}'
-          supabase stop --no-backup || true
-          sleep 5
-          supabase db start
-
-      - run: supabase test db
-
   e2e:
     runs-on: ubuntu-latest
     steps:

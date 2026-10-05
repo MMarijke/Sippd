@@ -43,5 +43,3 @@ ios/
 /playwright-report/
 /blob-report/
 
-# bg_removal.py / contact-sheet.mjs output (CI artifact, not committed)
-scripts/seed/out/

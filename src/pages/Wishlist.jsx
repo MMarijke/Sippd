@@ -203,7 +203,7 @@ export default function Wishlist() {
                           <div key={item.id} className={cn('flex items-center gap-3 px-4 py-3 transition-colors', justCollected && 'opacity-50')}>
                             {/* Image */}
                             <div className="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden">
-                              <CanImageBox imageUrl={imageUrl} rarity={rarity} alt={item.can_name} className="w-full h-full" iconSize="w-5 h-5" />
+                              <CanImageBox imageUrl={imageUrl} rarity={rarity} canBg={item.can_bg_color} alt={item.can_name} className="w-full h-full" iconSize="w-5 h-5" />
                             </div>
 
                             {/* Info */}

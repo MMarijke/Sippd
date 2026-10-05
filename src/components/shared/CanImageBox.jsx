@@ -1,5 +1,5 @@
 import { Package } from 'lucide-react';
-import { rarityTileBackground } from '@/lib/canBgColors';
+import { tileBackground } from '@/lib/canBgColors';
 
 /**
  * Reusable image box behind a can image, washed with the can's rarity hue.
@@ -9,6 +9,8 @@ import { rarityTileBackground } from '@/lib/canBgColors';
  *   imageUrl   — can image URL (optional)
  *   rarity     — the rarity the tile shows ("Rare", "Ultra Rare", ...);
  *                unrated/unknown gets the theme tile
+ *   canBg      — a collection row's can_bg_color: a picked hue replaces the
+ *                rarity wash (tileBackground); omit for catalog-only cans
  *   alt        — img alt text
  *   className  — extra classes on the container div
  *   style      — extra inline styles on the container
@@ -19,6 +21,7 @@ import { rarityTileBackground } from '@/lib/canBgColors';
 export default function CanImageBox({
   imageUrl,
   rarity,
+  canBg,
   alt = '',
   className = '',
   style = {},
@@ -29,7 +32,7 @@ export default function CanImageBox({
   return (
     <div
       className={`relative overflow-hidden ${className}`}
-      style={{ background: rarityTileBackground(rarity), ...style }}
+      style={{ background: tileBackground(rarity, canBg), ...style }}
     >
       {imageUrl ? (
         <img

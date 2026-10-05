@@ -10,7 +10,7 @@ import CanImageBox from '@/components/shared/CanImageBox';
 // before the page navigates away. This is deliberately smaller/faster: real
 // feedback for the habit-forming everyday case, without diluting what makes
 // a rare pull feel special.
-export default function AddedConfirmation({ canName, imageUrl, rarity, onComplete, onScanNext }) {
+export default function AddedConfirmation({ canName, imageUrl, rarity, canBg, onComplete, onScanNext }) {
   const reducedMotion = usePrefersReducedMotion();
 
   // Used to auto-dismiss (defaulting to "View Collection") after 1.1s with
@@ -54,6 +54,7 @@ export default function AddedConfirmation({ canName, imageUrl, rarity, onComplet
           <CanImageBox
             imageUrl={imageUrl}
             rarity={rarity}
+            canBg={canBg}
             alt={canName}
             className="w-20 h-20 rounded-2xl border border-border"
             iconSize="w-8 h-8"

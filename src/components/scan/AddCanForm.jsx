@@ -19,6 +19,7 @@ import { RARITY_ORDER, getDisplayRarity, getConfidence } from '@/lib/rarityConse
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import CanImageBox from '@/components/shared/CanImageBox';
 import TasteRatingStars from '@/components/shared/TasteRatingStars';
+import CanTileColorPicker from '@/components/shared/CanTileColorPicker';
 import BeverageTypeToggle from '@/components/shared/BeverageTypeToggle';
 
 const RARITIES = RARITY_ORDER;
@@ -345,6 +346,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
         canName={form.name}
         imageUrl={pendingCan?.can_image_url}
         rarity={pendingCan?.can_rarity}
+        canBg={pendingCan?.can_bg_color}
         onComplete={() => {
           setShowAddedConfirmation(false);
           onSuccess?.(pendingCan);
@@ -679,7 +681,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
           aria-label={showPersonalize ? 'Hide personalize fields' : 'Show personalize fields'}
         >
           <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
-            Personalize <span className="normal-case text-muted-foreground/70">— taste, photo, notes</span>
+            Personalize <span className="normal-case text-muted-foreground/70">— taste, photo, tile colour, notes</span>
           </span>
           <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform flex-shrink-0', showPersonalize && 'rotate-180')} />
         </CollapsibleTrigger>
@@ -699,6 +701,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
                   <CanImageBox
                     imageUrl={form.image_url}
                     rarity={tileRarity}
+                    canBg={form.bg_color}
                     alt={form.name || 'Can'}
                     className="w-full h-40 rounded-xl border border-border"
                     loading="eager"
@@ -767,11 +770,19 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
             <CanImageBox
               imageUrl={prefillData.image_url}
               rarity={tileRarity}
+              canBg={form.bg_color}
               alt={form.name || 'Can'}
               className="w-full h-40 rounded-xl border border-border"
               loading="eager"
             />
           )}
+
+          <CanTileColorPicker
+            value={form.bg_color}
+            onChange={v => update('bg_color', v)}
+            rarity={tileRarity}
+            name="add-tile-colour"
+          />
 
           <div className="space-y-1.5">
             <Label htmlFor="addcan-notes" className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Notes (optional)</Label>

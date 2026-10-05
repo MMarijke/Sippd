@@ -72,6 +72,7 @@ export default function CanCard({ can, to, onClick, showStatus, sharedCan, onFav
         <CanImageBox
           imageUrl={imageUrl}
           rarity={rarity}
+          canBg={can.can_bg_color}
           alt={name}
           className="w-full h-full group-hover:scale-105 transition-transform duration-300"
           iconSize="w-10 h-10"

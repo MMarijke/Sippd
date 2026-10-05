@@ -1,0 +1,4 @@
+# Only for scripts/seed/bg_removal.py, run in CI. Not an app dependency.
+# rembg is MIT; its isnet-general-use model is Apache-2.0.
+rembg[cpu]==2.0.85
+psutil==7.2.2

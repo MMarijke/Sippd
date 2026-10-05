@@ -1,0 +1,63 @@
+name: Background removal sample
+
+# Runs scripts/seed/bg_removal.py on the 12 sampled Open Food Facts cans and
+# uploads the before/after images, the check report, and contact sheets on
+# the app's real tiles as one artifact. A dev laptop doesn't have the memory
+# for the model; a hosted runner does.
+#
+# Read-only by construction: no secrets, no Supabase project, no Storage.
+# It downloads OFF's public images and writes only to the artifact.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/seed/**'
+      - '.github/workflows/bg-removal-sample.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: scripts/seed/requirements-bg.txt
+
+      - run: pip install -r scripts/seed/requirements-bg.txt
+
+      - name: Remove backgrounds and run the checks
+        run: python scripts/seed/bg_removal.py scripts/seed/out
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Only for the theme CSS the contact sheet borrows. Placeholders, not
+      # credentials: nothing here talks to Supabase.
+      - run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://sample-placeholder.supabase.co
+          VITE_SUPABASE_ANON_KEY: sample-placeholder-anon-key
+
+      - run: npx playwright install --with-deps chromium
+
+      - name: Draw contact sheets on the app's tiles
+        run: node scripts/seed/contact-sheet.mjs scripts/seed/out
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bg-removal-sample
+          path: scripts/seed/out/
+          retention-days: 14

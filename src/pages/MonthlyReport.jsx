@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { useSharedCansByIds } from '@/hooks/useSharedCansByIds';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, Share2, Package, Flame, Trophy, Tag, Star } from 'lucide-react';
@@ -43,18 +44,7 @@ export default function MonthlyReport() {
     enabled: !!user?.id,
   });
 
-  const { data: sharedCans = [], isLoading: loadingShared } = useQuery({
-    queryKey: ['shared-cans'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('shared_cans')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data: sharedCans = [], isLoading: loadingShared } = useSharedCansByIds(collection.map(i => i.can_id));
 
   const isLoading = !user || loadingCollection || loadingShared;
 

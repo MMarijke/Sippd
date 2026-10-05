@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { useSharedCansByIds } from '@/hooks/useSharedCansByIds';
 import { useAuth } from '@/lib/AuthContext';
 import { Zap, Star, Package, ArrowLeft, UserPlus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -47,14 +48,7 @@ export default function SharedCrate() {
   const proUserIds = useProStatus(crate?.owner_id ? [crate.owner_id] : []);
   const isOwnerPro = crate ? proUserIds.has(crate.owner_id) : false;
 
-  const { data: sharedCans = [] } = useQuery({
-    queryKey: ['shared-cans-public'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('shared_cans').select('*').limit(500);
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data: sharedCans = [] } = useSharedCansByIds(cans.map(i => i.can_id));
 
   const sharedCansMap = useMemo(
     () => Object.fromEntries(sharedCans.map(c => [c.id, c])),

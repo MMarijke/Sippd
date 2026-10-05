@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { useSharedCansByIds } from '@/hooks/useSharedCansByIds';
 import { useAuth } from '@/lib/AuthContext';
 import { ArrowLeft, GitCompare, Package, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -62,18 +63,9 @@ export default function CompareCollection() {
     enabled: !!friendId,
   });
 
-  const { data: sharedCans = [] } = useQuery({
-    queryKey: ['shared-cans-compare'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('shared_cans')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data: sharedCans = [] } = useSharedCansByIds(
+    [...myItems, ...friendItems].map(i => i.can_id)
+  );
 
   const sharedCansMap = useMemo(
     () => Object.fromEntries(sharedCans.map(c => [c.id, c])),

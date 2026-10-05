@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { useSharedCansByIds } from '@/hooks/useSharedCansByIds';
 import { useAuth } from '@/lib/AuthContext';
 import { Zap, Star, Flame, Package, Lock, ArrowRightLeft, GitCompare, ArrowLeft, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -122,14 +123,9 @@ export default function PublicProfile() {
     enabled: !!userId,
   });
 
-  const { data: sharedCans = [], isLoading: loadingShared } = useQuery({
-    queryKey: ['shared-cans-public'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('shared_cans').select('*').limit(500);
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data: sharedCans = [], isLoading: loadingShared } = useSharedCansByIds(
+    profileItems.map(i => i.can_id)
+  );
 
   const sharedCansMap = useMemo(
     () => Object.fromEntries(sharedCans.map(c => [c.id, c])),

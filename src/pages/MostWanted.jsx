@@ -36,11 +36,16 @@ export default function MostWanted() {
     isError: isSharedCansError,
     refetch: refetchSharedCans,
   } = useQuery({
-    queryKey: ['shared-cans'],
+    // Its own key: this used to share ['shared-cans'] with pages caching a
+    // differently-ordered list, so whichever loaded first answered both.
+    // Filtered on the server, so the 500 are the 500 most-favourited cans
+    // rather than favourites hunted for inside an arbitrary slice.
+    queryKey: ['shared-cans', 'most-wanted'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('shared_cans')
         .select('*')
+        .gte('community_favourites', 1)
         .order('community_favourites', { ascending: false })
         .limit(500);
       if (error) throw error;

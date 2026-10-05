@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState, useMemo, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useCallback, useEffect, useState, useRef } from 'react';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { searchSharedCans } from '@/lib/sharedCans';
 import { useNavigate } from 'react-router-dom';
 import { Search, Package, Loader2, Plus, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -86,21 +87,24 @@ export default function Scan() {
     setAutoStartCamera(scanNext);
   };
 
+  // Search asks the server (src/lib/sharedCans.js) rather than filtering a
+  // newest-500 copy of the catalog, which hid every older can from search.
+  // Debounced so typing a name is one query, not one per keystroke.
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
   const {
-    data: sharedCans = [],
+    data: searchResults = [],
+    isFetching: isSearchFetching,
     isError: isSharedCansError,
     refetch: refetchSharedCans,
   } = useQuery({
-    queryKey: ['shared-cans'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('shared_cans')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return data;
-    },
+    queryKey: ['shared-cans', 'search', debouncedQuery],
+    queryFn: () => searchSharedCans(supabase, debouncedQuery),
+    enabled: debouncedQuery.length >= 2,
+    placeholderData: keepPreviousData,
   });
 
   useEffect(() => {
@@ -171,27 +175,22 @@ export default function Scan() {
     openAddForm({ barcode: pendingBarcode, _offMiss: true });
   };
 
-  const filtered = useMemo(
-    () => searchQuery.length >= 2
-      ? sharedCans.filter(c =>
-          c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          c.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          c.barcode?.includes(searchQuery)
-        )
-      : [],
-    [searchQuery, sharedCans]
-  );
+  const filtered = debouncedQuery.length >= 2 ? searchResults : [];
+  // Results belong to what's in the box: typing has paused and the server
+  // has answered. Until then "No cans found" would be a lie, and Enter
+  // could open a can from the previous search.
+  const searchSettled = debouncedQuery === searchQuery.trim() && !isSearchFetching;
 
   // Say how many results a search found once typing pauses, instead of on
   // every keystroke.
   const resultCount = filtered.length;
   useEffect(() => {
-    if (searchQuery.length < 2 || isSharedCansError) return;
+    if (searchQuery.length < 2 || isSharedCansError || !searchSettled) return;
     const timer = setTimeout(() => {
       announce(resultCount === 0 ? 'No cans found.' : `${Math.min(resultCount, 10)} ${resultCount === 1 ? 'can' : 'cans'} found.`);
     }, 700);
     return () => clearTimeout(timer);
-  }, [searchQuery, resultCount, isSharedCansError, announce]);
+  }, [searchQuery, resultCount, isSharedCansError, searchSettled, announce]);
 
   const handleSearchKeyDown = async (e) => {
     if (e.key !== 'Enter') return;
@@ -203,7 +202,7 @@ export default function Scan() {
       return;
     }
 
-    if (filtered.length === 1) openAddForm(filtered[0]);
+    if (searchSettled && filtered.length === 1) openAddForm(filtered[0]);
   };
 
   const liveRegion = (
@@ -344,6 +343,10 @@ export default function Scan() {
                   <RarityBadge rarity={getConfidence(can.total_votes) === 'unrated' ? '???' : getDisplayRarity(can)} />
                 </button>
               ))
+            ) : !searchSettled ? (
+              <p className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground font-mono">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" /> Searching…
+              </p>
             ) : (
               <div className="text-center py-6 space-y-3">
                 <p className="text-sm text-muted-foreground font-mono">No cans found for "{searchQuery}"</p>

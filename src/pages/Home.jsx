@@ -167,8 +167,10 @@ export default function Home() {
           <PageHeader
             title="SIPPD"
             subtitle={profile?.full_name ? `${profile.full_name}'s vault` : 'Your Vault'}
+            // Scan and the selected brand chip wear the theme's Uncommon
+            // colour (the gauge's Uncommon step), not its primary.
             action={
-              <Button asChild size="sm" className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button asChild size="sm" className="h-11 font-mono text-xs gap-1.5 bg-uncommon-action text-uncommon-action-foreground hover:bg-uncommon-action/90">
                 <Link to="/scan">
                   <ScanLine className="w-4 h-4" aria-hidden="true" /> Scan
                 </Link>
@@ -202,7 +204,7 @@ export default function Home() {
                     <p className="text-xs font-mono text-muted-foreground mt-1.5">
                       Scan your first can to start building your vault.
                     </p>
-                    <Button asChild size="sm" className="h-11 mt-3 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Button asChild size="sm" className="h-11 mt-3 font-mono text-xs gap-1.5 bg-uncommon-action text-uncommon-action-foreground hover:bg-uncommon-action/90">
                       <Link to="/scan">
                         <ScanLine className="w-4 h-4" aria-hidden="true" /> Scan Your First Can
                       </Link>
@@ -301,10 +303,12 @@ export default function Home() {
                 className={cn(
                   'flex-shrink-0 h-11 px-4 flex items-center rounded-full text-xs font-mono font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   selectedBrand === brand
-                    ? 'bg-primary text-primary-foreground'
+                    // Border in the fill's colour so the chip keeps the
+                    // same 44px box as the outlined ones (no shift on select).
+                    ? 'bg-uncommon-action text-uncommon-action-foreground border border-uncommon-action'
                     // Outlined, not filled bg-secondary: muted text there
                     // measured 4.08:1 (Power-Up) and 3.96:1 (Sage).
-                    : 'bg-transparent border border-border text-foreground/80 hover:border-primary/40 hover:text-foreground'
+                    : 'bg-transparent border border-border text-foreground/80 hover:border-uncommon-action/60 hover:text-foreground'
                 )}
               >
                 {brand}

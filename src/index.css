@@ -189,6 +189,7 @@
        fit are unchanged. */
     --breakdown-common: 182.0 65% 28.4%;
     --breakdown-uncommon: 167.4 62% 36.1%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 158.0 66% 43.2%;
     --breakdown-ultra: 152.8 75% 48.9%;
     --breakdown-legendary: 152.0 100% 50.0%;
@@ -285,6 +286,7 @@
 
     --breakdown-common: 182.0 65% 28.4%;
     --breakdown-uncommon: 167.4 62% 36.1%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 158.0 66% 43.2%;
     --breakdown-ultra: 152.8 75% 48.9%;
     --breakdown-legendary: 152.0 100% 50.0%;
@@ -331,6 +333,7 @@
     --wash-intensity: 0;
     --breakdown-common: 182.0 65% 28.4%;
     --breakdown-uncommon: 167.4 62% 36.1%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 158.0 66% 43.2%;
     --breakdown-ultra: 152.8 75% 48.9%;
     --breakdown-legendary: 152.0 100% 50.0%;
@@ -356,6 +359,7 @@
     --wash-intensity: 0;
     --breakdown-common: 312.0 100% 58.0%;
     --breakdown-uncommon: 309.3 90% 65.1%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 302.8 77% 68.7%;
     --breakdown-ultra: 291.2 78% 74.1%;
     --breakdown-legendary: 275.0 90% 80.0%;
@@ -381,6 +385,7 @@
     --wash-intensity: 0;
     --breakdown-common: 222.0 100% 56.0%;
     --breakdown-uncommon: 216.9 100% 60.5%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 207.9 100% 61.5%;
     --breakdown-ultra: 197.2 100% 59.9%;
     --breakdown-legendary: 186.0 100% 50.0%;
@@ -406,6 +411,7 @@
     --wash-intensity: 0;
     --breakdown-common: 347.0 100% 61.0%;
     --breakdown-uncommon: 358.3 100% 69.3%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 9.6 100% 70.8%;
     --breakdown-ultra: 19.9 100% 71.4%;
     --breakdown-legendary: 30.0 100% 72.0%;
@@ -435,6 +441,7 @@
     --wash-intensity: 0;
     --breakdown-common: 272.0 80% 37.4%;
     --breakdown-uncommon: 275.0 72% 42.5%;
+    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 277.8 66% 47.7%;
     --breakdown-ultra: 280.5 68% 52.8%;
     --breakdown-legendary: 283.0 79% 58.0%;
@@ -473,6 +480,7 @@
     --wash-intensity: 0;
     --breakdown-common: 152.0 55% 38.0%;
     --breakdown-uncommon: 158.4 55% 35.9%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 165.7 55% 33.6%;
     --breakdown-ultra: 173.7 58% 30.9%;
     --breakdown-legendary: 182.0 65% 28.4%;
@@ -499,6 +507,7 @@
     --wash-intensity: 0;
     --breakdown-common: 275.0 80% 77.8%;
     --breakdown-uncommon: 286.6 62% 71.3%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 297.3 51% 64.7%;
     --breakdown-ultra: 306.1 52% 60.2%;
     --breakdown-legendary: 312.0 55% 56.0%;
@@ -525,6 +534,7 @@
     --wash-intensity: 0;
     --breakdown-common: 186.0 55% 39.1%;
     --breakdown-uncommon: 201.0 60% 46.0%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 216.0 65% 56.8%;
     --breakdown-ultra: 231.0 70% 65.1%;
     --breakdown-legendary: 246.0 75% 68.5%;
@@ -554,6 +564,7 @@
     --wash-intensity: 0;
     --breakdown-common: 334.0 75% 75.6%;
     --breakdown-uncommon: 334.3 68% 71.3%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 334.4 63% 66.9%;
     --breakdown-ultra: 334.3 58% 62.5%;
     --breakdown-legendary: 334.0 55% 58.0%;
@@ -582,6 +593,7 @@
     --wash-intensity: 0;
     --breakdown-common: 274.0 55% 62.0%;
     --breakdown-uncommon: 273.6 41% 52.1%;
+    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 273.1 44% 42.5%;
     --breakdown-ultra: 272.5 53% 33.2%;
     --breakdown-legendary: 272.0 70% 24.0%;
@@ -687,6 +699,7 @@
     --wash-intensity: 0;
     --breakdown-common: 221.0 26% 52.0%;
     --breakdown-uncommon: 221.6 25% 57.9%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 221.7 24% 63.7%;
     --breakdown-ultra: 221.0 23% 69.5%;
     --breakdown-legendary: 219.2 21% 75.3%;
@@ -712,6 +725,7 @@
     --wash-intensity: 0;
     --breakdown-common: 250.1 55% 57.3%;
     --breakdown-uncommon: 265.1 60% 55.5%;
+    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 280.1 65% 51.2%;
     --breakdown-ultra: 295.1 70% 43.8%;
     --breakdown-legendary: 310.1 75% 42.3%;
@@ -737,6 +751,7 @@
     --wash-intensity: 0;
     --breakdown-common: 16.0 95% 50.0%;
     --breakdown-uncommon: 24.8 97% 50.1%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 31.7 99% 50.2%;
     --breakdown-ultra: 38.0 100% 50.1%;
     --breakdown-legendary: 44.0 100% 50.0%;
@@ -762,6 +777,7 @@
     --wash-intensity: 0;
     --breakdown-common: 161.4 71% 57.5%;
     --breakdown-uncommon: 164.4 66% 65.9%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 172.0 60% 72.3%;
     --breakdown-ultra: 187.1 62% 79.2%;
     --breakdown-legendary: 207.0 100% 88.0%;
@@ -787,6 +803,7 @@
     --wash-intensity: 0;
     --breakdown-common: 258.0 65% 43.0%;
     --breakdown-uncommon: 251.9 53% 47.8%;
+    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 244.9 48% 52.0%;
     --breakdown-ultra: 236.6 49% 54.8%;
     --breakdown-legendary: 228.4 52% 55.5%;
@@ -812,6 +829,7 @@
     --wash-intensity: 0;
     --breakdown-common: 46.0 100% 40.0%;
     --breakdown-uncommon: 44.5 67% 49.3%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 44.4 66% 55.3%;
     --breakdown-ultra: 44.8 68% 60.5%;
     --breakdown-legendary: 45.7 69% 65.5%;
@@ -860,6 +878,7 @@
     --wash-intensity: 0;
     --breakdown-common: 125.9 17% 46.5%;
     --breakdown-uncommon: 126.2 18% 41.3%;
+    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 126.5 18% 36.3%;
     --breakdown-ultra: 126.7 19% 31.6%;
     --breakdown-legendary: 127.0 19% 27.0%;
@@ -885,6 +904,7 @@
     --wash-intensity: 0;
     --breakdown-common: 151.1 55% 31.0%;
     --breakdown-uncommon: 166.1 60% 29.8%;
+    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 181.1 65% 29.1%;
     --breakdown-ultra: 196.1 70% 34.5%;
     --breakdown-legendary: 211.1 75% 43.8%;
@@ -910,6 +930,7 @@
     --wash-intensity: 0;
     --breakdown-common: 124.7 32% 26.8%;
     --breakdown-uncommon: 124.7 31% 32.6%;
+    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 124.7 30% 38.6%;
     --breakdown-ultra: 124.7 28% 45.1%;
     --breakdown-legendary: 124.7 27% 53.3%;
@@ -936,6 +957,7 @@
     --wash-intensity: 0;
     --breakdown-common: 61.3 55% 33.0%;
     --breakdown-uncommon: 76.3 60% 33.4%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 91.3 65% 33.4%;
     --breakdown-ultra: 106.3 70% 33.3%;
     --breakdown-legendary: 121.3 75% 32.8%;
@@ -962,6 +984,7 @@
     --wash-intensity: 0;
     --breakdown-common: 100.0 24% 62.7%;
     --breakdown-uncommon: 100.0 30% 55.1%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 99.9 35% 48.0%;
     --breakdown-ultra: 99.8 41% 43.2%;
     --breakdown-legendary: 99.8 46% 38.8%;
@@ -1010,6 +1033,7 @@
     --wash-intensity: 0;
     --breakdown-common: 220.0 5% 30.7%;
     --breakdown-uncommon: 218.8 6% 41.4%;
+    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 217.5 7% 52.9%;
     --breakdown-ultra: 216.3 7% 65.5%;
     --breakdown-legendary: 215.0 8% 80.0%;
@@ -1035,6 +1059,7 @@
     --wash-intensity: 0;
     --breakdown-common: 355.0 80% 32.2%;
     --breakdown-uncommon: 354.2 73% 36.1%;
+    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 353.4 66% 39.9%;
     --breakdown-ultra: 352.7 59% 43.7%;
     --breakdown-legendary: 351.9 52% 47.5%;
@@ -1060,6 +1085,7 @@
     --wash-intensity: 0;
     --breakdown-common: 271.9 55% 53.1%;
     --breakdown-uncommon: 286.9 60% 48.2%;
+    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 301.9 65% 42.7%;
     --breakdown-ultra: 316.9 70% 43.8%;
     --breakdown-legendary: 331.9 75% 44.7%;
@@ -1085,6 +1111,7 @@
     --wash-intensity: 0;
     --breakdown-common: 276.1 75% 37.7%;
     --breakdown-uncommon: 261.1 70% 49.7%;
+    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 246.1 65% 56.6%;
     --breakdown-ultra: 231.1 60% 56.4%;
     --breakdown-legendary: 216.1 55% 52.0%;
@@ -1110,6 +1137,7 @@
     --wash-intensity: 0;
     --breakdown-common: 150.0 70% 20.6%;
     --breakdown-uncommon: 157.3 61% 24.6%;
+    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 164.6 51% 29.0%;
     --breakdown-ultra: 171.8 42% 34.0%;
     --breakdown-legendary: 179.1 32% 39.6%;
@@ -1147,6 +1175,7 @@
     --card-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.07 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
     --breakdown-common: 0.0 0% 28.2%;
     --breakdown-uncommon: 0.0 0% 42.3%;
+    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 0.0 0% 58.1%;
     --breakdown-ultra: 0.0 0% 76.9%;
     --breakdown-legendary: 0.0 0% 100.0%;
@@ -1197,6 +1226,7 @@
     --wash-intensity: 0;
     --breakdown-common: 336.7 100% 78.4%;
     --breakdown-uncommon: 336.7 100% 72.8%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 336.7 100% 67.3%;
     --breakdown-ultra: 336.7 100% 61.7%;
     --breakdown-legendary: 336.7 100% 56.1%;
@@ -1223,6 +1253,7 @@
     --wash-intensity: 0;
     --breakdown-common: 217.1 100% 76.6%;
     --breakdown-uncommon: 217.1 100% 72.6%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 217.1 100% 68.5%;
     --breakdown-ultra: 217.1 100% 64.5%;
     --breakdown-legendary: 217.1 100% 60.4%;
@@ -1249,6 +1280,7 @@
     --wash-intensity: 0;
     --breakdown-common: 267.4 55% 62.4%;
     --breakdown-uncommon: 282.4 60% 60.2%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 297.4 65% 55.0%;
     --breakdown-ultra: 312.4 70% 54.9%;
     --breakdown-legendary: 327.4 75% 56.9%;
@@ -1275,6 +1307,7 @@
     --wash-intensity: 0;
     --breakdown-common: 21.3 100% 68.9%;
     --breakdown-uncommon: 21.3 100% 63.2%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 21.3 100% 57.4%;
     --breakdown-ultra: 21.3 100% 51.7%;
     --breakdown-legendary: 21.3 100% 45.9%;
@@ -1301,6 +1334,7 @@
     --wash-intensity: 0;
     --breakdown-common: 82.0 55% 37.1%;
     --breakdown-uncommon: 97.0 60% 37.1%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 112.0 65% 36.7%;
     --breakdown-ultra: 127.0 70% 35.9%;
     --breakdown-legendary: 142.0 75% 34.8%;
@@ -1327,6 +1361,7 @@
     --wash-intensity: 0;
     --breakdown-common: 352.2 100% 57.6%;
     --breakdown-uncommon: 351.1 98% 48.2%;
+    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 350.1 95% 44.8%;
     --breakdown-ultra: 349.1 93% 41.4%;
     --breakdown-legendary: 348.0 90% 38.0%;

@@ -37,3 +37,19 @@ describe('rarity breakdown ramps', () => {
     expect(contrast(b.legendary, b.card)).toBeGreaterThanOrEqual(contrast(b.common, b.card) * 0.97);
   });
 });
+
+// Home's Scan button and selected brand chip are filled with each theme's
+// --breakdown-uncommon; their label is --uncommon-action-foreground, which
+// every theme must define at body-text contrast (12px label, so 4.5:1).
+const actionBlocks = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-uncommon[^{}]*)\}/g)].map(([, sel, body]) => ({
+  name: sel.trim().split('\n').pop().trim(),
+  fill: body.match(/--breakdown-uncommon:\s*([^;]+);/)[1],
+  label: body.match(/--uncommon-action-foreground:\s*([^;]+);/)?.[1],
+}));
+
+describe('Uncommon action colour', () => {
+  it.each(actionBlocks.map(b => [b.name, b]))('%s: label reads at 4.5:1 on the Uncommon fill', (_, b) => {
+    expect(b.label, `${b.name} is missing --uncommon-action-foreground`).toBeTruthy();
+    expect(contrast(b.fill, b.label)).toBeGreaterThanOrEqual(4.5);
+  });
+});

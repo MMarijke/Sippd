@@ -64,7 +64,7 @@ jobs:
       # release on every run, unauthenticated, and that call gets rate
       # limited ("Failed to resolve latest Supabase CLI release"). Matches
       # the CLI version used locally; bump deliberately.
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
         with:
           version: 2.117.0
 

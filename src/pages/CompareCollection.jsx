@@ -231,7 +231,7 @@ export default function CompareCollection() {
               const borderColor = tab === 'mine' ? 'border-primary/30' : tab === 'theirs' ? 'border-muted-foreground/30' : 'border-overlap/30';
               return (
                 <div key={item.id} className={cn('bg-card border rounded-xl overflow-hidden', borderColor)}>
-                  <CanImageBox imageUrl={imageUrl} rarity={rarity} alt={item.can_name} className="aspect-square" iconSize="w-7 h-7" />
+                  <CanImageBox imageUrl={imageUrl} rarity={rarity} canBg={item.can_bg_color} alt={item.can_name} className="aspect-square" iconSize="w-7 h-7" />
                   <div className="px-2 py-1.5 space-y-0.5">
                     <p className="text-2xs font-mono text-primary/70 truncate">{item.can_brand}</p>
                     <p className="text-xs font-semibold text-foreground truncate leading-tight">{item.can_name}</p>

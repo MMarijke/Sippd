@@ -30,7 +30,12 @@ export default function StatBox({ icon, label, value, className, glow, isLoading
           {value != null ? `${value}` : '0'}
         </span>
       )}
-      <span className="text-2xs font-mono text-muted-foreground uppercase tracking-widest">{label}</span>
+      {/* text-center: a three-up row is ~100px wide on a phone, so "RARE
+          PULLS" wraps, and each line sat left-aligned in the centred box.
+          pl-[0.1em]: tracking-widest adds 0.1em after every letter,
+          including the last on each line; matching it on the left keeps
+          the glyphs, not the trailing gap, on the centre line. */}
+      <span className="text-2xs font-mono text-muted-foreground uppercase tracking-widest text-center pl-[0.1em]">{label}</span>
     </Root>
   );
 }

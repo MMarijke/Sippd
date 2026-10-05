@@ -87,6 +87,7 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
                   <CanImageBox
                     imageUrl={item.can_image_url}
                     rarity={rarity}
+                    canBg={item.can_bg_color}
                     alt={item.can_name}
                     className="w-full h-[140px]"
                     iconSize="w-10 h-10"

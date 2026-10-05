@@ -14,6 +14,8 @@ import { format } from 'date-fns';
 import { acquiredAt } from '@/lib/canDate';
 import { RARITY_ORDER, getConfidence, getDisplayRarity } from '@/lib/rarityConsensus';
 import CanImageBox from '@/components/shared/CanImageBox';
+import CanTileColorPicker from '@/components/shared/CanTileColorPicker';
+import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import TasteRatingStars from '@/components/shared/TasteRatingStars';
 import BeverageTypeToggle from '@/components/shared/BeverageTypeToggle';
 
@@ -60,6 +62,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
     can_edition:  item?.can_edition  || '',
     can_beverage_type: item?.can_beverage_type || 'energy_drink',
     can_image_url: item?.can_image_url || '',
+    can_bg_color: item?.can_bg_color || DEFAULT_CAN_BG,
     taste_rating: item?.taste_rating || null,
     // When they got it (user_collection.acquired_on), shown as the date
     // this can already uses: their own date, else when it was logged.
@@ -239,12 +242,13 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
           <div className="space-y-1.5">
             <Label className="text-2xs font-mono uppercase tracking-wider text-muted-foreground">Image</Label>
             {form.can_image_url ? (
-              // Drawn by CanImageBox with the rarity rule CanCard uses, so it
-              // shows exactly the tile this can gets in Haul.
+              // Drawn by CanImageBox with the rarity rule CanCard uses and the
+              // tile colour picked below, so it shows exactly the Haul tile.
               <div className="relative">
                 <CanImageBox
                   imageUrl={form.can_image_url}
                   rarity={tileRarity}
+                  canBg={form.can_bg_color}
                   alt={form.can_name || 'Can'}
                   className="w-full h-40 rounded-xl border border-border"
                   loading="eager"
@@ -305,6 +309,13 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
               </div>
             )}
           </div>
+
+          <CanTileColorPicker
+            value={form.can_bg_color}
+            onChange={v => update('can_bg_color', v)}
+            rarity={tileRarity}
+            name="edit-tile-colour"
+          />
 
           {/* Rarity vote — read only */}
           <div className="space-y-1.5">

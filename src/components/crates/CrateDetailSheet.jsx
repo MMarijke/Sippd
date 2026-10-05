@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { rarityTileBackground } from '@/lib/canBgColors';
+import { tileBackground } from '@/lib/canBgColors';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { X, Plus, Minus, Share2 } from 'lucide-react';
@@ -294,7 +294,7 @@ function CanRow({ item, action, onAction, disabled }) {
     <div className="flex items-center gap-3 bg-secondary/40 border border-border rounded-xl px-3 py-2.5">
       <div
         className="w-9 h-9 rounded-lg overflow-hidden border border-border flex-shrink-0"
-        style={{ background: rarityTileBackground(item.can_rarity) }}
+        style={{ background: tileBackground(item.can_rarity, item.can_bg_color) }}
       >
         {item.can_image_url && (
           <img src={item.can_image_url} alt={item.can_name} loading="lazy" decoding="async" className="w-full h-full object-contain" />

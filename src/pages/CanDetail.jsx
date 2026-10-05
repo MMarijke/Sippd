@@ -223,6 +223,7 @@ export default function CanDetail() {
           <CanImageBox
             imageUrl={imageUrl}
             rarity={rarity}
+            canBg={item?.can_bg_color}
             alt={name}
             className="w-full h-full"
             iconSize="w-24 h-24"

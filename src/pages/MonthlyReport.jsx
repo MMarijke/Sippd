@@ -132,6 +132,7 @@ export default function MonthlyReport() {
     streak: streak ?? 0,
     bestPullId: bestPull?.id || null,
     bestPullRarity,
+    bestPullCanBg: bestPull?.can_bg_color || null,
     rarityBreakdown: monthlyRarityBreakdown,
   }), [monthLabel, collected.length, monthScore, streak, bestPull, bestPullRarity, monthlyRarityBreakdown]);
 
@@ -236,6 +237,7 @@ export default function MonthlyReport() {
                   <CanImageBox
                     imageUrl={bestPullImage}
                     rarity={bestPullRarity}
+                    canBg={bestPull?.can_bg_color}
                     alt={bestPull.can_name}
                     className="w-20 h-20 rounded-xl flex-shrink-0"
                     iconSize="w-8 h-8"

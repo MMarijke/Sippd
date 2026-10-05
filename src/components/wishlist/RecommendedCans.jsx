@@ -1,21 +1,48 @@
 import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabaseClient';
 import { Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CanImageBox from '@/components/shared/CanImageBox';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
 
-export default function RecommendedCans({ collection, sharedCans }) {
+// Per brand, enough of the catalog to rank from without loading all of it.
+const PER_BRAND_LIMIT = 300;
+
+export default function RecommendedCans({ collection }) {
   const navigate = useNavigate();
+
+  // Brands I actively collect (status = collected)
+  const brandList = useMemo(
+    () => [...new Set(
+      collection.filter(i => i.status === 'collected').map(i => i.can_brand).filter(Boolean)
+    )].sort(),
+    [collection]
+  );
+
+  // The catalog for those brands, asked of the server. This used to come
+  // from the page's newest-500 catalog copy, so once the catalog outgrew it
+  // the older cans of your brands could never be recommended.
+  const { data: sharedCans = [] } = useQuery({
+    queryKey: ['shared-cans', 'by-brand', brandList],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shared_cans')
+        .select('*')
+        .in('brand', brandList)
+        .order('total_votes', { ascending: false })
+        .limit(PER_BRAND_LIMIT);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: brandList.length > 0,
+  });
 
   const recommendations = useMemo(() => {
     if (!collection.length || !sharedCans.length) return [];
 
-    // Brands I actively collect (status = collected)
-    const collectedBrands = new Set(
-      collection.filter(i => i.status === 'collected').map(i => i.can_brand).filter(Boolean)
-    );
-    if (!collectedBrands.size) return [];
+    const collectedBrands = new Set(brandList);
 
     // Can IDs I already own or have wishlisted
     const myCanIds = new Set(collection.map(i => i.can_id));
@@ -35,7 +62,7 @@ export default function RecommendedCans({ collection, sharedCans }) {
     });
 
     return candidates.slice(0, 10);
-  }, [collection, sharedCans]);
+  }, [collection, sharedCans, brandList]);
 
   if (!recommendations.length) return null;
 

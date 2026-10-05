@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { useSharedCansByIds } from '@/hooks/useSharedCansByIds';
 import { useAuth } from '@/lib/AuthContext';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, ScanLine, PackageOpen, X, AlertCircle, RefreshCw, CheckSquare, Star, PackagePlus } from 'lucide-react';
@@ -114,18 +115,7 @@ export default function Collection() {
     isLoading: isLoadingSharedCans,
     isError: isSharedCansError,
     refetch: refetchSharedCans,
-  } = useQuery({
-    queryKey: ['shared-cans'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('shared_cans')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return data;
-    },
-  });
+  } = useSharedCansByIds(collection.map(i => i.can_id));
 
   const {
     data: votes = [],

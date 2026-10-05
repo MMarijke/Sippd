@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { useSharedCansByIds } from '@/hooks/useSharedCansByIds';
 import { useAuth } from '@/lib/AuthContext';
 import { Search, ScanLine, CheckCircle2, Trash2, ChevronDown, ChevronRight, Bookmark } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -39,18 +40,7 @@ export default function Wishlist() {
     enabled: !!user?.id,
   });
 
-  const { data: sharedCans = [] } = useQuery({
-    queryKey: ['shared-cans'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('shared_cans')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data: sharedCans = [] } = useSharedCansByIds(collection.map(i => i.can_id));
 
   const sharedCansMap = useMemo(
     () => Object.fromEntries(sharedCans.map(c => [c.id, c])),
@@ -158,7 +148,7 @@ export default function Wishlist() {
         </div>
       </div>
 
-      {!isLoading && <RecommendedCans collection={collection} sharedCans={sharedCans} />}
+      {!isLoading && <RecommendedCans collection={collection} />}
 
       <div className="px-5">
         {isLoading ? (

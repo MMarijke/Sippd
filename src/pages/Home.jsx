@@ -1,6 +1,7 @@
 import { lazy, Suspense, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { useSharedCansByIds } from '@/hooks/useSharedCansByIds';
 import { useAuth } from '@/lib/AuthContext';
 import { Link } from 'react-router-dom';
 import { ScanLine, BarChart2, RefreshCw } from 'lucide-react';
@@ -73,19 +74,7 @@ export default function Home() {
     isLoading: loadingShared,
     isError: isSharedCansError,
     refetch: refetchSharedCans,
-  } = useQuery({
-    queryKey: ['shared-cans'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('shared_cans')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return data;
-    },
-    refetchOnMount: true,
-  });
+  } = useSharedCansByIds(collection.map(i => i.can_id));
 
   const { streak, isLoading: streakLoading } = useStreakStatus();
   const isLoading = !user || loadingCollection || loadingShared;

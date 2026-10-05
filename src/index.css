@@ -299,17 +299,14 @@
      :root, not repeated per palette. (XP Gold retired 2026-09-29: 1 free +
      4 Pro now.)
 
-     --breakdown-* is HAND-AUTHORED for every Neon Arcade block (2026-09-29),
-     per product direction, using Cosmic's method (even CIELAB steps, ends
-     chosen for a real lightness step, 2:1 floor on any faint end):
-     - Power-Up: scan button -> the blue-green its Rare tier used to be.
-       Both polarities END on the dark polarity's old Rare (182 65% 28.4%):
-       the light polarity's own old Rare matched its green in luminance and
-       stepped only 1.02/tier. :root and .dark mirror Power-Up dark.
-     - Cyberpunk: scan button -> light purple (both polarities).
-     - Plasma DARK: scan button -> blue. Plasma light is unchanged.
-     - Boss Fight: dark -> light orange; light -> lighter pink.
-     - Synthwave: scan button -> deep dark purple (both polarities).
+     --breakdown-* for the DARK Neon Arcade blocks is HAND-AUTHORED
+     (2026-09-29), per product direction, using Cosmic's method (even CIELAB
+     steps, ends chosen for a real lightness step, 2:1 floor on any faint
+     end). :root and .dark mirror Power-Up dark. The LIGHT blocks derive
+     from these (2026-10-05, "Daylight Neon", see the light section below):
+     same hue route Common -> Legendary in both polarities, so a theme's
+     gauge, Scan button and selected chips keep their colour family when the
+     polarity toggles.
      With this, the file header's 15deg/tier rotation only still describes
      Nebula, Amethyst, Forest, Moss, Grape Candy, Sour Apple and Plasma light. */
   [data-theme="power-up"][data-polarity="dark"] {
@@ -447,13 +444,17 @@
     --breakdown-legendary: 283.0 79% 58.0%;
   }
 
-  /* ── Neon Arcade, light-polarity counterparts ────────────────────────────
-     Same theme identity (main/supporting keep their hue, or shift by the
-     smallest amount needed to clear 15deg from every other same-polarity
-     color -- see the file header) recomputed for a light background using
-     the exact Vintage Pastel formula: main/supporting deepened to ~3.4:1
-     against a new near-white background, text/muted-foreground authored
-     dark, on-main/on-supporting verified rather than assumed. Full glow
+  /* ── Neon Arcade, light-polarity counterparts ("Daylight Neon") ─────────
+     One theme, two polarities: each light block is derived from its dark
+     twin rather than authored separately (they had drifted into different
+     themes: 55% saturation mains, and gauge ramps running the opposite hue
+     route). --primary/--ring/--accent take the dark hue at 100% saturation,
+     lightness solved for ~3.4:1 against the near-white background with the
+     near-black primary-foreground still >= 4.5:1 on top. --breakdown-*
+     follows the dark ramp's hue route with saturation floored at 70%,
+     contrast vs --card stepping evenly from 2.0:1 (Common) to the primary's
+     (Legendary), so the rarest step reads loudest and IS the main colour,
+     as in dark. Text/muted-foreground stay authored dark. Full glow
      (--glow-intensity: 1, --wash-intensity: 0) -- light and dark used to
      get different ambient treatments (glow vs. a top-down wash) until the
      user asked for both polarities to share the same neon-bubble glow, so
@@ -465,25 +466,25 @@
     --card-foreground: 218 30% 25%;
     --popover: 218 85% 97%;
     --popover-foreground: 218 30% 25%;
-    --primary: 152 55% 38%;
+    --primary: 152 100% 29.5%;
     --primary-foreground: 240 20% 5%;
     --secondary: 217 88% 87%;
     --secondary-foreground: 218 30% 25%;
     --muted: 218 87% 91%;
     --muted-foreground: 218 21% 45%;
-    --accent: 189 60% 39%;
+    --accent: 189 100% 33%;
     --accent-foreground: 240 20% 5%;
     --border: 217 87% 82%;
     --input: 217 87% 82%;
-    --ring: 152 55% 38%;
+    --ring: 152 100% 29.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 152.0 55% 38.0%;
-    --breakdown-uncommon: 158.4 55% 35.9%;
+    --breakdown-common: 182 70% 46.1%;
+    --breakdown-uncommon: 167.4 70% 41.8%;
     --uncommon-action-foreground: 240 20% 4.9%;
-    --breakdown-rare: 165.7 55% 33.6%;
-    --breakdown-ultra: 173.7 58% 30.9%;
-    --breakdown-legendary: 182.0 65% 28.4%;
+    --breakdown-rare: 158 70% 39%;
+    --breakdown-ultra: 152.8 75% 35.6%;
+    --breakdown-legendary: 152 100% 29.5%;
   }
   [data-theme="cyberpunk"][data-polarity="light"] {
     --background: 278 89% 96%;
@@ -492,25 +493,25 @@
     --card-foreground: 278 30% 25%;
     --popover: 278 85% 97%;
     --popover-foreground: 278 30% 25%;
-    --primary: 312 55% 56%;
+    --primary: 312 100% 46.7%;
     --primary-foreground: 240 20% 5%;
     --secondary: 278 88% 87%;
     --secondary-foreground: 278 30% 25%;
     --muted: 278 87% 91%;
     --muted-foreground: 278 21% 47%;
-    --accent: 257 60% 65%;
+    --accent: 257 100% 69.4%;
     --accent-foreground: 240 20% 5%;
     --border: 278 87% 82%;
     --input: 278 87% 82%;
-    --ring: 312 55% 56%;
+    --ring: 312 100% 46.7%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 275.0 80% 77.8%;
-    --breakdown-uncommon: 286.6 62% 71.3%;
+    --breakdown-common: 312 100% 75.2%;
+    --breakdown-uncommon: 309.3 90% 68.7%;
     --uncommon-action-foreground: 240 20% 4.9%;
-    --breakdown-rare: 297.3 51% 64.7%;
-    --breakdown-ultra: 306.1 52% 60.2%;
-    --breakdown-legendary: 312.0 55% 56.0%;
+    --breakdown-rare: 302.8 77% 62.5%;
+    --breakdown-ultra: 291.2 78% 61.2%;
+    --breakdown-legendary: 275 90% 64.1%;
   }
   [data-theme="plasma"][data-polarity="light"] {
     --background: 203 89% 96%;
@@ -519,25 +520,25 @@
     --card-foreground: 204 30% 25%;
     --popover: 202 85% 97%;
     --popover-foreground: 204 30% 25%;
-    --primary: 186 55% 40%;
+    --primary: 186 100% 31.9%;
     --primary-foreground: 240 20% 5%;
     --secondary: 204 88% 87%;
     --secondary-foreground: 204 30% 25%;
     --muted: 204 87% 91%;
     --muted-foreground: 203 21% 43%;
-    --accent: 227 60% 63%;
+    --accent: 227 100% 66.9%;
     --accent-foreground: 240 20% 5%;
     --border: 204 87% 82%;
     --input: 204 87% 82%;
-    --ring: 186 55% 40%;
+    --ring: 186 100% 31.9%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 186.0 55% 39.1%;
-    --breakdown-uncommon: 201.0 60% 46.0%;
+    --breakdown-common: 222 100% 78%;
+    --breakdown-uncommon: 216.9 100% 70.8%;
     --uncommon-action-foreground: 240 20% 4.9%;
-    --breakdown-rare: 216.0 65% 56.8%;
-    --breakdown-ultra: 231.0 70% 65.1%;
-    --breakdown-legendary: 246.0 75% 68.5%;
+    --breakdown-rare: 207.9 100% 57.7%;
+    --breakdown-ultra: 197.2 100% 41.4%;
+    --breakdown-legendary: 186 100% 31.9%;
   }
   [data-theme="boss-fight"][data-polarity="light"] {
     /* main/supporting hue shifted -13/-13deg from the dark original (347,
@@ -549,25 +550,25 @@
     --card-foreground: 341 30% 25%;
     --popover: 338 85% 97%;
     --popover-foreground: 341 30% 25%;
-    --primary: 334 55% 58%;
+    --primary: 347 100% 53.6%;
     --primary-foreground: 240 20% 5%;
     --secondary: 340 88% 87%;
     --secondary-foreground: 341 30% 25%;
     --muted: 341 87% 91%;
     --muted-foreground: 341 21% 46%;
-    --accent: 16 60% 53%;
+    --accent: 29 100% 40.4%;
     --accent-foreground: 240 20% 5%;
     --border: 340 87% 82%;
     --input: 340 87% 82%;
-    --ring: 334 55% 58%;
+    --ring: 347 100% 53.6%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 334.0 75% 75.6%;
-    --breakdown-uncommon: 334.3 68% 71.3%;
+    --breakdown-common: 347 100% 77.5%;
+    --breakdown-uncommon: 358.3 100% 72.8%;
     --uncommon-action-foreground: 240 20% 4.9%;
-    --breakdown-rare: 334.4 63% 66.9%;
-    --breakdown-ultra: 334.3 58% 62.5%;
-    --breakdown-legendary: 334.0 55% 58.0%;
+    --breakdown-rare: 9.6 100% 62.4%;
+    --breakdown-ultra: 19.9 100% 48.1%;
+    --breakdown-legendary: 30 100% 39.8%;
   }
   [data-theme="synthwave"][data-polarity="light"] {
     /* shifted -9/-9deg (283, 250 -> 274, 241) to clear Grape Float's dark
@@ -578,25 +579,25 @@
     --card-foreground: 261 30% 25%;
     --popover: 262 85% 97%;
     --popover-foreground: 261 30% 25%;
-    --primary: 274 55% 62%;
+    --primary: 283 100% 60.4%;
     --primary-foreground: 240 20% 5%;
     --secondary: 261 88% 87%;
     --secondary-foreground: 261 30% 25%;
     --muted: 261 87% 91%;
     --muted-foreground: 261 21% 49%;
-    --accent: 241 60% 66%;
+    --accent: 250 100% 70.4%;
     --accent-foreground: 240 20% 5%;
     --border: 261 87% 82%;
     --input: 261 87% 82%;
-    --ring: 274 55% 62%;
+    --ring: 283 100% 60.4%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 274.0 55% 62.0%;
-    --breakdown-uncommon: 273.6 41% 52.1%;
-    --uncommon-action-foreground: 0 0% 98%;
-    --breakdown-rare: 273.1 44% 42.5%;
-    --breakdown-ultra: 272.5 53% 33.2%;
-    --breakdown-legendary: 272.0 70% 24.0%;
+    --breakdown-common: 272 80% 78%;
+    --breakdown-uncommon: 275 72% 72.6%;
+    --uncommon-action-foreground: 240 20% 4.9%;
+    --breakdown-rare: 277.8 70% 68.1%;
+    --breakdown-ultra: 280.5 70% 64.1%;
+    --breakdown-legendary: 283 79% 60.5%;
   }
 
   /* ============================================================================

@@ -60,9 +60,13 @@ jobs:
       # no project ref, no login, no secrets. See supabase/tests/*.sql for
       # the RLS/RPC cross-account isolation and column-lock trigger tests
       # this actually runs.
+      # Pinned: "latest" makes setup-cli ask the GitHub API for the newest
+      # release on every run, unauthenticated, and that call gets rate
+      # limited ("Failed to resolve latest Supabase CLI release"). Matches
+      # the CLI version used locally; bump deliberately.
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.117.0
 
       - run: supabase db start
 

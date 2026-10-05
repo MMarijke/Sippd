@@ -36,6 +36,13 @@ module.exports = {
   				DEFAULT: 'hsl(var(--primary))',
   				foreground: 'hsl(var(--primary-foreground))'
   			},
+  			// Each theme's Uncommon colour (the rarity gauge's Uncommon
+  			// step) as an action fill, with a per-theme text colour picked
+  			// for contrast (src/lib/breakdownRamps.test.js guards >= 4.5:1).
+  			'uncommon-action': {
+  				DEFAULT: 'hsl(var(--breakdown-uncommon))',
+  				foreground: 'hsl(var(--uncommon-action-foreground))'
+  			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
   				foreground: 'hsl(var(--secondary-foreground))'

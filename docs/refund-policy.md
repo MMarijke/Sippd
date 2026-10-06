@@ -10,7 +10,7 @@ This policy explains how billing, cancellation, and refunds work for Sippd Pro, 
 
 Sippd Pro is billed through Paddle.com, who act as the Merchant of Record for this purchase. This means your subscription payment is made to Paddle, not directly to Sippd, and your payment method, receipts, and tax invoice will show Paddle as the seller.
 
-The Paddle entity acting as seller is **Paddle.com Market Ltd**, a UK company. [TODO: confirm this exact wording against what actually appears on your live Paddle account's receipts before publishing — Paddle operates region-specific entities in some cases, so double-check this matches what a customer will actually see on their bank/card statement rather than relying on this being universal.]
+The Paddle entity acting as seller is **Paddle.com Market Ltd**, a UK company.
 
 Sippd Pro is currently offered at:
 

@@ -25,7 +25,7 @@ We may suspend or terminate your account if you violate these Terms.
 
 Where practical, we will make reasonable efforts to notify you by email before or shortly after suspending or terminating an account for a violation, and to explain why. This does not apply where notice would defeat the purpose of the suspension (for example, active fraud, abuse of the App's systems, or repeated rarity-vote manipulation), in which case we may act immediately.
 
-If you believe your account was suspended or terminated in error, you may appeal by contacting us at [TODO: insert contact email — see Section 10]. We'll review appeals in good faith but don't guarantee reinstatement.
+If you believe your account was suspended or terminated in error, you may appeal by contacting us at seedstackstudio@gmail.com. We'll review appeals in good faith but don't guarantee reinstatement.
 
 You may delete your own account at any time from Settings within the App. A user-initiated deletion is immediate and permanent, as described in our [Privacy Policy](./privacy-policy.md). An involuntary termination for a Terms violation may, unlike a voluntary deletion, involve us retaining a minimal record (such as the account identifier and the reason for termination) to prevent re-registration or enforce a ban — see the Privacy Policy's data retention section for specifics.
 
@@ -52,12 +52,11 @@ When you delete a specific photo, or delete your account, the licence for that c
 
 Sippd offers an optional paid tier, Sippd Pro, which unlocks additional features beyond the free tier. Sippd Pro is billed through Paddle.com, acting as Merchant of Record. Full billing, cancellation, and refund terms are set out in our [Refund & Cancellation Policy](./refund-policy.md).
 
-[TODO: confirm whether anything Pro-specific needs to be stated here rather than only in the refund policy — for example, what happens to Pro-only data (like a raised pin limit above the free tier's cap) if a subscription lapses or is cancelled. If cancelling drops you back to the free tier's limits, say explicitly whether anything over the free limit becomes read-only, hidden, or is never removed.]
-
 
 ## 6. Governing Law
 
 These Terms are governed by the laws of the Republic of South Africa. The processing of your personal information under these Terms is separately governed by South Africa's Protection of Personal Information Act (POPIA), and — for users in the European Union or United Kingdom — by the GDPR/UK GDPR, as described in our [Privacy Policy](./privacy-policy.md).
+
 
 ## 7. Changes to These Terms
 

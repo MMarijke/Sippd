@@ -6,13 +6,7 @@ This policy explains what personal information Sippd ("the App", "we", "us") col
 
 Sippd is distributed on the Google Play Store (Android) and on the web at sippd-beta.vercel.app. Our users are global, with our primary market in South Africa. This policy is written to comply with South Africa's Protection of Personal Information Act (POPIA), and, per the note below, is also likely subject to the GDPR/UK GDPR for users in those regions.
 
-**On GDPR applicability — this is a legal-fact question, not a style choice.** Under Article 3(2) of the GDPR, the regulation applies extraterritorially to any business processing the personal data of individuals located in the EU where the processing relates to offering goods or services to those individuals — regardless of whether payment is involved — or to monitoring their behaviour within the EU. Sippd is a publicly available app/web service with no geographic restriction excluding EU users, so it likely falls within GDPR's scope as a matter of law, not merely as a voluntary best-practice alignment. This has real consequences beyond wording:
-
-[TODO — LEGAL REVIEW RECOMMENDED. If GDPR applies as a matter of law rather than voluntarily:
-- You need a documented lawful basis (GDPR Article 6) for each processing purpose listed in Section 1 below, not just a description of what's collected.
-- EU/UK users have the right to lodge a complaint with a supervisory authority in their own country, in addition to South Africa's Information Regulator — this should be added to Section 5.
-- Article 27 may require appointing an EU representative if your processing isn't "occasional" — Sippd's ongoing social/profile features arguably aren't occasional, so this needs a real decision, not an assumption either way.
-A lawyer familiar with both POPIA and GDPR can confirm how far this actually needs to go given your current scale — this doesn't need to block launch, but it shouldn't be silently skipped either.]
+**On GDPR applicability — this is a legal-fact question, not a style choice.** Under Article 3(2) of the GDPR, the regulation applies extraterritorially to any business processing the personal data of individuals located in the EU where the processing relates to offering goods or services to those individuals — regardless of whether payment is involved — or to monitoring their behaviour within the EU. Sippd is a publicly available app/web service with no geographic restriction excluding EU users, so it likely falls within GDPR's scope as a matter of law, not merely as a voluntary best-practice alignment. 
 
 ## 1. What we collect and why
 
@@ -75,7 +69,7 @@ You have the following rights over your personal information:
 - **Export.** You can download a self-service export of your data — your profile, collection, votes, follows, trades, crates, notifications, activity, and reactions — as a JSON file from Settings > Your Data within the App, at any time and free of charge.
 - **Complain to a regulator.** You have the right to lodge a complaint with South Africa's Information Regulator if you believe your personal information has been processed unlawfully. 
 
-**On the Information Officer requirement:** under POPIA, every organization processing personal information (a "responsible party") automatically has a default Information Officer — for a sole-operator project like Sippd, that is you by default — and POPIA requires that this Information Officer be registered with the Information Regulator via its eServices portal before taking up IO duties. [TODO: complete this registration at the Information Regulator's website (search "Information Regulator South Africa eServices Portal" for the current link, since portal URLs have moved before) and insert your registration details/contact information here once done. This is a real, outstanding compliance step, not just a documentation gap.]
+**On the Information Officer requirement:** under POPIA, every organization processing personal information (a "responsible party") automatically has a default Information Officer — for a sole-operator project like Sippd, that is you by default — and POPIA requires that this Information Officer be registered with the Information Regulator via its eServices portal before taking up IO duties. 
 
 ## 6. How to contact us
 

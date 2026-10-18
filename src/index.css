@@ -837,8 +837,8 @@
   }
 
   /* ── Botanical family (natural/earthy, mixed polarity) ───────────────────
-     2 free (Sage, Spring) + 4 Pro (Terracotta retired 2026-09-29, users
-     moved to Noir's Crimson). Sage/Moss/Meadow/Spring are light-background, Forest/Fern are
+     1 free + 4 Pro (Terracotta retired 2026-09-29, users moved to Noir's
+     Crimson). Sage/Moss/Meadow are light-background, Forest/Fern are
      dark-background -- that split is each theme's own fixed identity
      (confirmed explicitly), not something the polarity toggle controls;
      the toggle doesn't render for this family at all. Full glow on every
@@ -852,7 +852,7 @@
      scan-button green. Each steps evenly in contrast against --card.
      Forest and Moss are unchanged. */
   [data-theme="sage"], [data-theme="forest"], [data-theme="fern"],
-  [data-theme="moss"], [data-theme="meadow"], [data-theme="spring"] {
+  [data-theme="moss"], [data-theme="meadow"] {
     --font-display: 'Fraunces', serif;
     --font-mono: 'IBM Plex Mono', monospace;
     --font-body: 'Karla', sans-serif;
@@ -989,50 +989,6 @@
     --breakdown-rare: 99.9 35% 48.0%;
     --breakdown-ultra: 99.8 41% 43.2%;
     --breakdown-legendary: 99.8 46% 38.8%;
-  }
-  /* Spring (2026-10-18, free, light): built from a palette the user chose --
-     plum 665075, brick C75554, coral EF8F6E, butter FFED9C, sage-lime B2BC76,
-     moss 778C62. The palette's own colours are used as they are wherever
-     they pass; only text and the faint ramp end are derived.
-     - Background: the lilac-grey of the palette card's canvas, which also
-       keeps Spring apart from Sage/Moss/Meadow's creams.
-     - Main = plum (6.1:1 on the background, near-white label 6.8:1);
-       supporting = moss, deepened 2% to ~3.4:1 like the other light themes'
-       supporting colours (it's the outline/ghost hover text).
-     - Ramp rises in contrast against the card, Common -> Legendary:
-       sage-lime (lifted to the 2:1 floor) 2.0, coral 2.1, moss 3.2,
-       brick 3.8, plum 6.3 -- the deepest colour is the rarest. Coral on
-       Uncommon makes the Scan button and selected brand chip coral.
-     - Butter is the palette's one colour with no role: at 1.1:1 against
-       any light surface it can't carry a ramp step or text.
-     - Text/muted text are plum, deepened; muted-foreground clears 4.5:1 on
-       background, card, muted and secondary. */
-  [data-theme="spring"] {
-    --background: 258.0 16% 94.0%;
-    --foreground: 279.0 24% 21.0%;
-    --card: 258.0 13% 95.0%;
-    --card-foreground: 279.0 24% 21.0%;
-    --popover: 258.0 13% 95.0%;
-    --popover-foreground: 279.0 24% 21.0%;
-    --primary: 275.7 19% 38.6%;
-    --primary-foreground: 0.0 0% 98.0%;
-    --secondary: 258.0 14% 85.0%;
-    --secondary-foreground: 279.0 24% 21.0%;
-    --muted: 258.0 12% 89.0%;
-    --muted-foreground: 279.0 13% 37.0%;
-    --accent: 90.0 18% 44.7%;
-    --accent-foreground: 240.0 20% 4.9%;
-    --border: 258.0 14% 80.0%;
-    --input: 258.0 14% 80.0%;
-    --ring: 275.7 19% 38.6%;
-    --glow-intensity: 1;
-    --wash-intensity: 0;
-    --breakdown-common: 68.6 34% 54.8%;
-    --breakdown-uncommon: 15.3 80% 68.4%;
-    --uncommon-action-foreground: 240.0 20% 4.9%;
-    --breakdown-rare: 90.0 18% 46.7%;
-    --breakdown-ultra: 0.5 51% 55.5%;
-    --breakdown-legendary: 275.7 19% 38.6%;
   }
 
   /* ── Noir family (dark, luxury/minimalist) ────────────────────────────────
@@ -1410,6 +1366,197 @@
     --breakdown-rare: 350.1 95% 44.8%;
     --breakdown-ultra: 349.1 93% 41.4%;
     --breakdown-legendary: 348.0 90% 38.0%;
+  }
+
+  /* ── Spring family (light, built from a palette the user chose) ──────────
+     1 free (Plum) + 5 Pro, all light. Palette: plum 665075, brick C75554,
+     coral EF8F6E, butter FFED9C, pistachio (the palette's sage-lime) B2BC76,
+     olive (its moss) 778C62. Each theme is led by one palette colour; all
+     six share the palette as their rarity gauge, so the family reads as one.
+     Ids are spring-* because Botanical already owns 'sage' and 'moss'.
+
+     - Background: a pale tint of the lead's hue (Plum: the palette card's
+       own lilac-grey). Surfaces follow the Phase 2 light formula (card
+       bg+1, secondary bg-9, muted bg-5, border bg-14).
+     - Main = the lead colour, used exactly as the palette gives it where it
+       already clears ~3.4:1 on the background (Plum, Brick), otherwise
+       deepened to it: Coral at 65% saturation (full saturation turned it
+       hard orange-red), Pistachio at 45% (so it stays apart from Olive),
+       Butter to a warm gold (its cream background carries the butter).
+       Supporting = a partner palette colour, same rule.
+     - Gauge, rising in contrast vs --card: pistachio (lifted to the 2:1
+       floor) -> coral -> olive -> brick -> plum. The deepest colour is the
+       rarest. Coral on Uncommon makes Scan and the selected brand chip coral
+       in every Spring theme.
+     - Text is the lead hue, near-black; muted text >= 4.5:1 on background,
+       card, muted and secondary. Labels on main/supporting/Scan >= 4.5:1. */
+  [data-theme="spring-plum"], [data-theme="spring-brick"], [data-theme="spring-coral"],
+  [data-theme="spring-butter"], [data-theme="spring-pistachio"], [data-theme="spring-olive"] {
+    --font-display: 'Poppins', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  [data-theme="spring-plum"] {
+    --background: 258.0 16% 94.0%;
+    --foreground: 275.7 24% 20.0%;
+    --card: 258.0 13% 95.0%;
+    --card-foreground: 275.7 24% 20.0%;
+    --popover: 258.0 13% 95.0%;
+    --popover-foreground: 275.7 24% 20.0%;
+    --primary: 275.7 19% 38.6%;
+    --primary-foreground: 0.0 0% 98.0%;
+    --secondary: 258.0 14% 85.0%;
+    --secondary-foreground: 275.7 24% 20.0%;
+    --muted: 258.0 12% 89.0%;
+    --muted-foreground: 275.7 13% 38.6%;
+    --accent: 90.0 18% 44.7%;
+    --accent-foreground: 240.0 20% 4.9%;
+    --border: 258.0 14% 80.0%;
+    --input: 258.0 14% 80.0%;
+    --ring: 275.7 19% 38.6%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 68.6 34% 54.8%;
+    --breakdown-uncommon: 15.3 80% 68.4%;
+    --uncommon-action-foreground: 240.0 20% 4.9%;
+    --breakdown-rare: 90.0 18% 46.7%;
+    --breakdown-ultra: 0.5 51% 55.5%;
+    --breakdown-legendary: 275.7 19% 38.6%;
+  }
+  [data-theme="spring-brick"] {
+    --background: 0.5 30% 94.0%;
+    --foreground: 0.5 24% 20.0%;
+    --card: 0.5 27% 95.0%;
+    --card-foreground: 0.5 24% 20.0%;
+    --popover: 0.5 27% 95.0%;
+    --popover-foreground: 0.5 24% 20.0%;
+    --primary: 0.5 51% 55.5%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 0.5 28% 85.0%;
+    --secondary-foreground: 0.5 24% 20.0%;
+    --muted: 0.5 26% 89.0%;
+    --muted-foreground: 0.5 13% 37.8%;
+    --accent: 275.7 19% 38.6%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 0.5 28% 80.0%;
+    --input: 0.5 28% 80.0%;
+    --ring: 0.5 51% 55.5%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 68.6 34% 54.5%;
+    --breakdown-uncommon: 15.3 80% 68.4%;
+    --uncommon-action-foreground: 240.0 20% 4.9%;
+    --breakdown-rare: 90.0 18% 46.7%;
+    --breakdown-ultra: 0.5 51% 55.5%;
+    --breakdown-legendary: 275.7 19% 38.6%;
+  }
+  [data-theme="spring-coral"] {
+    --background: 15.3 45% 94.0%;
+    --foreground: 15.3 24% 20.0%;
+    --card: 15.3 42% 95.0%;
+    --card-foreground: 15.3 24% 20.0%;
+    --popover: 15.3 42% 95.0%;
+    --popover-foreground: 15.3 24% 20.0%;
+    --primary: 15.3 65% 51.3%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 15.3 43% 85.0%;
+    --secondary-foreground: 15.3 24% 20.0%;
+    --muted: 15.3 41% 89.0%;
+    --muted-foreground: 15.3 13% 36.8%;
+    --accent: 275.7 19% 38.6%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 15.3 43% 80.0%;
+    --input: 15.3 43% 80.0%;
+    --ring: 15.3 65% 51.3%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 68.6 34% 54.9%;
+    --breakdown-uncommon: 15.3 80% 68.4%;
+    --uncommon-action-foreground: 240.0 20% 4.9%;
+    --breakdown-rare: 90.0 18% 46.7%;
+    --breakdown-ultra: 0.5 51% 55.5%;
+    --breakdown-legendary: 275.7 19% 38.6%;
+  }
+  [data-theme="spring-butter"] {
+    --background: 49.1 75% 94.0%;
+    --foreground: 49.1 24% 20.0%;
+    --card: 49.1 72% 95.0%;
+    --card-foreground: 49.1 24% 20.0%;
+    --popover: 49.1 72% 95.0%;
+    --popover-foreground: 49.1 24% 20.0%;
+    --primary: 49.1 100% 31.3%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 49.1 73% 85.0%;
+    --secondary-foreground: 49.1 24% 20.0%;
+    --muted: 49.1 71% 89.0%;
+    --muted-foreground: 49.1 13% 37.9%;
+    --accent: 0.5 51% 55.5%;
+    --accent-foreground: 240.0 20% 4.9%;
+    --border: 49.1 73% 80.0%;
+    --input: 49.1 73% 80.0%;
+    --ring: 49.1 100% 31.3%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 68.6 34% 57.7%;
+    --breakdown-uncommon: 15.3 80% 68.4%;
+    --uncommon-action-foreground: 240.0 20% 4.9%;
+    --breakdown-rare: 90.0 18% 46.7%;
+    --breakdown-ultra: 0.5 51% 55.5%;
+    --breakdown-legendary: 275.7 19% 38.6%;
+  }
+  [data-theme="spring-pistachio"] {
+    --background: 68.6 35% 94.0%;
+    --foreground: 68.6 24% 20.0%;
+    --card: 68.6 32% 95.0%;
+    --card-foreground: 68.6 24% 20.0%;
+    --popover: 68.6 32% 95.0%;
+    --popover-foreground: 68.6 24% 20.0%;
+    --primary: 68.6 45% 37.4%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 68.6 33% 85.0%;
+    --secondary-foreground: 68.6 24% 20.0%;
+    --muted: 68.6 31% 89.0%;
+    --muted-foreground: 68.6 13% 35.4%;
+    --accent: 275.7 19% 38.6%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 68.6 33% 80.0%;
+    --input: 68.6 33% 80.0%;
+    --ring: 68.6 45% 37.4%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 68.6 34% 56.8%;
+    --breakdown-uncommon: 15.3 80% 68.4%;
+    --uncommon-action-foreground: 240.0 20% 4.9%;
+    --breakdown-rare: 90.0 18% 46.7%;
+    --breakdown-ultra: 0.5 51% 55.5%;
+    --breakdown-legendary: 275.7 19% 38.6%;
+  }
+  [data-theme="spring-olive"] {
+    --background: 90.0 25% 94.0%;
+    --foreground: 90.0 24% 20.0%;
+    --card: 90.0 22% 95.0%;
+    --card-foreground: 90.0 24% 20.0%;
+    --popover: 90.0 22% 95.0%;
+    --popover-foreground: 90.0 24% 20.0%;
+    --primary: 90.0 18% 45.7%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 90.0 23% 85.0%;
+    --secondary-foreground: 90.0 24% 20.0%;
+    --muted: 90.0 21% 89.0%;
+    --muted-foreground: 90.0 13% 35.1%;
+    --accent: 15.3 65% 52.5%;
+    --accent-foreground: 240.0 20% 4.9%;
+    --border: 90.0 23% 80.0%;
+    --input: 90.0 23% 80.0%;
+    --ring: 90.0 18% 45.7%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 68.6 34% 56.1%;
+    --breakdown-uncommon: 15.3 80% 68.4%;
+    --uncommon-action-foreground: 240.0 20% 4.9%;
+    --breakdown-rare: 90.0 18% 46.7%;
+    --breakdown-ultra: 0.5 51% 55.5%;
+    --breakdown-legendary: 275.7 19% 38.6%;
   }
 }
 

@@ -75,9 +75,6 @@ export const THEME_FAMILIES = [
       { id: 'fern', label: 'Fern', pro: true, dark: { swatch: '#68A86D', sup: '#447547', background: '#0F1911' } },
       { id: 'moss', label: 'Moss', pro: true, light: { swatch: '#828355', sup: '#5A5B37', background: '#F0EFE1' } },
       { id: 'meadow', label: 'Meadow', pro: true, light: { swatch: '#549135', sup: '#2C491F', background: '#F5F3DE' } },
-      // Built from a palette the user picked (plum, brick, coral, butter,
-      // sage-lime, moss); free for everyone. See index.css.
-      { id: 'spring', label: 'Spring', pro: false, light: { swatch: '#665075', sup: '#72875D', background: '#EFEDF2' } },
     ],
   },
   {
@@ -108,6 +105,25 @@ export const THEME_FAMILIES = [
       { id: 'orange-crush', label: 'Orange Crush', pro: true, light: { swatch: '#EA5300', sup: '#953A11', background: '#FFF5ED' } },
       { id: 'sour-apple', label: 'Sour Apple', pro: true, light: { swatch: '#679616', sup: '#2B4213', background: '#F5FFE9' } },
       { id: 'cherry-pop', label: 'Cherry Pop', pro: true, light: { swatch: '#FF2743', sup: '#B4243A', background: '#FFF1F3' } },
+    ],
+  },
+  {
+    // Built from a palette the user chose (plum, brick, coral, butter,
+    // sage-lime, moss): each theme led by one of its colours, all sharing
+    // it as their rarity gauge. Ids are spring-* because Botanical already
+    // owns 'sage' and 'moss'. See index.css.
+    id: 'spring',
+    label: 'Spring',
+    displayFont: "'Poppins', sans-serif",
+    labelSize: '0.7125rem',
+    isNew: true,
+    themes: [
+      { id: 'spring-plum', label: 'Plum', pro: false, light: { swatch: '#665075', sup: '#72875D', background: '#EFEDF2' } },
+      { id: 'spring-brick', label: 'Brick', pro: true, light: { swatch: '#C75554', sup: '#665075', background: '#F4EBEB' } },
+      { id: 'spring-coral', label: 'Coral', pro: true, light: { swatch: '#D45B32', sup: '#665075', background: '#F7ECE9' } },
+      { id: 'spring-butter', label: 'Butter', pro: true, light: { swatch: '#A08300', sup: '#C75554', background: '#FBF7E4' } },
+      { id: 'spring-pistachio', label: 'Pistachio', pro: true, light: { swatch: '#7E8A34', sup: '#665075', background: '#F4F5EA' } },
+      { id: 'spring-olive', label: 'Olive', pro: true, light: { swatch: '#758A60', sup: '#D55F37', background: '#F0F4EC' } },
     ],
   },
 ];
@@ -143,8 +159,9 @@ export function getThemeFamily(themeId) {
 // index.css's own @import for every visitor. The rest load on demand the
 // first time their family is applied, so a user only ever downloads the
 // one trio they actually see (/impeccable audit).
-// labelSize (per family above) sizes that face's picker label so all five
-// read at one optical size: their x-heights run 0.46 (Bodoni Moda) to 0.58
+// labelSize (per family above) sizes that face's picker label so every family
+// reads at one optical size (Spring's Poppins: x-height ~0.55, so 0.7125rem):
+// their x-heights run 0.46 (Bodoni Moda) to 0.58
 // (Orbitron), measured, so one font-size made "Noir" look a size smaller
 // than "Neon Arcade". Target x-height ~0.52 of 12px. CSS font-size-adjust
 // was tried first and didn't hold: Chrome reads Bodoni's and Fraunces'
@@ -153,13 +170,14 @@ export function getThemeFamily(themeId) {
 // block sets. The Settings picker sets each family's tile label in its own
 // face, so it needs these before the family is ever applied.
 export const PICKER_LABEL_FONTS_URL =
-  'https://fonts.googleapis.com/css2?family=Michroma&family=Fraunces:wght@600&family=Bodoni+Moda:wght@700&family=Fredoka:wght@600&display=swap';
+  'https://fonts.googleapis.com/css2?family=Michroma&family=Fraunces:wght@600&family=Bodoni+Moda:wght@700&family=Fredoka:wght@600&family=Poppins:wght@700&display=swap';
 
 export const FAMILY_FONT_URLS = {
   cosmic: 'https://fonts.googleapis.com/css2?family=Michroma&family=Space+Mono:wght@400;700&family=Manrope:wght@400;500;700&display=swap',
   botanical: 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Karla:wght@400;500;700&display=swap',
   noir: 'https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500;700&family=Fragment+Mono&family=Jost:wght@400;500&display=swap',
   candy: 'https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Chivo+Mono:wght@400;500&family=Nunito:wght@400;600;700&display=swap',
+  spring: 'https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap',
 };
 
 // Appends the family's stylesheet once; later calls for the same family

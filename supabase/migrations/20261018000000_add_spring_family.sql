@@ -1,10 +1,13 @@
--- Adds Spring (Botanical family, FREE): a light theme built from a palette
--- the user chose. See src/index.css for its token values.
+-- Adds the Spring theme family: six light themes built from a palette the
+-- user chose (plum, brick, coral, butter, pistachio, olive). Plum is free;
+-- the other five are Pro. See src/index.css for their token values.
+--
+-- Ids are spring-* because Botanical already owns 'sage' and 'moss'.
 --
 -- Only widens two lists, so no backfill and nothing destructive:
--- 1. profiles_theme_valid gains 'spring'.
--- 2. profiles_lock_columns()'s free-id list gains 'spring', so a free user
---    can pick it (any id NOT on that list is Pro-locked by default).
+-- 1. profiles_theme_valid gains the six spring-* ids.
+-- 2. profiles_lock_columns()'s free-id list gains 'spring-plum' (any id NOT
+--    on that list is Pro-locked by default, so the other five need nothing).
 
 alter table profiles drop constraint profiles_theme_valid;
 
@@ -15,16 +18,18 @@ alter table profiles add constraint profiles_theme_valid check (
     -- Cosmic
     'moonlight', 'nebula', 'solar-flare', 'aurora', 'deep-space', 'stellar-gold',
     -- Botanical
-    'sage', 'forest', 'fern', 'moss', 'meadow', 'spring',
+    'sage', 'forest', 'fern', 'moss', 'meadow',
     -- Noir
     'carbon', 'crimson', 'amethyst', 'sapphire', 'emerald', 'silver-screen',
     -- Candy
-    'bubblegum', 'blue-pop', 'grape-candy', 'orange-crush', 'sour-apple', 'cherry-pop'
+    'bubblegum', 'blue-pop', 'grape-candy', 'orange-crush', 'sour-apple', 'cherry-pop',
+    -- Spring
+    'spring-plum', 'spring-brick', 'spring-coral', 'spring-butter', 'spring-pistachio', 'spring-olive'
   )
 );
 
--- Only the free-id list in the Pro-lock branch changes ('spring' joins it);
--- every other branch is copied unchanged from
+-- Only the free-id list in the Pro-lock branch changes ('spring-plum'
+-- joins it); every other branch is copied unchanged from
 -- 20260929000000_trim_theme_catalogue.sql. Stays SECURITY INVOKER (the
 -- default) so current_user reflects the real caller -- see CLAUDE.md.
 create or replace function public.profiles_lock_columns()
@@ -57,7 +62,7 @@ begin
       raise exception 'pro_expires_at is not client-writable';
     end if;
     if new.theme is distinct from old.theme
-      and new.theme not in ('power-up', 'moonlight', 'sage', 'spring', 'carbon', 'bubblegum') then
+      and new.theme not in ('power-up', 'moonlight', 'sage', 'carbon', 'bubblegum', 'spring-plum') then
       if old.subscription_status is distinct from 'pro'
         or (old.pro_expires_at is not null and old.pro_expires_at <= now())
       then

@@ -91,10 +91,17 @@ select throws_like(
   'free user is blocked from Silver Screen'
 );
 
--- Added in 20261018000000_add_spring_theme.sql, on the free list.
+-- Spring family, 20261018000000_add_spring_family.sql: Plum is on the
+-- free list, the other five are Pro-locked by omission.
 select lives_ok(
-  $$update profiles set theme = 'spring' where id = '11111111-1111-1111-1111-111111111111'$$,
-  'free user can pick Spring (free for everyone)'
+  $$update profiles set theme = 'spring-plum' where id = '11111111-1111-1111-1111-111111111111'$$,
+  'free user can pick Spring Plum (the family''s free theme)'
+);
+
+select throws_like(
+  $$update profiles set theme = 'spring-coral' where id = '11111111-1111-1111-1111-111111111111'$$,
+  '%theme is Pro-only%',
+  'free user is blocked from Spring Coral (Pro)'
 );
 
 reset role;

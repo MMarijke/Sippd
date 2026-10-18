@@ -75,6 +75,9 @@ export const THEME_FAMILIES = [
       { id: 'fern', label: 'Fern', pro: true, dark: { swatch: '#68A86D', sup: '#447547', background: '#0F1911' } },
       { id: 'moss', label: 'Moss', pro: true, light: { swatch: '#828355', sup: '#5A5B37', background: '#F0EFE1' } },
       { id: 'meadow', label: 'Meadow', pro: true, light: { swatch: '#549135', sup: '#2C491F', background: '#F5F3DE' } },
+      // Built from a palette the user picked (plum, brick, coral, butter,
+      // sage-lime, moss); free for everyone. See index.css.
+      { id: 'spring', label: 'Spring', pro: false, light: { swatch: '#665075', sup: '#72875D', background: '#EFEDF2' } },
     ],
   },
   {

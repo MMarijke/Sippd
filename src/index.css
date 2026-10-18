@@ -837,8 +837,8 @@
   }
 
   /* ── Botanical family (natural/earthy, mixed polarity) ───────────────────
-     1 free + 4 Pro (Terracotta retired 2026-09-29, users moved to Noir's
-     Crimson). Sage/Moss/Meadow are light-background, Forest/Fern are
+     2 free (Sage, Spring) + 4 Pro (Terracotta retired 2026-09-29, users
+     moved to Noir's Crimson). Sage/Moss/Meadow/Spring are light-background, Forest/Fern are
      dark-background -- that split is each theme's own fixed identity
      (confirmed explicitly), not something the polarity toggle controls;
      the toggle doesn't render for this family at all. Full glow on every
@@ -852,7 +852,7 @@
      scan-button green. Each steps evenly in contrast against --card.
      Forest and Moss are unchanged. */
   [data-theme="sage"], [data-theme="forest"], [data-theme="fern"],
-  [data-theme="moss"], [data-theme="meadow"] {
+  [data-theme="moss"], [data-theme="meadow"], [data-theme="spring"] {
     --font-display: 'Fraunces', serif;
     --font-mono: 'IBM Plex Mono', monospace;
     --font-body: 'Karla', sans-serif;
@@ -989,6 +989,50 @@
     --breakdown-rare: 99.9 35% 48.0%;
     --breakdown-ultra: 99.8 41% 43.2%;
     --breakdown-legendary: 99.8 46% 38.8%;
+  }
+  /* Spring (2026-10-18, free, light): built from a palette the user chose --
+     plum 665075, brick C75554, coral EF8F6E, butter FFED9C, sage-lime B2BC76,
+     moss 778C62. The palette's own colours are used as they are wherever
+     they pass; only text and the faint ramp end are derived.
+     - Background: the lilac-grey of the palette card's canvas, which also
+       keeps Spring apart from Sage/Moss/Meadow's creams.
+     - Main = plum (6.1:1 on the background, near-white label 6.8:1);
+       supporting = moss, deepened 2% to ~3.4:1 like the other light themes'
+       supporting colours (it's the outline/ghost hover text).
+     - Ramp rises in contrast against the card, Common -> Legendary:
+       sage-lime (lifted to the 2:1 floor) 2.0, coral 2.1, moss 3.2,
+       brick 3.8, plum 6.3 -- the deepest colour is the rarest. Coral on
+       Uncommon makes the Scan button and selected brand chip coral.
+     - Butter is the palette's one colour with no role: at 1.1:1 against
+       any light surface it can't carry a ramp step or text.
+     - Text/muted text are plum, deepened; muted-foreground clears 4.5:1 on
+       background, card, muted and secondary. */
+  [data-theme="spring"] {
+    --background: 258.0 16% 94.0%;
+    --foreground: 279.0 24% 21.0%;
+    --card: 258.0 13% 95.0%;
+    --card-foreground: 279.0 24% 21.0%;
+    --popover: 258.0 13% 95.0%;
+    --popover-foreground: 279.0 24% 21.0%;
+    --primary: 275.7 19% 38.6%;
+    --primary-foreground: 0.0 0% 98.0%;
+    --secondary: 258.0 14% 85.0%;
+    --secondary-foreground: 279.0 24% 21.0%;
+    --muted: 258.0 12% 89.0%;
+    --muted-foreground: 279.0 13% 37.0%;
+    --accent: 90.0 18% 44.7%;
+    --accent-foreground: 240.0 20% 4.9%;
+    --border: 258.0 14% 80.0%;
+    --input: 258.0 14% 80.0%;
+    --ring: 275.7 19% 38.6%;
+    --glow-intensity: 1;
+    --wash-intensity: 0;
+    --breakdown-common: 68.6 34% 54.8%;
+    --breakdown-uncommon: 15.3 80% 68.4%;
+    --uncommon-action-foreground: 240.0 20% 4.9%;
+    --breakdown-rare: 90.0 18% 46.7%;
+    --breakdown-ultra: 0.5 51% 55.5%;
+    --breakdown-legendary: 275.7 19% 38.6%;
   }
 
   /* ── Noir family (dark, luxury/minimalist) ────────────────────────────────

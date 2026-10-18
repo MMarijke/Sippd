@@ -91,6 +91,12 @@ select throws_like(
   'free user is blocked from Silver Screen'
 );
 
+-- Added in 20261018000000_add_spring_theme.sql, on the free list.
+select lives_ok(
+  $$update profiles set theme = 'spring' where id = '11111111-1111-1111-1111-111111111111'$$,
+  'free user can pick Spring (free for everyone)'
+);
+
 reset role;
 
 -- ── As the Pro user (authenticated) ──────────────────────────────────────

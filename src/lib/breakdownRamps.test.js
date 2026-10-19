@@ -38,23 +38,31 @@ describe('rarity breakdown ramps', () => {
   });
 });
 
-// Home's Scan button and selected brand chip are filled with each theme's
-// --breakdown-uncommon; their label is --uncommon-action-foreground, which
-// every theme must define at body-text contrast (12px label, so 4.5:1).
-// The fill is --uncommon-action where a theme sets it to a literal colour
-// (Spring: its exact palette hex), else --breakdown-uncommon, which
-// --uncommon-action defaults to. Only blocks that DECLARE
-// --breakdown-uncommon are themes; the defaults block merely var()s it.
-const actionBlocks = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-uncommon:[^{}]*)\}/g)].map(([, sel, body]) => ({
+// Scan (and the selected brand chip) wear --cta, which defaults to the
+// theme's own button fill (--primary-fill, else --primary) with its label
+// (--primary-foreground): Scan is never quieter than Save. In every theme
+// the label must read at 4.5:1 on that fill, and the fill must stand out
+// from the page at 3:1 OR the theme must outline it with --fill-edge at 3:1.
+// Theme blocks are the ones that DECLARE --breakdown-common.
+const scanBlocks = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-common:[^{}]*)\}/g)].map(([, sel, body]) => ({
   name: sel.trim().split('\n').pop().trim(),
-  fill: body.match(/--uncommon-action:\s*([\d.]+ [^;]+);/)?.[1] ?? body.match(/--breakdown-uncommon:\s*([^;]+);/)[1],
-  label: body.match(/--uncommon-action-foreground:\s*([^;]+);/)?.[1],
+  background: body.match(/--background:\s*([^;]+);/)[1],
+  fill: body.match(/--cta:\s*([\d.]+ [^;]+);/)?.[1]
+    ?? body.match(/--primary-fill:\s*([\d.]+ [^;]+);/)?.[1]
+    ?? body.match(/--primary:\s*([^;]+);/)[1],
+  label: body.match(/--cta-foreground:\s*([\d.]+ [^;]+);/)?.[1] ?? body.match(/--primary-foreground:\s*([^;]+);/)[1],
+  edge: body.match(/--fill-edge:\s*hsl\(([^)]+)\);/)?.[1],
 }));
 
-describe('Uncommon action colour', () => {
-  it.each(actionBlocks.map(b => [b.name, b]))('%s: label reads at 4.5:1 on the Uncommon fill', (_, b) => {
-    expect(b.label, `${b.name} is missing --uncommon-action-foreground`).toBeTruthy();
+describe('Scan (cta)', () => {
+  it('no theme still carries the retired Uncommon-based Scan tokens', () => {
+    expect(css).not.toMatch(/--uncommon-action/);
+  });
+
+  it.each(scanBlocks.map(b => [b.name, b]))('%s: label 4.5:1 on the fill; shape 3:1 against the page', (_, b) => {
     expect(contrast(b.fill, b.label)).toBeGreaterThanOrEqual(4.5);
+    const shape = Math.max(contrast(b.fill, b.background), b.edge ? contrast(b.edge, b.background) : 0);
+    expect(shape, `${b.name}: fill ${contrast(b.fill, b.background).toFixed(2)}:1 and no --fill-edge`).toBeGreaterThanOrEqual(3);
   });
 });
 

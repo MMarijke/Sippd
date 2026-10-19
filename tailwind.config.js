@@ -59,12 +59,12 @@ module.exports = {
   			// Each theme's Uncommon colour (the rarity gauge's Uncommon
   			// step) as an action fill, with a per-theme text colour picked
   			// for contrast (src/lib/breakdownRamps.test.js guards >= 4.5:1).
-  			'uncommon-action': {
-  				// --uncommon-action defaults to --breakdown-uncommon (index.css);
-  				// a theme can point the action fill elsewhere (Spring: its
-  				// exact palette colour, while its gauge runs pale -> full).
-  				DEFAULT: 'hsl(var(--uncommon-action))',
-  				foreground: 'hsl(var(--uncommon-action-foreground))'
+  			// Scan and the selected brand chip. --cta defaults to the theme's
+  			// own button fill (index.css), so the main action is never quieter
+  			// than Save, and its label is the fill's already-checked label.
+  			cta: {
+  				DEFAULT: 'hsl(var(--cta))',
+  				foreground: 'hsl(var(--cta-foreground))'
   			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',

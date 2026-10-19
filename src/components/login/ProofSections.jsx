@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Flame, Star as StarIcon, ChevronRight, ChevronDown } from 'lucide-react';
+import { Flame, Star as StarIcon, ChevronRight, ChevronDown, ArrowRightLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import RarityBadge from '@/components/shared/RarityBadge';
 import DrawnCan, { CAN_PALETTES } from '@/components/login/DrawnCan';
@@ -28,6 +28,17 @@ function Title({ children, className }) {
   );
 }
 
+// Every demo on the page is sample data (the page has no session, and the
+// names and numbers are made up), so each one says so, in words a screen
+// reader reads too.
+function ExampleTag({ className }) {
+  return (
+    <p className={cn('mb-2 text-right text-xs font-mono uppercase tracking-wider text-muted-foreground', className)}>
+      Example
+    </p>
+  );
+}
+
 // Phone: heading, line, then the demo, stacked. Desktop: a two-column row
 // across the page, the demo alternating sides so the sections read as a
 // sequence rather than identical blocks.
@@ -40,6 +51,7 @@ function ProofSection({ title, copy, flip = false, children }) {
           <p className="text-sm lg:text-lg font-body text-muted-foreground mb-6 lg:mb-0 max-w-sm">{copy}</p>
         </div>
         <div className={cn('w-full max-w-sm lg:max-w-md', flip ? 'lg:order-1 lg:justify-self-start' : 'lg:justify-self-end')}>
+          <ExampleTag />
           {children}
         </div>
       </div>
@@ -53,11 +65,11 @@ function ProofSection({ title, copy, flip = false, children }) {
 // the scanner, the vote tally, the badge it earns).
 
 const VOTES = [
-  { tier: 'Common', n: 2, bar: 'bg-rarity-common', text: 'text-rarity-common-text' },
-  { tier: 'Uncommon', n: 4, bar: 'bg-rarity-uncommon', text: 'text-rarity-uncommon-text' },
-  { tier: 'Rare', n: 11, bar: 'bg-rarity-rare', text: 'text-rarity-rare-text' },
-  { tier: 'Ultra Rare', n: 3, bar: 'bg-rarity-ultra', text: 'text-rarity-ultra-text' },
-  { tier: 'Legendary', n: 1, bar: 'bg-rarity-legendary', text: 'text-rarity-legendary-text' },
+  { tier: 'Common', n: 6, bar: 'bg-rarity-common', text: 'text-rarity-common-text' },
+  { tier: 'Uncommon', n: 14, bar: 'bg-rarity-uncommon', text: 'text-rarity-uncommon-text' },
+  { tier: 'Rare', n: 38, bar: 'bg-rarity-rare', text: 'text-rarity-rare-text' },
+  { tier: 'Ultra Rare', n: 9, bar: 'bg-rarity-ultra', text: 'text-rarity-ultra-text' },
+  { tier: 'Legendary', n: 3, bar: 'bg-rarity-legendary', text: 'text-rarity-legendary-text' },
 ];
 const TOTAL_VOTES = VOTES.reduce((sum, v) => sum + v.n, 0);
 const TOP_VOTES = Math.max(...VOTES.map((v) => v.n));
@@ -127,7 +139,8 @@ export function RarityProof() {
           No price guide decides how rare a can is. Collectors do.
         </p>
 
-        <ol className="mt-10 lg:mt-14 grid gap-12 lg:grid-cols-3 lg:gap-12">
+        <ExampleTag className="mt-10 lg:mt-14" />
+        <ol className="grid gap-12 lg:grid-cols-3 lg:gap-12">
           {STEPS.map(({ title, copy, Stage }, i) => (
             <li key={title} className="relative">
               <div className="h-52 rounded-2xl border border-border bg-card flex items-center justify-center px-5">
@@ -153,14 +166,14 @@ export function RarityProof() {
 
 export function LeaderboardProof() {
   const rows = [
-    { rank: 1, name: 'Juno R.', cans: 412, medal: '🥇' },
-    { rank: 2, name: 'Silas K.', cans: 389, medal: '🥈' },
-    { rank: 3, name: 'Wren T.', cans: 351, medal: '🥉' },
+    { rank: 1, name: 'Juno R.', cans: 2412, medal: '🥇' },
+    { rank: 2, name: 'Silas K.', cans: 1953, medal: '🥈' },
+    { rank: 3, name: 'Wren T.', cans: 1608, medal: '🥉' },
   ];
   return (
     <ProofSection
       title="Climb the ranks."
-      copy="Compete with collectors worldwide by total cans or rare pulls."
+      copy="Compete with other collectors by total cans or rare pulls."
     >
       <div className="rounded-xl border border-border overflow-hidden divide-y divide-border bg-card">
         {rows.map(r => (
@@ -174,7 +187,7 @@ export function LeaderboardProof() {
             </div>
             <p className="flex-1 text-sm font-semibold text-foreground truncate">{r.name}</p>
             <div className="text-right flex-shrink-0">
-              <p className="text-sm font-display font-bold tabular-nums text-foreground">{r.cans}</p>
+              <p className="text-sm font-display font-bold tabular-nums text-foreground">{r.cans.toLocaleString('en')}</p>
               <p className="text-xs font-mono text-muted-foreground">cans</p>
             </div>
           </div>
@@ -228,38 +241,62 @@ export function FeedProof() {
   );
 }
 
-// ── Vault ────────────────────────────────────────────────────────────────
+// ── Trades ───────────────────────────────────────────────────────────────
+// Sippd's trade log is a record of swaps you made with other collectors
+// (Trades.jsx / TradeLogDialog: pick cans from your collection, name the
+// other collector, track the status), not a marketplace, so the example is
+// one logged trade, in the app's own statuses (Pending/Completed/Cancelled).
 
-const VAULT = [
-  { rarity: 'Legendary', palette: CAN_PALETTES.legendary, word: 'NOVA', sub: 'SURGE XL', tile: 'bg-rarity-legendary/10 border-rarity-legendary/40', text: 'text-rarity-legendary-text' },
-  { rarity: 'Ultra Rare', palette: CAN_PALETTES.ultra, word: 'VOLT', sub: 'GRAPE', tile: 'bg-rarity-ultra/10 border-rarity-ultra/40', text: 'text-rarity-ultra-text' },
-  { rarity: 'Rare', palette: CAN_PALETTES.rare, word: 'COMET', sub: 'FIZZ', tile: 'bg-rarity-rare/10 border-rarity-rare/40', text: 'text-rarity-rare-text' },
-  { rarity: 'Uncommon', palette: CAN_PALETTES.uncommon, word: 'KIWI', sub: 'ZEST', tile: 'bg-rarity-uncommon/10 border-rarity-uncommon/40', text: 'text-rarity-uncommon-text' },
-  { rarity: 'Common', palette: CAN_PALETTES.common, word: 'CITRA', sub: 'LIME', tile: 'bg-rarity-common/10 border-rarity-common/40', text: 'text-rarity-common-text' },
-  { rarity: 'Common', palette: CAN_PALETTES.common, word: 'ZAP', sub: 'COLA', tile: 'bg-rarity-common/10 border-rarity-common/40', text: 'text-rarity-common-text' },
-];
+const TRADE = {
+  with: 'Juno R.',
+  date: '12 Oct',
+  gave: [
+    { palette: CAN_PALETTES.uncommon, word: 'KIWI', sub: 'ZEST', rarity: 'Uncommon', text: 'text-rarity-uncommon-text' },
+    { palette: CAN_PALETTES.rare, word: 'COMET', sub: 'FIZZ', rarity: 'Rare', text: 'text-rarity-rare-text' },
+  ],
+  got: [
+    { palette: CAN_PALETTES.ultra, word: 'VOLT', sub: 'GRAPE', rarity: 'Ultra Rare', text: 'text-rarity-ultra-text' },
+  ],
+};
 
-export function CollectionProof() {
+function TradeSide({ label, cans }) {
+  return (
+    <div className="flex-1 min-w-0">
+      <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2">{label}</p>
+      <ul className="flex gap-3">
+        {cans.map((c) => (
+          <li key={c.word} className="flex flex-col items-center gap-1.5">
+            <DrawnCan palette={c.palette} word={c.word} sub={c.sub} className="h-16 w-auto" />
+            <span className={cn('text-xs font-mono', c.text)}>{c.rarity}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export function TradeProof() {
+  const count = (n) => `${n} can${n === 1 ? '' : 's'}`;
   return (
     <ProofSection
-      title="Build your vault."
-      copy="Every can, cataloged, scored, and yours to show off."
+      title="Every trade, on the record."
+      copy="Log what you swapped, with whom, and where it stands, right next to the collection it came from."
     >
-      {/* Score and tiles stack directly, not inside an outer card: one
-          surface per thing, no card nested in a card. */}
-      <div>
-        <div className="hero-card rounded-2xl p-4 mb-3 text-center">
-          <p className="text-xs font-mono uppercase tracking-widest text-foreground">Collection Score</p>
-          <p className="text-4xl font-mono font-black text-foreground tabular-nums">2,140</p>
+      <div className="rounded-2xl border border-border bg-card p-4 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate">Trade with {TRADE.with}</p>
+            <p className="text-xs font-mono text-muted-foreground">{TRADE.date} · {count(TRADE.gave.length)} for {count(TRADE.got.length)}</p>
+          </div>
+          <span className="flex-shrink-0 rounded-full border border-rarity-uncommon/40 bg-rarity-uncommon/10 px-2.5 py-1 text-xs font-mono text-rarity-uncommon-text">
+            Completed
+          </span>
         </div>
-        <ul className="grid grid-cols-3 gap-2">
-          {VAULT.map((c) => (
-            <li key={c.word} className={cn('rounded-xl border pt-3 pb-2 flex flex-col items-center gap-1.5', c.tile)}>
-              <DrawnCan palette={c.palette} word={c.word} sub={c.sub} className="h-20 w-auto" />
-              <span className={cn('text-xs font-mono uppercase tracking-wider', c.text)}>{c.rarity}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="flex items-end gap-3 pt-3 border-t border-border/60">
+          <TradeSide label="You gave" cans={TRADE.gave} />
+          <ArrowRightLeft className="w-5 h-5 text-primary mb-8 flex-shrink-0" aria-hidden="true" />
+          <TradeSide label="You got" cans={TRADE.got} />
+        </div>
       </div>
     </ProofSection>
   );

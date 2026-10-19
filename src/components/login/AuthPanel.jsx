@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, AlertCircle, Eye, EyeOff, Check, MailCheck } from 'lucide-react';
 import { PILL, PILL_OUTLINE } from '@/components/login/pill';
+import { FREE_TIER } from '@/components/login/copy';
 import { describeAuthError, validateAuthForm, signUpNeedsConfirmation, MIN_PASSWORD } from '@/lib/authErrors';
 import { cn } from '@/lib/utils';
 
@@ -29,7 +30,7 @@ const LINK = 'inline-flex items-center min-h-11 px-2 -mx-2 text-primary hover:un
 const LABEL = 'text-sm font-body font-medium text-foreground';
 
 const HEADINGS = {
-  signup: ['Start your vault', 'Free to join, free to collect.'],
+  signup: ['Start your vault', FREE_TIER],
   signin: ['Welcome back', 'Sign in to pick up where you left off.'],
   forgot: ['Reset your password', "Enter your email and we'll send you a reset link."],
   'sent-confirm': ['Check your inbox', null],

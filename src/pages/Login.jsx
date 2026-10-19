@@ -7,8 +7,9 @@ import HeroReveal from '@/components/login/HeroReveal';
 import DrawnCan from '@/components/login/DrawnCan';
 import AuthPanel from '@/components/login/AuthPanel';
 import LegalFooter from '@/components/legal/LegalFooter';
-import { RarityProof, LeaderboardProof, FeedProof, CollectionProof } from '@/components/login/ProofSections';
+import { RarityProof, LeaderboardProof, FeedProof, TradeProof } from '@/components/login/ProofSections';
 import { PILL } from '@/components/login/pill';
+import { FREE_TIER } from '@/components/login/copy';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 const POST_LOGIN_REDIRECT_KEY = 'sippd-post-login-redirect';
@@ -198,14 +199,14 @@ export default function Login() {
           <RarityProof />
           <LeaderboardProof />
           <FeedProof />
-          <CollectionProof />
+          <TradeProof />
 
           {/* The proof sections end on a way back to the form. */}
           <section className="px-5 py-20 border-t border-border text-center">
             <h2 className="font-display font-black text-3xl lg:text-4xl text-foreground mb-2 text-balance">
               Your vault is waiting<span className="text-primary">.</span>
             </h2>
-            <p className="text-sm lg:text-base font-body text-muted-foreground mb-8">Free to join, free to collect.</p>
+            <p className="text-sm lg:text-base font-body text-muted-foreground mb-8 max-w-md mx-auto text-balance">{FREE_TIER}</p>
             <button type="button" onClick={() => openForm('signup')} className={PILL}>
               Start your vault
             </button>

@@ -1,0 +1,21 @@
+-- Adds profiles.retired_theme to databases that never got it.
+--
+-- Why: commit e78b000 added this column by EDITING
+-- 20260929000000_trim_theme_catalogue.sql after production had already run
+-- it, so production never received the column (verified 2026-10-19:
+-- information_schema has no profiles.retired_theme; the recorded statements
+-- of 20260929000000 and 20260929180000 never mention it). Since then:
+--   - useTheme.js selects `theme, theme_polarity, retired_theme`, so the
+--     theme query has been failing in production for every user, who fell
+--     back to the device's cached theme or Power-Up;
+--   - 20261019120000_retire_moss.sql failed on its first statement, which
+--     is what the Supabase Preview check on main reported.
+-- (Same root cause as the Spring bug: never edit a migration once it ran.)
+--
+-- `if not exists` makes this a no-op wherever the edited 20260929000000
+-- already created it (local resets, CI). Not personal data beyond a theme
+-- id; the user clears it themselves by dismissing Settings' note (own row,
+-- existing RLS), it gates nothing, so like theme_polarity it needs no
+-- lock-trigger branch. Deleted with the profile row.
+
+alter table profiles add column if not exists retired_theme text;

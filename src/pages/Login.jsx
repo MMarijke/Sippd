@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import LegalFooter from '@/components/legal/LegalFooter';
 import HeroReveal from '@/components/login/HeroReveal';
 import { LeaderboardProof, FeedProof, CollectionProof } from '@/components/login/ProofSections';
@@ -228,7 +228,15 @@ export default function Login() {
                 />
               </div>
 
-              {error && <p className="text-xs font-mono text-destructive">{error}</p>}
+              {/* Icon + text, so the error isn't carried by colour alone
+                  (it can sit near a red main colour: Boss Fight, Crimson,
+                  Cherry Pop, Brick); role="alert" announces it. */}
+              {error && (
+                <p role="alert" className="flex items-start gap-1.5 text-xs font-mono text-destructive">
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-px" aria-hidden="true" />
+                  <span>{error}</span>
+                </p>
+              )}
               {infoMessage && <p className="text-xs font-mono text-primary">{infoMessage}</p>}
 
               <Button
@@ -295,7 +303,15 @@ export default function Login() {
                 </div>
               )}
 
-              {error && <p className="text-xs font-mono text-destructive">{error}</p>}
+              {/* Icon + text, so the error isn't carried by colour alone
+                  (it can sit near a red main colour: Boss Fight, Crimson,
+                  Cherry Pop, Brick); role="alert" announces it. */}
+              {error && (
+                <p role="alert" className="flex items-start gap-1.5 text-xs font-mono text-destructive">
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-px" aria-hidden="true" />
+                  <span>{error}</span>
+                </p>
+              )}
               {infoMessage && <p className="text-xs font-mono text-primary">{infoMessage}</p>}
 
               <Button

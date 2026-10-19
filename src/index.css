@@ -225,9 +225,20 @@
     --rarity-rare-text: 217 91% 69%;
     --rarity-ultra-text: 271 91% 73.5%;
     --rarity-legendary-text: 330 81% 69%;
+
+    /* Error TEXT (text-destructive: messages, retry buttons, "Log out").
+       Separate from --destructive for the same reason as --caution: the
+       fill red is authored to the 3:1 component floor and read 3.3-4.0:1 as
+       text in EVERY theme (/impeccable audit, 2026-10-19). Same hue and
+       saturation, lightness solved per tone to clear 4.6:1 against every
+       theme's --background, --card and the bg-destructive/10 error box over
+       the card (tightest: Fern dark 4.6, Moss light 4.6). Painted by
+       text-destructive via tailwind.config.js; fills keep --destructive. */
+    --destructive-text: 0 70% 66%;
   }
 
   :root[data-tone="light"] {
+    --destructive-text: 0 70% 44%;
     --medal-gold: 40 90% 24%;
     --medal-silver: 215 16% 33%;
     --medal-bronze: 24 72% 30%;

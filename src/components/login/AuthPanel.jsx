@@ -60,7 +60,11 @@ function ErrorLine({ id, children, alert = false }) {
 // about the whole form (wrong password, offline) are announced as alerts.
 // A switch between sign-up / sign-in / reset / "check your inbox" moves
 // focus to the new heading, so a screen reader announces where you are.
-const AuthPanel = forwardRef(function AuthPanel(_props, ref) {
+//
+// onSentChange(sent) tells the page when a confirmation or reset email has
+// gone out ('confirm' | 'reset', or null once the user leaves that screen),
+// so it can stop selling and point its buttons at the inbox screen.
+const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
   // Defaults to 'signup': on the web, a visitor who reaches the form
   // without tapping a specific button came through the pitch above it.
   const [mode, setMode] = useState('signup'); // 'signup' | 'signin' | 'forgot' | 'sent-confirm' | 'sent-reset'
@@ -102,6 +106,15 @@ const AuthPanel = forwardRef(function AuthPanel(_props, ref) {
 
   useImperativeHandle(ref, () => ({
     open(nextMode) {
+      // An email is on its way: "Get Started" / "Start your vault" must not
+      // throw that screen away for an empty sign-up form (the user would
+      // think it failed and sign up again). Bring the inbox screen back into
+      // focus instead. An explicit "Sign in" still switches: having opened
+      // the link, signing in is the next step.
+      if ((mode === 'sent-confirm' || mode === 'sent-reset') && nextMode !== 'signin') {
+        setFocusRequest({ target: 'heading', preventScroll: true });
+        return;
+      }
       if (nextMode && nextMode !== mode) {
         setMode(nextMode);
         clearMessages();
@@ -119,6 +132,10 @@ const AuthPanel = forwardRef(function AuthPanel(_props, ref) {
     el?.focus({ preventScroll: !!focusRequest.preventScroll });
     setFocusRequest(null);
   }, [focusRequest]);
+
+  useEffect(() => {
+    onSentChange?.(mode === 'sent-confirm' ? 'confirm' : mode === 'sent-reset' ? 'reset' : null);
+  }, [mode, onSentChange]);
 
   // Re-render once the resend cooldown ends, so the button comes back.
   useEffect(() => {

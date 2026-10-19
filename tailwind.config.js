@@ -16,6 +16,17 @@ module.exports = {
   		fontSize: {
   			'2xs': '0.6875rem',
   		},
+  		// bg-primary paints --primary-fill, not --primary. They're the same
+  		// colour in every theme (index.css defaults one to the other) except
+  		// where a theme's exact colour is too pale to read as text: Spring's
+  		// Butter, Pistachio and Coral fill buttons with the palette's exact
+  		// hex, while text-primary/border/ring keep a deeper shade of it.
+  		backgroundColor: {
+  			primary: {
+  				DEFAULT: 'hsl(var(--primary-fill))',
+  				foreground: 'hsl(var(--primary-foreground))'
+  			},
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
@@ -40,7 +51,10 @@ module.exports = {
   			// step) as an action fill, with a per-theme text colour picked
   			// for contrast (src/lib/breakdownRamps.test.js guards >= 4.5:1).
   			'uncommon-action': {
-  				DEFAULT: 'hsl(var(--breakdown-uncommon))',
+  				// --uncommon-action defaults to --breakdown-uncommon (index.css);
+  				// a theme can point the action fill elsewhere (Spring: its
+  				// exact palette colour, while its gauge runs pale -> full).
+  				DEFAULT: 'hsl(var(--uncommon-action))',
   				foreground: 'hsl(var(--uncommon-action-foreground))'
   			},
   			secondary: {

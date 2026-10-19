@@ -292,6 +292,21 @@
     --breakdown-legendary: 152.0 100% 50.0%;
   }
 
+  /* Fill colours that can differ from their text twins. Every theme gets
+     the twin by default (resolved per element, so a [data-theme] preview
+     follows its own theme), and must come BEFORE the theme blocks so a
+     theme that sets them wins:
+     - --primary-fill: what bg-primary paints (tailwind.config.js). Same as
+       --primary except Spring's pale colours, which fill buttons with the
+       palette's exact hex but keep a deeper shade for text/icons/ring.
+     - --uncommon-action: the Scan button / selected brand chip fill. Same
+       as --breakdown-uncommon except Spring, whose gauge runs pale -> full
+       while Scan wears the exact palette colour. */
+  :root, [data-theme] {
+    --primary-fill: var(--primary);
+    --uncommon-action: var(--breakdown-uncommon);
+  }
+
   /* ── Neon Arcade family (dark, gamer/cyber/neon) ─────────────────────────
      1 free + 5 Pro. Full glow (--glow-intensity: 1 for every palette --
      no graduated rarity ladder in this flat free/Pro catalogue, unlike the
@@ -1369,27 +1384,31 @@
   }
 
   /* ── Spring family (light, built from a palette the user chose) ──────────
-     1 free (Plum) + 5 Pro, all light. Palette: plum 665075, brick C75554,
-     coral EF8F6E, butter FFED9C, pistachio (the palette's sage-lime) B2BC76,
-     olive (its moss) 778C62. Each theme is led by one palette colour; all
-     six share the palette as their rarity gauge, so the family reads as one.
-     Ids are spring-* because Botanical already owns 'sage' and 'moss'.
+     1 free (Plum) + 5 Pro, all light. Six themes, ONE palette colour each,
+     built the way the palette's own reference card builds its columns:
+     tints = mixed with white, shades = mixed with black (sRGB). Plum 665075,
+     Brick C75554, Coral EF8F6E, Butter FFED9C, Pistachio (the palette's
+     sage-lime) B2BC76, Olive (its moss) 778C62. Ids are spring-* because
+     Botanical already owns 'sage' and 'moss'. Generated, every pairing
+     measured (scratch script spring-mono.cjs; values below are its output).
 
-     - Background: a pale tint of the lead's hue (Plum: the palette card's
-       own lilac-grey). Surfaces follow the Phase 2 light formula (card
-       bg+1, secondary bg-9, muted bg-5, border bg-14).
-     - Main = the lead colour, used exactly as the palette gives it where it
-       already clears ~3.4:1 on the background (Plum, Brick), otherwise
-       deepened to it: Coral at 65% saturation (full saturation turned it
-       hard orange-red), Pistachio at 45% (so it stays apart from Olive),
-       Butter to a warm gold (its cream background carries the butter).
-       Supporting = a partner palette colour, same rule.
-     - Gauge, rising in contrast vs --card: pistachio (lifted to the 2:1
-       floor) -> coral -> olive -> brick -> plum. The deepest colour is the
-       rarest. Coral on Uncommon makes Scan and the selected brand chip coral
-       in every Spring theme.
-     - Text is the lead hue, near-black; muted text >= 4.5:1 on background,
-       card, muted and secondary. Labels on main/supporting/Scan >= 4.5:1. */
+     - Surfaces: tints of the colour (background 88% white, card 92%, muted
+       80%, secondary 70%, border 55%). Text: a deep shade of it (>= 9:1);
+       muted text the lightest shade clearing 4.6:1 on all four surfaces.
+     - Fills wear the EXACT hex: --primary-fill (every bg-primary button)
+       and --uncommon-action (Scan, selected brand chip), labelled near-black
+       or near-white, whichever reads (>= 4.5:1).
+     - --primary (icons, links, ring, primary borders) is the exact colour
+       where it clears 3.4:1 on the background (Plum, Brick), else the
+       lightest shade of it that does (Coral, Butter, Pistachio, Olive).
+       --accent (outline/ghost hover text) a shade at >= 4.6:1.
+     - Gauge, rising in contrast vs --card, read like the card's column:
+       Plum/Brick/Olive go from the tint at the 2:1 floor up to the exact
+       colour at Legendary. Coral/Butter/Pistachio are too pale to finish on
+       their exact colour, so their column extends into shades: Common is
+       the exact colour (Coral) or its lightest shade at 2:1, up to a deep
+       shade at ~4:1 for Legendary. Butter's exact hex shows in its fills
+       and background tint instead. */
   [data-theme="spring-plum"], [data-theme="spring-brick"], [data-theme="spring-coral"],
   [data-theme="spring-butter"], [data-theme="spring-pistachio"], [data-theme="spring-olive"] {
     --font-display: 'Poppins', sans-serif;
@@ -1397,166 +1416,178 @@
     --font-body: 'DM Sans', sans-serif;
   }
   [data-theme="spring-plum"] {
-    --background: 258.0 16% 94.0%;
-    --foreground: 275.7 24% 20.0%;
-    --card: 258.0 13% 95.0%;
-    --card-foreground: 275.7 24% 20.0%;
-    --popover: 258.0 13% 95.0%;
-    --popover-foreground: 275.7 24% 20.0%;
+    --background: 275.7 12% 92.6%;
+    --foreground: 275.7 19% 15.5%;
+    --card: 275.7 12% 95.1%;
+    --card-foreground: 275.7 19% 15.5%;
+    --popover: 275.7 12% 95.1%;
+    --popover-foreground: 275.7 19% 15.5%;
     --primary: 275.7 19% 38.6%;
+    --primary-fill: 275.7 19% 38.6%;
     --primary-foreground: 0.0 0% 98.0%;
-    --secondary: 258.0 14% 85.0%;
-    --secondary-foreground: 275.7 24% 20.0%;
-    --muted: 258.0 12% 89.0%;
-    --muted-foreground: 275.7 13% 38.6%;
-    --accent: 90.0 18% 44.7%;
-    --accent-foreground: 240.0 20% 4.9%;
-    --border: 258.0 14% 80.0%;
-    --input: 258.0 14% 80.0%;
+    --secondary: 275.7 12% 81.6%;
+    --secondary-foreground: 275.7 19% 15.5%;
+    --muted: 275.7 12% 87.7%;
+    --muted-foreground: 275.7 19% 37.5%;
+    --accent: 275.7 19% 38.6%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 275.7 12% 72.4%;
+    --input: 275.7 12% 72.4%;
     --ring: 275.7 19% 38.6%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 68.6 34% 54.8%;
-    --breakdown-uncommon: 15.3 80% 68.4%;
-    --uncommon-action-foreground: 240.0 20% 4.9%;
-    --breakdown-rare: 90.0 18% 46.7%;
-    --breakdown-ultra: 0.5 51% 55.5%;
+    --breakdown-common: 275.7 12% 69.6%;
+    --breakdown-uncommon: 275.7 12% 56.7%;
+    --uncommon-action: 275.7 19% 38.6%;
+    --uncommon-action-foreground: 0.0 0% 98.0%;
+    --breakdown-rare: 275.7 12% 48.8%;
+    --breakdown-ultra: 275.7 16% 42.9%;
     --breakdown-legendary: 275.7 19% 38.6%;
   }
   [data-theme="spring-brick"] {
-    --background: 0.5 30% 94.0%;
-    --foreground: 0.5 24% 20.0%;
-    --card: 0.5 27% 95.0%;
-    --card-foreground: 0.5 24% 20.0%;
-    --popover: 0.5 27% 95.0%;
-    --popover-foreground: 0.5 24% 20.0%;
+    --background: 0.5 51% 94.7%;
+    --foreground: 0.5 41% 22.2%;
+    --card: 0.5 51% 96.4%;
+    --card-foreground: 0.5 41% 22.2%;
+    --popover: 0.5 51% 96.4%;
+    --popover-foreground: 0.5 41% 22.2%;
     --primary: 0.5 51% 55.5%;
+    --primary-fill: 0.5 51% 55.5%;
     --primary-foreground: 240.0 20% 4.9%;
-    --secondary: 0.5 28% 85.0%;
-    --secondary-foreground: 0.5 24% 20.0%;
-    --muted: 0.5 26% 89.0%;
-    --muted-foreground: 0.5 13% 37.8%;
-    --accent: 275.7 19% 38.6%;
+    --secondary: 0.5 51% 86.6%;
+    --secondary-foreground: 0.5 41% 22.2%;
+    --muted: 0.5 51% 91.1%;
+    --muted-foreground: 0.5 41% 41.5%;
+    --accent: 0.5 41% 48.6%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 0.5 28% 80.0%;
-    --input: 0.5 28% 80.0%;
+    --border: 0.5 51% 80.0%;
+    --input: 0.5 51% 80.0%;
     --ring: 0.5 51% 55.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 68.6 34% 54.5%;
-    --breakdown-uncommon: 15.3 80% 68.4%;
+    --breakdown-common: 0.5 51% 74.4%;
+    --breakdown-uncommon: 0.5 51% 68.2%;
+    --uncommon-action: 0.5 51% 55.5%;
     --uncommon-action-foreground: 240.0 20% 4.9%;
-    --breakdown-rare: 90.0 18% 46.7%;
-    --breakdown-ultra: 0.5 51% 55.5%;
-    --breakdown-legendary: 275.7 19% 38.6%;
+    --breakdown-rare: 0.5 51% 63.3%;
+    --breakdown-ultra: 0.5 51% 59.1%;
+    --breakdown-legendary: 0.5 51% 55.5%;
   }
   [data-theme="spring-coral"] {
-    --background: 15.3 45% 94.0%;
-    --foreground: 15.3 24% 20.0%;
-    --card: 15.3 42% 95.0%;
-    --card-foreground: 15.3 24% 20.0%;
-    --popover: 15.3 42% 95.0%;
-    --popover-foreground: 15.3 24% 20.0%;
-    --primary: 15.3 65% 51.3%;
+    --background: 15.3 80% 96.2%;
+    --foreground: 15.3 37% 27.2%;
+    --card: 15.3 80% 97.5%;
+    --card-foreground: 15.3 37% 27.2%;
+    --popover: 15.3 80% 97.5%;
+    --popover-foreground: 15.3 37% 27.2%;
+    --primary: 15.3 43% 53.7%;
+    --primary-fill: 15.3 80% 68.4%;
     --primary-foreground: 240.0 20% 4.9%;
-    --secondary: 15.3 43% 85.0%;
-    --secondary-foreground: 15.3 24% 20.0%;
-    --muted: 15.3 41% 89.0%;
-    --muted-foreground: 15.3 13% 36.8%;
-    --accent: 275.7 19% 38.6%;
+    --secondary: 15.3 80% 90.5%;
+    --secondary-foreground: 15.3 37% 27.2%;
+    --muted: 15.3 80% 93.7%;
+    --muted-foreground: 15.3 37% 40.9%;
+    --accent: 15.3 37% 44.9%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 15.3 43% 80.0%;
-    --input: 15.3 43% 80.0%;
-    --ring: 15.3 65% 51.3%;
+    --border: 15.3 80% 85.8%;
+    --input: 15.3 80% 85.8%;
+    --ring: 15.3 43% 53.7%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 68.6 34% 54.9%;
-    --breakdown-uncommon: 15.3 80% 68.4%;
+    --breakdown-common: 15.3 80% 68.4%;
+    --breakdown-uncommon: 15.3 61% 62.3%;
+    --uncommon-action: 15.3 80% 68.4%;
     --uncommon-action-foreground: 240.0 20% 4.9%;
-    --breakdown-rare: 90.0 18% 46.7%;
-    --breakdown-ultra: 0.5 51% 55.5%;
-    --breakdown-legendary: 275.7 19% 38.6%;
+    --breakdown-rare: 15.3 49% 57.1%;
+    --breakdown-ultra: 15.3 42% 53.4%;
+    --breakdown-legendary: 15.3 37% 49.6%;
   }
   [data-theme="spring-butter"] {
-    --background: 49.1 75% 94.0%;
-    --foreground: 49.1 24% 20.0%;
-    --card: 49.1 72% 95.0%;
-    --card-foreground: 49.1 24% 20.0%;
-    --popover: 49.1 72% 95.0%;
-    --popover-foreground: 49.1 24% 20.0%;
-    --primary: 49.1 100% 31.3%;
+    --background: 49.1 100% 97.7%;
+    --foreground: 49.1 24% 24.3%;
+    --card: 49.1 100% 98.4%;
+    --card-foreground: 49.1 24% 24.3%;
+    --popover: 49.1 100% 98.4%;
+    --popover-foreground: 49.1 24% 24.3%;
+    --primary: 49.1 24% 46.7%;
+    --primary-fill: 49.1 100% 80.6%;
     --primary-foreground: 240.0 20% 4.9%;
-    --secondary: 49.1 73% 85.0%;
-    --secondary-foreground: 49.1 24% 20.0%;
-    --muted: 49.1 71% 89.0%;
-    --muted-foreground: 49.1 13% 37.9%;
-    --accent: 0.5 51% 55.5%;
-    --accent-foreground: 240.0 20% 4.9%;
-    --border: 49.1 73% 80.0%;
-    --input: 49.1 73% 80.0%;
-    --ring: 49.1 100% 31.3%;
+    --secondary: 49.1 100% 94.2%;
+    --secondary-foreground: 49.1 24% 24.3%;
+    --muted: 49.1 100% 96.1%;
+    --muted-foreground: 49.1 24% 38.7%;
+    --accent: 49.1 24% 39.3%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 49.1 21% 85.6%;
+    --input: 49.1 21% 85.6%;
+    --ring: 49.1 24% 46.7%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 68.6 34% 57.7%;
-    --breakdown-uncommon: 15.3 80% 68.4%;
+    --breakdown-common: 49.1 39% 61.6%;
+    --breakdown-uncommon: 49.1 30% 55.2%;
+    --uncommon-action: 49.1 100% 80.6%;
     --uncommon-action-foreground: 240.0 20% 4.9%;
-    --breakdown-rare: 90.0 18% 46.7%;
-    --breakdown-ultra: 0.5 51% 55.5%;
-    --breakdown-legendary: 275.7 19% 38.6%;
+    --breakdown-rare: 49.1 24% 50.0%;
+    --breakdown-ultra: 49.1 24% 45.9%;
+    --breakdown-legendary: 49.1 24% 42.7%;
   }
   [data-theme="spring-pistachio"] {
-    --background: 68.6 35% 94.0%;
-    --foreground: 68.6 24% 20.0%;
-    --card: 68.6 32% 95.0%;
-    --card-foreground: 68.6 24% 20.0%;
-    --popover: 68.6 32% 95.0%;
-    --popover-foreground: 68.6 24% 20.0%;
-    --primary: 68.6 45% 37.4%;
+    --background: 68.6 34% 95.2%;
+    --foreground: 68.6 23% 22.4%;
+    --card: 68.6 34% 96.8%;
+    --card-foreground: 68.6 23% 22.4%;
+    --popover: 68.6 34% 96.8%;
+    --popover-foreground: 68.6 23% 22.4%;
+    --primary: 68.6 23% 43.8%;
+    --primary-fill: 68.6 34% 60.0%;
     --primary-foreground: 240.0 20% 4.9%;
-    --secondary: 68.6 33% 85.0%;
-    --secondary-foreground: 68.6 24% 20.0%;
-    --muted: 68.6 31% 89.0%;
-    --muted-foreground: 68.6 13% 35.4%;
-    --accent: 275.7 19% 38.6%;
+    --secondary: 68.6 34% 88.0%;
+    --secondary-foreground: 68.6 23% 22.4%;
+    --muted: 68.6 34% 92.0%;
+    --muted-foreground: 68.6 23% 34.1%;
+    --accent: 68.6 23% 36.8%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 68.6 33% 80.0%;
-    --input: 68.6 33% 80.0%;
-    --ring: 68.6 45% 37.4%;
+    --border: 68.6 18% 82.9%;
+    --input: 68.6 18% 82.9%;
+    --ring: 68.6 23% 43.8%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 68.6 34% 56.8%;
-    --breakdown-uncommon: 15.3 80% 68.4%;
+    --breakdown-common: 68.6 33% 58.8%;
+    --breakdown-uncommon: 68.6 25% 52.5%;
+    --uncommon-action: 68.6 34% 60.0%;
     --uncommon-action-foreground: 240.0 20% 4.9%;
-    --breakdown-rare: 90.0 18% 46.7%;
-    --breakdown-ultra: 0.5 51% 55.5%;
-    --breakdown-legendary: 275.7 19% 38.6%;
+    --breakdown-rare: 68.6 23% 47.7%;
+    --breakdown-ultra: 68.6 23% 43.8%;
+    --breakdown-legendary: 68.6 23% 40.5%;
   }
   [data-theme="spring-olive"] {
-    --background: 90.0 25% 94.0%;
-    --foreground: 90.0 24% 20.0%;
-    --card: 90.0 22% 95.0%;
-    --card-foreground: 90.0 24% 20.0%;
-    --popover: 90.0 22% 95.0%;
-    --popover-foreground: 90.0 24% 20.0%;
-    --primary: 90.0 18% 45.7%;
+    --background: 90.0 15% 93.6%;
+    --foreground: 90.0 18% 18.7%;
+    --card: 90.0 15% 95.7%;
+    --card-foreground: 90.0 18% 18.7%;
+    --popover: 90.0 15% 95.7%;
+    --popover-foreground: 90.0 18% 18.7%;
+    --primary: 90.0 18% 45.3%;
+    --primary-fill: 90.0 18% 46.7%;
     --primary-foreground: 240.0 20% 4.9%;
-    --secondary: 90.0 23% 85.0%;
-    --secondary-foreground: 90.0 24% 20.0%;
-    --muted: 90.0 21% 89.0%;
-    --muted-foreground: 90.0 13% 35.1%;
-    --accent: 15.3 65% 52.5%;
-    --accent-foreground: 240.0 20% 4.9%;
-    --border: 90.0 23% 80.0%;
-    --input: 90.0 23% 80.0%;
-    --ring: 90.0 18% 45.7%;
+    --secondary: 90.0 15% 84.0%;
+    --secondary-foreground: 90.0 18% 18.7%;
+    --muted: 90.0 15% 89.3%;
+    --muted-foreground: 90.0 18% 33.0%;
+    --accent: 90.0 18% 37.8%;
+    --accent-foreground: 0.0 0% 98.0%;
+    --border: 90.0 15% 76.0%;
+    --input: 90.0 15% 76.0%;
+    --ring: 90.0 18% 45.3%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 68.6 34% 56.1%;
-    --breakdown-uncommon: 15.3 80% 68.4%;
+    --breakdown-common: 90.0 15% 65.3%;
+    --breakdown-uncommon: 90.0 15% 59.2%;
+    --uncommon-action: 90.0 18% 46.7%;
     --uncommon-action-foreground: 240.0 20% 4.9%;
-    --breakdown-rare: 90.0 18% 46.7%;
-    --breakdown-ultra: 0.5 51% 55.5%;
-    --breakdown-legendary: 275.7 19% 38.6%;
+    --breakdown-rare: 90.0 15% 54.4%;
+    --breakdown-ultra: 90.0 15% 50.1%;
+    --breakdown-legendary: 90.0 18% 46.7%;
   }
 }
 

@@ -108,22 +108,22 @@ export const THEME_FAMILIES = [
     ],
   },
   {
-    // Built from a palette the user chose (plum, brick, coral, butter,
-    // sage-lime, moss): each theme led by one of its colours, all sharing
-    // it as their rarity gauge. Ids are spring-* because Botanical already
-    // owns 'sage' and 'moss'. See index.css.
+    // Built from a palette the user chose: six themes, each made entirely
+    // from ONE of its colours (swatch = the exact hex its buttons wear; sup =
+    // the other end of that colour's gauge column). Ids are spring-* because
+    // Botanical already owns 'sage' and 'moss'. See index.css.
     id: 'spring',
     label: 'Spring',
     displayFont: "'Poppins', sans-serif",
     labelSize: '0.7125rem',
     isNew: true,
     themes: [
-      { id: 'spring-plum', label: 'Plum', pro: false, light: { swatch: '#665075', sup: '#72875D', background: '#EFEDF2' } },
-      { id: 'spring-brick', label: 'Brick', pro: true, light: { swatch: '#C75554', sup: '#665075', background: '#F4EBEB' } },
-      { id: 'spring-coral', label: 'Coral', pro: true, light: { swatch: '#D45B32', sup: '#665075', background: '#F7ECE9' } },
-      { id: 'spring-butter', label: 'Butter', pro: true, light: { swatch: '#A08300', sup: '#C75554', background: '#FBF7E4' } },
-      { id: 'spring-pistachio', label: 'Pistachio', pro: true, light: { swatch: '#7E8A34', sup: '#665075', background: '#F4F5EA' } },
-      { id: 'spring-olive', label: 'Olive', pro: true, light: { swatch: '#758A60', sup: '#D55F37', background: '#F0F4EC' } },
+      { id: 'spring-plum', label: 'Plum', pro: false, light: { swatch: '#665075', sup: '#B3A8BB', background: '#EDEAEE' } },
+      { id: 'spring-brick', label: 'Brick', pro: true, light: { swatch: '#C75554', sup: '#DF9D9D', background: '#F8EBEA' } },
+      { id: 'spring-coral', label: 'Coral', pro: true, light: { swatch: '#EF8F6E', sup: '#AD6850', background: '#FDF2EE' } },
+      { id: 'spring-butter', label: 'Butter', pro: true, light: { swatch: '#FFED9C', sup: '#877E53', background: '#FFFDF3' } },
+      { id: 'spring-pistachio', label: 'Pistachio', pro: true, light: { swatch: '#B2BC76', sup: '#787F50', background: '#F6F7EF' } },
+      { id: 'spring-olive', label: 'Olive', pro: true, light: { swatch: '#778C62', sup: '#A7B499', background: '#EFF1EC' } },
     ],
   },
 ];

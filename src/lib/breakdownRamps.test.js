@@ -41,9 +41,13 @@ describe('rarity breakdown ramps', () => {
 // Home's Scan button and selected brand chip are filled with each theme's
 // --breakdown-uncommon; their label is --uncommon-action-foreground, which
 // every theme must define at body-text contrast (12px label, so 4.5:1).
-const actionBlocks = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-uncommon[^{}]*)\}/g)].map(([, sel, body]) => ({
+// The fill is --uncommon-action where a theme sets it to a literal colour
+// (Spring: its exact palette hex), else --breakdown-uncommon, which
+// --uncommon-action defaults to. Only blocks that DECLARE
+// --breakdown-uncommon are themes; the defaults block merely var()s it.
+const actionBlocks = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-uncommon:[^{}]*)\}/g)].map(([, sel, body]) => ({
   name: sel.trim().split('\n').pop().trim(),
-  fill: body.match(/--breakdown-uncommon:\s*([^;]+);/)[1],
+  fill: body.match(/--uncommon-action:\s*([\d.]+ [^;]+);/)?.[1] ?? body.match(/--breakdown-uncommon:\s*([^;]+);/)[1],
   label: body.match(/--uncommon-action-foreground:\s*([^;]+);/)?.[1],
 }));
 
@@ -51,5 +55,27 @@ describe('Uncommon action colour', () => {
   it.each(actionBlocks.map(b => [b.name, b]))('%s: label reads at 4.5:1 on the Uncommon fill', (_, b) => {
     expect(b.label, `${b.name} is missing --uncommon-action-foreground`).toBeTruthy();
     expect(contrast(b.fill, b.label)).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+// Where a theme fills buttons with a different colour from its text-primary
+// (--primary-fill, Spring's exact palette hex), the button label must read
+// on the FILL, and the text shade must still read as icons on the page.
+const fillBlocks = [...css.matchAll(/([^{}]+)\{([^{}]*--primary-fill:\s*[\d.]+ [^{}]*)\}/g)].map(([, sel, body]) => ({
+  name: sel.trim().split('\n').pop().trim(),
+  fill: body.match(/--primary-fill:\s*([^;]+);/)[1],
+  label: body.match(/--primary-foreground:\s*([^;]+);/)[1],
+  primary: body.match(/--primary:\s*([^;]+);/)[1],
+  background: body.match(/--background:\s*([^;]+);/)[1],
+}));
+
+describe('primary fill', () => {
+  it('is set by the Spring themes', () => {
+    expect(fillBlocks.length).toBe(6);
+  });
+
+  it.each(fillBlocks.map(b => [b.name, b]))('%s: button label 4.5:1 on the fill, icons 3:1 on the page', (_, b) => {
+    expect(contrast(b.fill, b.label)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(b.primary, b.background)).toBeGreaterThanOrEqual(3);
   });
 });

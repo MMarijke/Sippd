@@ -89,8 +89,8 @@ function VoteStage() {
   return (
     <div className="w-full max-w-[15rem] space-y-1.5">
       {VOTES.map((v) => (
-        <div key={v.tier} className="grid grid-cols-[5.5rem_1fr_1.5rem] items-center gap-2">
-          <span className={cn('text-2xs font-mono uppercase tracking-wider', v.text)}>{v.tier}</span>
+        <div key={v.tier} className="grid grid-cols-[6.75rem_1fr_1.5rem] items-center gap-2">
+          <span className={cn('text-xs font-mono uppercase tracking-wider', v.text)}>{v.tier}</span>
           <span className="h-2 rounded-full bg-secondary overflow-hidden">
             <span className={cn('block h-full rounded-full', v.bar)} style={{ width: `${(v.n / TOP_VOTES) * 100}%` }} />
           </span>
@@ -174,7 +174,7 @@ export function LeaderboardProof() {
             <p className="flex-1 text-sm font-semibold text-foreground truncate">{r.name}</p>
             <div className="text-right flex-shrink-0">
               <p className="text-sm font-display font-bold tabular-nums text-foreground">{r.cans}</p>
-              <p className="text-2xs font-mono text-muted-foreground">cans</p>
+              <p className="text-xs font-mono text-muted-foreground">cans</p>
             </div>
           </div>
         ))}
@@ -199,7 +199,7 @@ export function FeedProof() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground">Wren T.</p>
-            <p className="text-2xs font-mono text-muted-foreground">2m ago</p>
+            <p className="text-xs font-mono text-muted-foreground">2m ago</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -246,14 +246,14 @@ export function CollectionProof() {
     >
       <div className="rounded-2xl border border-border bg-card p-4">
         <div className="hero-card rounded-2xl p-4 mb-3 text-center">
-          <p className="text-2xs font-mono uppercase tracking-widest text-foreground">Collection Score</p>
+          <p className="text-xs font-mono uppercase tracking-widest text-foreground">Collection Score</p>
           <p className="text-4xl font-mono font-black text-foreground tabular-nums">2,140</p>
         </div>
         <ul className="grid grid-cols-3 gap-2">
           {VAULT.map((c) => (
             <li key={c.word} className={cn('rounded-xl border pt-3 pb-2 flex flex-col items-center gap-1.5', c.tile)}>
               <DrawnCan palette={c.palette} word={c.word} sub={c.sub} className="h-20 w-auto" />
-              <span className={cn('text-2xs font-mono uppercase tracking-wider', c.text)}>{c.rarity}</span>
+              <span className={cn('text-xs font-mono uppercase tracking-wider', c.text)}>{c.rarity}</span>
             </li>
           ))}
         </ul>

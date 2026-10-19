@@ -1,11 +1,21 @@
 import { useId } from 'react';
 
-// A drawn, unbranded can for the sign-up hero: shows at a glance that Sippd
-// is about cans without featuring a real brand's pack shot (real catalog
-// photos are brand-owned and only readable once signed in). It carries the
-// hero's made-up example name, in the Legendary magenta of the reveal.
-// Decorative: the name is also in the text below it, so it's aria-hidden.
-export default function LegendaryCan({ className }) {
+// Drawn, unbranded cans for the signed-out sign-up page: they show at a
+// glance that Sippd is about cans without featuring a real brand's pack
+// shot (catalog photos are brand-owned, and only readable once signed in).
+// Every name on them is made up. Decorative, so aria-hidden: whatever they
+// show is also said in text nearby.
+
+// Body shading, dark edge -> lit -> highlight -> mid -> dark edge.
+export const CAN_PALETTES = {
+  legendary: ['#4a004a', '#ff33ff', '#ff66ff', '#b000b0', '#2a002a'],
+  ultra: ['#2a0a4f', '#a855f7', '#c79bff', '#7a2fd0', '#1a0633'],
+  rare: ['#0b2350', '#3b82f6', '#8db8ff', '#2160c8', '#071735'],
+  uncommon: ['#063d1f', '#22c55e', '#86efac', '#15913f', '#042a15'],
+  common: ['#2a2d33', '#8b919c', '#d3d7de', '#646a75', '#1b1d21'],
+};
+
+export default function DrawnCan({ className, palette = CAN_PALETTES.legendary, word = 'NOVA', sub = 'SURGE XL' }) {
   const id = useId().replace(/:/g, '');
   const body = `can-body-${id}`;
   const metal = `can-metal-${id}`;
@@ -16,11 +26,11 @@ export default function LegendaryCan({ className }) {
       <defs>
         {/* Horizontal shading reads as a cylinder: dark edges, lit centre-left. */}
         <linearGradient id={body} x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0" stopColor="#4a004a" />
-          <stop offset="0.28" stopColor="#ff33ff" />
-          <stop offset="0.42" stopColor="#ff66ff" />
-          <stop offset="0.7" stopColor="#b000b0" />
-          <stop offset="1" stopColor="#2a002a" />
+          <stop offset="0" stopColor={palette[0]} />
+          <stop offset="0.28" stopColor={palette[1]} />
+          <stop offset="0.42" stopColor={palette[2]} />
+          <stop offset="0.7" stopColor={palette[3]} />
+          <stop offset="1" stopColor={palette[4]} />
         </linearGradient>
         <linearGradient id={metal} x1="0" x2="1" y1="0" y2="0">
           <stop offset="0" stopColor="#5b5b66" />
@@ -50,7 +60,7 @@ export default function LegendaryCan({ className }) {
       {/* Base rim. */}
       <path d="M16 161 L64 161 C63 165 17 165 16 161 Z" fill={`url(#${metal})`} />
 
-      {/* Label: the example name, set vertically like a real can's wordmark. */}
+      {/* Label: a made-up name, set vertically like a real can's wordmark. */}
       <g transform="translate(43 89) rotate(-90)">
         <text
           x="0"
@@ -59,7 +69,7 @@ export default function LegendaryCan({ className }) {
           fill="#ffffff"
           style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 21, letterSpacing: 1.5 }}
         >
-          NOVA
+          {word}
         </text>
         <text
           x="0"
@@ -68,7 +78,7 @@ export default function LegendaryCan({ className }) {
           fill="#ffe0ff"
           style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 8.5, letterSpacing: 2.4 }}
         >
-          SURGE XL
+          {sub}
         </text>
       </g>
 

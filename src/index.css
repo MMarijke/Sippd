@@ -1816,3 +1816,63 @@ body {
   background-image: var(--card-texture);
   background-repeat: repeat;
 }
+
+/* ============================================================================
+   LOGIN WORLD -- the signed-out sign-up page's own fixed palette.
+   The page opens on the Legendary reveal (#FF00FF on #05050A, hardcoded in
+   HeroReveal.jsx), so everything after it -- the form, the proof sections,
+   the closing call -- carries that same magenta-on-near-black world instead
+   of whichever theme this device last cached. Set on Login's root element:
+   custom properties declared there win over the inherited :root/[data-theme]
+   values for the whole subtree, so the shared components (AuthPanel,
+   Button, Input, RarityBadge) recolour with no per-component overrides.
+   Tone-keyed text tokens are pinned to their dark values too, since a light
+   cached theme would otherwise set :root[data-tone="light"] ones.
+   Contrast on --background: foreground 19:1, muted-foreground 9:1,
+   primary (links) 6.5:1; primary-foreground on the magenta fill 6.5:1.
+   ============================================================================ */
+.login-world {
+  --font-display: 'Orbitron', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Exo 2', sans-serif;
+  --background: 240 33% 3%;
+  --foreground: 300 20% 97%;
+  --card: 290 35% 7%;
+  --card-foreground: 300 20% 97%;
+  --popover: 290 35% 7%;
+  --popover-foreground: 300 20% 97%;
+  --primary: 300 100% 50%;
+  --primary-fill: 300 100% 50%;
+  --primary-foreground: 240 33% 3%;
+  --cta: 300 100% 50%;
+  --cta-foreground: 240 33% 3%;
+  --fill-edge: transparent;
+  --secondary: 292 32% 13%;
+  --secondary-foreground: 300 20% 97%;
+  --muted: 292 30% 10%;
+  --muted-foreground: 300 22% 74%;
+  --accent: 300 100% 80%;
+  --accent-foreground: 240 33% 3%;
+  --border: 300 38% 20%;
+  --input: 300 38% 22%;
+  --ring: 300 100% 62%;
+  --glow-intensity: 1;
+  --wash-intensity: 0;
+  --card-texture: none;
+  --destructive-text: 0 70% 66%;
+  --medal-gold: 45 93% 58%;
+  --medal-silver: 215 16% 75%;
+  --medal-bronze: 28 75% 55%;
+  --rarity-common-text: 220 9% 64.5%;
+  --rarity-uncommon-text: 142 71% 45%;
+  --rarity-rare-text: 217 91% 69%;
+  --rarity-ultra-text: 271 91% 73.5%;
+  --rarity-legendary-text: 330 81% 69%;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.login-world ::selection {
+  background: hsl(var(--primary) / 0.45);
+  color: hsl(var(--foreground));
+}

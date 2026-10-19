@@ -108,8 +108,12 @@ const fillBlocks = [...css.matchAll(/([^{}]+)\{([^{}]*--primary-fill:\s*[\d.]+ [
 }));
 
 describe('primary fill', () => {
-  it('is set by the Spring themes', () => {
-    expect(fillBlocks.length).toBe(6);
+  // The six Spring themes, plus the sign-up page's own fixed palette
+  // (.login-world), whose magenta fill gets the same label check below.
+  it('is set by the Spring themes and the login page', () => {
+    const names = fillBlocks.map(b => b.name);
+    expect(names).toContain('.login-world');
+    expect(names.filter(n => n !== '.login-world')).toHaveLength(6);
   });
 
   it.each(fillBlocks.map(b => [b.name, b]))('%s: button label 4.5:1 on the fill, icons 3:1 on the page', (_, b) => {

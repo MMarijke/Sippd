@@ -2,6 +2,25 @@ import { Flame, Star as StarIcon, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import RarityBadge from '@/components/shared/RarityBadge';
 
+// Phone: heading, line, then the demo, stacked. Desktop: a two-column row
+// across the page, the demo alternating sides so the three sections read
+// as a sequence rather than three identical blocks.
+function ProofSection({ title, copy, flip = false, children }) {
+  return (
+    <section className="px-5 py-16 lg:py-24 border-t border-border">
+      <div className="mx-auto max-w-5xl lg:grid lg:grid-cols-2 lg:items-center lg:gap-20">
+        <div className={cn(flip && 'lg:order-2')}>
+          <h2 className="font-display font-black text-3xl lg:text-5xl text-foreground mb-2 lg:mb-4 text-balance">{title}</h2>
+          <p className="text-sm lg:text-lg font-body text-muted-foreground mb-6 lg:mb-0 max-w-sm">{copy}</p>
+        </div>
+        <div className={cn('w-full max-w-sm lg:max-w-md', flip ? 'lg:order-1 lg:justify-self-start' : 'lg:justify-self-end')}>
+          {children}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // Three full-width scroll sections, each a real product mechanism at
 // honest scale rather than a shrunk preview card — recreated from the
 // actual component patterns (CollectorsLeaderboard's medal/rank/score
@@ -19,12 +38,11 @@ export function LeaderboardProof() {
     { rank: 3, name: 'Wren T.', cans: 351, medal: '🥉', color: 'text-amber-600' },
   ];
   return (
-    <section className="px-5 py-16 border-t border-border">
-      <h2 className="font-display font-black text-3xl text-foreground mb-2">Climb the ranks.</h2>
-      <p className="text-sm font-body text-muted-foreground mb-6 max-w-sm">
-        Compete with collectors worldwide by total cans or rare pulls.
-      </p>
-      <div className="max-w-sm rounded-xl border border-border overflow-hidden divide-y divide-border bg-card">
+    <ProofSection
+      title="Climb the ranks."
+      copy="Compete with collectors worldwide by total cans or rare pulls."
+    >
+      <div className="rounded-xl border border-border overflow-hidden divide-y divide-border bg-card">
         {rows.map(r => (
           <div key={r.rank} className="flex items-center gap-3 px-3 py-2.5">
             <div className="w-7 flex-shrink-0 flex flex-col items-center justify-center gap-0.5">
@@ -42,18 +60,18 @@ export function LeaderboardProof() {
           </div>
         ))}
       </div>
-    </section>
+    </ProofSection>
   );
 }
 
 export function FeedProof() {
   return (
-    <section className="px-5 py-16 border-t border-border">
-      <h2 className="font-display font-black text-3xl text-foreground mb-2">Share every pull.</h2>
-      <p className="text-sm font-body text-muted-foreground mb-6 max-w-sm">
-        Your friends see it the moment it happens.
-      </p>
-      <div className="max-w-sm rounded-2xl border border-rarity-rare/30 rarity-glow-rare bg-card p-4 space-y-3">
+    <ProofSection
+      title="Share every pull."
+      copy="Your friends see it the moment it happens."
+      flip
+    >
+      <div className="rounded-2xl border border-rarity-rare/30 rarity-glow-rare bg-card p-4 space-y-3">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-xs font-display font-bold text-primary flex-shrink-0">
             W
@@ -78,19 +96,18 @@ export function FeedProof() {
           ))}
         </div>
       </div>
-    </section>
+    </ProofSection>
   );
 }
 
 export function CollectionProof() {
   const tiles = ['#0C1D38', '#170B33', '#2B0D1F', '#0D1F0D', '#2B0F0F', '#1C1C1E'];
   return (
-    <section className="px-5 py-16 border-t border-border">
-      <h2 className="font-display font-black text-3xl text-foreground mb-2">Build your vault.</h2>
-      <p className="text-sm font-body text-muted-foreground mb-6 max-w-sm">
-        Every can, cataloged, scored, and yours to show off.
-      </p>
-      <div className="max-w-sm rounded-2xl border border-border bg-card p-4">
+    <ProofSection
+      title="Build your vault."
+      copy="Every can, cataloged, scored, and yours to show off."
+    >
+      <div className="rounded-2xl border border-border bg-card p-4">
         <div className="hero-card rounded-2xl p-4 mb-3 text-center">
           <p className="text-2xs font-mono uppercase tracking-widest text-foreground">Collection Score</p>
           <p className="text-4xl font-mono font-black text-foreground tabular-nums">2,140</p>
@@ -103,6 +120,6 @@ export function CollectionProof() {
           ))}
         </div>
       </div>
-    </section>
+    </ProofSection>
   );
 }

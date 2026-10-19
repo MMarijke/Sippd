@@ -189,7 +189,6 @@
        fit are unchanged. */
     --breakdown-common: 182.0 65% 28.4%;
     --breakdown-uncommon: 167.4 62% 36.1%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 158.0 66% 43.2%;
     --breakdown-ultra: 152.8 75% 48.9%;
     --breakdown-legendary: 152.0 100% 50.0%;
@@ -286,7 +285,6 @@
 
     --breakdown-common: 182.0 65% 28.4%;
     --breakdown-uncommon: 167.4 62% 36.1%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 158.0 66% 43.2%;
     --breakdown-ultra: 152.8 75% 48.9%;
     --breakdown-legendary: 152.0 100% 50.0%;
@@ -299,12 +297,21 @@
      - --primary-fill: what bg-primary paints (tailwind.config.js). Same as
        --primary except Spring's pale colours, which fill buttons with the
        palette's exact hex but keep a deeper shade for text/icons/ring.
-     - --uncommon-action: the Scan button / selected brand chip fill. Same
-       as --breakdown-uncommon except Spring, whose gauge runs pale -> full
-       while Scan wears the exact palette colour. */
+     - --cta / --cta-foreground: Scan, and the selected brand chip that
+       follows it (bg-cta). The app's main action is never quieter than
+       Save: it wears each theme's own button fill and label, which already
+       clear 4.5:1 everywhere (2026-10-19; it used to take the Uncommon gauge
+       step, which was weaker than Save in 26 of 39 themes). Its own token so
+       a theme can still make Scan louder; never quieter.
+     - --fill-edge: an inset outline on filled buttons (button/a.bg-primary,
+       .bg-cta, below) for themes whose fill is under 3:1 against their own
+       page, so the button's shape still reads: Spring Coral, Butter and
+       Pistachio, whose exact-hex fills are pale. Transparent elsewhere. */
   :root, [data-theme] {
     --primary-fill: var(--primary);
-    --uncommon-action: var(--breakdown-uncommon);
+    --cta: var(--primary-fill);
+    --cta-foreground: var(--primary-foreground);
+    --fill-edge: transparent;
   }
 
   /* ── Neon Arcade family (dark, gamer/cyber/neon) ─────────────────────────
@@ -320,8 +327,8 @@
      end). :root and .dark mirror Power-Up dark. The LIGHT blocks derive
      from these (2026-10-05, "Daylight Neon", see the light section below):
      same hue route Common -> Legendary in both polarities, so a theme's
-     gauge, Scan button and selected chips keep their colour family when the
-     polarity toggles.
+     gauge keeps its colour family when the polarity toggles (Scan and the
+     selected chips wear the main colour, derived from dark the same way).
      With this, the file header's 15deg/tier rotation only still describes
      Nebula, Amethyst, Forest, Moss, Grape Candy, Sour Apple and Plasma light. */
   [data-theme="power-up"][data-polarity="dark"] {
@@ -345,7 +352,6 @@
     --wash-intensity: 0;
     --breakdown-common: 182.0 65% 28.4%;
     --breakdown-uncommon: 167.4 62% 36.1%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 158.0 66% 43.2%;
     --breakdown-ultra: 152.8 75% 48.9%;
     --breakdown-legendary: 152.0 100% 50.0%;
@@ -371,7 +377,6 @@
     --wash-intensity: 0;
     --breakdown-common: 312.0 100% 58.0%;
     --breakdown-uncommon: 309.3 90% 65.1%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 302.8 77% 68.7%;
     --breakdown-ultra: 291.2 78% 74.1%;
     --breakdown-legendary: 275.0 90% 80.0%;
@@ -397,7 +402,6 @@
     --wash-intensity: 0;
     --breakdown-common: 222.0 100% 56.0%;
     --breakdown-uncommon: 216.9 100% 60.5%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 207.9 100% 61.5%;
     --breakdown-ultra: 197.2 100% 59.9%;
     --breakdown-legendary: 186.0 100% 50.0%;
@@ -423,7 +427,6 @@
     --wash-intensity: 0;
     --breakdown-common: 347.0 100% 61.0%;
     --breakdown-uncommon: 358.3 100% 69.3%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 9.6 100% 70.8%;
     --breakdown-ultra: 19.9 100% 71.4%;
     --breakdown-legendary: 30.0 100% 72.0%;
@@ -453,7 +456,6 @@
     --wash-intensity: 0;
     --breakdown-common: 272.0 80% 37.4%;
     --breakdown-uncommon: 275.0 72% 42.5%;
-    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 277.8 66% 47.7%;
     --breakdown-ultra: 280.5 68% 52.8%;
     --breakdown-legendary: 283.0 79% 58.0%;
@@ -496,7 +498,6 @@
     --wash-intensity: 0;
     --breakdown-common: 182 70% 46.1%;
     --breakdown-uncommon: 167.4 70% 41.8%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 158 70% 39%;
     --breakdown-ultra: 152.8 75% 35.6%;
     --breakdown-legendary: 152 100% 29.5%;
@@ -523,7 +524,6 @@
     --wash-intensity: 0;
     --breakdown-common: 312 100% 75.2%;
     --breakdown-uncommon: 309.3 90% 68.7%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 302.8 77% 62.5%;
     --breakdown-ultra: 291.2 78% 61.2%;
     --breakdown-legendary: 275 90% 64.1%;
@@ -550,7 +550,6 @@
     --wash-intensity: 0;
     --breakdown-common: 222 100% 78%;
     --breakdown-uncommon: 216.9 100% 70.8%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 207.9 100% 57.7%;
     --breakdown-ultra: 197.2 100% 41.4%;
     --breakdown-legendary: 186 100% 31.9%;
@@ -580,7 +579,6 @@
     --wash-intensity: 0;
     --breakdown-common: 347 100% 77.5%;
     --breakdown-uncommon: 358.3 100% 72.8%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 9.6 100% 62.4%;
     --breakdown-ultra: 19.9 100% 48.1%;
     --breakdown-legendary: 30 100% 39.8%;
@@ -609,7 +607,6 @@
     --wash-intensity: 0;
     --breakdown-common: 272 80% 78%;
     --breakdown-uncommon: 275 72% 72.6%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 277.8 70% 68.1%;
     --breakdown-ultra: 280.5 70% 64.1%;
     --breakdown-legendary: 283 79% 60.5%;
@@ -715,7 +712,6 @@
     --wash-intensity: 0;
     --breakdown-common: 221.0 26% 52.0%;
     --breakdown-uncommon: 221.6 25% 57.9%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 221.7 24% 63.7%;
     --breakdown-ultra: 221.0 23% 69.5%;
     --breakdown-legendary: 219.2 21% 75.3%;
@@ -741,7 +737,6 @@
     --wash-intensity: 0;
     --breakdown-common: 250.1 55% 57.3%;
     --breakdown-uncommon: 265.1 60% 55.5%;
-    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 280.1 65% 51.2%;
     --breakdown-ultra: 295.1 70% 43.8%;
     --breakdown-legendary: 310.1 75% 42.3%;
@@ -767,7 +762,6 @@
     --wash-intensity: 0;
     --breakdown-common: 16.0 95% 50.0%;
     --breakdown-uncommon: 24.8 97% 50.1%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 31.7 99% 50.2%;
     --breakdown-ultra: 38.0 100% 50.1%;
     --breakdown-legendary: 44.0 100% 50.0%;
@@ -793,7 +787,6 @@
     --wash-intensity: 0;
     --breakdown-common: 161.4 71% 57.5%;
     --breakdown-uncommon: 164.4 66% 65.9%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 172.0 60% 72.3%;
     --breakdown-ultra: 187.1 62% 79.2%;
     --breakdown-legendary: 207.0 100% 88.0%;
@@ -819,7 +812,6 @@
     --wash-intensity: 0;
     --breakdown-common: 258.0 65% 43.0%;
     --breakdown-uncommon: 251.9 53% 47.8%;
-    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 244.9 48% 52.0%;
     --breakdown-ultra: 236.6 49% 54.8%;
     --breakdown-legendary: 228.4 52% 55.5%;
@@ -845,7 +837,6 @@
     --wash-intensity: 0;
     --breakdown-common: 46.0 100% 40.0%;
     --breakdown-uncommon: 44.5 67% 49.3%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 44.4 66% 55.3%;
     --breakdown-ultra: 44.8 68% 60.5%;
     --breakdown-legendary: 45.7 69% 65.5%;
@@ -894,7 +885,6 @@
     --wash-intensity: 0;
     --breakdown-common: 125.9 17% 46.5%;
     --breakdown-uncommon: 126.2 18% 41.3%;
-    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 126.5 18% 36.3%;
     --breakdown-ultra: 126.7 19% 31.6%;
     --breakdown-legendary: 127.0 19% 27.0%;
@@ -920,7 +910,6 @@
     --wash-intensity: 0;
     --breakdown-common: 151.1 55% 31.0%;
     --breakdown-uncommon: 166.1 60% 29.8%;
-    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 181.1 65% 29.1%;
     --breakdown-ultra: 196.1 70% 34.5%;
     --breakdown-legendary: 211.1 75% 43.8%;
@@ -946,7 +935,6 @@
     --wash-intensity: 0;
     --breakdown-common: 124.7 32% 26.8%;
     --breakdown-uncommon: 124.7 31% 32.6%;
-    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 124.7 30% 38.6%;
     --breakdown-ultra: 124.7 28% 45.1%;
     --breakdown-legendary: 124.7 27% 53.3%;
@@ -973,7 +961,6 @@
     --wash-intensity: 0;
     --breakdown-common: 61.3 55% 33.0%;
     --breakdown-uncommon: 76.3 60% 33.4%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 91.3 65% 33.4%;
     --breakdown-ultra: 106.3 70% 33.3%;
     --breakdown-legendary: 121.3 75% 32.8%;
@@ -1000,7 +987,6 @@
     --wash-intensity: 0;
     --breakdown-common: 100.0 24% 62.7%;
     --breakdown-uncommon: 100.0 30% 55.1%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 99.9 35% 48.0%;
     --breakdown-ultra: 99.8 41% 43.2%;
     --breakdown-legendary: 99.8 46% 38.8%;
@@ -1049,7 +1035,6 @@
     --wash-intensity: 0;
     --breakdown-common: 220.0 5% 30.7%;
     --breakdown-uncommon: 218.8 6% 41.4%;
-    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 217.5 7% 52.9%;
     --breakdown-ultra: 216.3 7% 65.5%;
     --breakdown-legendary: 215.0 8% 80.0%;
@@ -1075,7 +1060,6 @@
     --wash-intensity: 0;
     --breakdown-common: 355.0 80% 32.2%;
     --breakdown-uncommon: 354.2 73% 36.1%;
-    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 353.4 66% 39.9%;
     --breakdown-ultra: 352.7 59% 43.7%;
     --breakdown-legendary: 351.9 52% 47.5%;
@@ -1101,7 +1085,6 @@
     --wash-intensity: 0;
     --breakdown-common: 271.9 55% 53.1%;
     --breakdown-uncommon: 286.9 60% 48.2%;
-    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 301.9 65% 42.7%;
     --breakdown-ultra: 316.9 70% 43.8%;
     --breakdown-legendary: 331.9 75% 44.7%;
@@ -1127,7 +1110,6 @@
     --wash-intensity: 0;
     --breakdown-common: 276.1 75% 37.7%;
     --breakdown-uncommon: 261.1 70% 49.7%;
-    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 246.1 65% 56.6%;
     --breakdown-ultra: 231.1 60% 56.4%;
     --breakdown-legendary: 216.1 55% 52.0%;
@@ -1153,7 +1135,6 @@
     --wash-intensity: 0;
     --breakdown-common: 150.0 70% 20.6%;
     --breakdown-uncommon: 157.3 61% 24.6%;
-    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 164.6 51% 29.0%;
     --breakdown-ultra: 171.8 42% 34.0%;
     --breakdown-legendary: 179.1 32% 39.6%;
@@ -1191,7 +1172,6 @@
     --card-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.07 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
     --breakdown-common: 0.0 0% 28.2%;
     --breakdown-uncommon: 0.0 0% 42.3%;
-    --uncommon-action-foreground: 0 0% 98%;
     --breakdown-rare: 0.0 0% 58.1%;
     --breakdown-ultra: 0.0 0% 76.9%;
     --breakdown-legendary: 0.0 0% 100.0%;
@@ -1242,7 +1222,6 @@
     --wash-intensity: 0;
     --breakdown-common: 336.7 100% 78.4%;
     --breakdown-uncommon: 336.7 100% 72.8%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 336.7 100% 67.3%;
     --breakdown-ultra: 336.7 100% 61.7%;
     --breakdown-legendary: 336.7 100% 56.1%;
@@ -1269,7 +1248,6 @@
     --wash-intensity: 0;
     --breakdown-common: 217.1 100% 76.6%;
     --breakdown-uncommon: 217.1 100% 72.6%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 217.1 100% 68.5%;
     --breakdown-ultra: 217.1 100% 64.5%;
     --breakdown-legendary: 217.1 100% 60.4%;
@@ -1296,7 +1274,6 @@
     --wash-intensity: 0;
     --breakdown-common: 267.4 55% 62.4%;
     --breakdown-uncommon: 282.4 60% 60.2%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 297.4 65% 55.0%;
     --breakdown-ultra: 312.4 70% 54.9%;
     --breakdown-legendary: 327.4 75% 56.9%;
@@ -1323,7 +1300,6 @@
     --wash-intensity: 0;
     --breakdown-common: 21.3 100% 68.9%;
     --breakdown-uncommon: 21.3 100% 63.2%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 21.3 100% 57.4%;
     --breakdown-ultra: 21.3 100% 51.7%;
     --breakdown-legendary: 21.3 100% 45.9%;
@@ -1350,7 +1326,6 @@
     --wash-intensity: 0;
     --breakdown-common: 82.0 55% 37.1%;
     --breakdown-uncommon: 97.0 60% 37.1%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 112.0 65% 36.7%;
     --breakdown-ultra: 127.0 70% 35.9%;
     --breakdown-legendary: 142.0 75% 34.8%;
@@ -1377,7 +1352,6 @@
     --wash-intensity: 0;
     --breakdown-common: 352.2 100% 57.6%;
     --breakdown-uncommon: 351.1 98% 48.2%;
-    --uncommon-action-foreground: 240 20% 4.9%;
     --breakdown-rare: 350.1 95% 44.8%;
     --breakdown-ultra: 349.1 93% 41.4%;
     --breakdown-legendary: 348.0 90% 38.0%;
@@ -1395,9 +1369,11 @@
      - Surfaces: tints of the colour (background 88% white, card 92%, muted
        80%, secondary 70%, border 55%). Text: a deep shade of it (>= 9:1);
        muted text the lightest shade clearing 4.6:1 on all four surfaces.
-     - Fills wear the EXACT hex: --primary-fill (every bg-primary button)
-       and --uncommon-action (Scan, selected brand chip), labelled near-black
-       or near-white, whichever reads (>= 4.5:1).
+     - Fills wear the EXACT hex: --primary-fill (every bg-primary button,
+       and Scan / the selected brand chip through --cta), labelled
+       near-black or near-white, whichever reads (>= 4.5:1). Coral, Butter
+       and Pistachio's fills are under 3:1 against their own page, so they
+       also set --fill-edge (their --primary shade) to outline the shape.
      - --primary (icons, links, ring, primary borders) is the exact colour
        where it clears 3.4:1 on the background (Plum, Brick), else the
        lightest shade of it that does (Coral, Butter, Pistachio, Olive).
@@ -1438,8 +1414,6 @@
     --wash-intensity: 0;
     --breakdown-common: 275.7 12% 69.6%;
     --breakdown-uncommon: 275.7 12% 56.7%;
-    --uncommon-action: 275.7 19% 38.6%;
-    --uncommon-action-foreground: 0.0 0% 98.0%;
     --breakdown-rare: 275.7 12% 48.8%;
     --breakdown-ultra: 275.7 16% 42.9%;
     --breakdown-legendary: 275.7 19% 38.6%;
@@ -1467,8 +1441,6 @@
     --wash-intensity: 0;
     --breakdown-common: 0.5 51% 74.4%;
     --breakdown-uncommon: 0.5 51% 68.2%;
-    --uncommon-action: 0.5 51% 55.5%;
-    --uncommon-action-foreground: 240.0 20% 4.9%;
     --breakdown-rare: 0.5 51% 63.3%;
     --breakdown-ultra: 0.5 51% 59.1%;
     --breakdown-legendary: 0.5 51% 55.5%;
@@ -1482,6 +1454,7 @@
     --popover-foreground: 15.3 37% 27.2%;
     --primary: 15.3 43% 53.7%;
     --primary-fill: 15.3 80% 68.4%;
+    --fill-edge: hsl(15.3 43% 53.7%);
     --primary-foreground: 240.0 20% 4.9%;
     --secondary: 15.3 80% 90.5%;
     --secondary-foreground: 15.3 37% 27.2%;
@@ -1496,8 +1469,6 @@
     --wash-intensity: 0;
     --breakdown-common: 15.3 80% 68.4%;
     --breakdown-uncommon: 15.3 61% 62.3%;
-    --uncommon-action: 15.3 80% 68.4%;
-    --uncommon-action-foreground: 240.0 20% 4.9%;
     --breakdown-rare: 15.3 49% 57.1%;
     --breakdown-ultra: 15.3 42% 53.4%;
     --breakdown-legendary: 15.3 37% 49.6%;
@@ -1511,6 +1482,7 @@
     --popover-foreground: 49.1 24% 24.3%;
     --primary: 49.1 24% 46.7%;
     --primary-fill: 49.1 100% 80.6%;
+    --fill-edge: hsl(49.1 24% 46.7%);
     --primary-foreground: 240.0 20% 4.9%;
     --secondary: 49.1 100% 94.2%;
     --secondary-foreground: 49.1 24% 24.3%;
@@ -1525,8 +1497,6 @@
     --wash-intensity: 0;
     --breakdown-common: 49.1 39% 61.6%;
     --breakdown-uncommon: 49.1 30% 55.2%;
-    --uncommon-action: 49.1 100% 80.6%;
-    --uncommon-action-foreground: 240.0 20% 4.9%;
     --breakdown-rare: 49.1 24% 50.0%;
     --breakdown-ultra: 49.1 24% 45.9%;
     --breakdown-legendary: 49.1 24% 42.7%;
@@ -1540,6 +1510,7 @@
     --popover-foreground: 68.6 23% 22.4%;
     --primary: 68.6 23% 43.8%;
     --primary-fill: 68.6 34% 60.0%;
+    --fill-edge: hsl(68.6 23% 43.8%);
     --primary-foreground: 240.0 20% 4.9%;
     --secondary: 68.6 34% 88.0%;
     --secondary-foreground: 68.6 23% 22.4%;
@@ -1554,8 +1525,6 @@
     --wash-intensity: 0;
     --breakdown-common: 68.6 33% 58.8%;
     --breakdown-uncommon: 68.6 25% 52.5%;
-    --uncommon-action: 68.6 34% 60.0%;
-    --uncommon-action-foreground: 240.0 20% 4.9%;
     --breakdown-rare: 68.6 23% 47.7%;
     --breakdown-ultra: 68.6 23% 43.8%;
     --breakdown-legendary: 68.6 23% 40.5%;
@@ -1583,8 +1552,6 @@
     --wash-intensity: 0;
     --breakdown-common: 90.0 15% 65.3%;
     --breakdown-uncommon: 90.0 15% 59.2%;
-    --uncommon-action: 90.0 18% 46.7%;
-    --uncommon-action-foreground: 240.0 20% 4.9%;
     --breakdown-rare: 90.0 15% 54.4%;
     --breakdown-ultra: 90.0 15% 50.1%;
     --breakdown-legendary: 90.0 18% 46.7%;
@@ -1594,6 +1561,17 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+
+  /* --fill-edge (see the fill-colour notes near the top): an inset outline
+     that keeps a filled button's shape readable where the fill is under 3:1
+     against the page (Spring Coral, Butter, Pistachio); transparent, so
+     invisible, everywhere else. Inset so it never changes the button's size,
+     and off while keyboard-focused so the focus ring below always shows. */
+  :is(button, a).bg-primary:not(:focus-visible),
+  .bg-cta:not(:focus-visible) {
+    outline: 1.5px solid var(--fill-edge);
+    outline-offset: -1.5px;
   }
 
   /* One solid keyboard focus ring for every plain button and link that

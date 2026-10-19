@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Zap } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '@/lib/AuthContext';
 import HeroReveal from '@/components/login/HeroReveal';
 import DrawnCan from '@/components/login/DrawnCan';
 import AuthPanel from '@/components/login/AuthPanel';
 import LegalFooter from '@/components/legal/LegalFooter';
-import { RarityProof, LeaderboardProof, FeedProof, CollectionProof } from '@/components/login/ProofSections';
+import { RarityProof, LeaderboardProof, FeedProof, TradeProof } from '@/components/login/ProofSections';
 import { PILL } from '@/components/login/pill';
+import { FREE_TIER } from '@/components/login/copy';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 const POST_LOGIN_REDIRECT_KEY = 'sippd-post-login-redirect';
@@ -136,7 +138,7 @@ export default function Login() {
         }}
       >
         <div className="flex items-center gap-2">
-          <span className="text-lg" aria-hidden="true">⚡</span>
+          <Zap className="w-[18px] h-[18px] text-primary" fill="currentColor" strokeWidth={1.5} aria-hidden="true" />
           <span className="text-sm font-display font-bold text-foreground tracking-wide">Sippd</span>
         </div>
         <div className="flex justify-center pt-2" aria-hidden="true">
@@ -153,7 +155,7 @@ export default function Login() {
           </div>
         </div>
         <motion.main
-          className="flex-1 flex items-center py-6"
+          className="flex-1 flex items-center py-5"
           initial={reducedMotion ? false : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
@@ -198,16 +200,16 @@ export default function Login() {
           <RarityProof />
           <LeaderboardProof />
           <FeedProof />
-          <CollectionProof />
+          <TradeProof />
 
           {/* The proof sections end on a way back to the form. */}
           <section className="px-5 py-20 border-t border-border text-center">
             <h2 className="font-display font-black text-3xl lg:text-4xl text-foreground mb-2 text-balance">
-              Your vault is waiting<span className="text-primary">.</span>
+              Start with the can in your hand<span className="text-primary">.</span>
             </h2>
-            <p className="text-sm lg:text-base font-body text-muted-foreground mb-8">Free to join, free to collect.</p>
+            <p className="text-sm lg:text-base font-body text-muted-foreground mb-8 max-w-md mx-auto text-balance">{FREE_TIER}</p>
             <button type="button" onClick={() => openForm('signup')} className={PILL}>
-              Start your vault
+              Get Started
             </button>
           </section>
         </>

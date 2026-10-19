@@ -117,3 +117,21 @@ describe('primary fill', () => {
     expect(contrast(b.primary, b.background)).toBeGreaterThanOrEqual(3);
   });
 });
+
+// Card edges and dividers: every theme's --border reads at >= 1.35:1
+// against both the page and the card (/impeccable polish, 2026-10-19; Sour
+// Apple's was 1.10, Meadow 1.23, Synthwave dark 1.24, Deep Space 1.25).
+const borderBlocks = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-common[^{}]*)\}/g)].map(([, sel, body]) => ({
+  name: sel.trim().split('\n').pop().trim(),
+  background: body.match(/--background:\s*([^;]+);/)[1],
+  card: body.match(/--card:\s*([^;]+);/)[1],
+  border: body.match(/--border:\s*([^;]+);/)?.[1],
+}));
+
+describe('borders', () => {
+  it.each(borderBlocks.map(b => [b.name, b]))('%s: border visible against page and card', (_, b) => {
+    expect(b.border, `${b.name} has no --border`).toBeTruthy();
+    expect(contrast(b.border, b.background)).toBeGreaterThanOrEqual(1.35);
+    expect(contrast(b.border, b.card)).toBeGreaterThanOrEqual(1.35);
+  });
+});

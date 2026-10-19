@@ -2,9 +2,9 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 're
 import { supabase } from '@/lib/supabaseClient';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle } from 'lucide-react';
 import LegalFooter from '@/components/legal/LegalFooter';
+import { PILL, PILL_OUTLINE } from '@/components/login/pill';
 
 function GoogleIcon(props) {
   return (
@@ -20,7 +20,7 @@ function GoogleIcon(props) {
 // Every control here is 44px tall (h-11), and the small text-style links
 // get a 44px tap area around their visible text, so the form is usable
 // one-handed on a phone.
-const FIELD = 'h-11 bg-secondary border-border font-body';
+const FIELD = 'h-11 rounded-xl bg-secondary border-border font-body';
 const LINK = 'inline-flex items-center min-h-11 px-2 -mx-2 text-primary hover:underline underline-offset-2';
 
 // The sign-up / sign-in / reset form, used by both the web page and the
@@ -194,16 +194,15 @@ const AuthPanel = forwardRef(function AuthPanel(_props, ref) {
 
       {mode !== 'forgot' && (
         <>
-          <Button
+          <button
             type="button"
-            variant="outline"
             onClick={handleGoogleSignIn}
             disabled={googleLoading || emailLoading}
-            className="w-full h-11 font-mono text-sm gap-2 border-border bg-secondary hover:bg-secondary/80"
+            className={`${PILL_OUTLINE} w-full`}
           >
             {googleLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <GoogleIcon />}
             Continue with Google
-          </Button>
+          </button>
 
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-border" />
@@ -217,14 +216,10 @@ const AuthPanel = forwardRef(function AuthPanel(_props, ref) {
         <form onSubmit={handleForgotSubmit} className="space-y-4">
           {emailField}
           {messages}
-          <Button
-            type="submit"
-            disabled={resetSending}
-            className="w-full h-11 font-mono text-sm gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 neon-glow"
-          >
+          <button type="submit" disabled={resetSending} className={`${PILL} w-full`}>
             {resetSending && <Loader2 className="w-4 h-4 animate-spin" />}
             Send Reset Link
-          </Button>
+          </button>
         </form>
       ) : (
         <form onSubmit={handleEmailSubmit} className="space-y-4">
@@ -270,14 +265,10 @@ const AuthPanel = forwardRef(function AuthPanel(_props, ref) {
 
           {messages}
 
-          <Button
-            type="submit"
-            disabled={emailLoading || googleLoading}
-            className="w-full h-11 font-mono text-sm gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 neon-glow"
-          >
+          <button type="submit" disabled={emailLoading || googleLoading} className={`${PILL} w-full`}>
             {emailLoading && <Loader2 className="w-4 h-4 animate-spin" />}
             {mode === 'signin' ? 'Sign In' : 'Sign Up'}
-          </Button>
+          </button>
         </form>
       )}
 

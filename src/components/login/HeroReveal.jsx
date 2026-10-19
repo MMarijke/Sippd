@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
-import LegendaryCan from '@/components/login/LegendaryCan';
+import DrawnCan from '@/components/login/DrawnCan';
+import { PILL } from '@/components/login/pill';
 
 // The first viewport is the actual product mechanism at full scale, not a
 // shrunk-down preview card — Sippd's real celebratory moment (see
@@ -133,7 +134,7 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn }) {
           </motion.div>
 
           {/* The pull itself: a can, so the page says "cans" before any copy. */}
-          <LegendaryCan className="h-36 sm:h-44 w-auto mb-4" />
+          <DrawnCan className="h-36 sm:h-44 w-auto mb-4" />
 
           {/* The reveal's rarity word: display, not the page heading. */}
           <motion.p
@@ -182,8 +183,7 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn }) {
           <motion.button
             type="button"
             onClick={onGetStarted}
-            className="h-11 px-6 rounded-full text-sm font-mono font-semibold uppercase tracking-wider text-black"
-            style={{ backgroundColor: ACCENT }}
+            className={PILL}
             initial={reducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={reducedMotion ? { duration: 0 } : { delay: 1.2, duration: 0.4 }}

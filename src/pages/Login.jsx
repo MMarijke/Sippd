@@ -3,10 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '@/lib/AuthContext';
-import { Button } from '@/components/ui/button';
 import HeroReveal from '@/components/login/HeroReveal';
 import AuthPanel from '@/components/login/AuthPanel';
-import { LeaderboardProof, FeedProof, CollectionProof } from '@/components/login/ProofSections';
+import { RarityProof, LeaderboardProof, FeedProof, CollectionProof } from '@/components/login/ProofSections';
+import { PILL } from '@/components/login/pill';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 const POST_LOGIN_REDIRECT_KEY = 'sippd-post-login-redirect';
@@ -108,15 +108,17 @@ export default function Login() {
   if (native) {
     if (!introDone) {
       return (
-        <HeroReveal
-          onGetStarted={() => finishIntro('signup')}
-          onJumpToSignIn={() => finishIntro('signin')}
-        />
+        <div className="login-world">
+          <HeroReveal
+            onGetStarted={() => finishIntro('signup')}
+            onJumpToSignIn={() => finishIntro('signin')}
+          />
+        </div>
       );
     }
     return (
       <div
-        className="min-h-dvh bg-background flex flex-col px-5"
+        className="login-world min-h-dvh flex flex-col px-5"
         style={{
           paddingTop: 'max(1.5rem, env(safe-area-inset-top))',
           paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
@@ -140,7 +142,9 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    // .login-world (index.css): the opening's magenta-on-black for the
+    // whole page, whatever theme this device has cached.
+    <div className="login-world min-h-screen">
       {/* Phone: the form comes straight after the opening, not after the
           proof sections. Desktop: it sits beside the opening, so the page
           can be used without scrolling at all. */}
@@ -159,21 +163,20 @@ export default function Login() {
         </section>
       </div>
 
+      <RarityProof />
       <LeaderboardProof />
       <FeedProof />
       <CollectionProof />
 
       {/* The proof sections end on a way back to the form. */}
       <section className="px-5 py-20 border-t border-border text-center">
-        <h2 className="font-display font-black text-3xl lg:text-4xl text-foreground mb-2">Your vault is waiting.</h2>
+        <h2 className="font-display font-black text-3xl lg:text-4xl text-foreground mb-2 text-balance">
+          Your vault is waiting<span className="text-primary">.</span>
+        </h2>
         <p className="text-sm lg:text-base font-body text-muted-foreground mb-8">Free to join, free to collect.</p>
-        <Button
-          type="button"
-          onClick={() => openForm('signup')}
-          className="h-11 px-8 font-mono text-sm bg-primary text-primary-foreground hover:bg-primary/90 neon-glow"
-        >
+        <button type="button" onClick={() => openForm('signup')} className={PILL}>
           Start your vault
-        </Button>
+        </button>
       </section>
     </div>
   );

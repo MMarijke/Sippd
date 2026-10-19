@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
+import LegendaryCan from '@/components/login/LegendaryCan';
 
 // The first viewport is the actual product mechanism at full scale, not a
 // shrunk-down preview card — Sippd's real celebratory moment (see
@@ -25,6 +26,9 @@ const ACCENT = '#FF00FF';
 const GLOW = 'rgba(255,0,255,0.7)';
 const BURST = 'rgba(255,0,255,0.15)';
 const PARTICLE_COLORS = ['#FF00FF', '#cc00cc', '#ff99ff', '#ffffff'];
+// Small magenta text on the near-black hero: a pale tint of the accent, since
+// the accent at partial opacity measured 3.26:1 there. This is ~11:1.
+const ACCENT_TEXT = '#FF99FF';
 
 export default function HeroReveal({ onGetStarted, onJumpToSignIn }) {
   const reducedMotion = usePrefersReducedMotion();
@@ -119,7 +123,7 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn }) {
           className="flex flex-col items-center"
         >
           <motion.div
-            className="text-7xl mb-5 leading-none"
+            className="text-5xl mb-1 leading-none"
             style={{ filter: `drop-shadow(0 0 20px ${GLOW})` }}
             animate={reducedMotion ? {} : { scale: [1, 1.12, 1], rotate: [0, -4, 4, 0] }}
             transition={reducedMotion ? { duration: 0 } : { duration: 2, repeat: Infinity, ease: 'easeInOut' }}
@@ -128,7 +132,11 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn }) {
             👑
           </motion.div>
 
-          <motion.h1
+          {/* The pull itself: a can, so the page says "cans" before any copy. */}
+          <LegendaryCan className="h-36 sm:h-44 w-auto mb-4" />
+
+          {/* The reveal's rarity word: display, not the page heading. */}
+          <motion.p
             className="font-display font-black tracking-wide mb-3 leading-none px-4"
             style={{
               fontSize: 'clamp(2rem, 10vw, 4rem)',
@@ -140,7 +148,7 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn }) {
             transition={reducedMotion ? { duration: 0 } : { delay: 0.2, type: 'spring', stiffness: 200, damping: 16 }}
           >
             LEGENDARY
-          </motion.h1>
+          </motion.p>
 
           <motion.p
             className="text-2xl font-semibold text-white mb-2 leading-tight max-w-xs"
@@ -152,14 +160,24 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn }) {
           </motion.p>
 
           <motion.p
-            className="text-xs font-mono uppercase tracking-[0.2em] mb-10"
-            style={{ color: ACCENT + 'aa' }}
+            className="text-sm font-mono uppercase tracking-[0.1em] mb-8 text-balance"
+            style={{ color: ACCENT_TEXT }}
             initial={reducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={reducedMotion ? { duration: 0 } : { delay: 0.5 }}
           >
             This is what a pull feels like
           </motion.p>
+
+          {/* What Sippd is, in plain words: the page's real heading. */}
+          <motion.h1
+            className="text-lg sm:text-xl font-semibold text-white leading-snug max-w-[22rem] mb-8 text-balance"
+            initial={reducedMotion ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={reducedMotion ? { duration: 0 } : { delay: 0.8, duration: 0.4, ease: 'easeOut' }}
+          >
+            Scan the cans you find. The community votes how rare they are.
+          </motion.h1>
 
           <motion.button
             type="button"

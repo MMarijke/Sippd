@@ -31,7 +31,11 @@ const PARTICLE_COLORS = ['#FF00FF', '#cc00cc', '#ff99ff', '#ffffff'];
 // the accent at partial opacity measured 3.26:1 there. This is ~11:1.
 const ACCENT_TEXT = '#FF99FF';
 
-export default function HeroReveal({ onGetStarted, onJumpToSignIn }) {
+// ctaLabel: the page swaps "Get Started" for "Check your inbox" once a
+// sign-up or reset email has been sent, so the opening never invites a
+// second sign-up beside the confirmation. showScrollHint: off once the
+// page below has collapsed, so the chevron doesn't point at nothing.
+export default function HeroReveal({ onGetStarted, onJumpToSignIn, ctaLabel = 'Get Started', showScrollHint = true }) {
   const reducedMotion = usePrefersReducedMotion();
 
   return (
@@ -188,13 +192,13 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn }) {
             animate={{ opacity: 1 }}
             transition={reducedMotion ? { duration: 0 } : { delay: 1.2, duration: 0.4 }}
           >
-            Get Started
+            {ctaLabel}
           </motion.button>
         </motion.div>
       </div>
 
-      <div className="relative z-10 flex justify-center pb-6">
-        <ChevronDown className="w-5 h-5 text-white/30" aria-hidden="true" />
+      <div className="relative z-10 flex justify-center pb-6 h-11">
+        {showScrollHint && <ChevronDown className="w-5 h-5 text-white/30" aria-hidden="true" />}
       </div>
     </div>
   );

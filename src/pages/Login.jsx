@@ -46,6 +46,11 @@ export default function Login() {
   // Reduced motion skips the intro: without its motion it's a static
   // screen standing between the user and the form.
   const [introDone, setIntroDone] = useState(() => !native || reducedMotion || introAlreadySeen());
+  // 'confirm' | 'reset' once the form has sent an email (AuthPanel's
+  // onSentChange), else null. While set, the page stops selling: the proof
+  // sections and closing call collapse, and the opening's button points at
+  // the inbox screen instead of offering a second sign-up.
+  const [sent, setSent] = useState(null);
   // Mode/focus request made from the intro, applied once the form mounts.
   const pendingOpen = useRef(null);
 
@@ -152,6 +157,8 @@ export default function Login() {
         <HeroReveal
           onGetStarted={() => openForm('signup')}
           onJumpToSignIn={() => openForm('signin')}
+          ctaLabel={sent ? 'Check your inbox' : 'Get Started'}
+          showScrollHint={!sent}
         />
 
         <section
@@ -159,25 +166,29 @@ export default function Login() {
           aria-labelledby="auth-heading"
           className="px-5 py-16 border-t border-border scroll-mt-4 lg:border-t-0 lg:border-l lg:flex lg:items-center lg:px-12"
         >
-          <AuthPanel ref={panelRef} />
+          <AuthPanel ref={panelRef} onSentChange={setSent} />
         </section>
       </div>
 
-      <RarityProof />
-      <LeaderboardProof />
-      <FeedProof />
-      <CollectionProof />
+      {!sent && (
+        <>
+          <RarityProof />
+          <LeaderboardProof />
+          <FeedProof />
+          <CollectionProof />
 
-      {/* The proof sections end on a way back to the form. */}
-      <section className="px-5 py-20 border-t border-border text-center">
-        <h2 className="font-display font-black text-3xl lg:text-4xl text-foreground mb-2 text-balance">
-          Your vault is waiting<span className="text-primary">.</span>
-        </h2>
-        <p className="text-sm lg:text-base font-body text-muted-foreground mb-8">Free to join, free to collect.</p>
-        <button type="button" onClick={() => openForm('signup')} className={PILL}>
-          Start your vault
-        </button>
-      </section>
+          {/* The proof sections end on a way back to the form. */}
+          <section className="px-5 py-20 border-t border-border text-center">
+            <h2 className="font-display font-black text-3xl lg:text-4xl text-foreground mb-2 text-balance">
+              Your vault is waiting<span className="text-primary">.</span>
+            </h2>
+            <p className="text-sm lg:text-base font-body text-muted-foreground mb-8">Free to join, free to collect.</p>
+            <button type="button" onClick={() => openForm('signup')} className={PILL}>
+              Start your vault
+            </button>
+          </section>
+        </>
+      )}
     </div>
   );
 }

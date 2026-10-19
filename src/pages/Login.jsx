@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '@/lib/AuthContext';
 import HeroReveal from '@/components/login/HeroReveal';
+import DrawnCan from '@/components/login/DrawnCan';
 import AuthPanel from '@/components/login/AuthPanel';
 import LegalFooter from '@/components/legal/LegalFooter';
 import { RarityProof, LeaderboardProof, FeedProof, CollectionProof } from '@/components/login/ProofSections';
@@ -122,20 +123,37 @@ export default function Login() {
         </div>
       );
     }
+    // The opening's world carried into the form: the same magenta burst,
+    // held still, glowing behind a small LEGENDARY can, so the app's sign-in
+    // screen reads as the end of the reveal rather than a stock form.
     return (
       <div
         className="login-world min-h-dvh flex flex-col px-5"
         style={{
           paddingTop: 'max(1.5rem, env(safe-area-inset-top))',
           paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
+          backgroundImage: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255,0,255,0.16) 0%, transparent 70%)',
         }}
       >
         <div className="flex items-center gap-2">
           <span className="text-lg" aria-hidden="true">⚡</span>
           <span className="text-sm font-display font-bold text-foreground tracking-wide">Sippd</span>
         </div>
+        <div className="flex justify-center pt-2" aria-hidden="true">
+          <div className="relative">
+            <DrawnCan className="h-20 w-auto" />
+            <span className="absolute inset-x-0 -bottom-3 flex justify-center">
+              <span
+                className="whitespace-nowrap rounded-full border px-3 py-1 font-display font-black text-xs tracking-[0.18em]"
+                style={{ backgroundColor: '#05050A', borderColor: '#FF00FF', color: '#FF99FF', boxShadow: '0 0 14px rgba(255,0,255,0.6)' }}
+              >
+                LEGENDARY
+              </span>
+            </span>
+          </div>
+        </div>
         <motion.main
-          className="flex-1 flex items-center py-8"
+          className="flex-1 flex items-center py-6"
           initial={reducedMotion ? false : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
@@ -161,6 +179,7 @@ export default function Login() {
         <HeroReveal
           onGetStarted={() => openForm('signup')}
           onJumpToSignIn={() => openForm('signin')}
+          onSeeHow={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' })}
           ctaLabel={sent ? 'Check your inbox' : 'Get Started'}
           showScrollHint={!sent}
         />

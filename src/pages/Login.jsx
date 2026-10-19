@@ -5,6 +5,7 @@ import { Capacitor } from '@capacitor/core';
 import { useAuth } from '@/lib/AuthContext';
 import HeroReveal from '@/components/login/HeroReveal';
 import AuthPanel from '@/components/login/AuthPanel';
+import LegalFooter from '@/components/legal/LegalFooter';
 import { RarityProof, LeaderboardProof, FeedProof, CollectionProof } from '@/components/login/ProofSections';
 import { PILL } from '@/components/login/pill';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
@@ -142,6 +143,9 @@ export default function Login() {
         >
           <AuthPanel ref={panelRef} />
         </motion.main>
+        <footer>
+          <LegalFooter />
+        </footer>
       </div>
     );
   }
@@ -189,6 +193,13 @@ export default function Login() {
           </section>
         </>
       )}
+
+      {/* Legal and contact, out of the sign-up card (the card carries only
+          the consent line). Always shown, including on "Check your inbox":
+          Terms/Privacy/Refund must stay reachable without an account. */}
+      <footer className="px-5 py-8 border-t border-border">
+        <LegalFooter />
+      </footer>
     </div>
   );
 }

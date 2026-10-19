@@ -3,8 +3,8 @@
 // what to do next, names the field it belongs to (so the form can mark that
 // field and tie the message to it), and, where there is one, offers the
 // next step as an action:
-//   field:  'email' | 'password' | 'confirm' | null (about the whole form)
-//   action: 'signin' | 'forgot' | 'resend' | null
+//   field:  'email' | 'password' | null (about the whole form)
+//   action: 'signin' | 'resend' | null
 // Raw Supabase messages are never shown; an unknown error gets a generic
 // "try again" rather than an internal string.
 
@@ -17,10 +17,9 @@ const MESSAGES = {
   emailInvalid: { field: 'email', message: "That doesn't look like an email address. Check it and try again." },
   passwordMissing: { field: 'password', message: 'Enter your password.' },
   passwordShort: { field: 'password', message: `Use at least ${MIN_PASSWORD} characters.` },
-  confirmMissing: { field: 'confirm', message: 'Type your password again to confirm it.' },
-  confirmMismatch: { field: 'confirm', message: "These passwords don't match. Type the same password in both fields." },
   alreadyRegistered: { field: 'email', message: 'There is already an account with this email.', action: 'signin' },
-  wrongCredentials: { field: null, message: "That email and password don't match an account. Check them, or reset your password.", action: 'forgot' },
+  // No action button: "Forgot password?" already sits right above the error.
+  wrongCredentials: { field: null, message: "That email and password don't match an account. Check them and try again, or use Forgot password." },
   notConfirmed: { field: 'email', message: "You haven't confirmed this email yet. Open the link we sent you, or get a new one.", action: 'resend' },
   weakPassword: { field: 'password', message: 'Choose a stronger password: longer, and harder to guess.' },
   tooManyEmails: { field: null, message: "We've sent several emails to this address already. Wait a few minutes, then try again." },
@@ -38,7 +37,9 @@ function result(key) {
 // The form's own checks, run before anything is sent. Returns every
 // problem, in field order, so the form can mark each field at once and
 // focus the first.
-export function validateAuthForm(mode, { email, password, confirmPassword }) {
+// There's no confirm-password field: the form's show-password toggle lets
+// people check what they typed instead of typing it twice.
+export function validateAuthForm(mode, { email, password }) {
   const problems = [];
   const trimmed = (email || '').trim();
   if (!trimmed) problems.push(result('emailMissing'));
@@ -47,11 +48,6 @@ export function validateAuthForm(mode, { email, password, confirmPassword }) {
 
   if (!password) problems.push(result('passwordMissing'));
   else if (mode === 'signup' && password.length < MIN_PASSWORD) problems.push(result('passwordShort'));
-
-  if (mode === 'signup') {
-    if (!confirmPassword) problems.push(result('confirmMissing'));
-    else if (password && confirmPassword !== password) problems.push(result('confirmMismatch'));
-  }
   return problems;
 }
 

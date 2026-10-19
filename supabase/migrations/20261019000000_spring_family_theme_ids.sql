@@ -1,13 +1,24 @@
--- Adds the Spring theme family: six light themes built from a palette the
--- user chose (plum, brick, coral, butter, pistachio, olive). Plum is free;
--- the other five are Pro. See src/index.css for their token values.
+-- Allows the Spring family's six theme ids. Fixes "Couldn't save your
+-- theme" on every Spring theme.
 --
--- Ids are spring-* because Botanical already owns 'sage' and 'moss'.
+-- Why a new migration: 20261018000000 shipped (PR #254) when Spring was a
+-- single theme id, 'spring', and the database recorded it as applied. The
+-- next PR rewrote that SAME version's file for the six-theme family, and a
+-- recorded version is never re-run, so the live constraint kept 'spring'
+-- and rejected every spring-* id. That file is restored to what actually
+-- ran; this migration makes the change for real. (Lesson: never edit a
+-- migration file once a PR containing it has merged -- add a new one.)
 --
--- Only widens two lists, so no backfill and nothing destructive:
--- 1. profiles_theme_valid gains the six spring-* ids.
--- 2. profiles_lock_columns()'s free-id list gains 'spring-plum' (any id NOT
---    on that list is Pro-locked by default, so the other five need nothing).
+-- 1. Backfill: anyone still on the retired 'spring' id moves to its
+--    successor 'spring-plum' (checked 2026-10-19: nobody is; this is a
+--    guard). Runs as postgres, which profiles_lock_columns() exempts.
+-- 2. profiles_theme_valid: 'spring' out, the six spring-* ids in.
+-- 3. profiles_lock_columns(): free list 'spring' -> 'spring-plum'. Every
+--    other branch copied unchanged from 20261018000000 (itself unchanged
+--    from 20260929000000_trim_theme_catalogue.sql); stays SECURITY INVOKER
+--    (the default) so current_user reflects the real caller -- CLAUDE.md.
+
+update profiles set theme = 'spring-plum' where theme = 'spring';
 
 alter table profiles drop constraint profiles_theme_valid;
 
@@ -28,10 +39,6 @@ alter table profiles add constraint profiles_theme_valid check (
   )
 );
 
--- Only the free-id list in the Pro-lock branch changes ('spring-plum'
--- joins it); every other branch is copied unchanged from
--- 20260929000000_trim_theme_catalogue.sql. Stays SECURITY INVOKER (the
--- default) so current_user reflects the real caller -- see CLAUDE.md.
 create or replace function public.profiles_lock_columns()
 returns trigger
 language plpgsql

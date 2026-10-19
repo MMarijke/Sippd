@@ -27,7 +27,8 @@ const ACCENT = '#FF00FF';
 const GLOW = 'rgba(255,0,255,0.7)';
 const BURST = 'rgba(255,0,255,0.15)';
 const PARTICLE_COLORS = ['#FF00FF', '#cc00cc', '#ff99ff', '#ffffff'];
-// Small magenta text on the near-black hero: a pale tint of the accent, since
+// Magenta text on the near-black hero (the LEGENDARY badge, the h1's second
+// sentence): a pale tint of the accent, since
 // the accent at partial opacity measured 3.26:1 there. This is ~11:1.
 const ACCENT_TEXT = '#FF99FF';
 
@@ -47,7 +48,7 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn, ctaLabel = 'G
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: [0, 1, 0.6], scale: [0.5, 2, 2] }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
-            style={{ background: `radial-gradient(circle at 50% 42%, ${BURST} 0%, transparent 70%)` }}
+            style={{ background: `radial-gradient(circle at 50% 31%, ${BURST} 0%, transparent 70%)` }}
           />
           <motion.div
             className="absolute inset-0"
@@ -76,7 +77,7 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn, ctaLabel = 'G
                   height: p.size,
                   borderRadius: p.shape === 'circle' ? '50%' : '1px',
                   backgroundColor: PARTICLE_COLORS[p.colorIndex],
-                  top: '42%',
+                  top: '31%',
                   left: '50%',
                 }}
                 initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
@@ -94,7 +95,7 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn, ctaLabel = 'G
             <motion.div
               key={i}
               className="absolute rounded-full border"
-              style={{ borderColor: ACCENT + '60', top: '42%', left: '50%', translateX: '-50%', translateY: '-50%' }}
+              style={{ borderColor: ACCENT + '60', top: '31%', left: '50%', translateX: '-50%', translateY: '-50%' }}
               initial={{ width: 40, height: 40, opacity: 0.8 }}
               animate={{ width: 500, height: 500, opacity: 0 }}
               transition={{ duration: 1.2, delay, ease: 'easeOut' }}
@@ -121,68 +122,60 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn, ctaLabel = 'G
 
       {/* Core content */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-8">
-        <motion.div
-          initial={reducedMotion ? false : { scale: 0.3, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={reducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
-          className="flex flex-col items-center"
-        >
+        <div className="flex flex-col items-center">
+          {/* The pull: a can that lands with the burst, LEGENDARY stamped
+              across it as a badge. The rarity is the can's, not the page's
+              headline; it shows what a reveal looks like at a glance. */}
           <motion.div
-            className="text-5xl mb-1 leading-none"
-            style={{ filter: `drop-shadow(0 0 20px ${GLOW})` }}
-            animate={reducedMotion ? {} : { scale: [1, 1.12, 1], rotate: [0, -4, 4, 0] }}
-            transition={reducedMotion ? { duration: 0 } : { duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            aria-hidden="true"
+            className="relative mb-10"
+            initial={reducedMotion ? false : { scale: 0.3, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={reducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
           >
-            👑
+            <DrawnCan className="h-40 sm:h-48 w-auto" />
+            {/* Centred by a static wrapper: framer-motion owns the badge's
+                transform, which would override a translate-x centring. */}
+            <span className="absolute inset-x-0 -bottom-4 flex justify-center">
+            <motion.span
+              className="whitespace-nowrap rounded-full border px-4 py-1.5 font-display font-black text-sm tracking-[0.18em]"
+              style={{
+                backgroundColor: '#05050A',
+                borderColor: ACCENT,
+                color: ACCENT_TEXT,
+                boxShadow: `0 0 18px ${GLOW}`,
+                textShadow: `0 0 12px ${GLOW}`,
+              }}
+              initial={reducedMotion ? false : { y: 14, opacity: 0, scale: 0.8 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              transition={reducedMotion ? { duration: 0 } : { delay: 0.35, type: 'spring', stiffness: 320, damping: 18 }}
+            >
+              LEGENDARY
+            </motion.span>
+            </span>
           </motion.div>
 
-          {/* The pull itself: a can, so the page says "cans" before any copy. */}
-          <DrawnCan className="h-36 sm:h-44 w-auto mb-4" />
-
-          {/* The reveal's rarity word: display, not the page heading. */}
-          <motion.p
-            className="font-display font-black tracking-wide mb-3 leading-none px-4"
-            style={{
-              fontSize: 'clamp(2rem, 10vw, 4rem)',
-              color: ACCENT,
-              textShadow: `0 0 30px ${GLOW}, 0 0 60px ${GLOW}, 0 0 100px ${GLOW}`,
-            }}
-            initial={reducedMotion ? false : { y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={reducedMotion ? { duration: 0 } : { delay: 0.2, type: 'spring', stiffness: 200, damping: 16 }}
+          {/* What Sippd is: the page's headline, at display size. The second
+              sentence is the differentiator, set apart in the reveal's tint. */}
+          <motion.h1
+            className="font-display font-black text-white leading-[1.08] tracking-[-0.01em] max-w-[18ch] text-balance mb-4"
+            style={{ fontSize: 'clamp(1.75rem, 7.5vw, 3.5rem)' }}
+            initial={reducedMotion ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={reducedMotion ? { duration: 0 } : { delay: 0.5, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
-            LEGENDARY
-          </motion.p>
+            {/* One sentence per block, so the tinted one never starts mid-line. */}
+            <span className="block">Scan the cans you find.</span>{' '}
+            <span className="block" style={{ color: ACCENT_TEXT }}>The community votes how rare they are.</span>
+          </motion.h1>
 
           <motion.p
-            className="text-2xl font-semibold text-white mb-2 leading-tight max-w-xs"
-            initial={reducedMotion ? false : { y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={reducedMotion ? { duration: 0 } : { delay: 0.35 }}
-          >
-            Nova Surge XL
-          </motion.p>
-
-          <motion.p
-            className="text-sm font-mono uppercase tracking-[0.1em] mb-8 text-balance"
-            style={{ color: ACCENT_TEXT }}
+            className="text-base sm:text-lg font-body text-white/75 max-w-[32ch] text-balance mb-8"
             initial={reducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={reducedMotion ? { duration: 0 } : { delay: 0.5 }}
+            transition={reducedMotion ? { duration: 0 } : { delay: 0.75, duration: 0.4 }}
           >
-            This is what a pull feels like
+            Log every can you own, climb the leaderboard, and chase the Legendary ones.
           </motion.p>
-
-          {/* What Sippd is, in plain words: the page's real heading. */}
-          <motion.h1
-            className="text-lg sm:text-xl font-semibold text-white leading-snug max-w-[22rem] mb-8 text-balance"
-            initial={reducedMotion ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={reducedMotion ? { duration: 0 } : { delay: 0.8, duration: 0.4, ease: 'easeOut' }}
-          >
-            Scan the cans you find. The community votes how rare they are.
-          </motion.h1>
 
           <motion.button
             type="button"
@@ -190,11 +183,11 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn, ctaLabel = 'G
             className={PILL}
             initial={reducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={reducedMotion ? { duration: 0 } : { delay: 1.2, duration: 0.4 }}
+            transition={reducedMotion ? { duration: 0 } : { delay: 1, duration: 0.4 }}
           >
             {ctaLabel}
           </motion.button>
-        </motion.div>
+        </div>
       </div>
 
       <div className="relative z-10 flex justify-center pb-6 h-11">

@@ -24,7 +24,9 @@ function GoogleIcon(props) {
 // one-handed on a phone. Fields take a 2px focus ring, like the pills.
 const FIELD = 'h-11 rounded-xl bg-secondary border-border font-body focus-visible:ring-2 aria-[invalid=true]:border-destructive';
 const LINK = 'inline-flex items-center min-h-11 px-2 -mx-2 text-primary hover:underline underline-offset-2';
-const LABEL = 'text-xs font-mono uppercase tracking-wider text-muted-foreground';
+// Field labels: sentence case in the body face at 14px, so they read as
+// labels, not as the page's monospace metadata.
+const LABEL = 'text-sm font-body font-medium text-foreground';
 
 const HEADINGS = {
   signup: ['Start your vault', 'Free to join, free to collect.'],
@@ -352,7 +354,7 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
 
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-border" />
-            <span className="text-2xs font-mono text-muted-foreground uppercase tracking-widest">or</span>
+            <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">or</span>
             <div className="flex-1 h-px bg-border" />
           </div>
         </>

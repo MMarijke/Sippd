@@ -25,6 +25,8 @@ const MESSAGES = {
   tooManyEmails: { field: null, message: "We've sent several emails to this address already. Wait a few minutes, then try again." },
   tooManyTries: { field: null, message: 'Too many attempts. Wait a minute, then try again.' },
   signupClosed: { field: null, message: "New sign-ups are paused right now. Try again later." },
+  googleOff: { field: null, message: "Google sign-in isn't available right now. Use your email and a password instead." },
+  googleCancelled: { field: null, message: 'Google sign-in was cancelled. Try again, or use your email instead.' },
   offline: { field: null, message: "Couldn't reach Sippd. Check your connection, then try again." },
   unknown: { field: null, message: 'Something went wrong on our side. Try again in a moment.' },
 };
@@ -69,6 +71,11 @@ export function describeAuthError(error) {
   if (code === 'over_email_send_rate_limit') return result('tooManyEmails');
   if (code === 'over_request_rate_limit' || status === 429) return result('tooManyTries');
   if (code === 'signup_disabled') return result('signupClosed');
+  // Google: switched off in Supabase (googleSignIn.js checks before
+  // redirecting; the message is Supabase's own wording), or the user backed
+  // out of Google's screen (OAuth's standard access_denied).
+  if (code === 'google_disabled' || msg.includes('provider is not enabled')) return result('googleOff');
+  if (code === 'access_denied') return result('googleCancelled');
   if (error.name === 'AuthRetryableFetchError' || msg.includes('failed to fetch') || msg.includes('network')) return result('offline');
   return result('unknown');
 }

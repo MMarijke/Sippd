@@ -73,10 +73,11 @@ async function mockLoggedInSession(page) {
 test('an unauthenticated visitor is redirected to /login and sees real content', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveURL(/\/login$/);
-  // "Sign in" appears twice on this page (the header's quick-jump button
-  // and the sign-up/sign-in mode toggle at the bottom) — .first() picks the
-  // header one, but either is equally real, rendered content.
-  await expect(page.getByRole('button', { name: 'Sign in' }).first()).toBeVisible();
+  // The form's Sign up | Sign in tabs: real, rendered content at every
+  // viewport. (The opening's corner "Sign in" button is phone-only now, so
+  // at this Desktop Chrome size it's hidden and can't be what we assert.)
+  await expect(page.getByRole('tab', { name: 'Sign in' })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Sign up' })).toHaveAttribute('aria-selected', 'true');
 });
 
 test('a logged-in user lands on Home and the dashboard renders', async ({ page }) => {

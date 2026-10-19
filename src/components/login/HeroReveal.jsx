@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ChevronDown, ArrowDown } from 'lucide-react';
+import { ChevronDown, ArrowDown, Zap } from 'lucide-react';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import DrawnCan from '@/components/login/DrawnCan';
 import { PILL, PILL_OUTLINE } from '@/components/login/pill';
@@ -114,7 +114,7 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn, onSeeHow, cta
           scroll through proof they don't need. */}
       <div className="relative z-10 flex items-center justify-between px-5 pt-6">
         <div className="flex items-center gap-2">
-          <span className="text-lg" aria-hidden="true">⚡</span>
+          <Zap className="w-[18px] h-[18px] text-primary" fill="currentColor" strokeWidth={1.5} aria-hidden="true" />
           <span className="text-sm font-display font-bold text-white tracking-wide">Sippd</span>
         </div>
         {/* Desktop: the form beside the opening has Sign up | Sign in tabs,
@@ -122,7 +122,7 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn, onSeeHow, cta
         <button
           type="button"
           onClick={onJumpToSignIn}
-          className={`h-11 px-3 -mr-3 flex items-center text-xs font-mono text-white/60 hover:text-white transition-colors ${onSeeHow ? 'lg:hidden' : ''}`}
+          className={`h-11 px-3 -mr-3 flex items-center text-sm font-mono text-white/80 hover:text-white transition-colors ${onSeeHow ? 'lg:hidden' : ''}`}
         >
           Sign in
         </button>

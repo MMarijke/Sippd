@@ -23,7 +23,7 @@ function GoogleIcon(props) {
 // Every control here is 44px tall (h-11), and the small text-style links
 // get a 44px tap area around their visible text, so the form is usable
 // one-handed on a phone. Fields take a 2px focus ring, like the pills.
-const FIELD = 'h-11 rounded-xl bg-secondary border-border font-body focus-visible:ring-2 aria-[invalid=true]:border-destructive';
+const FIELD = 'h-11 rounded-xl bg-secondary border-border font-body focus-visible:ring-2 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive';
 const LINK = 'inline-flex items-center min-h-11 px-2 -mx-2 text-primary hover:underline underline-offset-2';
 // Field labels: sentence case in the body face at 14px, so they read as
 // labels, not as the page's monospace metadata.
@@ -250,8 +250,7 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
       {problem.message}
       {problem.action && (
         <>
-          {' '}
-          <button type="button" onClick={() => runAction(problem.action)} className="underline underline-offset-2 font-semibold text-foreground hover:text-primary">
+          <button type="button" onClick={() => runAction(problem.action)} className="block mt-1 underline underline-offset-2 font-semibold text-primary hover:text-foreground">
             {ACTION_LABELS[problem.action]}
           </button>
         </>
@@ -482,6 +481,9 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
           {submitting && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
           {mode === 'signin' ? 'Sign In' : mode === 'forgot' ? 'Send Reset Link' : 'Sign Up'}
         </button>
+        <span role="status" className="sr-only">
+          {submitting ? (mode === 'signin' ? 'Signing you in…' : mode === 'forgot' ? 'Sending the reset link…' : 'Creating your account…') : ''}
+        </span>
 
         {/* Consent at the point of sign-up (GDPR/POPIA); the full legal
             links and contact live in the page footer (LegalFooter). Covers

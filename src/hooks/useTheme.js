@@ -59,7 +59,7 @@ export const THEME_FAMILIES = [
       { id: 'nebula', label: 'Nebula', pro: true, dark: { swatch: '#7A5FFF', sup: '#5579E8', background: '#130B20' } },
       { id: 'solar-flare', label: 'Solar Flare', pro: true, dark: { swatch: '#FF7043', sup: '#FFB347', background: '#1A0D08' } },
       { id: 'aurora', label: 'Aurora', pro: true, dark: { swatch: '#45E0B0', sup: '#6875FF', background: '#081716' } },
-      { id: 'deep-space', label: 'Deep Space', pro: true, dark: { swatch: '#5269C9', sup: '#3655E3', background: '#080C1C' } },
+      { id: 'deep-space', label: 'Deep Space', pro: true, dark: { swatch: '#3DBEFF', sup: '#7A62F2', background: '#070912' } },
       { id: 'stellar-gold', label: 'Stellar Gold', pro: true, dark: { swatch: '#E4C76A', sup: '#A98F45', background: '#17140B' } },
     ],
   },
@@ -70,10 +70,9 @@ export const THEME_FAMILIES = [
     labelSize: '0.8125rem',
     isNew: true,
     themes: [
-      { id: 'sage', label: 'Sage', pro: false, light: { swatch: '#628B66', sup: '#3E5140', background: '#F4F0E5' } },
+      { id: 'sage', label: 'Sage', pro: false, light: { swatch: '#528C77', sup: '#3E514A', background: '#F4F0E5' } },
       { id: 'forest', label: 'Forest', pro: true, dark: { swatch: '#3E765B', sup: '#107848', background: '#0D1712' } },
       { id: 'fern', label: 'Fern', pro: true, dark: { swatch: '#68A86D', sup: '#447547', background: '#0F1911' } },
-      { id: 'moss', label: 'Moss', pro: true, light: { swatch: '#828355', sup: '#5A5B37', background: '#F0EFE1' } },
       { id: 'meadow', label: 'Meadow', pro: true, light: { swatch: '#549135', sup: '#2C491F', background: '#F5F3DE' } },
     ],
   },
@@ -101,10 +100,10 @@ export const THEME_FAMILIES = [
     themes: [
       { id: 'bubblegum', label: 'Bubblegum', pro: false, light: { swatch: '#FF1F76', sup: '#B91D59', background: '#FFF3F8' } },
       { id: 'blue-pop', label: 'Blue Pop', pro: true, light: { swatch: '#3582FF', sup: '#255FBD', background: '#F0FAFF' } },
-      { id: 'grape-candy', label: 'Grape Candy', pro: true, light: { swatch: '#A65BFF', sup: '#7637CE', background: '#F8F1FF' } },
+      { id: 'grape-candy', label: 'Grape Candy', pro: true, light: { swatch: '#836AFF', sup: '#584DD4', background: '#F4F1FF' } },
       { id: 'orange-crush', label: 'Orange Crush', pro: true, light: { swatch: '#EA5300', sup: '#953A11', background: '#FFF5ED' } },
       { id: 'sour-apple', label: 'Sour Apple', pro: true, light: { swatch: '#679616', sup: '#2B4213', background: '#F5FFE9' } },
-      { id: 'cherry-pop', label: 'Cherry Pop', pro: true, light: { swatch: '#FF2743', sup: '#B4243A', background: '#FFF1F3' } },
+      { id: 'cherry-pop', label: 'Cherry Pop', pro: true, light: { swatch: '#C2102E', sup: '#821737', background: '#FFF1F3' } },
     ],
   },
   {
@@ -268,6 +267,9 @@ export const RETIRED_THEMES = {
   'xp-gold': { label: 'XP Gold', movedTo: 'stellar-gold' },
   champagne: { label: 'Champagne', movedTo: 'stellar-gold' },
   terracotta: { label: 'Terracotta', movedTo: 'crimson' },
+  // Retired 2026-10-19: it sat within reach of three Spring themes
+  // (Pistachio, Butter, Olive). Olive is its nearest match, also Pro.
+  moss: { label: 'Moss', movedTo: 'spring-olive' },
 };
 
 /**

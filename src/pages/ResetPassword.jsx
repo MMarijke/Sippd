@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2, Zap } from 'lucide-react';
+import { Loader2, Zap, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Reached only via the link in a Supabase "reset password" email
@@ -153,7 +153,13 @@ export default function ResetPassword() {
             />
           </div>
 
-          {error && <p className="text-xs font-mono text-destructive">{error}</p>}
+          {/* Icon + text, not colour alone; role="alert" announces it. */}
+          {error && (
+            <p role="alert" className="flex items-start gap-1.5 text-xs font-mono text-destructive">
+              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-px" aria-hidden="true" />
+              <span>{error}</span>
+            </p>
+          )}
 
           <Button
             type="submit"

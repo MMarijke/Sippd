@@ -27,6 +27,15 @@ module.exports = {
   				foreground: 'hsl(var(--primary-foreground))'
   			},
   		},
+  		// text-destructive paints --destructive-text: a per-tone shade of the
+  		// error red that clears 4.5:1 as text in every theme (index.css).
+  		// bg-/border-destructive keep the --destructive fill red.
+  		textColor: {
+  			destructive: {
+  				DEFAULT: 'hsl(var(--destructive-text))',
+  				foreground: 'hsl(var(--destructive-foreground))'
+  			},
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

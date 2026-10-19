@@ -117,9 +117,10 @@ const STEPS = [
   { title: 'It earns its rarity', copy: "The community's verdict goes on the can.", Stage: VerdictStage },
 ];
 
+// id="how-it-works": the desktop opening's "See how it works" scrolls here.
 export function RarityProof() {
   return (
-    <section className="px-5 py-16 lg:py-24 border-t border-border">
+    <section id="how-it-works" className="px-5 py-16 lg:py-24 border-t border-border scroll-mt-4">
       <div className="mx-auto max-w-5xl">
         <Title className="text-3xl lg:text-5xl mb-2 lg:mb-4 max-w-2xl">The community calls the rarity.</Title>
         <p className="text-sm lg:text-lg font-body text-muted-foreground max-w-xl">
@@ -244,7 +245,9 @@ export function CollectionProof() {
       title="Build your vault."
       copy="Every can, cataloged, scored, and yours to show off."
     >
-      <div className="rounded-2xl border border-border bg-card p-4">
+      {/* Score and tiles stack directly, not inside an outer card: one
+          surface per thing, no card nested in a card. */}
+      <div>
         <div className="hero-card rounded-2xl p-4 mb-3 text-center">
           <p className="text-xs font-mono uppercase tracking-widest text-foreground">Collection Score</p>
           <p className="text-4xl font-mono font-black text-foreground tabular-nums">2,140</p>

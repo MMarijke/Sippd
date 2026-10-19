@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ArrowDown } from 'lucide-react';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import DrawnCan from '@/components/login/DrawnCan';
-import { PILL } from '@/components/login/pill';
+import { PILL, PILL_OUTLINE } from '@/components/login/pill';
 
 // The first viewport is the actual product mechanism at full scale, not a
 // shrunk-down preview card — Sippd's real celebratory moment (see
@@ -36,7 +36,13 @@ const ACCENT_TEXT = '#FF99FF';
 // sign-up or reset email has been sent, so the opening never invites a
 // second sign-up beside the confirmation. showScrollHint: off once the
 // page below has collapsed, so the chevron doesn't point at nothing.
-export default function HeroReveal({ onGetStarted, onJumpToSignIn, ctaLabel = 'Get Started', showScrollHint = true }) {
+//
+// onSeeHow (web only): on desktop the form is already beside the opening,
+// so the opening's button there is a secondary "See how it works" that
+// scrolls to the rarity section, not a second magenta Sign Up. Phones keep
+// the primary button, since the form is below. Without onSeeHow (Android
+// intro), the primary button shows at every size.
+export default function HeroReveal({ onGetStarted, onJumpToSignIn, onSeeHow, ctaLabel = 'Get Started', showScrollHint = true }) {
   const reducedMotion = usePrefersReducedMotion();
 
   return (
@@ -111,10 +117,12 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn, ctaLabel = 'G
           <span className="text-lg" aria-hidden="true">⚡</span>
           <span className="text-sm font-display font-bold text-white tracking-wide">Sippd</span>
         </div>
+        {/* Desktop: the form beside the opening has Sign up | Sign in tabs,
+            so this quick path is for phones (and the Android intro). */}
         <button
           type="button"
           onClick={onJumpToSignIn}
-          className="h-11 px-3 -mr-3 flex items-center text-xs font-mono text-white/60 hover:text-white transition-colors"
+          className={`h-11 px-3 -mr-3 flex items-center text-xs font-mono text-white/60 hover:text-white transition-colors ${onSeeHow ? 'lg:hidden' : ''}`}
         >
           Sign in
         </button>
@@ -177,16 +185,21 @@ export default function HeroReveal({ onGetStarted, onJumpToSignIn, ctaLabel = 'G
             Log every can you own, climb the leaderboard, and chase the Legendary ones.
           </motion.p>
 
-          <motion.button
-            type="button"
-            onClick={onGetStarted}
-            className={PILL}
+          <motion.div
             initial={reducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={reducedMotion ? { duration: 0 } : { delay: 1, duration: 0.4 }}
           >
-            {ctaLabel}
-          </motion.button>
+            <button type="button" onClick={onGetStarted} className={`${PILL} ${onSeeHow ? 'lg:hidden' : ''}`}>
+              {ctaLabel}
+            </button>
+            {onSeeHow && showScrollHint && (
+              <button type="button" onClick={onSeeHow} className={`${PILL_OUTLINE} hidden lg:inline-flex`}>
+                See how it works
+                <ArrowDown className="w-4 h-4" aria-hidden="true" />
+              </button>
+            )}
+          </motion.div>
         </div>
       </div>
 

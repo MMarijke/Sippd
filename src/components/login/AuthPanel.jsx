@@ -126,6 +126,7 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
   useEffect(() => {
     if (!focusRequest) return;
     const el = focusRequest.target === 'heading' ? headingRef.current : fieldRefs[focusRequest.target]?.current;
+    if (focusRequest.target.startsWith('tab-')) document.getElementById(`auth-${focusRequest.target}`)?.focus();
     el?.focus({ preventScroll: !!focusRequest.preventScroll });
     setFocusRequest(null);
   }, [focusRequest]);
@@ -335,6 +336,45 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
 
   return (
     <div className="w-full max-w-sm mx-auto space-y-5">
+      {/* Sign up | Sign in: both doors at the top of the form, at every size
+          (replaces the "Already have an account?" line and, on desktop, the
+          opening's corner "Sign in"). Tabs with arrow-key movement; the
+          panel below follows the selected one. */}
+      {mode !== 'forgot' && (
+        <div role="tablist" aria-label="Account" className="grid grid-cols-2 gap-1 p-1 rounded-full border border-border">
+          {[['signup', 'Sign up'], ['signin', 'Sign in']].map(([m, label]) => (
+            <button
+              key={m}
+              type="button"
+              role="tab"
+              id={`auth-tab-${m}`}
+              aria-selected={mode === m}
+              aria-controls="auth-tabpanel"
+              tabIndex={mode === m ? 0 : -1}
+              onClick={() => mode !== m && switchMode(m, 'none')}
+              onKeyDown={(e) => {
+                if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+                e.preventDefault();
+                const other = m === 'signup' ? 'signin' : 'signup';
+                switchMode(other, `tab-${other}`);
+              }}
+              className={cn(
+                'h-11 rounded-full text-sm font-mono font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                mode === m ? 'bg-secondary text-foreground border border-primary/60' : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div
+        id="auth-tabpanel"
+        role={mode === 'forgot' ? undefined : 'tabpanel'}
+        aria-labelledby={mode === 'forgot' ? undefined : `auth-tab-${mode}`}
+        className="space-y-5"
+      >
       <div className="text-center mb-2">
         {heading}
         <p className="text-sm font-body text-muted-foreground">{subtitle}</p>
@@ -455,20 +495,14 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
         )}
       </form>
 
-      <p className="text-center text-xs font-mono text-muted-foreground">
-        {mode === 'forgot' ? (
+      {mode === 'forgot' && (
+        <p className="text-center text-xs font-mono">
           <button type="button" onClick={() => switchMode('signin')} className={LINK}>
             Back to sign in
           </button>
-        ) : (
-          <>
-            {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
-            <button type="button" onClick={() => switchMode(mode === 'signin' ? 'signup' : 'signin')} className={LINK}>
-              {mode === 'signin' ? 'Sign up' : 'Sign in'}
-            </button>
-          </>
-        )}
-      </p>
+        </p>
+      )}
+      </div>
     </div>
   );
 });

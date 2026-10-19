@@ -7,6 +7,7 @@ import { Loader2, AlertCircle, Eye, EyeOff, Check, MailCheck } from 'lucide-reac
 import { PILL, PILL_OUTLINE } from '@/components/login/pill';
 import { FREE_TIER } from '@/components/login/copy';
 import { describeAuthError, validateAuthForm, signUpNeedsConfirmation, MIN_PASSWORD } from '@/lib/authErrors';
+import { startGoogleSignIn, listenForNativeAuthCallback } from '@/lib/googleSignIn';
 import { cn } from '@/lib/utils';
 
 function GoogleIcon(props) {
@@ -156,18 +157,27 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
     if (first) setFocusRequest({ target: first });
   };
 
+  // Android: Google's result comes back through a deep link (googleSignIn.js).
+  // A failure shows here; a closed tab stops the spinner; success sets the
+  // session and Login leaves the page.
+  useEffect(() => listenForNativeAuthCallback({
+    onResult: ({ error }) => {
+      setGoogleLoading(false);
+      if (error) showProblems([describeAuthError(error)]);
+    },
+    onClosed: () => setGoogleLoading(false),
+  }), []);
+
   const handleGoogleSignIn = async () => {
     clearMessages();
     setGoogleLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin },
-    });
+    const { error } = await startGoogleSignIn();
     if (error) {
       showProblems([describeAuthError(error)]);
       setGoogleLoading(false);
     }
-    // On success the browser navigates away to Google — nothing left to reset.
+    // On the web a successful start navigates away to Google; in the app the
+    // spinner runs until the callback or the tab closing ends it.
   };
 
   const handleSubmit = async (e) => {

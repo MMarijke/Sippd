@@ -51,6 +51,14 @@ describe('describeAuthError', () => {
     expect(describeAuthError(authError({ message: 'Invalid login credentials' })).key).toBe('wrongCredentials');
   });
 
+  it('explains Google being switched off or cancelled, without raw provider text', () => {
+    expect(describeAuthError(authError({ code: 'google_disabled' })).key).toBe('googleOff');
+    const off = describeAuthError(authError({ message: 'Unsupported provider: provider is not enabled' }));
+    expect(off.key).toBe('googleOff');
+    expect(off.message).not.toMatch(/provider/i);
+    expect(describeAuthError(authError({ code: 'access_denied', message: 'User cancelled' })).key).toBe('googleCancelled');
+  });
+
   it('offers a new confirmation email when the address is unconfirmed', () => {
     expect(describeAuthError(authError({ code: 'email_not_confirmed' }))).toMatchObject({ action: 'resend' });
   });

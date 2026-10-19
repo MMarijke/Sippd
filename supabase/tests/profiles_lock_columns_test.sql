@@ -129,6 +129,13 @@ select throws_like(
   'a retired theme id is rejected even for a Pro user'
 );
 
+-- Retired in 20261019120000_retire_moss.sql.
+select throws_like(
+  $$update profiles set theme = 'moss' where id = '22222222-2222-2222-2222-222222222222'$$,
+  '%profiles_theme_valid%',
+  'Moss (retired) is rejected even for a Pro user'
+);
+
 reset role;
 
 -- ── As service_role (the Paddle webhook's real identity) ─────────────────

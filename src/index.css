@@ -129,8 +129,8 @@
     --warning-foreground: 240 20% 5%;
     --info: 217 70% 55%;
     --info-foreground: 240 20% 5%;
-    --border: 217 35% 20%;
-    --input: 217 35% 20%;
+    --border: 217.0 35% 21.3%;
+    --input: 217.0 35% 21.3%;
     --ring: 152 100% 50%;
     --radius: 0.75rem;
     --glow-intensity: 1;
@@ -273,8 +273,8 @@
     --warning-foreground: 240 20% 5%;
     --info: 217 70% 55%;
     --info-foreground: 240 20% 5%;
-    --border: 217 35% 20%;
-    --input: 217 35% 20%;
+    --border: 217.0 35% 21.3%;
+    --input: 217.0 35% 21.3%;
     --ring: 152 100% 50%;
     --glow-intensity: 1;
     --wash-intensity: 0;
@@ -341,7 +341,21 @@
      gauge keeps its colour family when the polarity toggles (Scan and the
      selected chips wear the main colour, derived from dark the same way).
      With this, the file header's 15deg/tier rotation only still describes
-     Nebula, Amethyst, Forest, Moss, Grape Candy, Sour Apple and Plasma light. */
+     Nebula, Amethyst, Forest, Moss, Grape Candy, Sour Apple and Plasma light.
+
+     GAUGE RULE (2026-10-19, /impeccable colorize, product direction; it
+     overrides the per-family HAND-AUTHORED notes below wherever they
+     disagree): in EVERY theme the gauge rises in BOTH contrast against
+     --card AND colourfulness, Common -> Legendary, so Legendary is always
+     the richest, most vivid step -- never a pastel that reads as fading.
+     24 gauges that broke it were regenerated (OKLCH: each step's hue kept,
+     lightness solved for rising contrast, chroma a rising share of what
+     that hue can show in sRGB). Where a theme's route ended on a hue too
+     pale to be vivid at that contrast, the SAME hues run in reverse:
+     Cyberpunk dark now climbs to magenta, Aurora to mint, Plasma light to
+     its deep teal, Sapphire to deep blue, Deep Space to starlit violet.
+     Neutral gauges (Carbon, Silver Screen) are exempt. Enforced by
+     breakdownRamps.test.js. */
   [data-theme="power-up"][data-polarity="dark"] {
     --background: 217 37% 7%;
     --foreground: 153 100% 98%;
@@ -356,8 +370,8 @@
     --muted: 217 31% 12%;
     --accent: 189 100% 50%;
     --accent-foreground: 240 20% 5%;
-    --border: 217 35% 20%;
-    --input: 217 35% 20%;
+    --border: 217.0 35% 21.3%;
+    --input: 217.0 35% 21.3%;
     --ring: 152 100% 50%;
     --glow-intensity: 1;
     --wash-intensity: 0;
@@ -381,16 +395,16 @@
     --muted: 278 32% 11%;
     --accent: 257 100% 68%;
     --accent-foreground: 240 20% 5%;
-    --border: 278 36% 19%;
-    --input: 278 36% 19%;
+    --border: 278.0 36% 21.9%;
+    --input: 278.0 36% 21.9%;
     --ring: 312 100% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 312.0 100% 58.0%;
-    --breakdown-uncommon: 309.3 90% 65.1%;
-    --breakdown-rare: 302.8 77% 68.7%;
-    --breakdown-ultra: 291.2 78% 74.1%;
-    --breakdown-legendary: 275.0 90% 80.0%;
+    --breakdown-common: 274.7 33% 62.9%;
+    --breakdown-uncommon: 291.2 51% 64.9%;
+    --breakdown-rare: 302.6 72% 65.8%;
+    --breakdown-ultra: 310.2 86% 68.8%;
+    --breakdown-legendary: 315.2 100% 71.5%;
   }
   [data-theme="plasma"][data-polarity="dark"] {
     --background: 204 52% 6%;
@@ -404,17 +418,17 @@
     --secondary: 204 48% 20%;
     --secondary-foreground: 192 100% 97%;
     --muted: 204 46% 11%;
-    --accent: 227 100% 63%;
+    --accent: 227 100% 64.5%;
     --accent-foreground: 240 20% 5%;
     --border: 204 50% 19%;
     --input: 204 50% 19%;
     --ring: 186 100% 50%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 222.0 100% 56.0%;
-    --breakdown-uncommon: 216.9 100% 60.5%;
-    --breakdown-rare: 207.9 100% 61.5%;
-    --breakdown-ultra: 197.2 100% 59.9%;
+    --breakdown-common: 220.0 35% 49.6%;
+    --breakdown-uncommon: 217.0 51% 61.6%;
+    --breakdown-rare: 209.7 69% 68.1%;
+    --breakdown-ultra: 199.3 88% 69.4%;
     --breakdown-legendary: 186.0 100% 50.0%;
   }
   [data-theme="boss-fight"][data-polarity="dark"] {
@@ -431,15 +445,15 @@
     --muted: 340 27% 10%;
     --accent: 29 100% 50%;
     --accent-foreground: 240 20% 5%;
-    --border: 340 31% 18%;
-    --input: 340 31% 18%;
+    --border: 340.0 31% 20.4%;
+    --input: 340.0 31% 20.4%;
     --ring: 347 100% 61%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 347.0 100% 61.0%;
-    --breakdown-uncommon: 358.3 100% 69.3%;
-    --breakdown-rare: 9.6 100% 70.8%;
-    --breakdown-ultra: 19.9 100% 71.4%;
+    --breakdown-common: 353.5 54% 61.7%;
+    --breakdown-uncommon: 1.1 64% 68.9%;
+    --breakdown-rare: 10.1 78% 72.0%;
+    --breakdown-ultra: 19.6 90% 73.3%;
     --breakdown-legendary: 30.0 100% 72.0%;
   }
   [data-theme="synthwave"][data-polarity="dark"] {
@@ -460,8 +474,8 @@
        not a copy-paste of the other five palettes' on-supporting. */
     --accent: 250 100% 65%;
     --accent-foreground: 0 0% 98%;
-    --border: 261 53% 19%;
-    --input: 261 53% 19%;
+    --border: 261.0 53% 24.8%;
+    --input: 261.0 53% 24.8%;
     --ring: 283 79% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
@@ -496,7 +510,7 @@
     --popover-foreground: 218 30% 25%;
     --primary: 152 100% 29.5%;
     --primary-foreground: 240 20% 5%;
-    --secondary: 217 88% 87%;
+    --secondary: 152.0 40% 87%;
     --secondary-foreground: 218 30% 25%;
     --muted: 218 87% 91%;
     --muted-foreground: 218 21% 45%;
@@ -559,11 +573,11 @@
     --ring: 186 100% 31.9%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 222 100% 78%;
-    --breakdown-uncommon: 216.9 100% 70.8%;
-    --breakdown-rare: 207.9 100% 57.7%;
-    --breakdown-ultra: 197.2 100% 41.4%;
-    --breakdown-legendary: 186 100% 31.9%;
+    --breakdown-common: 188.2 42% 62.5%;
+    --breakdown-uncommon: 202.0 61% 60.8%;
+    --breakdown-rare: 209.8 77% 60.7%;
+    --breakdown-ultra: 216.9 87% 62.4%;
+    --breakdown-legendary: 224.2 100% 65.2%;
   }
   [data-theme="boss-fight"][data-polarity="light"] {
     /* main/supporting hue shifted -13/-13deg from the dark original (347,
@@ -588,11 +602,11 @@
     --ring: 347 100% 53.6%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 347 100% 77.5%;
-    --breakdown-uncommon: 358.3 100% 72.8%;
-    --breakdown-rare: 9.6 100% 62.4%;
-    --breakdown-ultra: 19.9 100% 48.1%;
-    --breakdown-legendary: 30 100% 39.8%;
+    --breakdown-common: 349.0 51.3% 74.6%;
+    --breakdown-uncommon: 0.4 63.4% 71.9%;
+    --breakdown-rare: 10.2 78.7% 65.3%;
+    --breakdown-ultra: 15.8 90.9% 57.2%;
+    --breakdown-legendary: 30.1 100.0% 42.5%;
   }
   [data-theme="synthwave"][data-polarity="light"] {
     /* shifted -9/-9deg (283, 250 -> 274, 241) to clear Grape Float's dark
@@ -716,16 +730,16 @@
     --muted: 223.3 30% 14.8%;
     --accent: 221.1 25% 55.5%;
     --accent-foreground: 240.0 20% 4.9%;
-    --border: 223.3 34% 22.8%;
-    --input: 223.3 34% 22.8%;
+    --border: 223.3 34% 24.1%;
+    --input: 223.3 34% 24.1%;
     --ring: 219.2 21% 75.3%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 221.0 26% 52.0%;
-    --breakdown-uncommon: 221.6 25% 57.9%;
-    --breakdown-rare: 221.7 24% 63.7%;
-    --breakdown-ultra: 221.0 23% 69.5%;
-    --breakdown-legendary: 219.2 21% 75.3%;
+    --breakdown-common: 221.9 49% 55.3%;
+    --breakdown-uncommon: 222.7 60% 62.1%;
+    --breakdown-rare: 222.9 72% 67.7%;
+    --breakdown-ultra: 222.1 86% 72.2%;
+    --breakdown-legendary: 219.9 100% 75.4%;
   }
   [data-theme="nebula"] {
     --background: 262.9 49% 8.4%;
@@ -741,16 +755,16 @@
     --muted: 262.9 43% 13.4%;
     --accent: 225.3 76% 62.2%;
     --accent-foreground: 240.0 20% 4.9%;
-    --border: 262.9 47% 21.4%;
-    --input: 262.9 47% 21.4%;
+    --border: 262.9 47% 25.5%;
+    --input: 262.9 47% 25.5%;
     --ring: 250.1 100% 68.6%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 250.1 55% 57.3%;
-    --breakdown-uncommon: 265.1 60% 55.5%;
-    --breakdown-rare: 280.1 65% 51.2%;
-    --breakdown-ultra: 295.1 70% 43.8%;
-    --breakdown-legendary: 310.1 75% 42.3%;
+    --breakdown-common: 248.4 44% 55.3%;
+    --breakdown-uncommon: 263.7 58% 58.8%;
+    --breakdown-rare: 279.0 74% 59.8%;
+    --breakdown-ultra: 295.0 79% 55.6%;
+    --breakdown-legendary: 308.7 100% 49.5%;
   }
   [data-theme="solar-flare"] {
     --background: 16.7 53% 6.7%;
@@ -766,15 +780,15 @@
     --muted: 16.7 47% 11.7%;
     --accent: 35.2 100% 63.9%;
     --accent-foreground: 240.0 20% 4.9%;
-    --border: 16.7 51% 19.7%;
-    --input: 16.7 51% 19.7%;
+    --border: 16.7 51% 20.2%;
+    --input: 16.7 51% 20.2%;
     --ring: 14.4 100% 63.1%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 16.0 95% 50.0%;
-    --breakdown-uncommon: 24.8 97% 50.1%;
-    --breakdown-rare: 31.7 99% 50.2%;
-    --breakdown-ultra: 38.0 100% 50.1%;
+    --breakdown-common: 12.6 52% 56.6%;
+    --breakdown-uncommon: 19.3 70% 60.8%;
+    --breakdown-rare: 26.1 83% 62.8%;
+    --breakdown-ultra: 33.6 93% 62.1%;
     --breakdown-legendary: 44.0 100% 50.0%;
   }
   [data-theme="aurora"] {
@@ -796,36 +810,42 @@
     --ring: 161.4 71% 57.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 161.4 71% 57.5%;
-    --breakdown-uncommon: 164.4 66% 65.9%;
-    --breakdown-rare: 172.0 60% 72.3%;
-    --breakdown-ultra: 187.1 62% 79.2%;
-    --breakdown-legendary: 207.0 100% 88.0%;
+    --breakdown-common: 207.0 54% 78.7%;
+    --breakdown-uncommon: 186.9 75% 70.2%;
+    --breakdown-rare: 173.1 78% 66.8%;
+    --breakdown-ultra: 166.4 93% 63.9%;
+    --breakdown-legendary: 159.8 100% 71.4%;
   }
+  /* Deep Space, re-coloured 2026-10-19 (/impeccable distill): it had become
+     a second Sapphire (CIEDE2000 7.1) between Nebula and Sapphire. Now a
+     near-black void with a starlight-azure main colour (200 100%, 9.5:1)
+     and a violet supporting colour; the gauge climbs from a dim steel-blue
+     to a vivid starlit violet (gauge rule above). Nearest
+     main colour now Plasma dark at 15.8. */
   [data-theme="deep-space"] {
-    --background: 228.0 56% 7.1%;
-    --foreground: 227.1 100% 97.3%;
-    --card: 228.0 54% 11.1%;
-    --card-foreground: 227.1 100% 97.3%;
-    --popover: 228.0 54% 11.1%;
-    --popover-foreground: 227.1 100% 97.3%;
-    --primary: 228.4 52% 55.5%;
-    --primary-foreground: 0.0 0% 98.0%;
-    --secondary: 228.0 52% 21.1%;
-    --secondary-foreground: 227.1 100% 97.3%;
-    --muted: 228.0 50% 12.1%;
-    --accent: 229.2 76% 55.1%;
-    --accent-foreground: 0.0 0% 98.0%;
-    --border: 228.0 54% 20.1%;
-    --input: 228.0 54% 20.1%;
-    --ring: 228.4 52% 55.5%;
+    --background: 232.0 45% 5.0%;
+    --foreground: 205.0 60% 96.0%;
+    --card: 232.0 43% 9.0%;
+    --card-foreground: 205.0 60% 96.0%;
+    --popover: 232.0 43% 9.0%;
+    --popover-foreground: 205.0 60% 96.0%;
+    --primary: 200.0 100% 61.9%;
+    --primary-foreground: 240.0 20% 4.9%;
+    --secondary: 232.0 41% 19.0%;
+    --secondary-foreground: 205.0 60% 96.0%;
+    --muted: 232.0 39% 10.0%;
+    --accent: 250.0 85% 66.7%;
+    --accent-foreground: 240.0 20% 4.9%;
+    --border: 232.0 43% 23.1%;
+    --input: 232.0 43% 23.1%;
+    --ring: 200.0 100% 61.9%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 258.0 65% 43.0%;
-    --breakdown-uncommon: 251.9 53% 47.8%;
-    --breakdown-rare: 244.9 48% 52.0%;
-    --breakdown-ultra: 236.6 49% 54.8%;
-    --breakdown-legendary: 228.4 52% 55.5%;
+    --breakdown-common: 202.2 34% 32.8%;
+    --breakdown-uncommon: 212.4 49% 46.4%;
+    --breakdown-rare: 225.2 72% 62.8%;
+    --breakdown-ultra: 234.0 84% 72.6%;
+    --breakdown-legendary: 238.1 100% 79.0%;
   }
   [data-theme="stellar-gold"] {
     --background: 45.0 35% 6.7%;
@@ -846,16 +866,17 @@
     --ring: 45.7 69% 65.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 46.0 100% 40.0%;
-    --breakdown-uncommon: 44.5 67% 49.3%;
-    --breakdown-rare: 44.4 66% 55.3%;
-    --breakdown-ultra: 44.8 68% 60.5%;
-    --breakdown-legendary: 45.7 69% 65.5%;
+    --breakdown-common: 41.7 37% 56.7%;
+    --breakdown-uncommon: 42.7 51% 58.5%;
+    --breakdown-rare: 44.0 65% 59.1%;
+    --breakdown-ultra: 45.6 80% 57.7%;
+    --breakdown-legendary: 49.0 100% 48.4%;
   }
 
   /* ── Botanical family (natural/earthy, mixed polarity) ───────────────────
-     1 free + 4 Pro (Terracotta retired 2026-09-29, users moved to Noir's
-     Crimson). Sage/Moss/Meadow are light-background, Forest/Fern are
+     1 free + 3 Pro (Terracotta retired 2026-09-29, users moved to Noir's
+     Crimson; Moss retired 2026-10-19, users moved to Spring Olive -- it sat
+     within reach of three Spring themes). Sage/Meadow are light-background, Forest/Fern are
      dark-background -- that split is each theme's own fixed identity
      (confirmed explicitly), not something the polarity toggle controls;
      the toggle doesn't render for this family at all. Full glow on every
@@ -867,38 +888,42 @@
      darker gains contrast on a light card). Meadow: scan-button green ->
      light faded green, lightest end at 2:1. Fern: darker green at 2:1 ->
      scan-button green. Each steps evenly in contrast against --card.
-     Forest and Moss are unchanged. */
+     Forest is unchanged.
+     Sage moved cooler on 2026-10-19 (/impeccable distill): every green
+     +32deg to a blue-green sage, main colour 158 26% at the same ~3.4:1, so
+     it no longer reads as Spring Olive (CIEDE2000 5.4 -> 11.3); cream
+     surfaces unchanged. */
   [data-theme="sage"], [data-theme="forest"], [data-theme="fern"],
-  [data-theme="moss"], [data-theme="meadow"] {
+  [data-theme="meadow"] {
     --font-display: 'Fraunces', serif;
     --font-mono: 'IBM Plex Mono', monospace;
     --font-body: 'Karla', sans-serif;
   }
   [data-theme="sage"] {
     --background: 44.0 41% 92.7%;
-    --foreground: 114.5 9% 24.1%;
+    --foreground: 146.5 9% 24.1%;
     --card: 44.0 38% 93.7%;
-    --card-foreground: 114.5 9% 24.1%;
+    --card-foreground: 146.5 9% 24.1%;
     --popover: 44.0 38% 93.7%;
-    --popover-foreground: 114.5 9% 24.1%;
-    --primary: 125.9 17% 46.5%;
+    --popover-foreground: 146.5 9% 24.1%;
+    --primary: 158.0 26% 43.7%;
     --primary-foreground: 240.0 20% 4.9%;
     --secondary: 44.0 39% 83.7%;
-    --secondary-foreground: 114.5 9% 24.1%;
+    --secondary-foreground: 146.5 9% 24.1%;
     --muted: 44.0 37% 87.7%;
-    --muted-foreground: 115.4 6% 40.6%;
-    --accent: 126.3 13% 28.0%;
-    --accent-foreground: 0.0 0% 98.0%;
-    --border: 44.0 39% 78.7%;
-    --input: 44.0 39% 78.7%;
-    --ring: 125.9 17% 46.5%;
+    --muted-foreground: 147.4 6% 40.6%;
+    --accent: 157.6 8.0% 50.7%;
+    --accent-foreground: 240.0 20% 4.9%;
+    --border: 44.0 39% 77.3%;
+    --input: 44.0 39% 77.3%;
+    --ring: 158.0 26% 43.7%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 125.9 17% 46.5%;
-    --breakdown-uncommon: 126.2 18% 41.3%;
-    --breakdown-rare: 126.5 18% 36.3%;
-    --breakdown-ultra: 126.7 19% 31.6%;
-    --breakdown-legendary: 127.0 19% 27.0%;
+    --breakdown-common: 157.7 24% 44.2%;
+    --breakdown-uncommon: 160.2 32% 36.1%;
+    --breakdown-rare: 161.8 43% 29.6%;
+    --breakdown-ultra: 163.6 60% 23.7%;
+    --breakdown-legendary: 166.5 100% 17.2%;
   }
   [data-theme="forest"] {
     --background: 150.0 28% 7.1%;
@@ -912,18 +937,18 @@
     --secondary: 150.0 24% 21.1%;
     --secondary-foreground: 135.0 36% 95.7%;
     --muted: 150.0 22% 12.1%;
-    --accent: 152.3 76% 26.7%;
+    --accent: 142.9 21.5% 35.6%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 150.0 26% 20.1%;
     --input: 150.0 26% 20.1%;
     --ring: 151.1 31% 35.3%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 151.1 55% 31.0%;
-    --breakdown-uncommon: 166.1 60% 29.8%;
-    --breakdown-rare: 181.1 65% 29.1%;
-    --breakdown-ultra: 196.1 70% 34.5%;
-    --breakdown-legendary: 211.1 75% 43.8%;
+    --breakdown-common: 145.8 25% 37.0%;
+    --breakdown-uncommon: 163.3 32% 38.4%;
+    --breakdown-rare: 181.1 41% 38.8%;
+    --breakdown-ultra: 196.5 62% 44.2%;
+    --breakdown-legendary: 210.9 100% 57.0%;
   }
   [data-theme="fern"] {
     --background: 132.0 25% 7.8%;
@@ -950,32 +975,6 @@
     --breakdown-ultra: 124.7 28% 45.1%;
     --breakdown-legendary: 124.7 27% 53.3%;
   }
-  [data-theme="moss"] {
-    --background: 56.0 33% 91.2%;
-    --foreground: 67.2 23% 21.8%;
-    --card: 56.0 30% 92.2%;
-    --card-foreground: 67.2 23% 21.8%;
-    --popover: 56.0 30% 92.2%;
-    --popover-foreground: 67.2 23% 21.8%;
-    --primary: 61.3 21% 42.4%;
-    --primary-foreground: 240.0 20% 4.9%;
-    --secondary: 56.0 31% 82.2%;
-    --secondary-foreground: 67.2 23% 21.8%;
-    --muted: 56.0 29% 86.2%;
-    --muted-foreground: 66.2 16% 36.7%;
-    --accent: 61.7 25% 28.6%;
-    --accent-foreground: 0.0 0% 98.0%;
-    --border: 56.0 31% 77.2%;
-    --input: 56.0 31% 77.2%;
-    --ring: 61.3 21% 42.4%;
-    --glow-intensity: 1;
-    --wash-intensity: 0;
-    --breakdown-common: 61.3 55% 33.0%;
-    --breakdown-uncommon: 76.3 60% 33.4%;
-    --breakdown-rare: 91.3 65% 33.4%;
-    --breakdown-ultra: 106.3 70% 33.3%;
-    --breakdown-legendary: 121.3 75% 32.8%;
-  }
   [data-theme="meadow"] {
     --background: 54.8 53% 91.6%;
     --foreground: 69.1 29% 22.5%;
@@ -991,8 +990,8 @@
     --muted-foreground: 68.1 20% 36.3%;
     --accent: 101.4 40% 20.4%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 54.8 51% 77.6%;
-    --input: 54.8 51% 77.6%;
+    --border: 54.8 51% 71.2%;
+    --input: 54.8 51% 71.2%;
     --ring: 99.8 46% 38.8%;
     --glow-intensity: 1;
     --wash-intensity: 0;
@@ -1037,10 +1036,10 @@
     --secondary: 220.0 4% 21.3%;
     --secondary-foreground: 0.0 0% 96.1%;
     --muted: 220.0 2% 12.3%;
-    --accent: 212.9 29% 42.4%;
+    --accent: 213.1 14.7% 41.6%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 220.0 6% 20.3%;
-    --input: 220.0 6% 20.3%;
+    --border: 220.0 6% 20.6%;
+    --input: 220.0 6% 20.6%;
     --ring: 213.3 4% 45.3%;
     --glow-intensity: 1;
     --wash-intensity: 0;
@@ -1064,16 +1063,16 @@
     --muted: 343.6 27% 11.5%;
     --accent: 349.4 23% 44.1%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 343.6 31% 19.5%;
-    --input: 343.6 31% 19.5%;
+    --border: 343.6 31% 21.4%;
+    --input: 343.6 31% 21.4%;
     --ring: 351.9 52% 47.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 355.0 80% 32.2%;
-    --breakdown-uncommon: 354.2 73% 36.1%;
-    --breakdown-rare: 353.4 66% 39.9%;
-    --breakdown-ultra: 352.7 59% 43.7%;
-    --breakdown-legendary: 351.9 52% 47.5%;
+    --breakdown-common: 2.7 41% 33.2%;
+    --breakdown-uncommon: 359.7 46% 38.1%;
+    --breakdown-rare: 355.8 55% 41.5%;
+    --breakdown-ultra: 350.7 68% 43.5%;
+    --breakdown-legendary: 341.6 100% 40.8%;
   }
   [data-theme="amethyst"] {
     --background: 273.3 26% 6.9%;
@@ -1087,18 +1086,18 @@
     --secondary: 273.3 22% 20.9%;
     --secondary-foreground: 276.0 63% 96.9%;
     --muted: 273.3 20% 11.9%;
-    --accent: 273.0 58% 51.8%;
+    --accent: 268.4 20.9% 45.6%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 273.3 24% 19.9%;
-    --input: 273.3 24% 19.9%;
+    --border: 273.3 24% 21.9%;
+    --input: 273.3 24% 21.9%;
     --ring: 271.9 27% 54.9%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 271.9 55% 53.1%;
-    --breakdown-uncommon: 286.9 60% 48.2%;
-    --breakdown-rare: 301.9 65% 42.7%;
-    --breakdown-ultra: 316.9 70% 43.8%;
-    --breakdown-legendary: 331.9 75% 44.7%;
+    --breakdown-common: 270.3 40% 51.3%;
+    --breakdown-uncommon: 286.1 47% 52.3%;
+    --breakdown-rare: 302.5 53% 51.7%;
+    --breakdown-ultra: 317.3 79% 54.9%;
+    --breakdown-legendary: 332.5 100% 58.9%;
   }
   [data-theme="sapphire"] {
     --background: 215.3 52% 6.5%;
@@ -1112,18 +1111,18 @@
     --secondary: 215.3 48% 20.5%;
     --secondary-foreground: 218.6 100% 97.3%;
     --muted: 215.3 46% 11.5%;
-    --accent: 215.9 78% 44.9%;
+    --accent: 216.7 35.2% 43.4%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 215.3 50% 19.5%;
-    --input: 215.3 50% 19.5%;
+    --border: 215.3 50% 21.0%;
+    --input: 215.3 50% 21.0%;
     --ring: 216.1 42% 52.4%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 276.1 75% 37.7%;
-    --breakdown-uncommon: 261.1 70% 49.7%;
-    --breakdown-rare: 246.1 65% 56.6%;
-    --breakdown-ultra: 231.1 60% 56.4%;
-    --breakdown-legendary: 216.1 55% 52.0%;
+    --breakdown-common: 216.2 46% 32.3%;
+    --breakdown-uncommon: 234.3 57% 50.8%;
+    --breakdown-rare: 245.8 69% 58.5%;
+    --breakdown-ultra: 256.8 84% 61.9%;
+    --breakdown-legendary: 275.4 100% 60.3%;
   }
   [data-theme="emerald"] {
     --background: 156.0 36% 5.5%;
@@ -1137,18 +1136,18 @@
     --secondary: 156.0 32% 19.5%;
     --secondary-foreground: 155.0 60% 96.1%;
     --muted: 156.0 30% 10.5%;
-    --accent: 157.6 84% 24.9%;
+    --accent: 148.1 20.4% 35.9%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 156.0 34% 18.5%;
     --input: 156.0 34% 18.5%;
     --ring: 179.1 32% 39.6%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 150.0 70% 20.6%;
-    --breakdown-uncommon: 157.3 61% 24.6%;
-    --breakdown-rare: 164.6 51% 29.0%;
-    --breakdown-ultra: 171.8 42% 34.0%;
-    --breakdown-legendary: 179.1 32% 39.6%;
+    --breakdown-common: 142.7 26% 26.4%;
+    --breakdown-uncommon: 153.4 33% 29.8%;
+    --breakdown-rare: 163.8 42% 31.6%;
+    --breakdown-ultra: 172.6 57% 31.7%;
+    --breakdown-legendary: 179.7 100% 26.9%;
   }
   /* Silver Screen -- a black-and-white movie. Every value the theme owns
      is 0% saturation; can rarity badges, status colors and the medal/
@@ -1252,8 +1251,8 @@
     --muted-foreground: 201.1 25% 42.4%;
     --accent: 217.1 67% 44.3%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 200.0 98% 83.1%;
-    --input: 200.0 98% 83.1%;
+    --border: 200.0 98% 82.0%;
+    --input: 200.0 98% 82.0%;
     --ring: 217.1 100% 60.4%;
     --glow-intensity: 1;
     --wash-intensity: 0;
@@ -1263,31 +1262,36 @@
     --breakdown-ultra: 217.1 100% 64.5%;
     --breakdown-legendary: 217.1 100% 60.4%;
   }
+  /* Grape Candy, moved 2026-10-19 (/impeccable distill): it read as
+     Synthwave light (CIEDE2000 6.4). Now a bluer Concord-grape violet --
+     main 250 100% at the same ~3.5:1, surfaces and text 20deg bluer, darker
+     violet supporting colour; the gauge is unchanged (still climbs to pink).
+     Nearest main colour now Synthwave light at 13.0. */
   [data-theme="grape-candy"] {
-    --background: 270.0 100% 97.3%;
-    --foreground: 271.3 32% 28.2%;
-    --card: 270.0 97% 98.3%;
-    --card-foreground: 271.3 32% 28.2%;
-    --popover: 270.0 97% 98.3%;
-    --popover-foreground: 271.3 32% 28.2%;
-    --primary: 267.4 100% 67.8%;
+    --background: 250.0 100% 97.3%;
+    --foreground: 251.3 32% 28.2%;
+    --card: 250.0 97% 98.3%;
+    --card-foreground: 251.3 32% 28.2%;
+    --popover: 250.0 97% 98.3%;
+    --popover-foreground: 251.3 32% 28.2%;
+    --primary: 250.0 100% 70.8%;
     --primary-foreground: 240.0 20% 4.9%;
-    --secondary: 270.0 98% 88.3%;
-    --secondary-foreground: 271.3 32% 28.2%;
-    --muted: 270.0 96% 92.3%;
-    --muted-foreground: 272.1 23% 48.6%;
-    --accent: 265.0 61% 51.2%;
+    --secondary: 250.0 98% 88.3%;
+    --secondary-foreground: 251.3 32% 28.2%;
+    --muted: 250.0 96% 92.3%;
+    --muted-foreground: 252.1 23% 48.6%;
+    --accent: 245.0 61% 56.6%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 270.0 98% 83.3%;
-    --input: 270.0 98% 83.3%;
-    --ring: 267.4 100% 67.8%;
+    --border: 250.0 98% 83.3%;
+    --input: 250.0 98% 83.3%;
+    --ring: 250.0 100% 70.8%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 267.4 55% 62.4%;
-    --breakdown-uncommon: 282.4 60% 60.2%;
-    --breakdown-rare: 297.4 65% 55.0%;
-    --breakdown-ultra: 312.4 70% 54.9%;
-    --breakdown-legendary: 327.4 75% 56.9%;
+    --breakdown-common: 266.8 46.4% 61.3%;
+    --breakdown-uncommon: 282.6 58.0% 57.3%;
+    --breakdown-rare: 297.5 49.8% 49.7%;
+    --breakdown-ultra: 311.8 64.9% 46.3%;
+    --breakdown-legendary: 322.0 100.0% 40.0%;
   }
   [data-theme="orange-crush"] {
     --background: 26.7 100% 96.5%;
@@ -1302,17 +1306,17 @@
     --secondary-foreground: 16.8 40% 24.7%;
     --muted: 26.7 96% 91.5%;
     --muted-foreground: 17.1 28% 44.5%;
-    --accent: 18.6 80% 32.5%;
+    --accent: 21.5 100.0% 38.5%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 26.7 98% 82.5%;
-    --input: 26.7 98% 82.5%;
+    --border: 26.7 98% 82.2%;
+    --input: 26.7 98% 82.2%;
     --ring: 21.3 100% 45.9%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 21.3 100% 68.9%;
-    --breakdown-uncommon: 21.3 100% 63.2%;
-    --breakdown-rare: 21.3 100% 57.4%;
-    --breakdown-ultra: 21.3 100% 51.7%;
+    --breakdown-common: 20.5 59% 70.5%;
+    --breakdown-uncommon: 20.1 71% 64.3%;
+    --breakdown-rare: 19.5 79% 58.9%;
+    --breakdown-ultra: 18.1 83% 54.5%;
     --breakdown-legendary: 21.3 100% 45.9%;
   }
   [data-theme="sour-apple"] {
@@ -1330,17 +1334,22 @@
     --muted-foreground: 88.8 25% 37.6%;
     --accent: 89.4 55% 16.7%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 87.3 98% 81.7%;
-    --input: 87.3 98% 81.7%;
+    --border: 87.3 98% 48.5%;
+    --input: 87.3 98% 48.5%;
     --ring: 82.0 74% 33.7%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 82.0 55% 37.1%;
-    --breakdown-uncommon: 97.0 60% 37.1%;
-    --breakdown-rare: 112.0 65% 36.7%;
-    --breakdown-ultra: 127.0 70% 35.9%;
-    --breakdown-legendary: 142.0 75% 34.8%;
+    --breakdown-common: 86.4 17.5% 47.0%;
+    --breakdown-uncommon: 100.6 27.3% 41.8%;
+    --breakdown-rare: 112.6 39.6% 37.1%;
+    --breakdown-ultra: 123.9 52.9% 32.5%;
+    --breakdown-legendary: 145.3 100.0% 23.8%;
   }
+  /* Cherry Pop, moved 2026-10-19 (/impeccable distill): it was the app's
+     closest pair, a near-twin of Boss Fight light (CIEDE2000 2.1). Now a
+     true deep cherry red (350 85%, 5.6:1, white label) with a darker wine
+     supporting colour; the gauge ends on the cherry. Nearest main colour
+     now Spring Brick at 10.9, Boss Fight light at 13.2. */
   [data-theme="cherry-pop"] {
     --background: 351.4 100% 97.3%;
     --foreground: 347.8 37% 25.7%;
@@ -1348,24 +1357,24 @@
     --card-foreground: 347.8 37% 25.7%;
     --popover: 351.4 97% 98.3%;
     --popover-foreground: 347.8 37% 25.7%;
-    --primary: 352.2 100% 57.6%;
-    --primary-foreground: 240.0 20% 4.9%;
+    --primary: 350.0 85% 41.2%;
+    --primary-foreground: 0.0 0% 98.0%;
     --secondary: 351.4 98% 88.3%;
     --secondary-foreground: 347.8 37% 25.7%;
     --muted: 351.4 96% 92.3%;
     --muted-foreground: 347.1 27% 48.0%;
-    --accent: 350.8 67% 42.4%;
+    --accent: 342.0 70% 30.0%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 351.4 98% 83.3%;
     --input: 351.4 98% 83.3%;
-    --ring: 352.2 100% 57.6%;
+    --ring: 350.0 85% 41.2%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 352.2 100% 57.6%;
-    --breakdown-uncommon: 351.1 98% 48.2%;
-    --breakdown-rare: 350.1 95% 44.8%;
-    --breakdown-ultra: 349.1 93% 41.4%;
-    --breakdown-legendary: 348.0 90% 38.0%;
+    --breakdown-common: 0.3 54% 60.0%;
+    --breakdown-uncommon: 2.4 57% 54.8%;
+    --breakdown-rare: 359.2 57% 51.6%;
+    --breakdown-ultra: 354.9 67% 46.8%;
+    --breakdown-legendary: 346.9 100% 38.7%;
   }
 
   /* ── Spring family (light, built from a palette the user chose) ──────────
@@ -1471,18 +1480,18 @@
     --secondary-foreground: 15.3 37% 27.2%;
     --muted: 15.3 80% 93.7%;
     --muted-foreground: 15.3 37% 40.9%;
-    --accent: 15.3 37% 44.9%;
+    --accent: 20.1 100.0% 38.6%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 15.3 80% 85.8%;
-    --input: 15.3 80% 85.8%;
+    --border: 15.3 80% 85.0%;
+    --input: 15.3 80% 85.0%;
     --ring: 15.3 43% 53.7%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 15.3 80% 68.4%;
-    --breakdown-uncommon: 15.3 61% 62.3%;
-    --breakdown-rare: 15.3 49% 57.1%;
-    --breakdown-ultra: 15.3 42% 53.4%;
-    --breakdown-legendary: 15.3 37% 49.6%;
+    --breakdown-common: 15.2 57% 68.3%;
+    --breakdown-uncommon: 15.4 70% 62.0%;
+    --breakdown-rare: 15.8 73% 56.1%;
+    --breakdown-ultra: 16.7 72% 50.5%;
+    --breakdown-legendary: 20.4 100% 42.3%;
   }
   [data-theme="spring-butter"] {
     --background: 49.1 100% 97.7%;
@@ -1501,16 +1510,16 @@
     --muted-foreground: 49.1 24% 38.7%;
     --accent: 49.1 24% 39.3%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 49.1 21% 85.6%;
-    --input: 49.1 21% 85.6%;
+    --border: 49.1 21% 84.0%;
+    --input: 49.1 21% 84.0%;
     --ring: 49.1 24% 46.7%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 49.1 39% 61.6%;
-    --breakdown-uncommon: 49.1 30% 55.2%;
-    --breakdown-rare: 49.1 24% 50.0%;
-    --breakdown-ultra: 49.1 24% 45.9%;
-    --breakdown-legendary: 49.1 24% 42.7%;
+    --breakdown-common: 49.1 41% 61.0%;
+    --breakdown-uncommon: 49.1 37% 52.1%;
+    --breakdown-rare: 49.3 45% 44.7%;
+    --breakdown-ultra: 49.8 60% 37.8%;
+    --breakdown-legendary: 51.3 100% 28.5%;
   }
   [data-theme="spring-pistachio"] {
     --background: 68.6 34% 95.2%;
@@ -1529,16 +1538,16 @@
     --muted-foreground: 68.6 23% 34.1%;
     --accent: 68.6 23% 36.8%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 68.6 18% 82.9%;
-    --input: 68.6 18% 82.9%;
+    --border: 68.6 18% 81.0%;
+    --input: 68.6 18% 81.0%;
     --ring: 68.6 23% 43.8%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 68.6 33% 58.8%;
-    --breakdown-uncommon: 68.6 25% 52.5%;
-    --breakdown-rare: 68.6 23% 47.7%;
-    --breakdown-ultra: 68.6 23% 43.8%;
-    --breakdown-legendary: 68.6 23% 40.5%;
+    --breakdown-common: 68.5 34% 58.4%;
+    --breakdown-uncommon: 67.8 32% 49.3%;
+    --breakdown-rare: 67.0 42% 41.7%;
+    --breakdown-ultra: 66.2 58% 34.7%;
+    --breakdown-legendary: 64.8 100% 25.4%;
   }
   [data-theme="spring-olive"] {
     --background: 90.0 15% 93.6%;

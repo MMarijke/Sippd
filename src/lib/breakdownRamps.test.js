@@ -38,6 +38,36 @@ describe('rarity breakdown ramps', () => {
   });
 });
 
+// The gauge rule (index.css, 2026-10-19): Common -> Legendary rises in
+// contrast against --card at EVERY step, and in colourfulness, so
+// Legendary is the most vivid step, never a fading pastel. Colourfulness is
+// CIELAB chroma; neutral gauges (all steps under 8: Carbon, Silver Screen)
+// are exempt from the chroma half.
+const STEPS = ['common', 'uncommon', 'rare', 'ultra', 'legendary'];
+const chroma = v => {
+  const lin = hslToRgb(...parse(v)).map(c => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  const [r, g, b] = lin;
+  const X = (r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047, Y = r * 0.2126 + g * 0.7152 + b * 0.0722, Z = (r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883;
+  const f = t => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  return Math.hypot(500 * (f(X) - f(Y)), 200 * (f(Y) - f(Z)));
+};
+const gauges = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-common[^{}]*)\}/g)].map(([, sel, body]) => ({
+  name: sel.trim().split('\n').pop().trim(),
+  card: body.match(/--card:\s*([^;]+);/)[1],
+  steps: STEPS.map(s => body.match(new RegExp(`--breakdown-${s}:\\s*([^;]+);`))[1]),
+}));
+
+describe('gauge rule: rises to a vivid Legendary', () => {
+  it.each(gauges.map(g => [g.name, g]))('%s', (_, g) => {
+    const K = g.steps.map(s => contrast(s, g.card));
+    for (let i = 1; i < 5; i++) expect(K[i], `${STEPS[i]} contrast`).toBeGreaterThan(K[i - 1]);
+    const C = g.steps.map(chroma);
+    if (Math.max(...C) < 8) return;
+    expect(C[4], 'Legendary is the most colourful step').toBeGreaterThanOrEqual(Math.max(...C) - 2);
+    for (let i = 1; i < 5; i++) expect(C[i], `${STEPS[i]} colourfulness`).toBeGreaterThanOrEqual(C[i - 1] - 4);
+  });
+});
+
 // Scan (and the selected brand chip) wear --cta, which defaults to the
 // theme's own button fill (--primary-fill, else --primary) with its label
 // (--primary-foreground): Scan is never quieter than Save. In every theme
@@ -85,5 +115,23 @@ describe('primary fill', () => {
   it.each(fillBlocks.map(b => [b.name, b]))('%s: button label 4.5:1 on the fill, icons 3:1 on the page', (_, b) => {
     expect(contrast(b.fill, b.label)).toBeGreaterThanOrEqual(4.5);
     expect(contrast(b.primary, b.background)).toBeGreaterThanOrEqual(3);
+  });
+});
+
+// Card edges and dividers: every theme's --border reads at >= 1.35:1
+// against both the page and the card (/impeccable polish, 2026-10-19; Sour
+// Apple's was 1.10, Meadow 1.23, Synthwave dark 1.24, Deep Space 1.25).
+const borderBlocks = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-common[^{}]*)\}/g)].map(([, sel, body]) => ({
+  name: sel.trim().split('\n').pop().trim(),
+  background: body.match(/--background:\s*([^;]+);/)[1],
+  card: body.match(/--card:\s*([^;]+);/)[1],
+  border: body.match(/--border:\s*([^;]+);/)?.[1],
+}));
+
+describe('borders', () => {
+  it.each(borderBlocks.map(b => [b.name, b]))('%s: border visible against page and card', (_, b) => {
+    expect(b.border, `${b.name} has no --border`).toBeTruthy();
+    expect(contrast(b.border, b.background)).toBeGreaterThanOrEqual(1.35);
+    expect(contrast(b.border, b.card)).toBeGreaterThanOrEqual(1.35);
   });
 });

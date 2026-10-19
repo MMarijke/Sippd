@@ -52,7 +52,8 @@ const cases = THEME_FAMILIES.flatMap(family => family.themes.flatMap(theme => {
 
 describe('error text contrast', () => {
   it('covers every theme rendering', () => {
-    expect(cases.length).toBeGreaterThanOrEqual(39);
+    // 38 renderings since Moss retired (2026-10-19).
+    expect(cases.length).toBeGreaterThanOrEqual(38);
     for (const [name, c] of cases) expect(c.body, name).toBeTruthy();
   });
 

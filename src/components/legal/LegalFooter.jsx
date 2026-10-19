@@ -11,18 +11,23 @@ import { Link } from 'react-router-dom';
 // those three docs settled on a real address.
 const CONTACT_EMAIL = 'seedstackstudio@gmail.com';
 
+// Each link gets a 44px-tall tap area around its 12px text (the visible
+// text stays small; the target doesn't), so they're usable one-handed.
+const LINK = 'inline-flex items-center min-h-11 px-2 underline underline-offset-2 hover:text-foreground';
+
 export default function LegalFooter({ className = '' }) {
   return (
-    <div className={`text-center space-y-2 ${className}`}>
-      <p className="text-2xs font-mono text-muted-foreground">
-        <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">Terms</Link>
-        {' · '}
-        <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground">Privacy</Link>
-        {' · '}
-        <Link to="/refund" className="underline underline-offset-2 hover:text-foreground">Refund Policy</Link>
+    <div className={`text-center ${className}`}>
+      <p className="flex flex-wrap items-center justify-center text-xs font-mono text-muted-foreground">
+        <Link to="/terms" className={LINK}>Terms</Link>
+        <span aria-hidden="true">·</span>
+        <Link to="/privacy" className={LINK}>Privacy</Link>
+        <span aria-hidden="true">·</span>
+        <Link to="/refund" className={LINK}>Refund Policy</Link>
       </p>
-      <p className="text-2xs font-mono text-muted-foreground">
-        Questions? <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-2">{CONTACT_EMAIL}</a>
+      <p className="flex flex-wrap items-center justify-center text-xs font-mono text-muted-foreground">
+        Questions?
+        <a href={`mailto:${CONTACT_EMAIL}`} className={`${LINK} text-primary hover:text-primary break-all`}>{CONTACT_EMAIL}</a>
       </p>
     </div>
   );

@@ -1,9 +1,9 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, AlertCircle, Eye, EyeOff, Check, MailCheck } from 'lucide-react';
-import LegalFooter from '@/components/legal/LegalFooter';
 import { PILL, PILL_OUTLINE } from '@/components/login/pill';
 import { describeAuthError, validateAuthForm, signUpNeedsConfirmation, MIN_PASSWORD } from '@/lib/authErrors';
 import { cn } from '@/lib/utils';
@@ -70,9 +70,8 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
   const [mode, setMode] = useState('signup'); // 'signup' | 'signin' | 'forgot' | 'sent-confirm' | 'sent-reset'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState({}); // { email?, password?, confirm? } -> describeAuthError() result
+  const [fieldErrors, setFieldErrors] = useState({}); // { email?, password? } -> describeAuthError() result
   const [formError, setFormError] = useState(null);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -81,10 +80,9 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
 
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
-  const confirmRef = useRef(null);
   const headingRef = useRef(null);
-  const fieldRefs = { email: emailRef, password: passwordRef, confirm: confirmRef };
-  const [focusRequest, setFocusRequest] = useState(null); // { target: 'email'|'password'|'confirm'|'heading' }
+  const fieldRefs = { email: emailRef, password: passwordRef };
+  const [focusRequest, setFocusRequest] = useState(null); // { target: 'email'|'password'|'heading' }
 
   const clearMessages = () => {
     setFieldErrors({});
@@ -97,10 +95,7 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
     setMode(next);
     clearMessages();
     if (next === 'signin' || next === 'signup' || next === 'forgot') setResend({ sending: false, sentAt: 0 });
-    if (next === 'forgot' || next === 'signup') {
-      setPassword('');
-      setConfirmPassword('');
-    }
+    if (next === 'forgot' || next === 'signup') setPassword('');
     setFocusRequest({ target: focusTarget });
   };
 
@@ -153,7 +148,7 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
     }
     setFieldErrors(byField);
     setFormError(whole);
-    const first = ['email', 'password', 'confirm'].find((f) => byField[f]);
+    const first = ['email', 'password'].find((f) => byField[f]);
     if (first) setFocusRequest({ target: first });
   };
 
@@ -175,7 +170,7 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
     e.preventDefault();
     if (submitting || googleLoading) return;
     clearMessages();
-    const problems = validateAuthForm(mode, { email, password, confirmPassword });
+    const problems = validateAuthForm(mode, { email, password });
     if (problems.length) {
       showProblems(problems);
       return;
@@ -239,13 +234,12 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
   // An error's next step, as a button inside the message.
   const runAction = (action) => {
     if (action === 'signin') switchMode('signin', 'password');
-    else if (action === 'forgot') switchMode('forgot');
     else if (action === 'resend') {
       switchMode('sent-confirm');
       handleResend();
     }
   };
-  const ACTION_LABELS = { signin: 'Sign in instead', forgot: 'Reset your password', resend: 'Send a new link' };
+  const ACTION_LABELS = { signin: 'Sign in instead', resend: 'Send a new link' };
 
   const errorText = (problem) => (
     <>
@@ -326,14 +320,16 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
             {mode === 'sent-confirm' ? 'Already confirmed? Sign in' : 'Back to sign in'}
           </button>
         </div>
-
-        <LegalFooter />
       </div>
     );
   }
 
   const busy = submitting || googleLoading;
   const passwordMet = password.length >= MIN_PASSWORD;
+  // A too-short password turns the hint itself into the error, so the rule
+  // is said once under the field, not as a hint plus an error repeating it.
+  const shortError = mode === 'signup' && fieldErrors.password?.key === 'passwordShort';
+  const passwordError = fieldErrors.password && !shortError;
 
   return (
     <div className="w-full max-w-sm mx-auto space-y-5">
@@ -398,7 +394,7 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
                 onChange={onField(setPassword, 'password')}
                 autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                 aria-invalid={!!fieldErrors.password}
-                aria-describedby={describedBy(mode === 'signup' && 'login-password-hint', fieldErrors.password && 'login-password-error')}
+                aria-describedby={describedBy(mode === 'signup' && 'login-password-hint', passwordError && 'login-password-error')}
                 className={cn(FIELD, 'pr-12')}
               />
               <button
@@ -406,21 +402,23 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
                 onClick={() => setShowPassword((s) => !s)}
                 aria-pressed={showPassword}
                 aria-label="Show password"
-                aria-controls={mode === 'signup' ? 'login-password login-confirm-password' : 'login-password'}
+                aria-controls="login-password"
                 className="absolute right-0 top-0 h-11 w-11 flex items-center justify-center rounded-r-xl text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
               </button>
             </div>
-            {mode === 'signup' && (
+            {mode === 'signup' && (shortError ? (
+              <ErrorLine id="login-password-hint">{fieldErrors.password.message}</ErrorLine>
+            ) : (
               <p id="login-password-hint" className={cn('flex items-center gap-1.5 text-xs font-mono', passwordMet ? 'text-foreground' : 'text-muted-foreground')}>
                 {passwordMet
                   ? <Check className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
                   : <span className="w-3.5 h-3.5 flex items-center justify-center" aria-hidden="true"><span className="w-1 h-1 rounded-full bg-current" /></span>}
                 At least {MIN_PASSWORD} characters
               </p>
-            )}
-            {fieldErrors.password && <ErrorLine id="login-password-error">{errorText(fieldErrors.password)}</ErrorLine>}
+            ))}
+            {passwordError && <ErrorLine id="login-password-error">{errorText(fieldErrors.password)}</ErrorLine>}
           </div>
         )}
 
@@ -429,25 +427,6 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
             <button type="button" onClick={() => switchMode('forgot', 'email')} className={`${LINK} text-xs font-mono`}>
               Forgot password?
             </button>
-          </div>
-        )}
-
-        {mode === 'signup' && (
-          <div className="space-y-1.5">
-            <Label htmlFor="login-confirm-password" className={LABEL}>Confirm Password</Label>
-            <Input
-              ref={confirmRef}
-              id="login-confirm-password"
-              name="confirm-password"
-              type={showPassword ? 'text' : 'password'}
-              value={confirmPassword}
-              onChange={onField(setConfirmPassword, 'confirm')}
-              autoComplete="new-password"
-              aria-invalid={!!fieldErrors.confirm}
-              aria-describedby={describedBy(fieldErrors.confirm && 'login-confirm-error')}
-              className={FIELD}
-            />
-            {fieldErrors.confirm && <ErrorLine id="login-confirm-error">{errorText(fieldErrors.confirm)}</ErrorLine>}
           </div>
         )}
 
@@ -460,6 +439,18 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
           {submitting && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
           {mode === 'signin' ? 'Sign In' : mode === 'forgot' ? 'Send Reset Link' : 'Sign Up'}
         </button>
+
+        {/* Consent at the point of sign-up (GDPR/POPIA); the full legal
+            links and contact live in the page footer (LegalFooter). Covers
+            Google sign-up too, which is on the same card. */}
+        {mode === 'signup' && (
+          <p className="text-center text-xs font-body text-muted-foreground">
+            By signing up you agree to the{' '}
+            <Link to="/terms" className="text-foreground underline underline-offset-2 hover:text-primary">Terms</Link>
+            {' '}and{' '}
+            <Link to="/privacy" className="text-foreground underline underline-offset-2 hover:text-primary">Privacy policy</Link>.
+          </p>
+        )}
       </form>
 
       <p className="text-center text-xs font-mono text-muted-foreground">
@@ -476,8 +467,6 @@ const AuthPanel = forwardRef(function AuthPanel({ onSentChange }, ref) {
           </>
         )}
       </p>
-
-      <LegalFooter />
     </div>
   );
 });

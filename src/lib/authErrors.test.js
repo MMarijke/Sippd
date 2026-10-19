@@ -4,25 +4,22 @@ import { describeAuthError, validateAuthForm, signUpNeedsConfirmation, MIN_PASSW
 const authError = (props) => Object.assign(new Error(props.message || 'x'), props);
 
 describe('validateAuthForm', () => {
-  const ok = { email: 'collector@example.com', password: 'secret-pass', confirmPassword: 'secret-pass' };
+  const ok = { email: 'collector@example.com', password: 'secret-pass' };
 
   it('passes a complete sign-up', () => {
     expect(validateAuthForm('signup', ok)).toEqual([]);
   });
 
   it('marks every problem at once, in field order', () => {
-    const problems = validateAuthForm('signup', { email: '', password: '123', confirmPassword: '' });
+    const problems = validateAuthForm('signup', { email: '', password: '123' });
     expect(problems.map((p) => [p.field, p.key])).toEqual([
       ['email', 'emailMissing'],
       ['password', 'passwordShort'],
-      ['confirm', 'confirmMissing'],
     ]);
   });
 
-  it('catches a mismatched confirmation on the confirm field', () => {
-    const [p] = validateAuthForm('signup', { ...ok, confirmPassword: 'other-pass' });
-    expect(p.field).toBe('confirm');
-    expect(p.key).toBe('confirmMismatch');
+  it('asks for the password once (no confirm field)', () => {
+    expect(validateAuthForm('signup', { email: ok.email, password: '' }).map((p) => p.key)).toEqual(['passwordMissing']);
   });
 
   it('checks the email shape, ignoring surrounding spaces', () => {
@@ -32,7 +29,7 @@ describe('validateAuthForm', () => {
 
   it('only asks for the minimum length when creating a password', () => {
     expect(validateAuthForm('signin', { email: ok.email, password: '123' })).toEqual([]);
-    expect(validateAuthForm('signup', { ...ok, password: 'a'.repeat(MIN_PASSWORD - 1), confirmPassword: 'a'.repeat(MIN_PASSWORD - 1) })[0].key).toBe('passwordShort');
+    expect(validateAuthForm('signup', { ...ok, password: 'a'.repeat(MIN_PASSWORD - 1) })[0].key).toBe('passwordShort');
   });
 
   it('needs only the email to send a reset link', () => {
@@ -47,8 +44,10 @@ describe('describeAuthError', () => {
     }
   });
 
-  it('offers a reset for wrong credentials, without blaming one field', () => {
-    expect(describeAuthError(authError({ code: 'invalid_credentials' }))).toMatchObject({ field: null, action: 'forgot' });
+  it('points wrong credentials at Forgot password, without a second reset link or blaming one field', () => {
+    const d = describeAuthError(authError({ code: 'invalid_credentials' }));
+    expect(d).toMatchObject({ field: null, action: null });
+    expect(d.message).toMatch(/forgot password/i);
     expect(describeAuthError(authError({ message: 'Invalid login credentials' })).key).toBe('wrongCredentials');
   });
 

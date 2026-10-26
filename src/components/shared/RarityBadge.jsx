@@ -11,7 +11,7 @@ const rarityConfig = {
   'Uncommon': { color: 'text-rarity-uncommon-text', bg: 'bg-rarity-uncommon/10', border: 'border-rarity-uncommon/30', glow: '' },
   'Rare': { color: 'text-rarity-rare-text', bg: 'bg-rarity-rare/10', border: 'border-rarity-rare/30', glow: 'rarity-glow-rare' },
   'Ultra Rare': { color: 'text-rarity-ultra-text', bg: 'bg-rarity-ultra/10', border: 'border-rarity-ultra/30', glow: 'rarity-glow-ultra' },
-  'Legendary': { color: 'text-rarity-legendary-text', bg: 'bg-rarity-legendary/10', border: 'border-rarity-legendary/30', glow: 'rarity-glow-legendary' },
+  'Legendary': { color: 'text-rarity-legendary-text', bg: 'bg-rarity-legendary/10', border: 'border-rarity-legendary/30', glow: 'rarity-glow-legendary rarity-holo-badge' },
 };
 
 export default function RarityBadge({ rarity, size = 'sm', className }) {

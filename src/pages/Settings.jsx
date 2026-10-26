@@ -392,8 +392,11 @@ function useFocusRequest(ref, request, key, onHandled) {
 function FamilyTile({ family, polarity, isCurrent, showNewBadge, onSelect, focusRequest, onFocusHandled }) {
   const ref = useRef(null);
   useFocusRequest(ref, focusRequest, `family:${family.id}`, onFocusHandled);
-  const freeTheme = family.themes.find(t => !t.pro);
-  const rendering = getThemeRendering(freeTheme, polarity);
+  // The tile previews the family's free theme, or its first theme when the
+  // whole family is Pro (Alloy, Soda Fountain): without the fallback the
+  // tile showed an empty circle.
+  const previewTheme = family.themes.find(t => !t.pro) ?? family.themes[0];
+  const rendering = getThemeRendering(previewTheme, polarity);
   // This tile opens a family; it doesn't toggle anything, so no
   // aria-pressed (it always read "not pressed"). Where the user's own
   // theme lives is said in words instead.
@@ -466,7 +469,7 @@ function RarityStrip({ themeId, polarity }) {
     >
       <div className="flex h-1.5 gap-px rounded-full overflow-hidden">
         {RARITY_TIERS.map(tier => (
-          <div key={tier} className="flex-1" style={{ backgroundColor: `hsl(var(--breakdown-${tier}))` }} />
+          <div key={tier} className="flex-1" style={{ background: tier === 'legendary' ? 'var(--holo-gradient, hsl(var(--breakdown-legendary)))' : `hsl(var(--breakdown-${tier}))` }} />
         ))}
       </div>
     </div>
@@ -969,7 +972,7 @@ export default function Settings() {
             </p>
             {!pickerLoading && !isPro && (
               <p className="text-xs font-mono text-muted-foreground mt-0.5">
-                One free theme per family — the rest unlock with Pro.
+                Themes without a lock are free; the rest unlock with Pro.
               </p>
             )}
             {/* One-time note for users the retire migrations moved

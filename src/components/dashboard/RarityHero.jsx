@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { getDisplayRarity, RARITY_ORDER, BREAKDOWN_VAR } from '@/lib/rarityConsensus';
+import { getDisplayRarity, RARITY_ORDER, BREAKDOWN_VAR, breakdownBackground } from '@/lib/rarityConsensus';
 
 // This gauge shows a PROPORTION across tiers (like CollectionCard's
 // breakdown bar), not any single can's own badge color, so it reads the
@@ -11,6 +11,15 @@ import { getDisplayRarity, RARITY_ORDER, BREAKDOWN_VAR } from '@/lib/rarityConse
 // relied on that via hsl(var(--secondary)) before this change).
 const breakdownColor = (name) => `hsl(var(${BREAKDOWN_VAR[name] || BREAKDOWN_VAR.Common}))`;
 
+// Holo Legendary (Alloy family): the Legendary arc and its end cap fill
+// with an SVG gradient whose stops read --holo-1..4. Every other theme
+// leaves those unset, so each stop falls back to --breakdown-legendary and
+// the arc renders as the same solid colour as before.
+const HOLO_STOPS = [0, 0.35, 0.65, 1].map((offset, i) => ({
+  offset,
+  color: `hsl(var(--holo-${i + 1}, var(--breakdown-legendary)))`,
+}));
+
 export default function RarityHero({ collected, sharedCansMap = {}, isLoading = false }) {
   // Recharts sizes percentage-based innerRadius/outerRadius off a generic
   // min(width,height)/2 rule that has no idea our Pie's cy sits at the
@@ -19,6 +28,8 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
   // matter what percentage is requested. Measuring the box ourselves and
   // passing real pixel radii is the only way around that.
   const wrapperRef = useRef(null);
+  const holoId = `rarity-holo-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+  const arcFill = (name) => (name === 'Legendary' ? `url(#${holoId})` : breakdownColor(name));
   const [size, setSize] = useState({ width: 330, height: 165 });
 
   // Re-attached when loading ends: the loading skeleton has no wrapperRef,
@@ -80,7 +91,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
     if (isEmpty) return null;
     const { cx, cy, midAngle, value, index, name } = props;
     const RADIAN = Math.PI / 180;
-    const color = breakdownColor(name);
+    const color = arcFill(name);
     const pathRadius = (innerRadius + outerRadius) / 2;
     const strokeWidth = outerRadius - innerRadius;
     const labelRadius = outerRadius + labelGap;
@@ -133,6 +144,13 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
       <div ref={wrapperRef} role="img" aria-label={summary} className="relative w-full max-w-[330px] mx-auto mt-2" style={{ aspectRatio: '2 / 1' }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
+            <defs>
+              <linearGradient id={holoId} x1="0" y1="0" x2="1" y2="1">
+                {HOLO_STOPS.map(s => (
+                  <stop key={s.offset} offset={s.offset} style={{ stopColor: s.color }} />
+                ))}
+              </linearGradient>
+            </defs>
             <Pie
               rootTabIndex={-1}
               data={data}
@@ -158,7 +176,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
                   // no product meaning tied to a specific rarity tier, so it
                   // should track the active theme like the rest of the app's
                   // neutral surfaces.
-                  fill={isEmpty ? 'hsl(var(--secondary))' : breakdownColor(entry.name)}
+                  fill={isEmpty ? 'hsl(var(--secondary))' : arcFill(entry.name)}
                 />
               ))}
             </Pie>
@@ -181,7 +199,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
             <div key={name} className="flex items-center gap-1.5">
               <div
                 className="w-2 h-2 rounded-full flex-shrink-0"
-                style={{ backgroundColor: breakdownColor(name) }}
+                style={{ background: breakdownBackground(name) }}
               />
               <span className="text-xs font-mono text-muted-foreground">{name}</span>
             </div>

@@ -53,7 +53,6 @@ export const THEME_FAMILIES = [
     label: 'Cosmic',
     displayFont: "'Michroma', sans-serif",
     labelSize: '0.6875rem',
-    isNew: true,
     themes: [
       { id: 'moonlight', label: 'Moonlight', pro: false, dark: { swatch: '#B3BCCD', sup: '#7183AA', background: '#101522' } },
       { id: 'nebula', label: 'Nebula', pro: true, dark: { swatch: '#7A5FFF', sup: '#5579E8', background: '#130B20' } },
@@ -68,7 +67,6 @@ export const THEME_FAMILIES = [
     label: 'Botanical',
     displayFont: "'Fraunces', serif",
     labelSize: '0.8125rem',
-    isNew: true,
     themes: [
       { id: 'sage', label: 'Sage', pro: false, light: { swatch: '#528C77', sup: '#3E514A', background: '#F4F0E5' } },
       { id: 'forest', label: 'Forest', pro: true, dark: { swatch: '#3E765B', sup: '#107848', background: '#0D1712' } },
@@ -81,7 +79,6 @@ export const THEME_FAMILIES = [
     label: 'Noir',
     displayFont: "'Bodoni Moda', serif",
     labelSize: '0.875rem',
-    isNew: true,
     themes: [
       { id: 'carbon', label: 'Carbon', pro: false, dark: { swatch: '#6F7378', sup: '#4D698B', background: '#111214' } },
       { id: 'crimson', label: 'Crimson', pro: true, dark: { swatch: '#B83A4B', sup: '#8A5760', background: '#160B0E' } },
@@ -96,7 +93,6 @@ export const THEME_FAMILIES = [
     label: 'Candy',
     displayFont: "'Fredoka', sans-serif",
     labelSize: '0.75rem',
-    isNew: true,
     themes: [
       { id: 'bubblegum', label: 'Bubblegum', pro: false, light: { swatch: '#FF1F76', sup: '#B91D59', background: '#FFF3F8' } },
       { id: 'blue-pop', label: 'Blue Pop', pro: true, light: { swatch: '#3582FF', sup: '#255FBD', background: '#F0FAFF' } },
@@ -123,6 +119,46 @@ export const THEME_FAMILIES = [
       { id: 'spring-butter', label: 'Butter', pro: true, light: { swatch: '#FFD84D', sup: '#8A6A00', background: '#FFF7D9' } },
       { id: 'spring-pistachio', label: 'Pistachio', pro: true, light: { swatch: '#A3CC6E', sup: '#4E6E30', background: '#EEF6E6' } },
       { id: 'spring-olive', label: 'Olive', pro: true, light: { swatch: '#6B6A1F', sup: '#A39C5C', background: '#F2F1E6' } },
+    ],
+  },
+  // 2026-10-26: three new families from the theme catalogue critique's gaps
+  // (high contrast, neutral light, the can-finish world, warm darks).
+  // Essentials is free in full: Floodlight is an accessibility theme and
+  // Ledger the calm neutral, so neither belongs behind Pro. Alloy and Soda
+  // Fountain are Pro-only families (the first without a free member).
+  {
+    id: 'essentials',
+    label: 'Essentials',
+    displayFont: "'Atkinson Hyperlegible', sans-serif",
+    labelSize: '0.875rem',
+    isNew: true,
+    themes: [
+      { id: 'floodlight', label: 'Floodlight', pro: false, dark: { swatch: '#FFD400', sup: '#FFFFFF', background: '#000000' } },
+      { id: 'ledger', label: 'Ledger', pro: false, light: { swatch: '#1F3A93', sup: '#8C2F1C', background: '#FAF8F3' } },
+    ],
+  },
+  {
+    id: 'alloy',
+    label: 'Alloy',
+    displayFont: "'Archivo', sans-serif",
+    labelSize: '0.875rem',
+    isNew: true,
+    themes: [
+      { id: 'alloy-aluminium', label: 'Brushed Aluminium', pro: true, light: { swatch: '#3B4652', sup: '#8A96A3', background: '#E9ECEF' } },
+      { id: 'alloy-teal', label: 'Anodised Teal', pro: true, dark: { swatch: '#19C2C2', sup: '#0E8A8C', background: '#0F1214' } },
+      { id: 'alloy-red', label: 'Anodised Red', pro: true, dark: { swatch: '#FF2D55', sup: '#C21842', background: '#101115' } },
+      { id: 'alloy-gold', label: 'Gold Foil', pro: true, dark: { swatch: '#E0A526', sup: '#8A6A1E', background: '#0B0C10' } },
+    ],
+  },
+  {
+    id: 'soda-fountain',
+    label: 'Soda Fountain',
+    displayFont: "'Shrikhand', serif",
+    labelSize: '0.8125rem',
+    isNew: true,
+    themes: [
+      { id: 'cola', label: 'Cola', pro: true, dark: { swatch: '#D98A3D', sup: '#B5402A', background: '#140A06' } },
+      { id: 'root-beer', label: 'Root Beer', pro: true, dark: { swatch: '#F1E3C8', sup: '#8C3B2E', background: '#1A0B0B' } },
     ],
   },
 ];
@@ -169,7 +205,7 @@ export function getThemeFamily(themeId) {
 // block sets. The Settings picker sets each family's tile label in its own
 // face, so it needs these before the family is ever applied.
 export const PICKER_LABEL_FONTS_URL =
-  'https://fonts.googleapis.com/css2?family=Michroma&family=Fraunces:wght@600&family=Bodoni+Moda:wght@700&family=Fredoka:wght@600&family=Poppins:wght@700&display=swap';
+  'https://fonts.googleapis.com/css2?family=Michroma&family=Fraunces:wght@600&family=Bodoni+Moda:wght@700&family=Fredoka:wght@600&family=Poppins:wght@700&family=Atkinson+Hyperlegible:wght@700&family=Archivo:wght@700&family=Shrikhand&display=swap';
 
 export const FAMILY_FONT_URLS = {
   cosmic: 'https://fonts.googleapis.com/css2?family=Michroma&family=Space+Mono:wght@400;700&family=Manrope:wght@400;500;700&display=swap',
@@ -177,6 +213,9 @@ export const FAMILY_FONT_URLS = {
   noir: 'https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500;700&family=Fragment+Mono&family=Jost:wght@400;500&display=swap',
   candy: 'https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Chivo+Mono:wght@400;500&family=Nunito:wght@400;600;700&display=swap',
   spring: 'https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap',
+  essentials: 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Atkinson+Hyperlegible+Mono:wght@400;500;700&display=swap',
+  alloy: 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Martian+Mono:wght@400;500;700&display=swap',
+  'soda-fountain': 'https://fonts.googleapis.com/css2?family=Shrikhand&family=Figtree:wght@400;500;600;700&family=Azeret+Mono:wght@400;500;700&display=swap',
 };
 
 // Appends the family's stylesheet once; later calls for the same family

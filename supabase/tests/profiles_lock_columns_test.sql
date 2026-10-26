@@ -104,6 +104,30 @@ select throws_like(
   'free user is blocked from Spring Coral (Pro)'
 );
 
+-- New families, 20261026100000_new_theme_families.sql: Floodlight and
+-- Ledger are free (Essentials), Alloy and Soda Fountain are Pro.
+select lives_ok(
+  $$update profiles set theme = 'floodlight' where id = '11111111-1111-1111-1111-111111111111'$$,
+  'free user can pick Floodlight (free accessibility theme)'
+);
+
+select lives_ok(
+  $$update profiles set theme = 'ledger' where id = '11111111-1111-1111-1111-111111111111'$$,
+  'free user can pick Ledger'
+);
+
+select throws_like(
+  $$update profiles set theme = 'alloy-gold' where id = '11111111-1111-1111-1111-111111111111'$$,
+  '%theme is Pro-only%',
+  'free user is blocked from Gold Foil (Alloy, Pro)'
+);
+
+select throws_like(
+  $$update profiles set theme = 'cola' where id = '11111111-1111-1111-1111-111111111111'$$,
+  '%theme is Pro-only%',
+  'free user is blocked from Cola (Soda Fountain, Pro)'
+);
+
 reset role;
 
 -- ── As the Pro user (authenticated) ──────────────────────────────────────

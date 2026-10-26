@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { STEPS, MIN_STEP, rampProblems, adjacentSteps, isDarkCard, contrast as contrastRgb } from './rampColour';
 
 // Guards index.css's ramp ORDER RULE: in every theme, the Legendary step of
 // --breakdown-* stands out at least as much as Common against that theme's
@@ -19,7 +20,13 @@ const contrast = (a, b) => {
   return (x + 0.05) / (y + 0.05);
 };
 
-const blocks = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-common[^{}]*)\}/g)].map(([, sel, body]) => ({
+// Theme blocks: the ones that declare both a gauge and a card. (The
+// colour-blind override, [data-rarity="colour-blind"], declares only the
+// gauge; it's checked against every theme's card further down.)
+const themeBlockMatches = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-common[^{}]*)\}/g)]
+  .filter(([, , body]) => /--card:/.test(body));
+
+const blocks = themeBlockMatches.map(([, sel, body]) => ({
   name: sel.trim().split('\n').pop().trim(),
   card: body.match(/--card:\s*([^;]+);/)?.[1],
   common: body.match(/--breakdown-common:\s*([^;]+);/)[1],
@@ -38,33 +45,66 @@ describe('rarity breakdown ramps', () => {
   });
 });
 
-// The gauge rule (index.css, 2026-10-19): Common -> Legendary rises in
-// contrast against --card at EVERY step, and in colourfulness, so
-// Legendary is the most vivid step, never a fading pastel. Colourfulness is
-// CIELAB chroma; neutral gauges (all steps under 8: Carbon, Silver Screen)
-// are exempt from the chroma half.
-const STEPS = ['common', 'uncommon', 'rare', 'ultra', 'legendary'];
-const chroma = v => {
-  const lin = hslToRgb(...parse(v)).map(c => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
-  const [r, g, b] = lin;
-  const X = (r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047, Y = r * 0.2126 + g * 0.7152 + b * 0.0722, Z = (r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883;
-  const f = t => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
-  return Math.hypot(500 * (f(X) - f(Y)), 200 * (f(Y) - f(Z)));
-};
-const gauges = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-common[^{}]*)\}/g)].map(([, sel, body]) => ({
-  name: sel.trim().split('\n').pop().trim(),
-  card: body.match(/--card:\s*([^;]+);/)[1],
-  steps: STEPS.map(s => body.match(new RegExp(`--breakdown-${s}:\\s*([^;]+);`))[1]),
+// The gauge rules, shared with scripts/tune-rarity-ramps.mjs
+// (src/lib/rampColour.js, rampProblems): Common reads at >= 2:1, contrast
+// rises at every tier, and adjacent tiers are >= MIN_STEP (8) apart in
+// deltaE-OK. Dark themes: also under simulated protanopia and deuteranopia,
+// and Legendary is the most colourful tier. Light themes: in normal vision,
+// with Legendary at least as colourful as Common (a light card forces the
+// ramp to darken, which drains many hues); colour-blind users there get the
+// fixed override below. Before 2026-10-26 only 3 of 38 renderings had every
+// step >= 8, and Nebula, Crimson, Amethyst and Cyberpunk collapsed to one
+// colour under protanopia.
+const gauges = themeBlockMatches.map(([, sel, body]) => ({
+  name: sel.trim().split(/\r?\n/).pop().trim(),
+  card: hslToRgb(...parse(body.match(/--card:\s*([^;]+);/)[1])),
+  steps: STEPS.map(s => hslToRgb(...parse(body.match(new RegExp(`--breakdown-${s}:\\s*([^;]+);`))[1]))),
 }));
 
-describe('gauge rule: rises to a vivid Legendary', () => {
+describe('gauge rules: clear steps, rising contrast, vivid Legendary', () => {
+  it('covers every theme gauge', () => {
+    expect(gauges.length).toBeGreaterThanOrEqual(38);
+  });
+
   it.each(gauges.map(g => [g.name, g]))('%s', (_, g) => {
-    const K = g.steps.map(s => contrast(s, g.card));
+    expect(rampProblems(g.steps, g.card)).toEqual([]);
+  });
+});
+
+// The fixed colour-blind-safe gauge (Settings > Accessibility): dark and
+// light versions, each checked against EVERY theme card of that polarity,
+// with the strict rules in all three vision modes.
+const overrideRamp = selector => {
+  // The block whose selector is exactly `selector` (followed by its "{").
+  const at = css.search(new RegExp(`${selector.replace(/[[\]"().*+?^$|\\]/g, '\\$&')}\\s*\\{`));
+  if (at < 0) return null; // missing: reported by the tests below, not a load-time crash
+  const body = css.slice(css.indexOf('{', at) + 1, css.indexOf('}', at));
+  return STEPS.map(s => hslToRgb(...parse(body.match(new RegExp(`--breakdown-${s}:\\s*([^;]+);`))[1])));
+};
+const cvdRamps = {
+  dark: overrideRamp(':root[data-rarity="colour-blind"]'),
+  light: overrideRamp(':root[data-rarity="colour-blind"][data-tone="light"]'),
+};
+
+describe('colour-blind-friendly rarity colours', () => {
+  it('defines a dark and a light override', () => {
+    expect(cvdRamps.dark, ':root[data-rarity="colour-blind"]').toBeTruthy();
+    expect(cvdRamps.light, ':root[data-rarity="colour-blind"][data-tone="light"]').toBeTruthy();
+  });
+
+  it.each(gauges.map(g => [g.name, g]))('%s: the override reads on this card', (_, g) => {
+    const ramp = isDarkCard(g.card) ? cvdRamps.dark : cvdRamps.light;
+    expect(ramp, 'override block present').toBeTruthy();
+    const K = ramp.map(c => contrastRgb(c, g.card));
+    expect(K[0], 'Common contrast').toBeGreaterThanOrEqual(2);
     for (let i = 1; i < 5; i++) expect(K[i], `${STEPS[i]} contrast`).toBeGreaterThan(K[i - 1]);
-    const C = g.steps.map(chroma);
-    if (Math.max(...C) < 8) return;
-    expect(C[4], 'Legendary is the most colourful step').toBeGreaterThanOrEqual(Math.max(...C) - 2);
-    for (let i = 1; i < 5; i++) expect(C[i], `${STEPS[i]} colourfulness`).toBeGreaterThanOrEqual(C[i - 1] - 4);
+  });
+
+  it.each(['dark', 'light'])('%s override: >= 8 apart in normal, protan and deutan vision', tone => {
+    expect(cvdRamps[tone], 'override block present').toBeTruthy();
+    for (const vision of ['normal', 'protan', 'deutan']) {
+      expect(Math.min(...adjacentSteps(cvdRamps[tone], vision)), vision).toBeGreaterThanOrEqual(MIN_STEP);
+    }
   });
 });
 
@@ -74,7 +114,7 @@ describe('gauge rule: rises to a vivid Legendary', () => {
 // the label must read at 4.5:1 on that fill, and the fill must stand out
 // from the page at 3:1 OR the theme must outline it with --fill-edge at 3:1.
 // Theme blocks are the ones that DECLARE --breakdown-common.
-const scanBlocks = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-common:[^{}]*)\}/g)].map(([, sel, body]) => ({
+const scanBlocks = themeBlockMatches.map(([, sel, body]) => ({
   name: sel.trim().split('\n').pop().trim(),
   background: body.match(/--background:\s*([^;]+);/)[1],
   fill: body.match(/--cta:\s*([\d.]+ [^;]+);/)?.[1]
@@ -125,7 +165,7 @@ describe('primary fill', () => {
 // Card edges and dividers: every theme's --border reads at >= 1.35:1
 // against both the page and the card (/impeccable polish, 2026-10-19; Sour
 // Apple's was 1.10, Meadow 1.23, Synthwave dark 1.24, Deep Space 1.25).
-const borderBlocks = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-common[^{}]*)\}/g)].map(([, sel, body]) => ({
+const borderBlocks = themeBlockMatches.map(([, sel, body]) => ({
   name: sel.trim().split('\n').pop().trim(),
   background: body.match(/--background:\s*([^;]+);/)[1],
   card: body.match(/--card:\s*([^;]+);/)[1],

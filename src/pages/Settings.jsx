@@ -16,6 +16,7 @@ import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import LegalFooter from '@/components/legal/LegalFooter';
 import { exportUserData, downloadJson } from '@/lib/exportUserData';
 import { MIN_PASSWORD } from '@/lib/authErrors';
+import { COLOUR_BLIND, readRarityPalette, setRarityPalette } from '@/lib/rarityPalette';
 
 const STATUSES = ['collected', 'wishlist'];
 const PREFS_KEY = 'canvolt_prefs';
@@ -784,6 +785,14 @@ export default function Settings() {
     savePrefs(next);
   };
 
+  // Accessibility: colour-blind-friendly rarity colours (src/lib/rarityPalette.js).
+  const [colourBlindRarity, setColourBlindRarity] = useState(() => readRarityPalette() === COLOUR_BLIND);
+  const toggleColourBlindRarity = () => {
+    const next = !colourBlindRarity;
+    setColourBlindRarity(next);
+    setRarityPalette(next ? COLOUR_BLIND : 'theme');
+  };
+
   const updateFollowNotifyPref = async (next) => {
     if (next === profile?.notify_follows_pref) return;
     setNotifyPending(true);
@@ -1109,6 +1118,34 @@ export default function Settings() {
               disabled={notifyPending}
             />
           )}
+        </div>
+
+        <SectionHeader title="Accessibility" />
+        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+          <div className="px-4 py-3.5 flex items-center justify-between gap-4">
+            <div>
+              <p id="colour-blind-rarity-label" className="text-sm font-medium text-foreground">Colour-blind-friendly rarity colours</p>
+              <p className="text-xs font-mono text-muted-foreground mt-0.5">
+                One set of rarity colours, from Common to Legendary, that stays easy to tell apart with colour blindness, in any theme. Saved on this device.
+              </p>
+            </div>
+            <button
+              onClick={toggleColourBlindRarity}
+              role="switch"
+              aria-checked={colourBlindRarity}
+              aria-labelledby="colour-blind-rarity-label"
+              className={cn(
+                'relative w-11 h-6 rounded-full transition-colors flex-shrink-0',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                colourBlindRarity ? 'bg-primary' : 'bg-secondary border border-border'
+              )}
+            >
+              <div className={cn(
+                'absolute top-0.5 w-5 h-5 rounded-full bg-foreground shadow transition-all',
+                colourBlindRarity ? 'left-5' : 'left-0.5'
+              )} />
+            </button>
+          </div>
         </div>
 
         <SectionHeader title="Privacy" />

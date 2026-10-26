@@ -207,5 +207,3 @@ async function readCapped(response: Response, maxBytes: number): Promise<Uint8Ar
   for (const c of chunks) { out.set(c, offset); offset += c.byteLength }
   return out
 }
-  }
-})

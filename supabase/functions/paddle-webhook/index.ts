@@ -107,18 +107,36 @@ async function isAllowedPaddleIp(ip: string): Promise<boolean> {
   return cidrs.some((cidr) => ipInCidr(ip, cidr));
 }
 
+// How old a signature may be. Paddle signs each delivery attempt with the
+// time it was sent, so a legitimate one is seconds old; 5 minutes leaves
+// room for clock skew and queueing. Older ones are refused even with a
+// valid hash, so a captured request can't be replayed later (the
+// paddle_events duplicate check below is the second line of defence).
+const SIGNATURE_MAX_AGE_SECONDS = 300;
+
 function verifySignature(rawBody: string, header: string): boolean {
-  // header format: "ts=<timestamp>;h1=<hash>"
-  const parts = Object.fromEntries(header.split(";").map((p) => p.split("=")));
-  if (!parts.ts || !parts.h1) return false;
+  // header format: "ts=<timestamp>;h1=<hash>", with more than one h1 while
+  // a webhook secret is being rotated (any match is accepted).
+  let ts = "";
+  const hashes: string[] = [];
+  for (const part of header.split(";")) {
+    const [key, ...rest] = part.trim().split("=");
+    const value = rest.join("=");
+    if (key === "ts") ts = value;
+    else if (key === "h1" && value) hashes.push(value);
+  }
+  if (!/^\d+$/.test(ts) || hashes.length === 0) return false;
 
-  const signedPayload = `${parts.ts}:${rawBody}`;
-  const expected = createHmac("sha256", WEBHOOK_SECRET).update(signedPayload).digest("hex");
+  const age = Math.abs(Math.floor(Date.now() / 1000) - Number(ts));
+  if (age > SIGNATURE_MAX_AGE_SECONDS) return false;
 
-  const expectedBuf = Buffer.from(expected);
-  const actualBuf = Buffer.from(parts.h1);
-  if (expectedBuf.length !== actualBuf.length) return false;
-  return timingSafeEqual(expectedBuf, actualBuf);
+  const signedPayload = `${ts}:${rawBody}`;
+  const expectedBuf = Buffer.from(createHmac("sha256", WEBHOOK_SECRET).update(signedPayload).digest("hex"));
+
+  return hashes.some((h) => {
+    const actualBuf = Buffer.from(h);
+    return actualBuf.length === expectedBuf.length && timingSafeEqual(expectedBuf, actualBuf);
+  });
 }
 
 // Only for subscription.activated — see the file-header note on why the

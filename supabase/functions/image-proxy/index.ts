@@ -15,6 +15,11 @@ import { Redis } from 'npm:@upstash/redis@1.38.3'
 // CDN proxy — matches Supabase's own official example for this exact
 // use case.
 
+// Can photos only: no SVG (it can carry script), no other image types.
+const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'])
+const MAX_BYTES = 8 * 1024 * 1024
+const MAX_REDIRECTS = 3
+
 const ALLOWED_HOSTS = new Set([
   'world.openfoodfacts.org',
   'images.openfoodfacts.org',
@@ -97,54 +102,110 @@ serve(async (req) => {
     return new Response('Invalid URL', { status: 400 })
   }
 
-  // Only allow http/https URLs
-  if (target.protocol !== 'http:' && target.protocol !== 'https:') {
-    return new Response('Invalid URL', { status: 400 })
-  }
-
-  // CONTROL 1 — hostname allowlist. This function is unauthenticated (see
-  // note above), so this is the primary gate against it being used as an
-  // open proxy for arbitrary URLs.
-  if (!ALLOWED_HOSTS.has(target.hostname.toLowerCase())) {
-    return new Response('URL not allowed', { status: 403 })
-  }
-
-  // CONTROL 2 — block requests that resolve to a private/internal IP,
-  // even for an allowed hostname (defense in depth against DNS pointing an
-  // otherwise-legitimate domain at an internal address).
-  let blocked: boolean
-  try {
-    blocked = await hasBlockedIp(target.hostname)
-  } catch {
-    return new Response('DNS resolution failed', { status: 502 })
-  }
-  if (blocked) {
-    return new Response('URL not allowed', { status: 403 })
-  }
+  // CONTROLS 1 + 2, run on the requested URL and again on every redirect
+  // hop (CONTROL 3): an allowed host that redirects elsewhere must not be a
+  // way around the allowlist or the private-IP block.
+  const rejected = await checkTarget(target)
+  if (rejected) return rejected
 
   try {
-    const response = await fetch(target.toString())
-    if (!response.ok) {
-      return new Response('Failed to fetch image', { status: response.status })
+    let response: Response | null = null
+    for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+      response = await fetch(target.toString(), { redirect: 'manual' })
+      if (response.status < 300 || response.status >= 400) break
+      const location = response.headers.get('location')
+      if (!location || hop === MAX_REDIRECTS) {
+        return new Response('Too many redirects', { status: 502 })
+      }
+      try {
+        target = new URL(location, target)
+      } catch {
+        return new Response('Invalid redirect', { status: 502 })
+      }
+      const hopRejected = await checkTarget(target)
+      if (hopRejected) return hopRejected
     }
 
-    const contentType = response.headers.get('content-type') || ''
-    // Reject non-image responses — without this, the function is a general-
-    // purpose relay for arbitrary URLs, not just an image proxy.
-    if (!contentType.startsWith('image/')) {
+    if (!response || !response.ok) {
+      return new Response('Failed to fetch image', { status: response?.status ?? 502 })
+    }
+
+    // CONTROL 4 — raster images only. "image/*" would also pass SVG, which
+    // can carry script; can images are photos.
+    const contentType = (response.headers.get('content-type') || '').split(';')[0].trim().toLowerCase()
+    if (!ALLOWED_TYPES.has(contentType)) {
       return new Response('Not an image', { status: 400 })
     }
 
-    const buffer = await response.arrayBuffer()
+    // CONTROL 5 — size cap, checked against the declared length and again
+    // while reading (the header can be missing or wrong).
+    const declared = Number(response.headers.get('content-length') || 0)
+    if (declared > MAX_BYTES) {
+      return new Response('Image too large', { status: 413 })
+    }
+    const body = await readCapped(response, MAX_BYTES)
+    if (!body) {
+      return new Response('Image too large', { status: 413 })
+    }
 
-    return new Response(buffer, {
+    return new Response(body, {
       headers: {
         'Content-Type': contentType,
+        'X-Content-Type-Options': 'nosniff',
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'public, max-age=86400',
       },
     })
   } catch (e) {
     return new Response('Error fetching image', { status: 500 })
+  }
+})
+
+// http/https + allowlisted host + not resolving to a private address.
+// Returns the error response to send, or null when the URL may be fetched.
+async function checkTarget(target: URL): Promise<Response | null> {
+  if (target.protocol !== 'http:' && target.protocol !== 'https:') {
+    return new Response('Invalid URL', { status: 400 })
+  }
+  // CONTROL 1 — hostname allowlist. This function is unauthenticated (see
+  // note above), so this is the primary gate against it being used as an
+  // open proxy for arbitrary URLs.
+  if (!ALLOWED_HOSTS.has(target.hostname.toLowerCase())) {
+    return new Response('URL not allowed', { status: 403 })
+  }
+  // CONTROL 2 — block requests that resolve to a private/internal IP,
+  // even for an allowed hostname (defense in depth against DNS pointing an
+  // otherwise-legitimate domain at an internal address).
+  try {
+    if (await hasBlockedIp(target.hostname)) {
+      return new Response('URL not allowed', { status: 403 })
+    }
+  } catch {
+    return new Response('DNS resolution failed', { status: 502 })
+  }
+  return null
+}
+
+// Reads the body, giving up (null) once it passes maxBytes.
+async function readCapped(response: Response, maxBytes: number): Promise<Uint8Array | null> {
+  if (!response.body) return new Uint8Array()
+  const reader = response.body.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    total += value.byteLength
+    if (total > maxBytes) {
+      await reader.cancel().catch(() => {})
+      return null
+    }
+    chunks.push(value)
+  }
+  const out = new Uint8Array(total)
+  let offset = 0
+  for (const c of chunks) { out.set(c, offset); offset += c.byteLength }
+  return out
+}
   }
 })

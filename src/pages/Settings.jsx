@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import LegalFooter from '@/components/legal/LegalFooter';
 import { exportUserData, downloadJson } from '@/lib/exportUserData';
+import { MIN_PASSWORD } from '@/lib/authErrors';
 
 const STATUSES = ['collected', 'wishlist'];
 const PREFS_KEY = 'canvolt_prefs';
@@ -155,7 +156,7 @@ function ChangePasswordPanel({ user }) {
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
-    if (form.next.length < 6) { toast.error('New password must be at least 6 characters'); return; }
+    if (form.next.length < MIN_PASSWORD) { toast.error(`New password must be at least ${MIN_PASSWORD} characters`); return; }
     if (form.next !== form.confirm) { toast.error('Passwords do not match'); return; }
     setSaving(true);
     // supabase.auth.updateUser() alone doesn't verify the current password —

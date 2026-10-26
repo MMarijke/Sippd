@@ -16,12 +16,35 @@ insert into auth.users (
 );
 update profiles set full_name = 'Original Name' where id = '33333333-3333-3333-3333-333333333333';
 
+-- A private collector with a live streak (as postgres, which the lock
+-- trigger exempts), for the privacy checks below.
+insert into auth.users (
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+  confirmation_token, email_change, email_change_token_new, recovery_token
+) values (
+  '00000000-0000-0000-0000-000000000000', '55555555-5555-5555-5555-555555555555', 'authenticated', 'authenticated',
+  'private@sippd.test', 'x', now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', '', '', ''
+);
+update profiles
+set full_name = 'Private Collector', is_private = true, current_streak = 12,
+    last_active_date = (now() at time zone 'utc')::date
+where id = '55555555-5555-5555-5555-555555555555';
+
 -- ── As anon (only the public key) ────────────────────────────────────────
 set local role anon;
 
-select ok(
-  (select count(*) from public.public_profiles where id = '33333333-3333-3333-3333-333333333333') = 1,
-  'anon can still read public_profiles (middleware, OG image, public profile page)'
+-- Since 20261026000000: signed-out callers read one profile by id through
+-- get_public_profile(), not the view itself.
+select is(
+  (select full_name from public.get_public_profile('33333333-3333-3333-3333-333333333333')),
+  'Original Name',
+  'anon can read one profile by id (public profile page, link preview, OG image)'
+);
+
+select throws_ok(
+  $$select count(*) from public.public_profiles$$,
+  '42501', null, 'anon cannot list every profile through public_profiles'
 );
 
 select throws_ok(
@@ -61,6 +84,38 @@ select throws_ok(
   '42501', null, 'a signed-in user cannot rename someone else through public_profiles'
 );
 
+-- Private profile, seen by a signed-in non-follower: findable by name (to
+-- request a follow), but streak and join date hidden.
+select is(
+  (select full_name from public.public_profiles where id = '55555555-5555-5555-5555-555555555555'),
+  'Private Collector',
+  'a private collector is still findable by name when signed in'
+);
+select ok(
+  (select current_streak is null and created_at is null from public.public_profiles where id = '55555555-5555-5555-5555-555555555555'),
+  'a non-follower does not see a private collector''s streak or join date'
+);
+
+reset role;
+
+-- The private collector themself sees their own streak and join date.
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '55555555-5555-5555-5555-555555555555', true);
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', true);
+select ok(
+  (select current_streak = 12 and created_at is not null from public.public_profiles where id = '55555555-5555-5555-5555-555555555555'),
+  'a private collector sees their own streak and join date'
+);
+reset role;
+
+-- And signed out, through get_public_profile, they stay hidden.
+set local role anon;
+select set_config('request.jwt.claim.sub', '', true);
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select ok(
+  (select current_streak is null and created_at is null from public.get_public_profile('55555555-5555-5555-5555-555555555555')),
+  'signed out, a private collector''s streak and join date stay hidden'
+);
 reset role;
 
 select is(

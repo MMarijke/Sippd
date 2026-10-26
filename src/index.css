@@ -249,57 +249,6 @@
     --rarity-legendary-text: 330 81% 38.5%;
   }
 
-  .dark {
-    --background: 217 37% 7%;
-    --foreground: 153 100% 98%;
-    --card: 217 35% 11%;
-    --card-foreground: 153 100% 98%;
-    --popover: 217 35% 11%;
-    --popover-foreground: 153 100% 98%;
-    --primary: 152 100% 50%;
-    --primary-foreground: 240 20% 5%;
-    --secondary: 217 33% 21%;
-    --secondary-foreground: 153 100% 98%;
-    --muted: 217 31% 12%;
-    --muted-foreground: 220 10% 58%;
-    --accent: 189 100% 50%;
-    --accent-foreground: 240 20% 5%;
-    --destructive: 0 70% 56%;
-    --destructive-foreground: 240 20% 5%;
-    --success: 150 55% 35%;
-    --success-foreground: 240 20% 5%;
-    --warning: 38 75% 37%;
-    --warning-foreground: 240 20% 5%;
-    --info: 217 70% 55%;
-    --info-foreground: 240 20% 5%;
-    --border: 217.0 35% 21.3%;
-    --input: 217.0 35% 21.3%;
-    --ring: 152 100% 50%;
-    --glow-intensity: 1;
-    --wash-intensity: 0;
-    --card-texture: none;
-    --sidebar-background: 217 35% 9%;
-    --sidebar-foreground: 153 60% 85%;
-    --sidebar-primary: 152 100% 50%;
-    --sidebar-primary-foreground: 240 20% 5%;
-    --sidebar-accent: 217 31% 15%;
-    --sidebar-accent-foreground: 153 60% 85%;
-    --sidebar-border: 217 35% 20%;
-    --sidebar-ring: 152 100% 50%;
-
-    --rarity-common: 220 9% 56%;
-    --rarity-uncommon: 142 71% 45%;
-    --rarity-rare: 217 91% 60%;
-    --rarity-ultra: 271 91% 65%;
-    --rarity-legendary: 330 81% 60%;
-
-    --breakdown-common: 182.0 65% 28.4%;
-    --breakdown-uncommon: 167.4 62% 36.1%;
-    --breakdown-rare: 158.0 66% 43.2%;
-    --breakdown-ultra: 152.8 75% 48.9%;
-    --breakdown-legendary: 152.0 100% 50.0%;
-  }
-
   /* Fill colours that can differ from their text twins. Every theme gets
      the twin by default (resolved per element, so a [data-theme] preview
      follows its own theme), and must come BEFORE the theme blocks so a
@@ -364,7 +313,7 @@
      --breakdown-* for the DARK Neon Arcade blocks is HAND-AUTHORED
      (2026-09-29), per product direction, using Cosmic's method (even CIELAB
      steps, ends chosen for a real lightness step, 2:1 floor on any faint
-     end). :root and .dark mirror Power-Up dark. The LIGHT blocks derive
+     end). :root mirrors Power-Up dark. The LIGHT blocks derive
      from these (2026-10-05, "Daylight Neon", see the light section below):
      same hue route Common -> Legendary in both polarities, so a theme's
      gauge keeps its colour family when the polarity toggles (Scan and the
@@ -410,6 +359,7 @@
     --secondary: 217 33% 21%;
     --secondary-foreground: 153 100% 98%;
     --muted: 217 31% 12%;
+    --muted-foreground: 217.0 10% 57.7%;
     --accent: 189 100% 50%;
     --accent-foreground: 240 20% 5%;
     --border: 217.0 35% 21.3%;
@@ -435,6 +385,7 @@
     --secondary: 278 34% 20%;
     --secondary-foreground: 316 100% 98%;
     --muted: 278 32% 11%;
+    --muted-foreground: 278.0 10% 58.8%;
     --accent: 257 100% 68%;
     --accent-foreground: 240 20% 5%;
     --border: 278.0 36% 21.9%;
@@ -460,6 +411,7 @@
     --secondary: 204 48% 20%;
     --secondary-foreground: 192 100% 97%;
     --muted: 204 46% 11%;
+    --muted-foreground: 204.0 10% 56.4%;
     --accent: 227 100% 64.5%;
     --accent-foreground: 240 20% 5%;
     --border: 204 50% 19%;
@@ -485,6 +437,7 @@
     --secondary: 340 29% 19%;
     --secondary-foreground: 354 100% 98%;
     --muted: 340 27% 10%;
+    --muted-foreground: 340.0 10% 58.5%;
     --accent: 29 100% 50%;
     --accent-foreground: 240 20% 5%;
     --border: 340.0 31% 20.4%;
@@ -510,6 +463,7 @@
     --secondary: 261 51% 20%;
     --secondary-foreground: 310 100% 98%;
     --muted: 261 49% 11%;
+    --muted-foreground: 261.0 10% 59.3%;
     /* This palette's one exception to "dark on-color everywhere": Synthwave's
        supporting (#6C4DFF) is dark/saturated enough that near-white text
        reads better on it than near-black (4.86:1 vs 3.90:1) -- verified,
@@ -555,7 +509,7 @@
     --secondary: 152.0 40% 87%;
     --secondary-foreground: 218 30% 25%;
     --muted: 218 87% 91%;
-    --muted-foreground: 218 21% 45%;
+    --muted-foreground: 218 21% 41.5%;
     --accent: 189 100% 33%;
     --accent-foreground: 240 20% 5%;
     --border: 217 87% 82%;
@@ -607,7 +561,7 @@
     --secondary: 204 88% 87%;
     --secondary-foreground: 204 30% 25%;
     --muted: 204 87% 91%;
-    --muted-foreground: 203 21% 43%;
+    --muted-foreground: 203 21% 40.0%;
     --accent: 227 100% 66.9%;
     --accent-foreground: 240 20% 5%;
     --border: 204 87% 82%;
@@ -636,7 +590,7 @@
     --secondary: 340 88% 87%;
     --secondary-foreground: 341 30% 25%;
     --muted: 341 87% 91%;
-    --muted-foreground: 341 21% 46%;
+    --muted-foreground: 341 21% 41.9%;
     --accent: 29 100% 40.4%;
     --accent-foreground: 240 20% 5%;
     --border: 340 87% 82%;
@@ -664,7 +618,7 @@
     --secondary: 261 88% 87%;
     --secondary-foreground: 261 30% 25%;
     --muted: 261 87% 91%;
-    --muted-foreground: 282.0 17.5% 44.7%;
+    --muted-foreground: 282 17.5% 40.6%;
     --accent: 17.1 81.6% 51.0%;
     --accent-foreground: 240 20% 5%;
     --border: 327.6 58.1% 83.1%;
@@ -714,9 +668,11 @@
      through Legendary=4), saturation = 55 + tier-index*5, lightness
      binary-searched for ~3.5:1 against this theme's own background.
 
-     muted-foreground is set only for the 9 light-background themes (Sage,
-     Moss, Meadow, and all 6 Candy) -- the 15 dark ones inherit the existing
-     invariant value from :root/.dark, same as every Phase 1 dark theme.
+     muted-foreground: every theme sets its own. The dark ones used to
+     inherit :root's blue-grey (220 10% 58%), which read bluish on warm and
+     neutral pages (Carbon, Solar Flare, Crimson...); since 2026-10-26 each
+     is a 10%-saturation grey in its own page's hue (Carbon: neutral), at
+     the same contrast it had (mutedText.test.js).
 
      This whole revision cycle (contrast fixes, hue-collision fixes, and the
      on-color/restoration pass below) followed an /impeccable critique with
@@ -778,6 +734,7 @@
     --secondary: 223.3 32% 23.8%;
     --secondary-foreground: 223.6 100% 97.8%;
     --muted: 223.3 30% 14.8%;
+    --muted-foreground: 223.3 10% 58.3%;
     --accent: 221.1 25% 55.5%;
     --accent-foreground: 240.0 20% 4.9%;
     --border: 223.3 34% 24.1%;
@@ -803,6 +760,7 @@
     --secondary: 262.9 45% 22.4%;
     --secondary-foreground: 272.7 100% 97.8%;
     --muted: 262.9 43% 13.4%;
+    --muted-foreground: 262.9 10% 59.2%;
     --accent: 225.3 76% 62.2%;
     --accent-foreground: 240.0 20% 4.9%;
     --border: 262.9 47% 25.5%;
@@ -828,6 +786,7 @@
     --secondary: 16.7 49% 20.7%;
     --secondary-foreground: 26.3 100% 96.9%;
     --muted: 16.7 47% 11.7%;
+    --muted-foreground: 16.7 10% 57.1%;
     --accent: 35.2 100% 63.9%;
     --accent-foreground: 240.0 20% 4.9%;
     --border: 16.7 51% 20.2%;
@@ -853,6 +812,7 @@
     --secondary: 176.0 44% 20.1%;
     --secondary-foreground: 158.6 100% 97.3%;
     --muted: 176.0 42% 11.1%;
+    --muted-foreground: 176.0 10% 53.7%;
     --accent: 234.8 100% 70.4%;
     --accent-foreground: 240.0 20% 4.9%;
     --border: 176.0 46% 19.1%;
@@ -884,6 +844,7 @@
     --secondary: 232.0 41% 19.0%;
     --secondary-foreground: 205.0 60% 96.0%;
     --muted: 232.0 39% 10.0%;
+    --muted-foreground: 232.0 10% 59.1%;
     --accent: 250.0 85% 66.7%;
     --accent-foreground: 240.0 20% 4.9%;
     --border: 232.0 43% 23.1%;
@@ -909,6 +870,7 @@
     --secondary: 45.0 31% 20.7%;
     --secondary-foreground: 45.0 100% 96.9%;
     --muted: 45.0 29% 11.7%;
+    --muted-foreground: 45.0 10% 54.1%;
     --accent: 44.4 42% 46.7%;
     --accent-foreground: 240.0 20% 4.9%;
     --border: 45.0 33% 19.7%;
@@ -978,7 +940,7 @@
     --secondary: 44.0 39% 83.7%;
     --secondary-foreground: 146.5 9% 24.1%;
     --muted: 44.0 37% 87.7%;
-    --muted-foreground: 147.4 6% 40.6%;
+    --muted-foreground: 147.4 6% 38.6%;
     --accent: 157.6 8.0% 50.7%;
     --accent-foreground: 240.0 20% 4.9%;
     --border: 44.0 39% 77.3%;
@@ -1004,6 +966,7 @@
     --secondary: 150.0 24% 21.1%;
     --secondary-foreground: 135.0 36% 95.7%;
     --muted: 150.0 22% 12.1%;
+    --muted-foreground: 150.0 10% 54.0%;
     --accent: 142.9 21.5% 35.6%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 150.0 26% 20.1%;
@@ -1029,6 +992,7 @@
     --secondary: 132.0 21% 21.8%;
     --secondary-foreground: 124.6 100% 97.5%;
     --muted: 132.0 19% 12.8%;
+    --muted-foreground: 78.0 10% 53.0%;
     --accent: 68.5 47.0% 32.5%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 76.0 31.9% 18.4%;
@@ -1054,7 +1018,7 @@
     --secondary: 54.8 51% 82.6%;
     --secondary-foreground: 69.1 29% 22.5%;
     --muted: 54.8 49% 86.6%;
-    --muted-foreground: 68.1 20% 36.3%;
+    --muted-foreground: 68.1 20% 35.0%;
     --accent: 101.4 40% 20.4%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 54.8 51% 71.2%;
@@ -1112,6 +1076,7 @@
     --secondary: 220.0 4% 21.3%;
     --secondary-foreground: 0.0 0% 96.1%;
     --muted: 220.0 2% 12.3%;
+    --muted-foreground: 220.0 0% 56.5%;
     --accent: 213.1 14.7% 41.6%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 220.0 6% 20.6%;
@@ -1137,6 +1102,7 @@
     --secondary: 343.6 29% 20.5%;
     --secondary-foreground: 355.0 100% 97.6%;
     --muted: 343.6 27% 11.5%;
+    --muted-foreground: 343.6 10% 58.5%;
     --accent: 349.4 23% 44.1%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 343.6 31% 21.4%;
@@ -1162,6 +1128,7 @@
     --secondary: 273.3 22% 20.9%;
     --secondary-foreground: 276.0 63% 96.9%;
     --muted: 273.3 20% 11.9%;
+    --muted-foreground: 273.3 10% 58.9%;
     --accent: 268.4 20.9% 45.6%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 273.3 24% 21.9%;
@@ -1187,6 +1154,7 @@
     --secondary: 215.3 48% 20.5%;
     --secondary-foreground: 218.6 100% 97.3%;
     --muted: 215.3 46% 11.5%;
+    --muted-foreground: 215.3 10% 57.5%;
     --accent: 216.7 35.2% 43.4%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 215.3 50% 21.0%;
@@ -1212,6 +1180,7 @@
     --secondary: 156.0 32% 19.5%;
     --secondary-foreground: 155.0 60% 96.1%;
     --muted: 156.0 30% 10.5%;
+    --muted-foreground: 191.3 10% 55.0%;
     --accent: 189.0 63.3% 33.1%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 191.1 38.8% 19.2%;
@@ -1311,7 +1280,7 @@
     --secondary: 335.0 98% 88.6%;
     --secondary-foreground: 334.3 25% 27.3%;
     --muted: 335.0 96% 92.6%;
-    --muted-foreground: 334.9 18% 46.9%;
+    --muted-foreground: 334.9 18% 42.7%;
     --accent: 336.9 73% 42.0%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 335.0 98% 83.6%;
@@ -1337,7 +1306,7 @@
     --secondary: 200.0 98% 88.1%;
     --secondary-foreground: 200.9 36% 25.1%;
     --muted: 200.0 96% 92.1%;
-    --muted-foreground: 201.1 25% 42.4%;
+    --muted-foreground: 201.1 25% 40.4%;
     --accent: 217.1 67% 44.3%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 200.0 98% 82.0%;
@@ -1368,7 +1337,7 @@
     --secondary: 250.0 98% 88.3%;
     --secondary-foreground: 251.3 32% 28.2%;
     --muted: 250.0 96% 92.3%;
-    --muted-foreground: 252.1 23% 48.6%;
+    --muted-foreground: 252.1 23% 45.3%;
     --accent: 245.0 61% 56.6%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 250.0 98% 83.3%;
@@ -1394,7 +1363,7 @@
     --secondary: 26.7 98% 87.5%;
     --secondary-foreground: 16.8 40% 24.7%;
     --muted: 26.7 96% 91.5%;
-    --muted-foreground: 17.1 28% 44.5%;
+    --muted-foreground: 17.1 28% 42.3%;
     --accent: 21.5 100.0% 38.5%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 26.7 98% 82.2%;
@@ -1453,7 +1422,7 @@
     --secondary: 351.4 98% 88.3%;
     --secondary-foreground: 347.8 37% 25.7%;
     --muted: 351.4 96% 92.3%;
-    --muted-foreground: 347.1 27% 48.0%;
+    --muted-foreground: 347.1 27% 43.8%;
     --accent: 342.0 70% 30.0%;
     --accent-foreground: 0.0 0% 98.0%;
     --border: 351.4 98% 83.3%;

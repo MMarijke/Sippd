@@ -130,7 +130,10 @@ if (process.argv.includes('--write')) {
   let js = readFileSync('src/hooks/useTheme.js', 'utf8');
   for (const { swatch } of Object.values(THEMES)) {
     const polarity = swatch.polarity ?? (/^#[0-3]/.test(swatch.background) ? 'dark' : 'light');
-    const re = new RegExp(`(\\{ id: '${swatch.id}'[\\s\\S]*?${polarity}: \\{ )swatch: '#[0-9A-Fa-f]{6}', sup: '#[0-9A-Fa-f]{6}', background: '#[0-9A-Fa-f]{6}'`);
+    // Bounded to this theme's own entry: an unbounded lazy match once ran
+    // past entries with a different shape (Neon's, no `sup`) and wrote
+    // Synthwave light's colours onto Sage. themeSwatches.test.js now guards it.
+    const re = new RegExp(`(\\{ id: '${swatch.id}'(?:(?!\\{ id: )[\\s\\S])*?${polarity}: \\{ )swatch: '#[0-9A-Fa-f]{6}', sup: '#[0-9A-Fa-f]{6}', background: '#[0-9A-Fa-f]{6}'`);
     if (!re.test(js)) throw new Error(`no ${polarity} swatch for ${swatch.id}`);
     js = js.replace(re, `$1swatch: '${swatch.swatch}', sup: '${swatch.sup}', background: '${swatch.background}'`);
   }

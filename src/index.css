@@ -5,6 +5,12 @@
    /impeccable audit found all 6 families' ~24 faces were render-blocking
    on every visit, when any one user only ever sees 3 of them. */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Exo+2:wght@300;400;500;600;700&display=swap');
+/* Neon Arcade's number face (--font-num), subset to the characters numbers
+   use, so it adds only a few KB to this default load. Anything else in a
+   .font-num run falls back to Orbitron. Only 700: at 900 its zero closes
+   into a solid octagon; .font-num's font-synthesis: none makes the Score's
+   font-black use this real 700 rather than a faked heavier one. */
+@import url('https://fonts.googleapis.com/css2?family=Tektur:wght@700&text=0123456789%2C.%2B-%23%25&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -359,12 +365,15 @@
 
   /* Neon Arcade structure: sharp cabinet corners, CRT scanlines (light
      lines on dark, dark on light), a primary bloom under every card, and
-     Orbitron numerals. Fonts and full glow come from :root. */
+     Tektur numerals: chamfered, cabinet-style digits with a plain zero.
+     (Orbitron's own zero is slashed, and at Score size with the glow a
+     lone 0 read as a "none" icon; 2026-10-26, /impeccable typeset.)
+     Fonts and full glow come from :root. */
   [data-theme="power-up"], [data-theme="cyberpunk"], [data-theme="plasma"], [data-theme="boss-fight"], [data-theme="synthwave"] {
     --radius-scale: 0.25;
     --card-texture: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAADCAQAAAAT4xYKAAAAFElEQVR42mP4z/2fm+E/w38GMAEAMOcGEWRK+/cAAAAASUVORK5CYII=");
     --card-lift: 0 0 0 1px hsl(var(--primary) / 0.05), 0 4px 18px -8px hsl(var(--primary) / calc(0.4 * var(--glow-intensity)));
-    --font-num: 'Orbitron', sans-serif;
+    --font-num: 'Tektur', 'Orbitron', sans-serif;
   }
   [data-theme="power-up"][data-polarity="light"], [data-theme="cyberpunk"][data-polarity="light"], [data-theme="plasma"][data-polarity="light"], [data-theme="boss-fight"][data-polarity="light"], [data-theme="synthwave"][data-polarity="light"] {
     --card-texture: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAADCAQAAAAT4xYKAAAAD0lEQVR42mNg4GTgZIADAADnABOtIDBfAAAAAElFTkSuQmCC");

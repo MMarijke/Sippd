@@ -4,7 +4,10 @@ import { cn } from '@/lib/utils';
 // to: makes the whole box the link (Home's Wishlist). It used to be wrapped
 // in <Link className="contents">, which has no box of its own: keyboard
 // focus skipped it and a focus ring had nothing to draw on.
-export default function StatBox({ icon, label, value, className, glow, isLoading, to }) {
+// unit: a short suffix (Streak's "d") set apart from the number in the
+// smaller label face, not the family's number face, where it fused with the
+// digits: Shrikhand's "0d" read as "Od". Screen readers get `unitLabel`.
+export default function StatBox({ icon, label, value, unit, unitLabel, className, glow, isLoading, to }) {
   const Icon = icon;
   const Root = to ? Link : 'div';
   return (
@@ -28,6 +31,12 @@ export default function StatBox({ icon, label, value, className, glow, isLoading
       ) : (
         <span className="text-2xl font-num font-bold text-foreground tabular-nums">
           {value != null ? `${value}` : '0'}
+          {unit && (
+            <>
+              <span className="ml-0.5 text-sm font-mono font-medium text-muted-foreground" aria-hidden="true">{unit}</span>
+              {unitLabel && <span className="sr-only"> {unitLabel}</span>}
+            </>
+          )}
         </span>
       )}
       {/* text-center: a three-up row is ~100px wide on a phone, so "RARE

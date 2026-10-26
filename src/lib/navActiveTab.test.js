@@ -21,7 +21,7 @@ const read = (rel) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)),
 const css = read('../index.css');
 const themeSource = read('../hooks/useTheme.js');
 
-// ── The 38 renderings and their tokens (shared resolver: themeTokens.js) ──
+// ── Every rendering and its tokens (shared resolver: themeTokens.js) ──
 const renderings = themeRenderings(themeSource);
 const rules = cssRules(css);
 const resolveTokensFor = (rendering) => resolveTokens(rules, rendering);
@@ -57,8 +57,8 @@ const measured = renderings.map((rendering) => {
 });
 
 describe('bottom nav: the active tab is the most visible item', () => {
-  it('covers every theme rendering (33 themes, Neon Arcade in both polarities)', () => {
-    expect(renderings).toHaveLength(38);
+  it('covers every theme rendering (41 themes, Neon Arcade in both polarities)', () => {
+    expect(renderings).toHaveLength(46);
   });
 
   it.each(measured.map((m) => [m.name, m]))('%s', (_, m) => {

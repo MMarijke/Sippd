@@ -19,6 +19,16 @@ export const RARITY_HEX = {
 // own rarity badge must read the same for every viewer. Anything showing
 // a PROPORTION/breakdown across tiers (not a specific can's own badge)
 // should use this instead of RARITY_HEX.
+// CSS `background` for a tier's gauge fill (bars, legend dots, swatches).
+// Legendary uses the theme's holo gradient when it has one (Alloy family:
+// --holo-gradient), else the solid --breakdown-legendary, so every other
+// theme renders exactly as before. Use as `background`, not
+// `backgroundColor` (a gradient is an image).
+export const breakdownBackground = (rarity) =>
+  rarity === 'Legendary'
+    ? 'var(--holo-gradient, hsl(var(--breakdown-legendary)))'
+    : `hsl(var(${BREAKDOWN_VAR[rarity] || '--breakdown-legendary'}))`;
+
 export const BREAKDOWN_VAR = {
   Common: '--breakdown-common',
   Uncommon: '--breakdown-uncommon',

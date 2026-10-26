@@ -6,11 +6,10 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import RarityBadge from '@/components/shared/RarityBadge';
 import { getMaxPins } from '@/hooks/useTogglePin';
 import { cn } from '@/lib/utils';
-import { BREAKDOWN_VAR, RARITY_POINTS } from '@/lib/rarityConsensus';
+import { RARITY_POINTS, breakdownBackground } from '@/lib/rarityConsensus';
 
 // One source for a tier's theme colour, shared by the bar segment and its
 // legend dot so the two can never drift apart.
-const breakdownColor = (rarity) => `hsl(var(${BREAKDOWN_VAR[rarity] || '--breakdown-legendary'}))`;
 
 // The trophy-case presentation shared by Profile.jsx (your own, editable
 // collection) and PublicProfile.jsx (anyone's, read-only) — score hero,
@@ -249,7 +248,7 @@ export default function CollectionCard({
               <div
                 key={rarity}
                 className="h-full"
-                style={{ width: `${pct}%`, backgroundColor: breakdownColor(rarity) }}
+                style={{ width: `${pct}%`, background: breakdownBackground(rarity) }}
               />
             ))}
           </div>
@@ -264,7 +263,7 @@ export default function CollectionCard({
               <span key={rarity} className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground">
                 <span
                   className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: breakdownColor(rarity) }}
+                  style={{ background: breakdownBackground(rarity) }}
                   aria-hidden="true"
                 />
                 <span>{rarity} <span className="text-foreground">{count}</span></span>

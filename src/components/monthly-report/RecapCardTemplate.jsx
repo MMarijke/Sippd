@@ -3,7 +3,7 @@ import { Zap, CupSoda } from 'lucide-react';
 import { tileBackground } from '@/lib/canBgColors';
 import { proxyImageUrl } from '@/lib/cardCapture';
 import RarityBadge from '@/components/shared/RarityBadge';
-import { BREAKDOWN_VAR } from '@/lib/rarityConsensus';
+import { breakdownBackground } from '@/lib/rarityConsensus';
 
 // Rarity Breakdown bar — theme-aware --breakdown-* ramp, matching
 // CollectionCard's and RarityHero's proportion charts elsewhere in the
@@ -199,7 +199,7 @@ const RecapCardTemplate = forwardRef(function RecapCardTemplate(
                 <div
                   key={rarity}
                   className="h-full"
-                  style={{ width: `${pct}%`, backgroundColor: `hsl(var(${BREAKDOWN_VAR[rarity] || '--breakdown-legendary'}))` }}
+                  style={{ width: `${pct}%`, background: breakdownBackground(rarity) }}
                 />
               ))}
             </div>

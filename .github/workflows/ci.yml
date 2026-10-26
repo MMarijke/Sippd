@@ -21,6 +21,10 @@ jobs:
 
       - run: npm run lint
 
+      # Edge functions are Deno code outside the Vite build: parse them here
+      # so a syntax error fails the PR, not Supabase's bundling after merge.
+      - run: npm run check:functions
+
       - run: npm run build
 
       - run: npm run test

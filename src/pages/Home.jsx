@@ -240,7 +240,7 @@ export default function Home() {
                     <p className="text-2xs font-mono uppercase tracking-widest text-foreground">
                       COLLECTION SCORE
                     </p>
-                    <p className="text-5xl font-mono font-black text-foreground neon-text">
+                    <p className="text-5xl font-num font-black text-foreground tabular-nums neon-text">
                       {isLoading ? (
                         <span className="inline-block h-10 w-24 rounded bg-foreground/10 animate-pulse align-middle" />
                       ) : score}

@@ -132,7 +132,7 @@ export default function ActivityCard({ item, myReactionSet, onReact, isPro = fal
               isMajorStreak ? 'border-primary/40 neon-glow' : 'border-primary/20'
             )}
           >
-            <span className="text-sm font-display font-black text-primary leading-none tabular-nums">
+            <span className="text-sm font-num font-black text-primary leading-none tabular-nums">
               {item.streak_days}
             </span>
           </div>

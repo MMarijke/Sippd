@@ -395,7 +395,7 @@ export default function CollectorsLeaderboard() {
                 </Link>
                 <div className="flex-shrink-0 text-right">
                   <p className={cn(
-                    'text-sm font-display font-bold tabular-nums',
+                    'text-sm font-num font-bold tabular-nums',
                     sortBy === 'rare' ? 'text-rarity-ultra-text' : isMe ? 'text-primary' : 'text-foreground'
                   )}>
                     {score}

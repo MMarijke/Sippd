@@ -26,7 +26,7 @@ export default function StatBox({ icon, label, value, className, glow, isLoading
       {isLoading ? (
         <span className="h-6 w-8 rounded bg-secondary/60 animate-pulse" />
       ) : (
-        <span className="text-2xl font-mono font-bold text-foreground tabular-nums">
+        <span className="text-2xl font-num font-bold text-foreground tabular-nums">
           {value != null ? `${value}` : '0'}
         </span>
       )}

@@ -3,6 +3,11 @@ import ReactDOM from 'react-dom/client'
 import * as Sentry from '@sentry/react'
 import App from '@/App.jsx'
 import '@/index.css'
+import { applyRarityPalette } from '@/lib/rarityPalette'
+
+// Before the first render, so the rarity gauge never flashes the theme's
+// own colours for someone who turned on colour-blind-friendly ones.
+applyRarityPalette()
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,

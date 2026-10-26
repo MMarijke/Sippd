@@ -529,17 +529,18 @@ function ThemePalettePicker({ family, theme, polarity, onSelectTheme, isPro, isP
   useFocusRequest(headingRef, focusRequest, 'palette-heading', onFocusHandled);
   // Botanical, Essentials and Alloy mix fixed polarities (Sage, Meadow,
   // Ledger and Brushed Aluminium are light pages; the rest dark), so
-  // tapping between them flips the whole app light/dark. Those families
-  // show their themes in a Light and a Dark group, in the order each kind
-  // first appears, so the mix reads as two sets rather than a surprise.
-  // (It was a 10px sun/moon in each tile's corner, easy to miss.) A
-  // single-polarity family (Cosmic, Noir, Candy...) is one plain row.
+  // tapping between them flips the whole app light/dark. In those families
+  // each tile says which it is, in words under its name, and the themes run
+  // one kind then the other (in the order each first appears). They sit in
+  // the same centred rows as every other family: Light and Dark headings
+  // left a lone tile under a heading of its own (Essentials, Alloy's one
+  // light theme), and a 10px corner glyph before that was easy to miss.
   const tone = (t) => (t.light ? 'light' : 'dark');
   const kinds = [...new Set(family.themes.filter(t => !(t.dark && t.light)).map(tone))];
   const familyMixedPolarity = kinds.length > 1;
-  const groups = familyMixedPolarity
-    ? kinds.map(kind => ({ kind, themes: family.themes.filter(t => tone(t) === kind) }))
-    : [{ kind: null, themes: family.themes }];
+  const ordered = familyMixedPolarity
+    ? kinds.flatMap(kind => family.themes.filter(t => tone(t) === kind))
+    : family.themes;
 
   return (
     <div className="p-4 space-y-3">
@@ -564,63 +565,58 @@ function ThemePalettePicker({ family, theme, polarity, onSelectTheme, isPro, isP
       >
         {family.label}
       </h2>
-      {groups.map(({ kind, themes }) => (
-        <div key={kind ?? 'all'} className="space-y-2">
-          {kind && (
-            <h3 className="flex items-center gap-1.5 text-2xs font-mono text-muted-foreground capitalize">
-              {kind === 'light'
-                ? <Sun className="w-3 h-3" aria-hidden="true" />
-                : <Moon className="w-3 h-3" aria-hidden="true" />}
-              {kind}
-            </h3>
-          )}
-          <div className={PICKER_ROW}>
-            {themes.map((themeEntry) => {
-              const { id, label, pro } = themeEntry;
-              const locked = pro && !isPro;
-              const selected = theme === id;
-              // Light/dark is only worth saying where it varies tile to tile
-              // (the grouped families) -- elsewhere the old template left an
-              // empty "()". Locked copy says what happens on activation
-              // rather than naming a gesture, and warns that it leaves Settings.
-              const modeNote = kind ? `, ${kind} mode` : '';
-              const ariaLabel = locked
-                ? `${label}${modeNote}, Pro only. Opens the upgrade page`
-                : `Use ${label} theme${modeNote}`;
-              return (
-                // aria-disabled while a change is saving, not `disabled`: a
-                // disabled button drops keyboard focus to <body> mid-change.
-                <button
-                  key={id}
-                  onClick={() => {
-                    if (isPending) return;
-                    if (locked) onLockedTap();
-                    else onSelectTheme(id);
-                  }}
-                  aria-disabled={isPending || undefined}
-                  aria-label={ariaLabel}
-                  aria-pressed={selected}
-                  className={cn(
-                    PICKER_TILE, PICKER_FOCUS, 'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors aria-disabled:cursor-wait',
-                    selected ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/20'
-                  )}
-                >
-                  <ThemeSwatch theme={themeEntry} polarity={polarity} familyId={family.id} />
-                  {/* The applied theme's name steps up to foreground, so the
-                      selection reads in the label as well as the border. */}
-                  <span className={cn('text-2xs font-mono text-center leading-tight', selected ? 'text-foreground' : 'text-muted-foreground')}>{label}</span>
-                  <RarityStrip themeId={id} polarity={getRenderedTone(themeEntry, polarity)} />
-                  {locked && (
-                    <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-background/80 border border-border flex items-center justify-center">
-                      <Lock className="w-2.5 h-2.5 text-muted-foreground" />
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ))}
+      <div className={PICKER_ROW}>
+        {ordered.map((themeEntry) => {
+          const { id, label, pro } = themeEntry;
+          const locked = pro && !isPro;
+          const selected = theme === id;
+          const kind = familyMixedPolarity ? tone(themeEntry) : null;
+          // Light/dark is only worth saying where it varies tile to tile
+          // (the mixed families) -- elsewhere the old template left an
+          // empty "()". Locked copy says what happens on activation
+          // rather than naming a gesture, and warns that it leaves Settings.
+          const modeNote = kind ? `, ${kind} mode` : '';
+          const ariaLabel = locked
+            ? `${label}${modeNote}, Pro only. Opens the upgrade page`
+            : `Use ${label} theme${modeNote}`;
+          return (
+            // aria-disabled while a change is saving, not `disabled`: a
+            // disabled button drops keyboard focus to <body> mid-change.
+            <button
+              key={id}
+              onClick={() => {
+                if (isPending) return;
+                if (locked) onLockedTap();
+                else onSelectTheme(id);
+              }}
+              aria-disabled={isPending || undefined}
+              aria-label={ariaLabel}
+              aria-pressed={selected}
+              className={cn(
+                PICKER_TILE, PICKER_FOCUS, 'relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors aria-disabled:cursor-wait',
+                selected ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-primary/20'
+              )}
+            >
+              <ThemeSwatch theme={themeEntry} polarity={polarity} familyId={family.id} />
+              {/* The applied theme's name steps up to foreground, so the
+                  selection reads in the label as well as the border. */}
+              <span className={cn('text-2xs font-mono text-center leading-tight', selected ? 'text-foreground' : 'text-muted-foreground')}>{label}</span>
+              {kind && (
+                <span className="-mt-1 flex items-center gap-1 text-2xs font-mono text-muted-foreground capitalize" aria-hidden="true">
+                  {kind === 'light' ? <Sun className="w-3 h-3" /> : <Moon className="w-3 h-3" />}
+                  {kind}
+                </span>
+              )}
+              <RarityStrip themeId={id} polarity={getRenderedTone(themeEntry, polarity)} />
+              {locked && (
+                <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-background/80 border border-border flex items-center justify-center">
+                  <Lock className="w-2.5 h-2.5 text-muted-foreground" />
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

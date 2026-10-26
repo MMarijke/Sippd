@@ -194,14 +194,24 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
       </div>
 
       {!isEmpty && (
-        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mt-4" aria-hidden="true">
+        // The key: one equal column per tier the collection has, dot above
+        // name, so it's always a single row under the arc. It was an inline
+        // wrapping row of mono labels that left Legendary alone on a second
+        // line in every theme: five names don't fit one 320-350px line at
+        // the 11px floor in the wider monos (Martian, Azeret). Names are in
+        // the body face, so even "Legendary" fits its column on a 360px phone.
+        <div
+          className="grid gap-1 mt-5"
+          style={{ gridTemplateColumns: `repeat(${tiers.length}, minmax(0, 1fr))` }}
+          aria-hidden="true"
+        >
           {tiers.map(({ name }) => (
-            <div key={name} className="flex items-center gap-1.5">
+            <div key={name} className="flex flex-col items-center gap-1 min-w-0">
               <div
                 className="w-2 h-2 rounded-full flex-shrink-0"
                 style={{ background: breakdownBackground(name) }}
               />
-              <span className="text-xs font-mono text-muted-foreground">{name}</span>
+              <span className="text-2xs font-body font-medium text-muted-foreground text-center leading-tight">{name}</span>
             </div>
           ))}
         </div>

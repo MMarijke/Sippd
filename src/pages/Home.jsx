@@ -178,8 +178,11 @@ export default function Home() {
             }
           />
 
+          {/* mt-1: PageHeader already ends in 16px of padding, so the first
+              block under it sits 20px from the header like every other gap
+              in this stack (it was 36px: pb-4 + mt-5). */}
           {hasCollectionError ? (
-            <div className="px-5 mt-5">
+            <div className="px-5 mt-1">
               <div className="glass-card-destructive rounded-2xl p-5 text-center">
                 <p className="text-sm font-display font-semibold text-foreground">Couldn't load your vault</p>
                 <p className="text-xs font-mono text-muted-foreground mt-1.5">
@@ -198,7 +201,7 @@ export default function Home() {
           ) : (
             <>
               {isNewUser && (
-                <div className="px-5 mt-5">
+                <div className="px-5 mt-1">
                   <div className="glass-card rounded-2xl p-5 text-center">
                     <p className="text-sm font-display font-semibold text-foreground">Welcome to Sippd</p>
                     <p className="text-xs font-mono text-muted-foreground mt-1.5">
@@ -214,7 +217,7 @@ export default function Home() {
               )}
 
               {!isNewUser && (
-                <div className="px-5 mt-5">
+                <div className="px-5 mt-1">
                   <Suspense fallback={<GaugePlaceholder />}>
                     <RarityHero collected={collected} sharedCansMap={sharedCansMap} isLoading={isLoading} />
                   </Suspense>
@@ -227,7 +230,7 @@ export default function Home() {
                       headline metric and needs to read as categorically
                       different from the welcome/error cards' neutral glass,
                       not just another instance of it. */}
-                  <div className="glass-card-hero rounded-2xl p-5">
+                  <div className="glass-card-hero rounded-2xl px-5 py-4">
                     {/* text-foreground, not text-primary — on Ultra/Voidglass
                         this label's own theme color measured ~4.2:1 against
                         .glass-card-hero's translucent surface, under WCAG
@@ -240,13 +243,12 @@ export default function Home() {
                     <p className="text-2xs font-mono uppercase tracking-widest text-foreground">
                       COLLECTION SCORE
                     </p>
-                    <p className="text-5xl font-num font-black text-foreground tabular-nums neon-text">
+                    {/* No "Your Vault" line under it: it repeated the header's
+                        subtitle ("<name>'s vault") a few lines above. */}
+                    <p className="text-5xl font-num font-black text-foreground tabular-nums neon-text leading-none mt-2">
                       {isLoading ? (
                         <span className="inline-block h-10 w-24 rounded bg-foreground/10 animate-pulse align-middle" />
                       ) : score}
-                    </p>
-                    <p className="text-xs font-mono text-muted-foreground">
-                      Your Vault
                     </p>
                   </div>
                 </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { MIN_PASSWORD } from '@/lib/authErrors';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -68,8 +69,8 @@ export default function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (password.length < MIN_PASSWORD) {
+      setError(`Password must be at least ${MIN_PASSWORD} characters`);
       return;
     }
     if (password !== confirmPassword) {
@@ -133,7 +134,7 @@ export default function ResetPassword() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={MIN_PASSWORD}
               autoComplete="new-password"
               className="bg-secondary border-border font-body"
             />
@@ -147,7 +148,7 @@ export default function ResetPassword() {
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={MIN_PASSWORD}
               autoComplete="new-password"
               className="bg-secondary border-border font-body"
             />

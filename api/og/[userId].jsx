@@ -27,11 +27,15 @@ export default async function handler(request) {
   let profileFound = false;
 
   try {
-    const profileRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/public_profiles?id=eq.${encodeURIComponent(userId)}&select=full_name,is_private`,
-      { headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` } }
-    );
-    const [profile] = await profileRes.json();
+    // get_public_profile(): signed-out callers can read one profile by id,
+    // not list the public_profiles view.
+    const profileRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_public_profile`, {
+      method: 'POST',
+      headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_profile_id: userId }),
+    });
+    const rows = await profileRes.json();
+    const [profile] = Array.isArray(rows) ? rows : [];
     if (profile) {
       profileFound = true;
       displayName = profile.full_name || displayName;

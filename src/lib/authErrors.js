@@ -8,7 +8,11 @@
 // Raw Supabase messages are never shown; an unknown error gets a generic
 // "try again" rather than an internal string.
 
-export const MIN_PASSWORD = 6; // Supabase Auth's default minimum length.
+// Minimum length for a new password, everywhere one is set (sign-up, reset,
+// Settings). Must match Supabase → Authentication → Providers → Email →
+// Minimum password length (and supabase/config.toml for local), which is
+// what actually enforces it. Existing shorter passwords still sign in.
+export const MIN_PASSWORD = 8;
 
 const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

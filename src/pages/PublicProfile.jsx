@@ -37,17 +37,17 @@ export default function PublicProfile() {
   // non-owner, non-follower visitor would.
   const isPreview = searchParams.get('preview') === 'true';
 
-  // Narrow public view — id, full_name, is_private, current_streak, created_at only.
-  // No email, no role, no raw profiles table read for another user.
+  // One profile by id through get_public_profile(), which works signed out
+  // too (this page is outside ProtectedRoute): id, full_name, is_private,
+  // current_streak, created_at only, with a private profile's streak and
+  // join date null unless you're them or an accepted follower.
   const { data: profileUser, isLoading: loadingProfile, isError: profileError } = useQuery({
     queryKey: ['public-profile', userId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('public_profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-      if (error && error.code !== 'PGRST116') throw error;
+        .rpc('get_public_profile', { p_profile_id: userId })
+        .maybeSingle();
+      if (error) throw error;
       return data ?? null;
     },
     enabled: !!userId,

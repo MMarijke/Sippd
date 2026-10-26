@@ -30,7 +30,9 @@ const renderings = themeRenderings(source).map((r) => ({
   family: familyOf[r.id],
   get: resolveTokens(rules, r),
 }));
-const byFamily = Object.groupBy(renderings, (r) => r.family);
+// Not Object.groupBy: CI runs Node 20, which doesn't have it.
+const byFamily = {};
+for (const r of renderings) (byFamily[r.family] ??= []).push(r);
 const STRUCTURE = ['--radius-scale', '--card-lift', '--font-num'];
 
 describe('per-family structure', () => {

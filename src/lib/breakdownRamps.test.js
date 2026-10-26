@@ -148,12 +148,14 @@ const fillBlocks = [...css.matchAll(/([^{}]+)\{([^{}]*--primary-fill:\s*[\d.]+ [
 }));
 
 describe('primary fill', () => {
-  // The six Spring themes, plus the sign-up page's own fixed palette
-  // (.login-world), whose magenta fill gets the same label check below.
-  it('is set by the Spring themes and the login page', () => {
+  // The six Spring themes, Sour Apple (acid-lime button, deeper lime for
+  // text and icons, since 2026-10-26), plus the sign-up page's own fixed
+  // palette (.login-world), whose magenta fill gets the same label check.
+  it('is set by the Spring themes, Sour Apple and the login page', () => {
     const names = fillBlocks.map(b => b.name);
     expect(names).toContain('.login-world');
-    expect(names.filter(n => n !== '.login-world')).toHaveLength(6);
+    expect(names).toContain('[data-theme="sour-apple"]');
+    expect(names.filter(n => n !== '.login-world')).toHaveLength(7);
   });
 
   it.each(fillBlocks.map(b => [b.name, b]))('%s: button label 4.5:1 on the fill, icons 3:1 on the page', (_, b) => {

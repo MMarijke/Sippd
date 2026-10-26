@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { STEPS, MIN_STEP, rampProblems, adjacentSteps, isDarkCard, contrast as contrastRgb } from './rampColour';
+import {
+  STEPS, MIN_STEP, MIN_COMMON, MIN_SCAN_GAP, rampProblems, adjacentSteps, isDarkCard,
+  contrast as contrastRgb, deltaEOk, labChroma, hslToRgb as hslTripleToRgb, parseHsl,
+} from './rampColour';
+import { themeRenderings, cssRules, resolveTokens } from './themeTokens';
 
 // Guards index.css's ramp ORDER RULE: in every theme, the Legendary step of
 // --breakdown-* stands out at least as much as Common against that theme's
@@ -46,28 +50,64 @@ describe('rarity breakdown ramps', () => {
 });
 
 // The gauge rules, shared with scripts/tune-rarity-ramps.mjs
-// (src/lib/rampColour.js, rampProblems): Common reads at >= 2:1, contrast
-// rises at every tier, and adjacent tiers are >= MIN_STEP (8) apart in
-// deltaE-OK. Dark themes: also under simulated protanopia and deuteranopia,
-// and Legendary is the most colourful tier. Light themes: in normal vision,
-// with Legendary at least as colourful as Common (a light card forces the
-// ramp to darken, which drains many hues); colour-blind users there get the
+// (src/lib/rampColour.js, rampProblems): Common reads at >= 3:1, contrast
+// rises at every tier, adjacent tiers are >= MIN_STEP (8) apart in
+// deltaE-OK, Legendary is the most colourful tier, and every tier is >= 10
+// from the theme's Scan fill. Dark themes: steps also hold under simulated
+// protanopia and deuteranopia; colour-blind users on light themes get the
 // fixed override below. Before 2026-10-26 only 3 of 38 renderings had every
 // step >= 8, and Nebula, Crimson, Amethyst and Cyberpunk collapsed to one
 // colour under protanopia.
+//
+// Measured per rendering through the cascade (themeTokens.js), so each
+// gauge is checked beside the Scan fill it's actually shown with.
+const rules = cssRules(css);
+const rgbToken = (get, t) => hslTripleToRgb(parseHsl(get(t)));
+const renderings = themeRenderings(readFileSync(fileURLToPath(new URL('../hooks/useTheme.js', import.meta.url)), 'utf8'))
+  .map((r) => {
+    const get = resolveTokens(rules, r);
+    return {
+      name: `${r.id} (${r.polarity})`,
+      card: rgbToken(get, '--card'),
+      scan: rgbToken(get, '--cta'),
+      steps: STEPS.map((s) => rgbToken(get, `--breakdown-${s}`)),
+    };
+  });
+// Every theme block's card, for the colour-blind override checks below.
 const gauges = themeBlockMatches.map(([, sel, body]) => ({
   name: sel.trim().split(/\r?\n/).pop().trim(),
   card: hslToRgb(...parse(body.match(/--card:\s*([^;]+);/)[1])),
-  steps: STEPS.map(s => hslToRgb(...parse(body.match(new RegExp(`--breakdown-${s}:\\s*([^;]+);`))[1]))),
 }));
 
 describe('gauge rules: clear steps, rising contrast, vivid Legendary', () => {
-  it('covers every theme gauge', () => {
-    expect(gauges.length).toBeGreaterThanOrEqual(38);
+  it('covers every theme rendering', () => {
+    expect(renderings).toHaveLength(46);
   });
 
-  it.each(gauges.map(g => [g.name, g]))('%s', (_, g) => {
-    expect(rampProblems(g.steps, g.card)).toEqual([]);
+  it.each(renderings.map(g => [g.name, g]))('%s', (_, g) => {
+    expect(rampProblems(g.steps, g.card, { scan: g.scan })).toEqual([]);
+  });
+});
+
+// The three rules from the 2026-10-26 critique, spelled out on their own so
+// a failure names which one broke.
+describe('rarity vs Scan (2026-10-26)', () => {
+  it.each(renderings.map(g => [g.name, g]))('%s: Common reads at >= 3:1 against the card', (_, g) => {
+    expect(contrastRgb(g.steps[0], g.card)).toBeGreaterThanOrEqual(MIN_COMMON);
+  });
+
+  it.each(renderings.map(g => [g.name, g]))('%s: no tier within 10 of Scan', (_, g) => {
+    for (const [i, step] of g.steps.entries()) {
+      expect(deltaEOk(step, g.scan), STEPS[i]).toBeGreaterThanOrEqual(MIN_SCAN_GAP);
+    }
+  });
+
+  it.each(renderings.map(g => [g.name, g]))('%s: Legendary is the peak in contrast and colour', (_, g) => {
+    const K = g.steps.map((c) => contrastRgb(c, g.card));
+    const C = g.steps.map(labChroma);
+    expect(K[4]).toBe(Math.max(...K));
+    // 0.5 tolerance: neutral ramps (Carbon, Silver Screen) are ~0 throughout.
+    expect(C[4]).toBeGreaterThanOrEqual(Math.max(...C) - 0.5);
   });
 });
 
@@ -96,7 +136,7 @@ describe('colour-blind-friendly rarity colours', () => {
     const ramp = isDarkCard(g.card) ? cvdRamps.dark : cvdRamps.light;
     expect(ramp, 'override block present').toBeTruthy();
     const K = ramp.map(c => contrastRgb(c, g.card));
-    expect(K[0], 'Common contrast').toBeGreaterThanOrEqual(2);
+    expect(K[0], 'Common contrast').toBeGreaterThanOrEqual(MIN_COMMON);
     for (let i = 1; i < 5; i++) expect(K[i], `${STEPS[i]} contrast`).toBeGreaterThan(K[i - 1]);
   });
 

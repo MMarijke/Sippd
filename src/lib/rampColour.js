@@ -107,36 +107,42 @@ export const isDarkCard = (cardRgb) => srgbToOklab(cardRgb)[0] < 0.5;
 // The gauge rules for one theme's ramp (sRGB tiers, Common first) on its
 // card. Returns the list of broken rules (empty = passes).
 //
-// Every theme: Common reads at >= 2:1 against the card, contrast rises at
-// every tier, and adjacent tiers are >= MIN_STEP apart in normal vision.
+// Every theme (2026-10-26, /impeccable colorize):
+// - Common reads at >= MIN_COMMON (3:1, the graphics floor) against the
+//   card, and contrast rises at every tier from there;
+// - adjacent tiers are >= MIN_STEP apart in normal vision;
+// - Legendary is the most colourful tier: the peak in colour as well as in
+//   contrast. Neutral ramps (Carbon, Silver Screen) pass as a tie: every
+//   tier there has ~0 colour, by design;
+// - with `scan` (the theme's Scan fill, --cta): every tier is >= MIN_SCAN_GAP
+//   from it, so the app's main action never reads as a rarity colour.
 //
 // Dark themes also: >= MIN_STEP apart under simulated protanopia and
-// deuteranopia, and Legendary is the most colourful tier (colourfulness may
-// dip by at most 4 between tiers). Neutral ramps (every tier under 8 CIELAB
-// chroma: Carbon, Silver Screen) are exempt from the colourfulness rule.
-//
-// Light themes: Legendary is at least as colourful as Common. On a light
-// card the ramp must darken to gain contrast, and many hues (greens, yellows,
-// oranges) lose colour as they darken, so "most colourful" and clear steps
-// can't both hold there; colour-blind users get the fixed ramp from the
-// "colour-blind-friendly rarity colours" setting instead (index.css,
+// deuteranopia, and colourfulness may dip by at most 4 between tiers. On a
+// light card colour-blind users get the fixed ramp from the "colour-blind-
+// friendly rarity colours" setting instead (index.css,
 // [data-rarity="colour-blind"]), which meets the dark-theme rules on every
 // light card.
-export function rampProblems(stepRgbs, cardRgb) {
+export const MIN_COMMON = 3;
+export const MIN_SCAN_GAP = 10;
+
+export function rampProblems(stepRgbs, cardRgb, { scan } = {}) {
   const problems = [];
   const K = stepRgbs.map((c) => contrast(c, cardRgb));
   const C = stepRgbs.map(labChroma);
-  if (K[0] < 2) problems.push(`Common only ${K[0].toFixed(2)}:1 against the card`);
+  if (K[0] < MIN_COMMON) problems.push(`Common only ${K[0].toFixed(2)}:1 against the card`);
   for (let i = 1; i < 5; i++) if (!(K[i] > K[i - 1])) problems.push(`contrast does not rise at ${STEPS[i]}`);
 
+  if (C[4] < Math.max(...C) - 0.5) problems.push('Legendary is not the most colourful tier');
   const dark = isDarkCard(cardRgb);
-  if (dark) {
-    if (Math.max(...C) >= 8) {
-      if (C[4] < Math.max(...C) - 2) problems.push('Legendary is not the most colourful tier');
-      for (let i = 1; i < 5; i++) if (C[i] < C[i - 1] - 4) problems.push(`colourfulness drops at ${STEPS[i]}`);
-    }
-  } else if (C[4] < C[0] - 2) {
-    problems.push('Legendary is less colourful than Common');
+  if (dark && Math.max(...C) >= 8) {
+    for (let i = 1; i < 5; i++) if (C[i] < C[i - 1] - 4) problems.push(`colourfulness drops at ${STEPS[i]}`);
+  }
+
+  if (scan) {
+    const gaps = stepRgbs.map((c) => deltaEOk(c, scan));
+    const i = gaps.indexOf(Math.min(...gaps));
+    if (gaps[i] < MIN_SCAN_GAP) problems.push(`${STEPS[i]} only ${gaps[i].toFixed(1)} from Scan`);
   }
 
   for (const vision of dark ? ['normal', 'protan', 'deutan'] : ['normal']) {

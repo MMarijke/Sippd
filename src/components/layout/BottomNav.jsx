@@ -36,9 +36,15 @@ export default function BottomNav() {
               key={path}
               to={path}
               aria-current={isActive ? 'page' : undefined}
+              // Active in the full foreground colour, never text-primary: in
+              // every light theme and many dark ones the theme's main colour
+              // is darker than the muted grey, so the current tab read as the
+              // faintest item (30 of 38 renderings, theme critique
+              // 2026-10-26). The theme's colour stays in the tinted pill and
+              // glow; navActiveTab.test.js guards it for every theme.
               className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 ${
                 isActive
-                  ? 'text-primary'
+                  ? 'text-foreground'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >

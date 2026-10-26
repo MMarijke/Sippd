@@ -150,12 +150,9 @@
     --sidebar-border: 217 35% 20%;
     --sidebar-ring: 152 100% 50%;
 
-    /* Not part of this restructure -- theme-invariant on purpose, unchanged. */
-    --rarity-common: 220 9% 56%;
-    --rarity-uncommon: 142 71% 45%;
-    --rarity-rare: 217 91% 60%;
-    --rarity-ultra: 271 91% 65%;
-    --rarity-legendary: 330 81% 60%;
+    /* --rarity-* (badge fills, borders, glows, filter chips) follow each
+       theme's own gauge since 2026-10-26: see the :root, [data-theme] block
+       below. */
 
     /* ORDER RULE (applies to every theme's --breakdown-* ramp below):
        Legendary is the standout step. Its contrast against the theme's
@@ -217,18 +214,18 @@
        text on light themes. Same amber values as --overlap, same checks. */
     --caution: 38 92% 60%;
 
-    /* Rarity TEXT (badges, status chips, the leaderboard's rare column):
-       each tier's own hue and saturation, with lightness tuned per tone to
-       clear 4.6:1 on every theme's background, card and the badge's own
-       tinted fill. --rarity-* itself stays theme-invariant (fills, glows,
-       borders): a tier keeps its colour identity for every viewer, it just
-       gets a legible text shade on light themes, where the fixed hues read
-       1.9-3.3:1 (Uncommon 1.87 on Sage). Product decision, 2026-09-29. */
-    --rarity-common-text: 220 9% 64.5%;
-    --rarity-uncommon-text: 142 71% 45%;
-    --rarity-rare-text: 217 91% 69%;
-    --rarity-ultra-text: 271 91% 73.5%;
-    --rarity-legendary-text: 330 81% 69%;
+    /* Rarity TEXT (badges, status chips, rarity labels): each theme's
+       own, written into its colour block by scripts/generate-rarity-text.mjs
+       -- the tier's gauge colour with lightness moved until it reads at
+       4.6:1 on the page, the card and the badge's own tinted fill. Until
+       2026-10-26 rarity colours were theme-invariant (a fixed pink/purple
+       ladder in every theme, product decision 2026-09-29); they now follow
+       the theme's gauge, per product direction (/impeccable critique). */
+    --rarity-common-text: 182.0 49.1% 43.6%;
+    --rarity-uncommon-text: 167.9 66.1% 40.6%;
+    --rarity-rare-text: 161.6 100.0% 36.9%;
+    --rarity-ultra-text: 151.2 68.2% 52.8%;
+    --rarity-legendary-text: 83.4 100.0% 42.8%;
 
     /* Error TEXT (text-destructive: messages, retry buttons, "Log out").
        Separate from --destructive for the same reason as --caution: the
@@ -248,11 +245,6 @@
     --medal-bronze: 24 72% 30%;
     --overlap: 35 92% 25%;
     --caution: 35 92% 25%;
-    --rarity-common-text: 220 9% 38.5%;
-    --rarity-uncommon-text: 142 71% 25.5%;
-    --rarity-rare-text: 217 91% 42.5%;
-    --rarity-ultra-text: 271 91% 48%;
-    --rarity-legendary-text: 330 81% 38.5%;
   }
 
   /* Fill colours that can differ from their text twins. Every theme gets
@@ -301,12 +293,19 @@
     --radius-scale: 1;
     --radius: calc(0.75rem * var(--radius-scale));
     --border-width: 1px;
-    --card-lift: none;
+    --card-lift: 0 0 #0000;
     --element-glow: 1;
     --shadow-ink: 0 0% 0%;
     --font-num: var(--font-mono);
     --num-figure: lining-nums;
     --num-stretch: normal;
+    /* Rarity fills, borders and glows wear the theme's own gauge colours
+       (their text twins, --rarity-*-text, live in each theme block). */
+    --rarity-common: var(--breakdown-common);
+    --rarity-uncommon: var(--breakdown-uncommon);
+    --rarity-rare: var(--breakdown-rare);
+    --rarity-ultra: var(--breakdown-ultra);
+    --rarity-legendary: var(--breakdown-legendary);
   }
 
   /* ── Neon Arcade family (dark, gamer/cyber/neon) ─────────────────────────
@@ -403,6 +402,11 @@
     --breakdown-rare: 161.6 100.0% 36.9%;
     --breakdown-ultra: 151.2 68.2% 52.8%;
     --breakdown-legendary: 83.4 100.0% 42.8%;
+    --rarity-legendary-text: 83.4 100.0% 42.8%;
+    --rarity-ultra-text: 151.2 68.2% 52.8%;
+    --rarity-rare-text: 161.6 100.0% 36.9%;
+    --rarity-uncommon-text: 167.9 66.1% 40.6%;
+    --rarity-common-text: 182.0 49.1% 43.6%;
   }
   [data-theme="cyberpunk"][data-polarity="dark"] {
     --background: 278 38% 6%;
@@ -429,6 +433,11 @@
     --breakdown-rare: 291.4 44.8% 61.7%;
     --breakdown-ultra: 294.0 61.3% 72.0%;
     --breakdown-legendary: 300.0 100.0% 82.4%;
+    --rarity-legendary-text: 300.0 100.0% 82.4%;
+    --rarity-ultra-text: 294.0 61.3% 72.0%;
+    --rarity-rare-text: 291.4 49.1% 64.8%;
+    --rarity-uncommon-text: 285.6 48.4% 63.8%;
+    --rarity-common-text: 273.7 14.2% 58.9%;
   }
   [data-theme="plasma"][data-polarity="dark"] {
     --background: 204 52% 6%;
@@ -455,6 +464,11 @@
     --breakdown-rare: 209.8 41.6% 60.6%;
     --breakdown-ultra: 199.9 59.0% 67.2%;
     --breakdown-legendary: 183.0 100.0% 82.0%;
+    --rarity-legendary-text: 183.0 100.0% 82.0%;
+    --rarity-ultra-text: 199.9 59.0% 67.2%;
+    --rarity-rare-text: 209.8 44.6% 63.0%;
+    --rarity-uncommon-text: 216.9 38.0% 62.5%;
+    --rarity-common-text: 43.8 0.0% 57.2%;
   }
   [data-theme="boss-fight"][data-polarity="dark"] {
     --background: 340 33% 5%;
@@ -481,6 +495,11 @@
     --breakdown-rare: 18.0 87.8% 56.3%;
     --breakdown-ultra: 34.5 100.0% 50.0%;
     --breakdown-legendary: 51.1 100.0% 50.0%;
+    --rarity-legendary-text: 51.1 100.0% 50.0%;
+    --rarity-ultra-text: 34.5 100.0% 50.0%;
+    --rarity-rare-text: 17.8 90.7% 57.8%;
+    --rarity-uncommon-text: 0.3 64.5% 65.6%;
+    --rarity-common-text: 353.4 59.0% 63.3%;
   }
   [data-theme="synthwave"][data-polarity="dark"] {
     --background: 261 55% 6%;
@@ -511,6 +530,11 @@
     --breakdown-rare: 273.7 44.9% 60.1%;
     --breakdown-ultra: 277.8 76.8% 71.5%;
     --breakdown-legendary: 299.9 100.0% 78.9%;
+    --rarity-legendary-text: 299.9 100.0% 78.9%;
+    --rarity-ultra-text: 277.8 76.8% 71.5%;
+    --rarity-rare-text: 273.5 54.0% 66.3%;
+    --rarity-uncommon-text: 269.1 53.1% 65.2%;
+    --rarity-common-text: 260.4 12.4% 57.5%;
   }
 
   /* ── Neon Arcade, light-polarity counterparts ("Daylight Neon") ─────────
@@ -553,6 +577,11 @@
     --breakdown-rare: 128.8 35.6% 30.1%;
     --breakdown-ultra: 106.7 46.8% 20.9%;
     --breakdown-legendary: 105.3 100.0% 10.8%;
+    --rarity-legendary-text: 105.3 100.0% 10.8%;
+    --rarity-ultra-text: 106.7 46.8% 20.9%;
+    --rarity-rare-text: 129.0 37.0% 29.0%;
+    --rarity-uncommon-text: 156.3 28.8% 31.0%;
+    --rarity-common-text: 182.2 47.6% 28.8%;
   }
   [data-theme="cyberpunk"][data-polarity="light"] {
     --background: 192.0 78.9% 96.3%;
@@ -579,6 +608,11 @@
     --breakdown-rare: 291.0 100.0% 46.6%;
     --breakdown-ultra: 278.3 100.0% 50.0%;
     --breakdown-legendary: 253.6 100.0% 50.0%;
+    --rarity-legendary-text: 253.6 100.0% 50.0%;
+    --rarity-ultra-text: 277.9 97.9% 41.8%;
+    --rarity-rare-text: 290.8 98.4% 35.5%;
+    --rarity-uncommon-text: 303.4 52.7% 40.2%;
+    --rarity-common-text: 311.8 36.3% 42.9%;
   }
   [data-theme="plasma"][data-polarity="light"] {
     --background: 203 89% 96%;
@@ -605,6 +639,11 @@
     --breakdown-rare: 212.1 100.0% 47.5%;
     --breakdown-ultra: 235.5 100.0% 57.8%;
     --breakdown-legendary: 263.4 100.0% 50.0%;
+    --rarity-legendary-text: 262.2 93.9% 49.2%;
+    --rarity-ultra-text: 236.3 96.7% 56.8%;
+    --rarity-rare-text: 212.9 96.2% 38.3%;
+    --rarity-uncommon-text: 203.6 98.1% 32.0%;
+    --rarity-common-text: 188.4 1.9% 38.2%;
   }
   [data-theme="boss-fight"][data-polarity="light"] {
     /* main/supporting hue shifted -13/-13deg from the dark original (347,
@@ -634,6 +673,11 @@
     --breakdown-rare: 334.1 100.0% 40.5%;
     --breakdown-ultra: 315.0 100.0% 37.6%;
     --breakdown-legendary: 281.0 100.0% 44.4%;
+    --rarity-legendary-text: 280.2 92.3% 39.7%;
+    --rarity-ultra-text: 315.2 99.6% 31.7%;
+    --rarity-rare-text: 335.2 95.4% 33.9%;
+    --rarity-uncommon-text: 344.2 48.1% 41.8%;
+    --rarity-common-text: 346.4 47.9% 43.1%;
   }
   [data-theme="synthwave"][data-polarity="light"] {
     /* shifted -9/-9deg (283, 250 -> 274, 241) to clear Grape Float's dark
@@ -662,6 +706,11 @@
     --breakdown-rare: 311.1 100.0% 40.5%;
     --breakdown-ultra: 293.1 100.0% 38.4%;
     --breakdown-legendary: 268.1 100.0% 50.0%;
+    --rarity-legendary-text: 267.8 99.4% 45.7%;
+    --rarity-ultra-text: 292.9 95.9% 33.8%;
+    --rarity-rare-text: 311.4 98.2% 32.5%;
+    --rarity-uncommon-text: 314.9 51.8% 40.2%;
+    --rarity-common-text: 270.2 8.9% 39.0%;
   }
 
   /* ============================================================================
@@ -778,6 +827,11 @@
     --breakdown-rare: 216.6 58.3% 58.3%;
     --breakdown-ultra: 203.2 85.9% 59.1%;
     --breakdown-legendary: 184.9 100.0% 50.0%;
+    --rarity-legendary-text: 184.9 100.0% 50.0%;
+    --rarity-ultra-text: 203.2 85.9% 59.1%;
+    --rarity-rare-text: 216.6 76.9% 67.6%;
+    --rarity-uncommon-text: 235.9 16.2% 65.1%;
+    --rarity-common-text: 210.0 6.5% 59.3%;
   }
   [data-theme="nebula"] {
     --background: 262.9 49% 8.4%;
@@ -804,6 +858,11 @@
     --breakdown-rare: 274.5 48.8% 60.2%;
     --breakdown-ultra: 279.2 65.8% 70.2%;
     --breakdown-legendary: 288.7 100.0% 80.1%;
+    --rarity-legendary-text: 288.7 100.0% 80.1%;
+    --rarity-ultra-text: 279.2 65.8% 70.2%;
+    --rarity-rare-text: 274.2 62.5% 68.4%;
+    --rarity-uncommon-text: 269.2 47.2% 65.7%;
+    --rarity-common-text: 234.8 4.5% 57.1%;
   }
   [data-theme="solar-flare"] {
     --background: 16.7 53% 6.7%;
@@ -830,6 +889,11 @@
     --breakdown-rare: 24.7 65.0% 69.2%;
     --breakdown-ultra: 37.3 100.0% 52.8%;
     --breakdown-legendary: 56.2 100.0% 50.0%;
+    --rarity-legendary-text: 56.2 100.0% 50.0%;
+    --rarity-ultra-text: 37.3 100.0% 52.8%;
+    --rarity-rare-text: 24.7 65.0% 69.2%;
+    --rarity-uncommon-text: 18.9 48.8% 60.3%;
+    --rarity-common-text: 12.7 47.9% 60.7%;
   }
   [data-theme="aurora"] {
     --background: 176.0 48% 6.1%;
@@ -856,6 +920,11 @@
     --breakdown-rare: 167.4 100.0% 36.7%;
     --breakdown-ultra: 145.7 100.0% 41.3%;
     --breakdown-legendary: 87.1 100.0% 50.0%;
+    --rarity-legendary-text: 87.1 100.0% 50.0%;
+    --rarity-ultra-text: 145.7 100.0% 41.3%;
+    --rarity-rare-text: 166.9 92.0% 38.6%;
+    --rarity-uncommon-text: 185.6 66.1% 46.0%;
+    --rarity-common-text: 198.8 67.7% 54.4%;
   }
   /* Deep Space, re-coloured 2026-10-19 (/impeccable distill): it had become
      a second Sapphire (CIEDE2000 7.1) between Nebula and Sapphire. Now a
@@ -888,6 +957,11 @@
     --breakdown-rare: 250.6 49.8% 62.2%;
     --breakdown-ultra: 254.9 93.9% 74.3%;
     --breakdown-legendary: 300.0 100.0% 77.4%;
+    --rarity-legendary-text: 300.0 100.0% 77.4%;
+    --rarity-ultra-text: 254.9 93.9% 74.3%;
+    --rarity-rare-text: 249.9 63.4% 69.8%;
+    --rarity-uncommon-text: 233.0 14.6% 59.9%;
+    --rarity-common-text: 196.6 4.8% 53.3%;
   }
   [data-theme="stellar-gold"] {
     --background: 45.0 35% 6.7%;
@@ -914,6 +988,11 @@
     --breakdown-rare: 44.7 57.9% 43.6%;
     --breakdown-ultra: 57.8 100.0% 36.0%;
     --breakdown-legendary: 58.1 100.0% 50.0%;
+    --rarity-legendary-text: 58.1 100.0% 50.0%;
+    --rarity-ultra-text: 57.8 100.0% 36.0%;
+    --rarity-rare-text: 44.3 49.9% 50.2%;
+    --rarity-uncommon-text: 43.3 49.6% 48.7%;
+    --rarity-common-text: 41.4 13.5% 58.5%;
   }
 
   /* ── Botanical family (natural/earthy, mixed polarity) ───────────────────
@@ -984,6 +1063,11 @@
     --breakdown-rare: 196.5 100.0% 20.5%;
     --breakdown-ultra: 202.7 100.0% 16.0%;
     --breakdown-legendary: 240.4 100.0% 31.9%;
+    --rarity-legendary-text: 240.4 100.0% 31.9%;
+    --rarity-ultra-text: 202.7 100.0% 16.0%;
+    --rarity-rare-text: 196.5 100.0% 20.5%;
+    --rarity-uncommon-text: 181.7 84.4% 21.5%;
+    --rarity-common-text: 160.5 2.5% 34.7%;
   }
   [data-theme="forest"] {
     --background: 150.0 28% 7.1%;
@@ -1010,6 +1094,11 @@
     --breakdown-rare: 153.5 100.0% 42.0%;
     --breakdown-ultra: 87.2 85.0% 48.5%;
     --breakdown-legendary: 64.5 100.0% 50.0%;
+    --rarity-legendary-text: 64.5 100.0% 50.0%;
+    --rarity-ultra-text: 87.2 85.0% 48.5%;
+    --rarity-rare-text: 153.5 100.0% 42.0%;
+    --rarity-uncommon-text: 169.1 100.0% 37.7%;
+    --rarity-common-text: 142.3 10.2% 60.2%;
   }
   [data-theme="fern"] {
     --background: 78.0 29.4% 6.7%;
@@ -1036,6 +1125,11 @@
     --breakdown-rare: 105.2 23.0% 49.4%;
     --breakdown-ultra: 95.8 100.0% 42.7%;
     --breakdown-legendary: 117.8 100.0% 50.0%;
+    --rarity-legendary-text: 117.8 100.0% 50.0%;
+    --rarity-ultra-text: 95.8 100.0% 42.7%;
+    --rarity-rare-text: 105.3 26.2% 56.0%;
+    --rarity-uncommon-text: 54.3 29.3% 49.5%;
+    --rarity-common-text: 43.5 0.5% 59.8%;
   }
   [data-theme="meadow"] {
     --background: 54.8 53% 91.6%;
@@ -1062,6 +1156,11 @@
     --breakdown-rare: 99.7 39.6% 27.3%;
     --breakdown-ultra: 98.5 58.5% 18.1%;
     --breakdown-legendary: 120.0 100.0% 10.2%;
+    --rarity-legendary-text: 120.0 100.0% 10.2%;
+    --rarity-ultra-text: 98.5 58.5% 18.1%;
+    --rarity-rare-text: 99.7 39.6% 27.3%;
+    --rarity-uncommon-text: 100.6 17.8% 32.6%;
+    --rarity-common-text: 94.7 11.4% 34.9%;
   }
 
   /* ── Noir family (dark, luxury/minimalist) ────────────────────────────────
@@ -1120,6 +1219,11 @@
     --breakdown-rare: 180.0 0.0% 76.2%;
     --breakdown-ultra: 0.0 0.0% 86.4%;
     --breakdown-legendary: 60.0 0.0% 96.9%;
+    --rarity-legendary-text: 43.8 0.0% 96.9%;
+    --rarity-ultra-text: 43.8 0.0% 86.4%;
+    --rarity-rare-text: 43.8 0.0% 76.2%;
+    --rarity-uncommon-text: 43.8 0.0% 66.2%;
+    --rarity-common-text: 43.8 0.0% 61.9%;
   }
   [data-theme="crimson"] {
     --background: 343.6 33% 6.5%;
@@ -1146,6 +1250,11 @@
     --breakdown-rare: 3.2 49.0% 69.3%;
     --breakdown-ultra: 22.0 93.8% 61.8%;
     --breakdown-legendary: 41.6 100.0% 50.0%;
+    --rarity-legendary-text: 41.6 100.0% 50.0%;
+    --rarity-ultra-text: 22.0 93.8% 61.8%;
+    --rarity-rare-text: 3.2 49.0% 69.3%;
+    --rarity-uncommon-text: 3.4 35.5% 64.3%;
+    --rarity-common-text: 3.9 22.8% 60.3%;
   }
   [data-theme="amethyst"] {
     --background: 273.3 26% 6.9%;
@@ -1172,6 +1281,11 @@
     --breakdown-rare: 242.6 19.2% 73.6%;
     --breakdown-ultra: 283.8 34.5% 83.8%;
     --breakdown-legendary: 300.0 100.0% 94.4%;
+    --rarity-legendary-text: 300.0 100.0% 94.4%;
+    --rarity-ultra-text: 283.8 34.5% 83.8%;
+    --rarity-rare-text: 242.6 19.2% 73.6%;
+    --rarity-uncommon-text: 231.8 17.2% 64.6%;
+    --rarity-common-text: 265.7 6.6% 58.4%;
   }
   [data-theme="sapphire"] {
     --background: 215.3 52% 6.5%;
@@ -1198,6 +1312,11 @@
     --breakdown-rare: 203.6 81.7% 60.6%;
     --breakdown-ultra: 195.4 100.0% 62.2%;
     --breakdown-legendary: 180.2 100.0% 50.0%;
+    --rarity-legendary-text: 180.2 100.0% 50.0%;
+    --rarity-ultra-text: 195.4 100.0% 62.2%;
+    --rarity-rare-text: 203.6 81.7% 60.6%;
+    --rarity-uncommon-text: 215.1 23.9% 62.5%;
+    --rarity-common-text: 221.5 10.8% 58.4%;
   }
   [data-theme="emerald"] {
     --background: 191.3 53.3% 5.9%;
@@ -1224,6 +1343,11 @@
     --breakdown-rare: 159.1 100.0% 37.8%;
     --breakdown-ultra: 163.1 99.9% 43.8%;
     --breakdown-legendary: 163.2 100.0% 50.0%;
+    --rarity-legendary-text: 163.2 100.0% 50.0%;
+    --rarity-ultra-text: 163.1 99.9% 43.8%;
+    --rarity-rare-text: 159.1 100.0% 37.8%;
+    --rarity-uncommon-text: 110.1 39.7% 47.6%;
+    --rarity-common-text: 138.7 5.3% 58.4%;
   }
   /* Silver Screen -- a black-and-white movie. Every value the theme owns
      is 0% saturation; can rarity badges, status colors and the medal/
@@ -1264,6 +1388,11 @@
     --breakdown-rare: 120.0 0.0% 59.6%;
     --breakdown-ultra: 180.0 0.0% 70.5%;
     --breakdown-legendary: 120.0 0.0% 81.8%;
+    --rarity-legendary-text: 43.8 0.0% 81.8%;
+    --rarity-ultra-text: 43.8 0.0% 70.5%;
+    --rarity-rare-text: 43.8 0.0% 59.6%;
+    --rarity-uncommon-text: 43.8 0.0% 57.2%;
+    --rarity-common-text: 43.8 0.0% 55.4%;
   }
 
   /* ── Candy family (light, playful) ────────────────────────────────────────
@@ -1324,6 +1453,11 @@
     --breakdown-rare: 321.6 81.7% 44.9%;
     --breakdown-ultra: 339.4 100.0% 41.3%;
     --breakdown-legendary: 359.9 100.0% 35.7%;
+    --rarity-legendary-text: 1.2 94.5% 35.4%;
+    --rarity-ultra-text: 339.9 99.9% 34.4%;
+    --rarity-rare-text: 320.3 96.5% 34.8%;
+    --rarity-uncommon-text: 331.9 14.6% 39.8%;
+    --rarity-common-text: 339.9 10.4% 40.4%;
   }
   [data-theme="blue-pop"] {
     --background: 200.0 100% 97.1%;
@@ -1350,6 +1484,11 @@
     --breakdown-rare: 226.7 61.9% 51.0%;
     --breakdown-ultra: 239.0 100.0% 61.3%;
     --breakdown-legendary: 266.9 100.0% 50.0%;
+    --rarity-legendary-text: 266.6 98.7% 47.7%;
+    --rarity-ultra-text: 240.2 94.7% 59.6%;
+    --rarity-rare-text: 227.0 61.0% 49.3%;
+    --rarity-uncommon-text: 220.2 42.5% 43.1%;
+    --rarity-common-text: 195.7 96.9% 28.3%;
   }
   /* Grape Candy, moved 2026-10-19 (/impeccable distill): it read as
      Synthwave light (CIEDE2000 6.4). Now a bluer Concord-grape violet --
@@ -1381,6 +1520,11 @@
     --breakdown-rare: 266.1 53.8% 46.3%;
     --breakdown-ultra: 268.2 100.0% 44.8%;
     --breakdown-legendary: 248.4 100.0% 50.0%;
+    --rarity-legendary-text: 248.4 100.0% 50.0%;
+    --rarity-ultra-text: 268.2 100.0% 44.8%;
+    --rarity-rare-text: 266.1 53.8% 46.3%;
+    --rarity-uncommon-text: 258.4 12.3% 38.0%;
+    --rarity-common-text: 43.8 0.0% 36.3%;
   }
   [data-theme="orange-crush"] {
     --background: 26.7 100% 96.5%;
@@ -1407,6 +1551,11 @@
     --breakdown-rare: 8.1 49.0% 47.8%;
     --breakdown-ultra: 6.1 66.9% 37.2%;
     --breakdown-legendary: 352.8 100.0% 25.8%;
+    --rarity-legendary-text: 352.8 100.0% 25.8%;
+    --rarity-ultra-text: 6.1 66.9% 37.2%;
+    --rarity-rare-text: 7.7 56.4% 40.5%;
+    --rarity-uncommon-text: 17.4 27.0% 38.5%;
+    --rarity-common-text: 20.6 28.5% 38.9%;
   }
   [data-theme="sour-apple"] {
     --background: 76.0 100.0% 91.2%;
@@ -1433,6 +1582,11 @@
     --breakdown-rare: 75.3 60.1% 27.2%;
     --breakdown-ultra: 98.2 66.0% 21.9%;
     --breakdown-legendary: 120.0 100.0% 13.8%;
+    --rarity-legendary-text: 120.0 100.0% 13.8%;
+    --rarity-ultra-text: 98.2 66.0% 21.9%;
+    --rarity-rare-text: 74.3 74.2% 23.0%;
+    --rarity-uncommon-text: 72.9 17.4% 33.3%;
+    --rarity-common-text: 63.4 18.2% 34.1%;
     --primary-fill: 74.5 100.0% 47.1%;
     --cta: 75.4 92.3% 31.6%;
     --cta-foreground: 240.0 20.0% 4.9%;
@@ -1468,6 +1622,11 @@
     --breakdown-rare: 333.5 100.0% 50.0%;
     --breakdown-ultra: 319.2 100.0% 47.3%;
     --breakdown-legendary: 293.4 100.0% 46.9%;
+    --rarity-legendary-text: 293.0 91.4% 35.2%;
+    --rarity-ultra-text: 320.3 92.6% 34.5%;
+    --rarity-rare-text: 334.9 95.5% 35.3%;
+    --rarity-uncommon-text: 352.7 94.1% 38.3%;
+    --rarity-common-text: 3.6 47.1% 43.1%;
   }
 
   /* ── Spring family (light, built from a palette the user chose) ──────────
@@ -1528,8 +1687,8 @@
        designed so no two digits can be mistaken. */
     --radius-scale: 0.7;
     --border-width: 2px;
-    --card-lift: none;
-    --hero-lift: none;
+    --card-lift: 0 0 #0000;
+    --hero-lift: 0 0 #0000;
     --element-glow: 0;
     --font-num: 'Atkinson Hyperlegible Mono', monospace;
   }
@@ -1562,6 +1721,11 @@
     --breakdown-rare: 159.8 100.0% 44.6%;
     --breakdown-ultra: 75.9 100.0% 43.5%;
     --breakdown-legendary: 75.8 100.0% 50.0%;
+    --rarity-legendary-text: 75.8 100.0% 50.0%;
+    --rarity-ultra-text: 75.9 100.0% 43.5%;
+    --rarity-rare-text: 159.8 100.0% 44.6%;
+    --rarity-uncommon-text: 179.2 16.7% 49.5%;
+    --rarity-common-text: 211.0 13.2% 54.0%;
   }
   /* Ledger: a calm, neutral cataloguing view. Paper white, ink-black text, one ink-blue action, ledger-red accent, no glow. */
   [data-theme="ledger"] {
@@ -1589,6 +1753,11 @@
     --breakdown-rare: 223.6 61.9% 50.9%;
     --breakdown-ultra: 227.5 100.0% 55.7%;
     --breakdown-legendary: 243.8 100.0% 49.1%;
+    --rarity-legendary-text: 243.8 100.0% 49.1%;
+    --rarity-ultra-text: 228.4 92.5% 52.8%;
+    --rarity-rare-text: 224.0 63.2% 47.4%;
+    --rarity-uncommon-text: 223.8 63.7% 48.6%;
+    --rarity-common-text: 221.4 35.1% 44.0%;
   }
 
   /* ── Alloy family (2026-10-26) ──────────────────────────────────────────
@@ -1656,6 +1825,11 @@
     --breakdown-rare: 205.0 100.0% 38.6%;
     --breakdown-ultra: 208.5 100.0% 32.7%;
     --breakdown-legendary: 245.5 100.0% 50.1%;
+    --rarity-legendary-text: 245.5 100.0% 50.1%;
+    --rarity-ultra-text: 208.7 98.3% 31.9%;
+    --rarity-rare-text: 205.4 99.7% 30.7%;
+    --rarity-uncommon-text: 204.4 93.5% 31.5%;
+    --rarity-common-text: 213.4 12.9% 37.3%;
   }
   /* Anodised Teal: deep satin teal with a fine anodised speckle; holo Legendary. */
   [data-theme="alloy-teal"] {
@@ -1689,6 +1863,11 @@
     --breakdown-rare: 212.1 29.5% 71.5%;
     --breakdown-ultra: 192.0 100.0% 68.7%;
     --breakdown-legendary: 174.3 100.0% 61.6%;
+    --rarity-legendary-text: 174.3 100.0% 61.6%;
+    --rarity-ultra-text: 192.0 100.0% 68.7%;
+    --rarity-rare-text: 212.1 29.5% 71.5%;
+    --rarity-uncommon-text: 214.5 23.2% 63.5%;
+    --rarity-common-text: 181.6 11.8% 54.5%;
   }
   /* Anodised Red: deep satin red with a fine anodised speckle; holo Legendary. */
   [data-theme="alloy-red"] {
@@ -1722,6 +1901,11 @@
     --breakdown-rare: 356.0 76.6% 69.7%;
     --breakdown-ultra: 336.9 100.0% 77.5%;
     --breakdown-legendary: 300.1 100.0% 76.3%;
+    --rarity-legendary-text: 300.1 100.0% 76.3%;
+    --rarity-ultra-text: 336.9 100.0% 77.5%;
+    --rarity-rare-text: 356.0 78.4% 70.4%;
+    --rarity-uncommon-text: 357.2 66.3% 67.8%;
+    --rarity-common-text: 12.8 54.8% 60.0%;
   }
   /* Gold Foil: hot-foil gold on a cool lacquer black, with a foil crinkle texture; holo Legendary. Cool black (not Stellar Gold's warm one) and a deeper foil gold keep it apart from Stellar Gold. */
   [data-theme="alloy-gold"] {
@@ -1744,7 +1928,7 @@
     --ring: 41.0 75.0% 51.4%;
     --glow-intensity: 0.6;
     --wash-intensity: 0;
-    --card-texture: url("data:image/png;base64,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");
+    --card-texture: url("data:image/png;base64,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");
     --holo-1:29.0 96.4% 90.6%;
     --holo-2:46.1 99.0% 82.7%;
     --holo-3:73.3 99.3% 64.9%;
@@ -1755,6 +1939,11 @@
     --breakdown-rare: 45.2 22.5% 58.7%;
     --breakdown-ultra: 45.3 98.3% 78.0%;
     --breakdown-legendary: 56.7 100.0% 50.0%;
+    --rarity-legendary-text: 56.7 100.0% 50.0%;
+    --rarity-ultra-text: 45.3 98.3% 78.0%;
+    --rarity-rare-text: 45.2 22.5% 58.7%;
+    --rarity-uncommon-text: 41.7 21.5% 53.6%;
+    --rarity-common-text: 41.7 21.3% 51.7%;
   }
 
   /* ── Soda Fountain family (2026-10-26) ──────────────────────────────────
@@ -1801,6 +1990,11 @@
     --breakdown-rare: 24.2 56.6% 71.9%;
     --breakdown-ultra: 33.6 100.0% 62.6%;
     --breakdown-legendary: 55.4 100.0% 50.0%;
+    --rarity-legendary-text: 55.4 100.0% 50.0%;
+    --rarity-ultra-text: 33.6 100.0% 62.6%;
+    --rarity-rare-text: 24.2 56.6% 71.9%;
+    --rarity-uncommon-text: 23.3 29.8% 57.2%;
+    --rarity-common-text: 23.3 29.2% 55.4%;
   }
   /* Root Beer: deeper red-brown with a frothy cream Scan and a vanilla-bean accent. */
   [data-theme="root-beer"] {
@@ -1828,6 +2022,11 @@
     --breakdown-rare: 12.9 98.3% 61.9%;
     --breakdown-ultra: 33.4 100.0% 56.8%;
     --breakdown-legendary: 50.6 100.0% 50.0%;
+    --rarity-legendary-text: 50.6 100.0% 50.0%;
+    --rarity-ultra-text: 33.4 100.0% 56.8%;
+    --rarity-rare-text: 12.8 98.4% 63.7%;
+    --rarity-uncommon-text: 7.5 94.3% 64.4%;
+    --rarity-common-text: 0.3 86.1% 65.7%;
   }
   [data-theme="spring-plum"] {
     --background: 275.7 12% 92.6%;
@@ -1855,6 +2054,11 @@
     --breakdown-rare: 283.5 100.0% 52.5%;
     --breakdown-ultra: 276.0 100.0% 47.8%;
     --breakdown-legendary: 261.0 100.0% 50.0%;
+    --rarity-legendary-text: 260.5 98.1% 47.0%;
+    --rarity-ultra-text: 275.1 94.2% 40.7%;
+    --rarity-rare-text: 283.5 93.7% 37.5%;
+    --rarity-uncommon-text: 294.6 94.5% 32.4%;
+    --rarity-common-text: 276.0 8.8% 37.8%;
   }
   [data-theme="spring-brick"] {
     --background: 32.3 35.1% 92.7%;
@@ -1882,6 +2086,11 @@
     --breakdown-rare: 333.0 100.0% 50.9%;
     --breakdown-ultra: 351.4 86.7% 51.3%;
     --breakdown-legendary: 1.3 100.0% 39.6%;
+    --rarity-legendary-text: 1.6 98.0% 33.4%;
+    --rarity-ultra-text: 350.2 91.2% 35.6%;
+    --rarity-rare-text: 334.3 93.0% 34.8%;
+    --rarity-uncommon-text: 346.1 29.3% 41.5%;
+    --rarity-common-text: 43.8 0.0% 36.7%;
   }
   [data-theme="spring-coral"] {
     --background: 22.8 100.0% 94.3%;
@@ -1912,6 +2121,11 @@
     --breakdown-rare: 4.2 54.4% 47.9%;
     --breakdown-ultra: 2.8 65.6% 37.4%;
     --breakdown-legendary: 357.5 100.0% 25.2%;
+    --rarity-legendary-text: 357.5 100.0% 25.2%;
+    --rarity-ultra-text: 2.8 65.6% 37.4%;
+    --rarity-rare-text: 3.0 63.9% 39.8%;
+    --rarity-uncommon-text: 6.8 26.3% 39.3%;
+    --rarity-common-text: 43.8 0.0% 36.9%;
   }
   [data-theme="spring-butter"] {
     --background: 47.4 100.0% 92.5%;
@@ -1942,6 +2156,11 @@
     --breakdown-rare: 55.5 62.9% 26.2%;
     --breakdown-ultra: 58.8 100.0% 15.9%;
     --breakdown-legendary: 119.8 100.0% 15.7%;
+    --rarity-legendary-text: 119.8 100.0% 15.7%;
+    --rarity-ultra-text: 58.8 100.0% 15.9%;
+    --rarity-rare-text: 55.6 75.9% 22.7%;
+    --rarity-uncommon-text: 52.3 25.8% 31.9%;
+    --rarity-common-text: 43.8 0.0% 38.7%;
   }
   [data-theme="spring-pistachio"] {
     --background: 90.0 47.1% 93.3%;
@@ -1972,6 +2191,11 @@
     --breakdown-rare: 79.6 16.2% 33.1%;
     --breakdown-ultra: 77.4 100.0% 17.5%;
     --breakdown-legendary: 120.0 100.0% 14.2%;
+    --rarity-legendary-text: 120.0 100.0% 14.2%;
+    --rarity-ultra-text: 77.4 100.0% 17.5%;
+    --rarity-rare-text: 79.5 16.9% 31.5%;
+    --rarity-uncommon-text: 74.3 17.7% 32.6%;
+    --rarity-common-text: 70.7 6.5% 36.2%;
   }
   [data-theme="spring-olive"] {
     --background: 55.0 31.6% 92.5%;
@@ -1999,6 +2223,11 @@
     --breakdown-rare: 27.7 77.5% 39.8%;
     --breakdown-ultra: 27.2 100.0% 29.9%;
     --breakdown-legendary: 0.0 100.0% 36.3%;
+    --rarity-legendary-text: 1.2 95.1% 33.9%;
+    --rarity-ultra-text: 26.4 93.1% 29.1%;
+    --rarity-rare-text: 29.4 96.0% 28.7%;
+    --rarity-uncommon-text: 41.7 95.4% 25.2%;
+    --rarity-common-text: 44.9 22.1% 33.7%;
   }
 }
 
@@ -2088,6 +2317,15 @@
     inset 0 0 10px hsl(var(--primary) / calc(0.05 * var(--glow-intensity) * var(--element-glow))),
     0 0 10px hsl(var(--primary) / calc(0.1 * var(--glow-intensity) * var(--element-glow)));
 }
+/* A card wearing the glow (Home's Rare Pulls tile) keeps its family's lift
+   under it: .neon-border's own shadow used to replace --card-lift, so in
+   every family without glow that one tile sat flat beside lifted ones. */
+.bg-card.neon-border {
+  box-shadow:
+    var(--card-lift),
+    inset 0 0 10px hsl(var(--primary) / calc(0.05 * var(--glow-intensity) * var(--element-glow))),
+    0 0 10px hsl(var(--primary) / calc(0.1 * var(--glow-intensity) * var(--element-glow)));
+}
 
 /* CanCard's favourited-state glow — was a fixed hsl(var(--primary)/0.12)
    shadow, the one glow surface left out of the --glow-intensity system:
@@ -2097,9 +2335,8 @@
   box-shadow: 0 0 12px hsl(var(--primary) / calc(0.12 * var(--glow-intensity) * var(--element-glow)));
 }
 
-/* RarityBadge's per-can glow — hue stays theme-invariant on purpose (a
-   can's actual rarity must read the same regardless of viewer theme,
-   same invariant as --rarity-* generally), but INTENSITY escalates with
+/* RarityBadge's per-can glow — in the theme's own tier colour (--rarity-*
+   is the theme's gauge since 2026-10-26), with INTENSITY escalating with
    --glow-intensity like every other glow surface. Common/Uncommon stay
    glow-free by design (RarityBadge.jsx). */
 .rarity-glow-rare {
@@ -2256,6 +2493,13 @@ body {
   :where(.bg-card) .bg-card {
     box-shadow: none;
   }
+  /* A card holding a hero card (Profile's collection card around its Score)
+     stays flat too: the Score is the one that lifts. In Soda Fountain the
+     outer card's inner rule ran parallel to the Score's own border, three
+     stacked lines. */
+  .bg-card:where(:has(.hero-card, .glass-card-hero)) {
+    box-shadow: none;
+  }
 }
 
 /* Headline numbers in the family's number face (--font-num). Keeps any
@@ -2317,7 +2561,7 @@ body {
   --radius-scale: 1;
   --radius: 0.75rem;
   --border-width: 1px;
-  --card-lift: none;
+  --card-lift: 0 0 #0000;
   --hero-lift: initial;
   --element-glow: 1;
   --shadow-ink: 0 0% 0%;
@@ -2328,6 +2572,11 @@ body {
   --medal-gold: 45 93% 58%;
   --medal-silver: 215 16% 75%;
   --medal-bronze: 28 75% 55%;
+  --rarity-common: 220 9% 56%;
+  --rarity-uncommon: 142 71% 45%;
+  --rarity-rare: 217 91% 60%;
+  --rarity-ultra: 271 91% 65%;
+  --rarity-legendary: 330 81% 60%;
   --rarity-common-text: 220 9% 64.5%;
   --rarity-uncommon-text: 142 71% 45%;
   --rarity-rare-text: 217 91% 69%;
@@ -2368,6 +2617,11 @@ body {
   --breakdown-rare: 151.1 47.3% 55.4%;
   --breakdown-ultra: 78.6 68.9% 58.1%;
   --breakdown-legendary: 51.4 97.9% 77.1%;
+  --rarity-legendary-text: 51.4 97.9% 77.1%;
+  --rarity-ultra-text: 78.6 68.9% 58.1%;
+  --rarity-rare-text: 151.1 47.3% 55.4%;
+  --rarity-uncommon-text: 186.2 34.7% 55.7%;
+  --rarity-common-text: 210.5 48.6% 62.3%;
 }
 :root[data-rarity="colour-blind"][data-tone="light"] {
   --breakdown-common:60.2 97.0% 27.9%;
@@ -2375,4 +2629,9 @@ body {
   --breakdown-rare:181.4 93.4% 18.4%;
   --breakdown-ultra:201.9 95.3% 17.0%;
   --breakdown-legendary:259.5 98.7% 16.0%;
+  --rarity-legendary-text: 259.5 98.7% 16.0%;
+  --rarity-ultra-text: 201.9 95.3% 17.0%;
+  --rarity-rare-text: 181.4 93.4% 18.4%;
+  --rarity-uncommon-text: 150.2 88.9% 20.9%;
+  --rarity-common-text: 60.3 82.5% 20.4%;
 }

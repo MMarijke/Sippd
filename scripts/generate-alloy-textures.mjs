@@ -5,7 +5,7 @@
 //
 //   brushed  Brushed Aluminium (light): fine horizontal streaks, dark, <= 6%
 //   anodised Anodised Teal/Red (dark): a fine satin speckle, white, <= 5%
-//   foil     Gold Foil (dark): diagonal crinkle highlights, white, <= 8%
+//   foil     Gold Foil (dark): wavering diagonal folds, white, <= 5%
 //
 // Alphas stay low so every text contrast in those themes is unaffected in
 // practice (the tests check colours without texture; these only lighten or
@@ -35,16 +35,20 @@ const anodised = (() => {
   return png(SIZE, SIZE, () => [255, Math.round(((rand() + rand()) / 2) * MAX)]);
 })();
 
-// Foil: soft diagonal ridges (two crossing frequencies) plus speckle, the
-// crinkle of hot-foil stamping. Light highlights on a dark card.
+// Foil: one family of diagonal folds, wavered by a slow sweep across them,
+// plus a little speckle: the crinkle of hot-foil stamping. Light highlights
+// on a dark card. (It used to be two crossing sine ridges at 8%, whose
+// crossings read as a transparency checkerboard at 1x; /impeccable critique,
+// 2026-10-26.) Whole-number frequencies, so the tile still repeats seamlessly.
 const foil = (() => {
   const rand = seeded(0xa3);
-  const MAX = Math.floor(0.08 * 255);
+  const MAX = Math.floor(0.05 * 255);
   const tau = Math.PI * 2;
   return png(SIZE, SIZE, (x, y) => {
-    const ridge = 0.5 + 0.25 * Math.sin(((x + y) / SIZE) * tau * 6) + 0.25 * Math.sin(((x - 2 * y) / SIZE) * tau * 3);
-    const v = Math.max(0, Math.min(1, ridge * 0.8 + rand() * 0.2));
-    return [255, Math.round(v * v * MAX)];
+    const sweep = 1.6 * Math.sin(((x - y) / SIZE) * tau);
+    const fold = 0.5 + 0.5 * Math.sin(((x + y) / SIZE) * tau * 4 + sweep);
+    const v = Math.max(0, Math.min(1, fold * 0.85 + rand() * 0.15));
+    return [255, Math.round(v * v * v * MAX)];
   });
 })();
 

@@ -37,8 +37,8 @@ const STRUCTURE = ['--radius-scale', '--card-lift', '--font-num'];
 
 describe('per-family structure', () => {
   it('finds every family and rendering', () => {
-    expect(renderings).toHaveLength(46);
-    expect(Object.keys(byFamily)).toHaveLength(9);
+    expect(renderings).toHaveLength(44);
+    expect(Object.keys(byFamily)).toHaveLength(8);
     expect(renderings.every((r) => r.family)).toBe(true);
   });
 

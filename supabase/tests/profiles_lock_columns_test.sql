@@ -6,8 +6,9 @@
 -- Pro-locked theme directly is profiles_lock_columns() (first added in
 -- 20260815120100_security.sql, extended in 20260901000000_add_pro_subscription.sql,
 -- 20260909000000_add_profile_theme.sql, 20260926000000_add_theme_families.sql,
--- 20260927000000_replace_theme_catalogue_phase1.sql, and most recently
--- 20260929000000_trim_theme_catalogue.sql).
+-- 20260927000000_replace_theme_catalogue_phase1.sql, 20260929000000_trim_theme_catalogue.sql,
+-- 20261026100000_new_theme_families.sql, and most recently
+-- 20261027000000_retire_essentials.sql).
 -- This is exactly the gap this project's own CLAUDE.md calls out ("RLS only
 -- restricts which rows a user can touch, not which columns") — this file is
 -- the regression check that the trigger still closes it after every future
@@ -104,18 +105,9 @@ select throws_like(
   'free user is blocked from Spring Coral (Pro)'
 );
 
--- New families, 20261026100000_new_theme_families.sql: Floodlight and
--- Ledger are free (Essentials), Alloy and Soda Fountain are Pro.
-select lives_ok(
-  $$update profiles set theme = 'floodlight' where id = '11111111-1111-1111-1111-111111111111'$$,
-  'free user can pick Floodlight (free accessibility theme)'
-);
-
-select lives_ok(
-  $$update profiles set theme = 'ledger' where id = '11111111-1111-1111-1111-111111111111'$$,
-  'free user can pick Ledger'
-);
-
+-- New families, 20261026100000_new_theme_families.sql: Alloy and Soda
+-- Fountain are Pro. (Its free Essentials family was retired in
+-- 20261027000000_retire_essentials.sql; see the Pro-user checks below.)
 select throws_like(
   $$update profiles set theme = 'alloy-gold' where id = '11111111-1111-1111-1111-111111111111'$$,
   '%theme is Pro-only%',
@@ -158,6 +150,19 @@ select throws_like(
   $$update profiles set theme = 'moss' where id = '22222222-2222-2222-2222-222222222222'$$,
   '%profiles_theme_valid%',
   'Moss (retired) is rejected even for a Pro user'
+);
+
+-- Retired in 20261027000000_retire_essentials.sql.
+select throws_like(
+  $$update profiles set theme = 'floodlight' where id = '22222222-2222-2222-2222-222222222222'$$,
+  '%profiles_theme_valid%',
+  'Floodlight (retired) is rejected even for a Pro user'
+);
+
+select throws_like(
+  $$update profiles set theme = 'ledger' where id = '22222222-2222-2222-2222-222222222222'$$,
+  '%profiles_theme_valid%',
+  'Ledger (retired) is rejected even for a Pro user'
 );
 
 reset role;

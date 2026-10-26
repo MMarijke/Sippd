@@ -34,8 +34,8 @@ for (let i = 0; i < renderings.length; i++) {
 }
 
 describe('theme catalogue: no lookalikes', () => {
-  it('measures every pair of the 46 renderings', () => {
-    expect(renderings).toHaveLength(46);
+  it('measures every pair of the 44 renderings', () => {
+    expect(renderings).toHaveLength(44);
     expect(pairs.length).toBeGreaterThan(600);
   });
 

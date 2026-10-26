@@ -121,22 +121,10 @@ export const THEME_FAMILIES = [
       { id: 'spring-olive', label: 'Olive', pro: true, light: { swatch: '#6B6A1F', sup: '#A39C5C', background: '#F2F1E6' } },
     ],
   },
-  // 2026-10-26: three new families from the theme catalogue critique's gaps
-  // (high contrast, neutral light, the can-finish world, warm darks).
-  // Essentials is free in full: Floodlight is an accessibility theme and
-  // Ledger the calm neutral, so neither belongs behind Pro. Alloy and Soda
-  // Fountain are Pro-only families (the first without a free member).
-  {
-    id: 'essentials',
-    label: 'Essentials',
-    displayFont: "'Atkinson Hyperlegible', sans-serif",
-    labelSize: '0.875rem',
-    isNew: true,
-    themes: [
-      { id: 'floodlight', label: 'Floodlight', pro: false, dark: { swatch: '#FFD400', sup: '#FFFFFF', background: '#000000' } },
-      { id: 'ledger', label: 'Ledger', pro: false, light: { swatch: '#1F3A93', sup: '#8C2F1C', background: '#FAF8F3' } },
-    ],
-  },
+  // 2026-10-26: new families from the theme catalogue critique's gaps (the
+  // can-finish world, warm darks), both Pro-only (the first without a free
+  // member). A third, Essentials (Floodlight, Ledger), was retired
+  // 2026-10-27; see RETIRED_THEMES.
   {
     id: 'alloy',
     label: 'Alloy',
@@ -205,7 +193,7 @@ export function getThemeFamily(themeId) {
 // block sets. The Settings picker sets each family's tile label in its own
 // face, so it needs these before the family is ever applied.
 export const PICKER_LABEL_FONTS_URL =
-  'https://fonts.googleapis.com/css2?family=Michroma&family=Fraunces:wght@600&family=Bodoni+Moda:wght@700&family=Fredoka:wght@600&family=Poppins:wght@700&family=Atkinson+Hyperlegible:wght@700&family=Archivo:wght@700&family=Shrikhand&display=swap';
+  'https://fonts.googleapis.com/css2?family=Michroma&family=Fraunces:wght@600&family=Bodoni+Moda:wght@700&family=Fredoka:wght@600&family=Poppins:wght@700&family=Archivo:wght@700&family=Shrikhand&display=swap';
 
 export const FAMILY_FONT_URLS = {
   cosmic: 'https://fonts.googleapis.com/css2?family=Michroma&family=Space+Mono:wght@400;700&family=Manrope:wght@400;500;700&display=swap',
@@ -213,7 +201,6 @@ export const FAMILY_FONT_URLS = {
   noir: 'https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500;700;900&family=Fragment+Mono&family=Jost:wght@400;500&display=swap',
   candy: 'https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Chivo+Mono:wght@400;500&family=Nunito:wght@400;600;700&display=swap',
   spring: 'https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap',
-  essentials: 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Atkinson+Hyperlegible+Mono:wght@400;500;700&display=swap',
   alloy: 'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Martian+Mono:wght@400;500;700&display=swap',
   'soda-fountain': 'https://fonts.googleapis.com/css2?family=Shrikhand&family=Figtree:wght@400;500;600;700&family=Azeret+Mono:wght@400;500;700&display=swap',
 };
@@ -309,6 +296,10 @@ export const RETIRED_THEMES = {
   // Retired 2026-10-19: it sat within reach of three Spring themes
   // (Pistachio, Butter, Olive). Olive is its nearest match, also Pro.
   moss: { label: 'Moss', movedTo: 'spring-olive' },
+  // Retired 2026-10-27 with the Essentials family (product direction):
+  // both move to the free default, Power-Up, in their own polarity.
+  floodlight: { label: 'Floodlight', movedTo: 'power-up' },
+  ledger: { label: 'Ledger', movedTo: 'power-up' },
 };
 
 /**

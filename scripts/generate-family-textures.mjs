@@ -13,8 +13,8 @@
 //
 // Every alpha stays at or under 7%, so a texture shifts a card's colour by a
 // few percent at its strongest point and text contrast holds (the tests
-// check colours without texture). Candy, Essentials and Alloy don't use
-// these: Candy is smooth, Essentials stays plain, Alloy has its own metals
+// check colours without texture). Candy and Alloy don't use
+// these: Candy is smooth, Alloy has its own metals
 // (generate-alloy-textures.mjs).
 //
 //   node scripts/generate-family-textures.mjs

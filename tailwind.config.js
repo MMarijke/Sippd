@@ -49,7 +49,7 @@ module.exports = {
   			'3xl': 'calc(1.5rem * var(--radius-scale, 1))'
   		},
   		// `border` (and border-b, divide-y...) draws the family's weight:
-  		// 1px, 1.5px for Candy/Spring/Soda Fountain, 2px for Essentials.
+  		// 1px, or 1.5px for Candy/Spring/Soda Fountain.
   		borderWidth: {
   			DEFAULT: 'var(--border-width, 1px)'
   		},

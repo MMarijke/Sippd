@@ -167,7 +167,7 @@ const RecapCardTemplate = forwardRef(function RecapCardTemplate(
             { label: 'Streak', value: `${streak}d` },
           ].map(({ label, value }) => (
             <div key={label} className="rounded-xl p-3 text-center border border-border" style={{ backgroundColor: 'hsl(var(--background) / 0.35)' }}>
-              <p className="text-xl font-mono font-black text-foreground tabular-nums">{value}</p>
+              <p className="text-xl font-num font-black text-foreground tabular-nums">{value}</p>
               <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider mt-1">{label}</p>
             </div>
           ))}

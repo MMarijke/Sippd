@@ -36,10 +36,22 @@ module.exports = {
   				foreground: 'hsl(var(--destructive-foreground))'
   			},
   		},
+  		// Every step scales with the family's --radius-scale (index.css):
+  		// 0 is Noir's square corners, 1.75 Candy's round ones. rounded-full
+  		// (pills, avatars) stays round everywhere.
   		borderRadius: {
+  			DEFAULT: 'calc(0.25rem * var(--radius-scale, 1))',
+  			sm: 'max(0px, calc(var(--radius) - 4px))',
+  			md: 'max(0px, calc(var(--radius) - 2px))',
   			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			xl: 'calc(0.75rem * var(--radius-scale, 1))',
+  			'2xl': 'calc(1rem * var(--radius-scale, 1))',
+  			'3xl': 'calc(1.5rem * var(--radius-scale, 1))'
+  		},
+  		// `border` (and border-b, divide-y...) draws the family's weight:
+  		// 1px, 1.5px for Candy/Spring/Soda Fountain, 2px for Essentials.
+  		borderWidth: {
+  			DEFAULT: 'var(--border-width, 1px)'
   		},
   		colors: {
   			background: 'hsl(var(--background))',

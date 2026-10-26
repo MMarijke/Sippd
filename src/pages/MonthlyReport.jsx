@@ -207,11 +207,11 @@ export default function MonthlyReport() {
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-card border border-border rounded-xl p-4">
                 <p className="text-2xs font-mono text-muted-foreground uppercase tracking-wider mb-1.5">Cans Added</p>
-                <p className="text-3xl font-display font-black text-primary">{collected.length}</p>
+                <p className="text-3xl font-num font-black text-primary tabular-nums">{collected.length}</p>
               </div>
               <div className="bg-card border border-border rounded-xl p-4">
                 <p className="text-2xs font-mono text-muted-foreground uppercase tracking-wider mb-1.5">Score Gained</p>
-                <p className="text-3xl font-display font-black text-primary">+{monthScore}</p>
+                <p className="text-3xl font-num font-black text-primary tabular-nums">+{monthScore}</p>
               </div>
             </div>
 

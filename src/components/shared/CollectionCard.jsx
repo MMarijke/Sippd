@@ -179,7 +179,7 @@ export default function CollectionCard({
           </PopoverContent>
         </Popover>
         <p className="text-xs font-mono uppercase tracking-widest text-foreground">Score</p>
-        <p className="text-5xl font-mono font-black text-foreground tabular-nums">{score}</p>
+        <p className="text-5xl font-num font-black text-foreground tabular-nums">{score}</p>
         {/* This week's movement, directly under the number it moves. */}
         {weeklyPoints != null && (
           <p className="mt-1 flex items-center justify-center gap-1 text-xs font-mono text-foreground">
@@ -231,7 +231,7 @@ export default function CollectionCard({
         {stats.map(({ icon: Icon, label, value }) => (
           <div key={label} className="flex flex-col items-center text-center px-1">
             <Icon className="w-3.5 h-3.5 text-primary mb-1" />
-            <span className="text-xl font-mono font-bold text-foreground tabular-nums">{value}</span>
+            <span className="text-xl font-num font-bold text-foreground tabular-nums">{value}</span>
             <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{label}</span>
           </div>
         ))}

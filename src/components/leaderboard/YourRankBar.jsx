@@ -61,7 +61,7 @@ export default function YourRankBar({ status, rank, scope, rival, unit, rankDelt
           </span>
         )}
         <span className="sr-only">: </span>
-        <span className={cn('font-display font-bold tabular-nums text-primary', status === 'ranked' ? 'text-xl' : 'text-sm')}>
+        <span className={cn('font-num font-bold tabular-nums text-primary', status === 'ranked' ? 'text-xl' : 'text-sm')}>
           {rankText}
         </span>
         {status === 'ranked' && <ArrowDownToLine className="w-4 h-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />}

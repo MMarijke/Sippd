@@ -209,12 +209,12 @@ export const PICKER_LABEL_FONTS_URL =
 
 export const FAMILY_FONT_URLS = {
   cosmic: 'https://fonts.googleapis.com/css2?family=Michroma&family=Space+Mono:wght@400;700&family=Manrope:wght@400;500;700&display=swap',
-  botanical: 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Karla:wght@400;500;700&display=swap',
-  noir: 'https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500;700&family=Fragment+Mono&family=Jost:wght@400;500&display=swap',
+  botanical: 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..900&family=IBM+Plex+Mono:wght@400;500&family=Karla:wght@400;500;700&display=swap',
+  noir: 'https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@500;700;900&family=Fragment+Mono&family=Jost:wght@400;500&display=swap',
   candy: 'https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Chivo+Mono:wght@400;500&family=Nunito:wght@400;600;700&display=swap',
-  spring: 'https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap',
+  spring: 'https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap',
   essentials: 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Atkinson+Hyperlegible+Mono:wght@400;500;700&display=swap',
-  alloy: 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Martian+Mono:wght@400;500;700&display=swap',
+  alloy: 'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Martian+Mono:wght@400;500;700&display=swap',
   'soda-fountain': 'https://fonts.googleapis.com/css2?family=Shrikhand&family=Figtree:wght@400;500;600;700&family=Azeret+Mono:wght@400;500;700&display=swap',
 };
 

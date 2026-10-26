@@ -184,7 +184,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
         </ResponsiveContainer>
 
         <div className="absolute inset-x-0 bottom-0 flex flex-col items-center pb-1">
-          <p className="text-4xl font-mono font-black text-foreground leading-none">
+          <p className="text-4xl font-num font-black text-foreground leading-none tabular-nums">
             {totalCans}
           </p>
           <p className="text-2xs font-mono uppercase tracking-widest text-muted-foreground mt-1">

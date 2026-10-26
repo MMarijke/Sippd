@@ -280,7 +280,7 @@ export default function RegionalLeaderboard() {
                   </div>
                 </Link>
                 <div className="flex-shrink-0 text-right">
-                  <p className={cn('text-sm font-display font-bold tabular-nums', isMe ? 'text-primary' : 'text-foreground')}>
+                  <p className={cn('text-sm font-num font-bold tabular-nums', isMe ? 'text-primary' : 'text-foreground')}>
                     {entry.score}
                   </p>
                   <p className="text-2xs font-mono text-muted-foreground">pts</p>

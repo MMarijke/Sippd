@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { themeRenderings, cssRules, resolveTokens } from './themeTokens';
 
 // Guards BottomNav's active-tab rule in every theme rendering: the current
 // tab (--foreground, on a 10% --primary pill) must be the most visible item
@@ -17,55 +18,13 @@ import { fileURLToPath } from 'node:url';
 // block alone would miss it.
 
 const read = (rel) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)), 'utf8');
-const css = read('../index.css').replace(/\/\*[\s\S]*?\*\//g, '');
+const css = read('../index.css');
 const themeSource = read('../hooks/useTheme.js');
 
-// ── The 38 renderings, from THEME_FAMILIES (each theme's dark/light keys) ──
-const familiesSrc = themeSource.slice(
-  themeSource.indexOf('export const THEME_FAMILIES'),
-  themeSource.indexOf('export const THEMES'),
-);
-const renderings = familiesSrc
-  .split("{ id: '")
-  .slice(1)
-  .flatMap((chunk) => {
-    const id = chunk.slice(0, chunk.indexOf("'"));
-    const polarities = ['dark', 'light'].filter((p) => new RegExp(`\\b${p}: \\{`).test(chunk));
-    return polarities.map((polarity) => ({ id, polarity }));
-  });
-
-// ── A small cascade for <html> ─────────────────────────────────────────────
-const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(([, selectorText, body], order) => ({
-  selectors: selectorText.split(',').map((s) => s.trim()),
-  decls: Object.fromEntries([...body.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)].map(([, k, v]) => [k, v.trim()])),
-  order,
-}));
-
-// Specificity of a selector that applies to <html> for this rendering, or
-// -1. Only :root and [data-theme]/[data-polarity] attribute selectors are
-// considered (the other attributes, e.g. data-tone, don't set these tokens).
-function specificity(selector, { id, polarity }) {
-  const m = selector.match(/^(:root)?((?:\[data-(?:theme|polarity)="[^"]+"\])*)$/);
-  if (!m || (!m[1] && !m[2])) return -1;
-  const attrs = [...m[2].matchAll(/\[data-(theme|polarity)="([^"]+)"\]/g)];
-  const ok = attrs.every(([, key, value]) => (key === 'theme' ? value === id : value === polarity));
-  return ok ? (m[1] ? 1 : 0) + attrs.length : -1;
-}
-
-function resolveTokens(rendering) {
-  const applied = rules
-    .flatMap((r) => r.selectors.map((s) => ({ spec: specificity(s, rendering), r })))
-    .filter((x) => x.spec >= 0)
-    .sort((a, b) => a.spec - b.spec || a.r.order - b.r.order);
-  const tokens = {};
-  for (const { r } of applied) Object.assign(tokens, r.decls);
-  const get = (name, depth = 0) => {
-    const v = tokens[name];
-    const ref = v?.match(/^var\((--[\w-]+)\)$/);
-    return ref && depth < 10 ? get(ref[1], depth + 1) : v;
-  };
-  return get;
-}
+// ── The 38 renderings and their tokens (shared resolver: themeTokens.js) ──
+const renderings = themeRenderings(themeSource);
+const rules = cssRules(css);
+const resolveTokensFor = (rendering) => resolveTokens(rules, rendering);
 
 // ── Colour maths (HSL triples -> sRGB, alpha blending, WCAG contrast) ──────
 const hslToRgb = (triple) => {
@@ -83,7 +42,7 @@ const contrast = (a, b) => {
 };
 
 const measured = renderings.map((rendering) => {
-  const get = resolveTokens(rendering);
+  const get = resolveTokensFor(rendering);
   const background = hslToRgb(get('--background'));
   const nav = over(hslToRgb(get('--card')), 0.95, background);
   const pill = over(hslToRgb(get('--primary')), 0.1, nav);

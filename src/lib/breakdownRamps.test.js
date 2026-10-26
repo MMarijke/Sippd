@@ -100,6 +100,18 @@ describe('rarity text follows the theme', () => {
   const textRenderings = themeRenderings(readFileSync(fileURLToPath(new URL('../hooks/useTheme.js', import.meta.url)), 'utf8'))
     .map((r) => ({ name: `${r.id} (${r.polarity})`, get: resolveTokens(rules, r) }));
 
+  // A filled Legendary badge (RarityBadge) labels in --rarity-legendary-on.
+  it.each(textRenderings.map((r) => [r.name, r]))('%s: filled Legendary badge label reads', (_, { get }) => {
+    expect(contrastRgb(rgbToken(get, '--rarity-legendary-on'), rgbToken(get, '--rarity-legendary'))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it.each([':root[data-rarity="colour-blind"]', ':root[data-rarity="colour-blind"][data-tone="light"]'])('%s: filled Legendary badge label reads', (sel) => {
+    const at = css.indexOf(`${sel} {`);
+    const body = css.slice(at, css.indexOf('}', at));
+    const tok = (t) => hslTripleToRgb(parseHsl(body.match(new RegExp(`${t}:\\s*([^;]+);`))[1]));
+    expect(contrastRgb(tok('--rarity-legendary-on'), tok('--breakdown-legendary'))).toBeGreaterThanOrEqual(4.5);
+  });
+
   it.each(textRenderings.map((r) => [r.name, r]))('%s', (_, { get }) => {
     const card = rgbToken(get, '--card'), bg = rgbToken(get, '--background');
     for (const s of STEPS) {

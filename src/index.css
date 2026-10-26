@@ -306,6 +306,9 @@
     --rarity-rare: var(--breakdown-rare);
     --rarity-ultra: var(--breakdown-ultra);
     --rarity-legendary: var(--breakdown-legendary);
+    /* The label on a filled Legendary badge: Legendary is the Scan colour,
+       so it's the Scan label, already checked at 4.5:1 on that fill. */
+    --rarity-legendary-on: var(--cta-foreground);
   }
 
   /* ── Neon Arcade family (dark, gamer/cyber/neon) ─────────────────────────
@@ -2494,6 +2497,7 @@ body {
   --rarity-rare: 217 91% 60%;
   --rarity-ultra: 271 91% 65%;
   --rarity-legendary: 330 81% 60%;
+  --rarity-legendary-on: 240 20% 5%;
   --rarity-common-text: 220 9% 64.5%;
   --rarity-uncommon-text: 142 71% 45%;
   --rarity-rare-text: 217 91% 69%;
@@ -2534,6 +2538,8 @@ body {
   --breakdown-rare: 151.1 47.3% 55.4%;
   --breakdown-ultra: 78.6 68.9% 58.1%;
   --breakdown-legendary: 51.4 97.9% 77.1%;
+  /* Filled Legendary badge label: ink on the pale yellow. */
+  --rarity-legendary-on: 240.0 20.0% 4.9%;
   --rarity-legendary-text: 51.4 97.9% 77.1%;
   --rarity-ultra-text: 78.6 68.9% 58.1%;
   --rarity-rare-text: 151.1 47.3% 55.4%;
@@ -2546,6 +2552,8 @@ body {
   --breakdown-rare:181.4 93.4% 18.4%;
   --breakdown-ultra:201.9 95.3% 17.0%;
   --breakdown-legendary:259.5 98.7% 16.0%;
+  /* Filled Legendary badge label: white on the deep indigo. */
+  --rarity-legendary-on: 0.0 0.0% 100.0%;
   --rarity-legendary-text: 259.5 98.7% 16.0%;
   --rarity-ultra-text: 201.9 95.3% 17.0%;
   --rarity-rare-text: 181.4 93.4% 18.4%;

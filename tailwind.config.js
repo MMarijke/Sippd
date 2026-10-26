@@ -120,6 +120,8 @@ module.exports = {
   				'rare-text': 'hsl(var(--rarity-rare-text))',
   				'ultra-text': 'hsl(var(--rarity-ultra-text))',
   				'legendary-text': 'hsl(var(--rarity-legendary-text))',
+  				// Label on a FILLED Legendary badge (RarityBadge).
+  				'legendary-on': 'hsl(var(--rarity-legendary-on))',
   			},
   			medal: {
   				gold: 'hsl(var(--medal-gold))',

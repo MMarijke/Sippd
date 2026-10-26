@@ -89,6 +89,27 @@ describe('gauge rules: clear steps, rising contrast, vivid Legendary', () => {
   });
 });
 
+// Rarity badges, chips and labels wear the theme's own gauge (2026-10-26):
+// fills are the gauge colours, and each tier's text twin
+// (scripts/generate-rarity-text.mjs) reads on the page, the card and the
+// badge's own tint.
+describe('rarity text follows the theme', () => {
+  const over = (c, base, a) => c.map((x, i) => x * a + base[i] * (1 - a));
+  const textRenderings = themeRenderings(readFileSync(fileURLToPath(new URL('../hooks/useTheme.js', import.meta.url)), 'utf8'))
+    .map((r) => ({ name: `${r.id} (${r.polarity})`, get: resolveTokens(rules, r) }));
+
+  it.each(textRenderings.map((r) => [r.name, r]))('%s', (_, { get }) => {
+    const card = rgbToken(get, '--card'), bg = rgbToken(get, '--background');
+    for (const s of STEPS) {
+      expect(get(`--rarity-${s}`), `${s} fill`).toBe(get(`--breakdown-${s}`));
+      const fill = rgbToken(get, `--rarity-${s}`), text = rgbToken(get, `--rarity-${s}-text`);
+      for (const surface of [card, bg, over(fill, card, 0.2), over(fill, bg, 0.2)]) {
+        expect(contrastRgb(text, surface), `${s} text`).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
+});
+
 // The three rules from the 2026-10-26 critique, spelled out on their own so
 // a failure names which one broke.
 describe('rarity vs Scan (2026-10-26)', () => {

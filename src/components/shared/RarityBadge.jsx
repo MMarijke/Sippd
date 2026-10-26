@@ -1,11 +1,11 @@
 import { cn } from '@/lib/utils';
 
-// Glow classes (index.css) scale with the viewer's active theme tier via
-// --glow-intensity, same as every other glow surface in the app — a can's
-// rarity hue itself stays theme-invariant (see index.css's --rarity-* note).
-// The TEXT uses --rarity-*-text: same hue per tier, lightness tuned per
-// rendered tone so the label clears 4.5:1 on light themes too (the fixed
-// hues read 1.9-3.3:1 there). Fill, border and glow keep the invariant hue.
+// Colours follow the viewer's theme (2026-10-26): fill, border and glow
+// use --rarity-*, which is the theme's own gauge colour (--breakdown-*), so
+// a badge matches the rarity bar and key beside it. The TEXT uses
+// --rarity-*-text, the same colour moved in lightness until it reads at
+// 4.6:1 on that theme's page, card and the badge's tint
+// (scripts/generate-rarity-text.mjs). Glows also scale with --glow-intensity.
 const rarityConfig = {
   'Common': { color: 'text-rarity-common-text', bg: 'bg-rarity-common/10', border: 'border-rarity-common/30', glow: '' },
   'Uncommon': { color: 'text-rarity-uncommon-text', bg: 'bg-rarity-uncommon/10', border: 'border-rarity-uncommon/30', glow: '' },

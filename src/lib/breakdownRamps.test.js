@@ -44,7 +44,7 @@ describe('rarity breakdown ramps', () => {
   // Since 2026-10-27 the gauge ends on the Scan colour, so a ramp that
   // descends into a mid-tone Scan has its highest contrast at Common. Every
   // tier still reads; the floor is the same for all five.
-  it.each(blocks.filter(b => !/data-theme="((spring|alloy)-|bubblegum|blue-pop|grape-candy|orange-crush|sour-apple|cherry-pop|carbon|crimson|amethyst|sapphire|emerald)/.test(b.name)).map(b => [b.name, b]))('%s: Common and Legendary both read at >= 3:1', (_, b) => {
+  it.each(blocks.filter(b => !/data-theme="((spring|alloy)-|bubblegum|blue-pop|grape-candy|orange-crush|sour-apple|cherry-pop|carbon|crimson|amethyst|sapphire|emerald|sage|meadow|fern|forest)/.test(b.name)).map(b => [b.name, b]))('%s: Common and Legendary both read at >= 3:1', (_, b) => {
     expect(contrast(b.common, b.card)).toBeGreaterThanOrEqual(MIN_COMMON);
     expect(contrast(b.legendary, b.card)).toBeGreaterThanOrEqual(MIN_COMMON);
   });
@@ -74,8 +74,8 @@ const renderings = themeRenderings(readFileSync(fileURLToPath(new URL('../hooks/
       edge: get('--gauge-edge'),
     };
   });
-// Every theme but Spring, Alloy, Candy and Noir (bar Silver Screen), whose ladders follow their own rules below.
-const isLadder = (g) => /^((spring|alloy)-|bubblegum|blue-pop|grape-candy|orange-crush|sour-apple|cherry-pop|carbon|crimson|amethyst|sapphire|emerald)/.test(g.name);
+// Every theme but Spring, Alloy, Candy, Noir (bar Silver Screen) and Botanical, whose ladders follow their own rules below.
+const isLadder = (g) => /^((spring|alloy)-|bubblegum|blue-pop|grape-candy|orange-crush|sour-apple|cherry-pop|carbon|crimson|amethyst|sapphire|emerald|sage|meadow|fern|forest)/.test(g.name);
 const ruled = renderings.filter((g) => !isLadder(g));
 
 describe('gauge rules: clear steps, rising contrast, vivid Legendary', () => {
@@ -96,12 +96,12 @@ describe('gauge rules: clear steps, rising contrast, vivid Legendary', () => {
 // lightness moves one way; neighbours are >= 4 apart; and where the palest
 // tint is faint on its card (under 2:1), every segment draws its hairline
 // (--gauge-edge).
-describe('Spring, Alloy, Candy and Noir: ladders of the main colour', () => {
+describe('Spring, Alloy, Candy, Noir and Botanical: ladders of the main colour', () => {
   const ladders = renderings.filter(isLadder);
   const hueOf = (c) => { const [, a, b] = srgbToOklab(c); return (Math.atan2(b, a) * 180) / Math.PI; };
   const hueGap = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
 
-  it('covers all twenty-one', () => expect(ladders).toHaveLength(21));
+  it('covers all twenty-five', () => expect(ladders).toHaveLength(25));
 
   it.each(ladders.map((g) => [g.name, g]))('%s', (name, g) => {
     if (name.startsWith('spring-butter')) {

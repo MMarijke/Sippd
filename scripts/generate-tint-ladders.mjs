@@ -25,6 +25,11 @@
 //   dark green; Fern from a deep olive, a little darker than its old
 //   gradient); the light pair (Sage, Meadow) are tint ladders, from a pale
 //   tint of their green up to the Scan green.
+//   Cosmic (dark): Deep Space, Stellar Gold and Solar Flare climb from a deep
+//   shade of the Scan colour (deep blue, amber-gold, ember) up to it; Nebula
+//   from a deep blue (its accent's hue) up to its Scan violet. Aurora is a
+//   blend instead: from the blue of its glow bubble (--accent) round through
+//   azure and teal to its Scan green. Moonlight keeps its tuned gradient.
 //
 // Tints are the colour mixed toward white in OKLab. These families trade the
 // gauge rules other themes keep (3:1 for every tier, colour-blind-safe steps)
@@ -69,13 +74,26 @@ export const LADDERS = {
   meadow: 'scan',
   fern: 'scan',
   forest: 'scan',
+  'deep-space': 'scan',
+  'stellar-gold': 'scan',
+  'solar-flare': 'scan',
+  nebula: 'scan',
+  aurora: 'scan',
 };
 // Shade ladders (dark cards): how far below the Scan colour Common starts,
 // in OKLab lightness.
-const SHADE_DEPTH = { crimson: 0.17, amethyst: 0.17, sapphire: 0.17, emerald: 0.17, forest: 0.18, fern: 0.36 };
-// ...and how much colour they gain going down (Fern's olive turns brown if
-// pushed, so it keeps the Scan colour's chroma).
-const SHADE_BOOST = { fern: 0 };
+const SHADE_DEPTH = { crimson: 0.17, amethyst: 0.17, sapphire: 0.17, emerald: 0.17, forest: 0.18, fern: 0.36, 'deep-space': 0.2, 'stellar-gold': 0.22, 'solar-flare': 0.2, nebula: 0.17 };
+// ...how much colour they gain going down, and how far their hue leans
+// toward green (degrees). Fern gives colour up instead: its lime, darkened at
+// full strength, turns mustard, so its deep tiers are soft olive-greens that
+// lean green, as its gradient was before the ladder.
+// Stellar Gold leans toward amber going down (deep yellows turn olive), Deep
+// Space toward a truer blue, Nebula all the way round to its accent blue.
+const SHADE_BOOST = { fern: -0.07, 'solar-flare': 0.01 };
+const SHADE_HUE = { fern: 10, 'stellar-gold': -14, 'deep-space': 8, nebula: -17 };
+// Blends: theme id -> the token Common starts on (the ladder runs from it to
+// the Scan colour in OKLCH, the short way round the hue circle).
+export const BLEND_FROM = { aurora: '--accent' };
 export const isLadderTheme = (id) => Object.hasOwn(LADDERS, id);
 const TINT_SHARES = [0.26, 0.46, 0.64, 0.82, 1];
 // Alloy's Scan colours are lighter than Spring's palette (Gold Foil's gold
@@ -96,6 +114,13 @@ function fit(L, C, h) {
   return clampRgb(x);
 }
 
+export function blendLadder(fromRgb, colourRgb) {
+  const lch = (c) => { const [L, a, b] = srgbToOklab(c); return [L, Math.hypot(a, b), Math.atan2(b, a)]; };
+  const [L0, C0, h0] = lch(fromRgb), [L1, C1, h1] = lch(colourRgb);
+  const dh = ((h1 - h0 + 3 * Math.PI) % (2 * Math.PI)) - Math.PI;
+  return [0, 0.25, 0.5, 0.75, 1].map((t) => (t === 1 ? colourRgb : fit(L0 + (L1 - L0) * t, C0 + (C1 - C0) * t, h0 + dh * t)));
+}
+
 export function tintLadder(id, colourRgb) {
   const [L, a, b] = srgbToOklab(colourRgb);
   if (id === 'spring-butter') {
@@ -108,7 +133,7 @@ export function tintLadder(id, colourRgb) {
     // Shades: deeper and a little more saturated below the Scan colour,
     // which stays Legendary exactly.
     const C0 = Math.hypot(a, b), h0 = Math.atan2(b, a);
-    return [1, 0.75, 0.5, 0.25, 0].map((t) => (t ? fit(L - SHADE_DEPTH[id] * t, C0 + (SHADE_BOOST[id] ?? 0.04) * t, h0) : colourRgb));
+    return [1, 0.75, 0.5, 0.25, 0].map((t) => (t ? fit(L - SHADE_DEPTH[id] * t, C0 + (SHADE_BOOST[id] ?? 0.04) * t, h0 + ((SHADE_HUE[id] ?? 0) * Math.PI / 180) * t) : colourRgb));
   }
   const shares = id.startsWith('alloy-') ? ALLOY_SHARES : id === 'carbon' ? CARBON_SHARES : id === 'sage' ? SAGE_SHARES : TINT_SHARES;
   return shares.map((t) => clampRgb(oklabToSrgb([1 - (1 - L) * t, a * t, b * t])));
@@ -126,7 +151,8 @@ if (process.argv[1]?.endsWith('generate-tint-ladders.mjs')) {
     while (at >= 0 && !css.slice(at, css.indexOf('}', at)).includes('--breakdown-common:')) at = css.indexOf(head, at + 1);
     const end = css.indexOf('}', at);
     let body = css.slice(at, end);
-    const ladder = tintLadder(id, colour).map((c) => formatHsl(rgbToHsl(c)));
+    const from = BLEND_FROM[id] && hslToRgb(parseHsl(resolveTokens(rules, r)(BLEND_FROM[id])));
+    const ladder = (from ? blendLadder(from, colour) : tintLadder(id, colour)).map((c) => formatHsl(rgbToHsl(c)));
     STEPS.forEach((s, i) => { body = body.replace(new RegExp(`(--breakdown-${s}:\\s*)[^;]+;`), `$1${ladder[i]};`); });
     css = css.slice(0, at) + body + css.slice(end);
     console.log(id.padEnd(17), ladder.join(' | '));

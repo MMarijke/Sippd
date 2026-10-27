@@ -21,6 +21,10 @@
 //   the jewel (garnet, royal purple, deep sapphire, deep teal) up to the
 //   Scan colour, so every tier shows the theme's colour instead of starting
 //   pale; Silver Screen keeps its tuned gradient.
+//   Botanical: the dark pair climb from deep shades too (Forest from a deep,
+//   dark green; Fern from a deep olive, a little darker than its old
+//   gradient); the light pair (Sage, Meadow) are tint ladders, from a pale
+//   tint of their green up to the Scan green.
 //
 // Tints are the colour mixed toward white in OKLab. These families trade the
 // gauge rules other themes keep (3:1 for every tier, colour-blind-safe steps)
@@ -61,8 +65,17 @@ export const LADDERS = {
   amethyst: 'scan',
   sapphire: 'scan',
   emerald: 'scan',
+  sage: 'scan',
+  meadow: 'scan',
+  fern: 'scan',
+  forest: 'scan',
 };
-const NOIR_JEWELS = ['crimson', 'amethyst', 'sapphire', 'emerald'];
+// Shade ladders (dark cards): how far below the Scan colour Common starts,
+// in OKLab lightness.
+const SHADE_DEPTH = { crimson: 0.17, amethyst: 0.17, sapphire: 0.17, emerald: 0.17, forest: 0.18, fern: 0.36 };
+// ...and how much colour they gain going down (Fern's olive turns brown if
+// pushed, so it keeps the Scan colour's chroma).
+const SHADE_BOOST = { fern: 0 };
 export const isLadderTheme = (id) => Object.hasOwn(LADDERS, id);
 const TINT_SHARES = [0.26, 0.46, 0.64, 0.82, 1];
 // Alloy's Scan colours are lighter than Spring's palette (Gold Foil's gold
@@ -71,6 +84,9 @@ const TINT_SHARES = [0.26, 0.46, 0.64, 0.82, 1];
 const ALLOY_SHARES = [0.16, 0.38, 0.58, 0.79, 1];
 // Carbon's graphite on its dark card: a short ladder from a mid silver.
 const CARBON_SHARES = [0.42, 0.56, 0.71, 0.85, 1];
+// Sage starts from a fuller tint, which also keeps it apart from Spring
+// Olive's pale greens.
+const SAGE_SHARES = [0.36, 0.52, 0.68, 0.84, 1];
 
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
 const clampRgb = (c) => c.map((v) => Math.min(1, Math.max(0, v)));
@@ -88,13 +104,13 @@ export function tintLadder(id, colourRgb) {
     const C0 = Math.hypot(a, b), h0 = Math.atan2(b, a);
     return [0, 0.25, 0.5, 0.75, 1].map((t) => fit(L - 0.16 * t, C0 + 0.08 * t, h0 - (12 * Math.PI / 180) * t));
   }
-  if (NOIR_JEWELS.includes(id)) {
+  if (Object.hasOwn(SHADE_DEPTH, id)) {
     // Shades: deeper and a little more saturated below the Scan colour,
     // which stays Legendary exactly.
     const C0 = Math.hypot(a, b), h0 = Math.atan2(b, a);
-    return [1, 0.75, 0.5, 0.25, 0].map((t) => (t ? fit(L - 0.17 * t, C0 + 0.04 * t, h0) : colourRgb));
+    return [1, 0.75, 0.5, 0.25, 0].map((t) => (t ? fit(L - SHADE_DEPTH[id] * t, C0 + (SHADE_BOOST[id] ?? 0.04) * t, h0) : colourRgb));
   }
-  const shares = id.startsWith('alloy-') ? ALLOY_SHARES : id === 'carbon' ? CARBON_SHARES : TINT_SHARES;
+  const shares = id.startsWith('alloy-') ? ALLOY_SHARES : id === 'carbon' ? CARBON_SHARES : id === 'sage' ? SAGE_SHARES : TINT_SHARES;
   return shares.map((t) => clampRgb(oklabToSrgb([1 - (1 - L) * t, a * t, b * t])));
 }
 

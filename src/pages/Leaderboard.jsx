@@ -66,7 +66,7 @@ export default function Leaderboard() {
             onClick={() => (searchOpen ? closeSearch() : setSearchOpen(true))}
             aria-label={searchOpen ? 'Close collector search' : 'Find collectors'}
             aria-expanded={searchOpen}
-            className={cn('h-11 w-11 rounded-md border flex items-center justify-center transition-colors',
+            className={cn('h-11 w-11 rounded-control border flex items-center justify-center transition-colors',
               searchOpen ? 'bg-card border-primary/50 text-foreground' : 'bg-secondary border-border text-muted-foreground hover:text-foreground'
             )}
           >

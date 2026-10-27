@@ -173,9 +173,9 @@ function tune(block) {
 let out = css;
 const report = [];
 for (const block of [...blocks].reverse()) { // from the end, so offsets stay valid
-  // Spring's, Alloy's, Candy's and Noir's gauges are ladders of their main colour,
+  // Spring's, Alloy's, Candy's, Noir's and Botanical's gauges are ladders of their main colour,
   // written by scripts/generate-tint-ladders.mjs under their own rules.
-  if (/data-theme="((spring|alloy)-|bubblegum|blue-pop|grape-candy|orange-crush|sour-apple|cherry-pop|carbon|crimson|amethyst|sapphire|emerald)/.test(block.name)) {
+  if (/data-theme="((spring|alloy)-|bubblegum|blue-pop|grape-candy|orange-crush|sour-apple|cherry-pop|carbon|crimson|amethyst|sapphire|emerald|sage|meadow|fern|forest)/.test(block.name)) {
     report.unshift(`skip    ${block.name}: tint ladder (generate-tint-ladders.mjs)`);
     continue;
   }

@@ -243,7 +243,7 @@ export default function Profile() {
           <Link
             to="/settings"
             aria-label="Settings"
-            className="w-11 h-11 rounded-lg bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            className="w-11 h-11 rounded-control bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
           >
             <Settings className="w-4 h-4" />
           </Link>

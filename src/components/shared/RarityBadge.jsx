@@ -12,11 +12,13 @@ import { cn } from '@/lib/utils';
 // Legendary is FILLED with its colour (the theme's Scan colour; label
 // --rarity-legendary-on, the Scan label colour), Ultra Rare gets a full-
 // strength outline, and the lower tiers keep a tint and a faint outline.
+// Outlines read --rarity-*-line: the tier colour, or in Noir's jewel themes
+// (whose gauges start from deep shades) the lighter text twin.
 const rarityConfig = {
-  'Common': { color: 'text-rarity-common-text', bg: 'bg-rarity-common/10', border: 'border-rarity-common/30', glow: '' },
-  'Uncommon': { color: 'text-rarity-uncommon-text', bg: 'bg-rarity-uncommon/10', border: 'border-rarity-uncommon/30', glow: '' },
-  'Rare': { color: 'text-rarity-rare-text', bg: 'bg-rarity-rare/10', border: 'border-rarity-rare/30', glow: 'rarity-glow-rare' },
-  'Ultra Rare': { color: 'text-rarity-ultra-text', bg: 'bg-rarity-ultra/10', border: 'border-rarity-ultra', glow: 'rarity-glow-ultra' },
+  'Common': { color: 'text-rarity-common-text', bg: 'bg-rarity-common/10', border: 'border-rarity-common-line/30', glow: '' },
+  'Uncommon': { color: 'text-rarity-uncommon-text', bg: 'bg-rarity-uncommon/10', border: 'border-rarity-uncommon-line/30', glow: '' },
+  'Rare': { color: 'text-rarity-rare-text', bg: 'bg-rarity-rare/10', border: 'border-rarity-rare-line/30', glow: 'rarity-glow-rare' },
+  'Ultra Rare': { color: 'text-rarity-ultra-text', bg: 'bg-rarity-ultra/10', border: 'border-rarity-ultra-line', glow: 'rarity-glow-ultra' },
   'Legendary': { color: 'text-rarity-legendary-on', bg: 'bg-rarity-legendary', border: 'border-rarity-legendary', glow: 'rarity-glow-legendary rarity-holo-badge' },
 };
 

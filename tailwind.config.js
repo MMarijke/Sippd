@@ -123,6 +123,11 @@ module.exports = {
   				'rare-text': 'hsl(var(--rarity-rare-text))',
   				'ultra-text': 'hsl(var(--rarity-ultra-text))',
   				'legendary-text': 'hsl(var(--rarity-legendary-text))',
+  				// A badge's outline (RarityBadge): the tier colour by default.
+  				'common-line': 'hsl(var(--rarity-common-line))',
+  				'uncommon-line': 'hsl(var(--rarity-uncommon-line))',
+  				'rare-line': 'hsl(var(--rarity-rare-line))',
+  				'ultra-line': 'hsl(var(--rarity-ultra-line))',
   				// Label on a FILLED Legendary badge (RarityBadge).
   				'legendary-on': 'hsl(var(--rarity-legendary-on))',
   			},

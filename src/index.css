@@ -1493,6 +1493,12 @@
     /* Rarity bars are tint ladders of each theme's Scan colour (2026-10-27);
        the palest tints need this hairline to hold their shape on the light card. */
     --gauge-edge: hsl(var(--primary) / 0.5);
+    /* Badge outlines in the readable text twins: the ladders' pale tints
+       all but vanish as outlines on these light cards. */
+    --rarity-common-line: var(--rarity-common-text);
+    --rarity-uncommon-line: var(--rarity-uncommon-text);
+    --rarity-rare-line: var(--rarity-rare-text);
+    --rarity-ultra-line: var(--rarity-ultra-text);
     --font-mono: 'Chivo Mono', monospace;
     --font-body: 'Nunito', sans-serif;
     /* Structure: the roundest corners, 1.5px outlines, smooth (no
@@ -1747,6 +1753,12 @@
        the lightest tints need this hairline in the theme's own colour to
        hold their shape on the light card, like the palette cards' edges. */
     --gauge-edge: hsl(var(--primary) / 0.5);
+    /* Badge outlines in the readable text twins: the ladders' pale tints
+       all but vanish as outlines on these light cards. */
+    --rarity-common-line: var(--rarity-common-text);
+    --rarity-uncommon-line: var(--rarity-uncommon-text);
+    --rarity-rare-line: var(--rarity-rare-text);
+    --rarity-ultra-line: var(--rarity-ultra-text);
     /* Structure: rounded, 1.5px outlines, risograph speckle, and a
        print-offset shadow (the second ink layer, slightly off register)
        instead of glow. Poppins numerals. */
@@ -1797,6 +1809,12 @@
     /* Its rarity bar is a ladder of tints up to the graphite Scan colour; the palest
        silver needs this hairline to keep its shape on the light card. */
     --gauge-edge: hsl(var(--cta) / 0.5);
+    /* Badge outlines in the readable text twins: the ladders' pale tints
+       all but vanish as outlines on these light cards. */
+    --rarity-common-line: var(--rarity-common-text);
+    --rarity-uncommon-line: var(--rarity-uncommon-text);
+    --rarity-rare-line: var(--rarity-rare-text);
+    --rarity-ultra-line: var(--rarity-ultra-text);
     /* Scan one shade lighter (+0.06 OKLab L), with the rarity bar, which ends on it (product direction, 2026-10-27). */
     --cta: 211.3 13.7% 34.0%;
     --background: 210.0 15.8% 92.5%;

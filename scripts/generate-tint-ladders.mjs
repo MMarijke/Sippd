@@ -9,15 +9,18 @@
 //   Scan colour. Butter #FFED9C is the one exception: its tints vanish on
 //   its own cream card (the colour itself reads 1.13:1 there), so its
 //   ladder starts AT the palette butter and climbs into richer butter-golds.
-//   Alloy: each theme's Scan colour (--cta, resolved through the cascade):
+//   Alloy and Candy: each theme's Scan colour (--cta, resolved through the
+//   cascade). Alloy:
 //   pale cream to Gold Foil's gold, pale pink to Anodised Red, pale aqua to
-//   Anodised Teal, pale silver to Brushed Aluminium's graphite.
+//   Anodised Teal, pale silver to Brushed Aluminium's graphite. Candy: pale
+//   tints up to Bubblegum's pink, Blue Pop's blue, Grape Candy's violet,
+//   Orange Crush's orange, Sour Apple's green and Cherry Pop's cherry red.
 //
 // Tints are the colour mixed toward white in OKLab. These families trade the
 // gauge rules other themes keep (3:1 for every tier, colour-blind-safe steps)
 // for the ladder; every segment draws a hairline in the theme's own colour
 // (--gauge-edge) so the palest tints keep their shape.
-// scripts/tune-rarity-ramps.mjs leaves both families alone;
+// scripts/tune-rarity-ramps.mjs leaves these families alone;
 // breakdownRamps.test.js checks the ladders with their own rules.
 //
 //   node scripts/generate-tint-ladders.mjs --write
@@ -41,6 +44,12 @@ export const LADDERS = {
   'alloy-teal': 'scan',
   'alloy-red': 'scan',
   'alloy-gold': 'scan',
+  bubblegum: 'scan',
+  'blue-pop': 'scan',
+  'grape-candy': 'scan',
+  'orange-crush': 'scan',
+  'sour-apple': 'scan',
+  'cherry-pop': 'scan',
 };
 export const isLadderTheme = (id) => Object.hasOwn(LADDERS, id);
 const TINT_SHARES = [0.26, 0.46, 0.64, 0.82, 1];

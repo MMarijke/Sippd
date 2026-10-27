@@ -6,7 +6,7 @@
 // Cascade: :root defaults, then [data-theme] blocks, then
 // [data-theme][data-polarity] blocks (more specific); later rules win ties;
 // var(--x) references are followed. Selectors with other attributes
-// (data-tone, data-rarity) or classes are ignored: they don't set the
+// (data-tone) or classes are ignored: they don't set the
 // theme's base tokens. Many themes inherit tokens from :root (e.g. most dark
 // themes' --muted-foreground), which reading a theme's own block would miss.
 

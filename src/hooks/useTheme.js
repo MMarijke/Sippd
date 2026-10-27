@@ -133,7 +133,7 @@ export const THEME_FAMILIES = [
     isNew: true,
     themes: [
       { id: 'alloy-aluminium', label: 'Brushed Aluminium', pro: true, light: { swatch: '#3B4652', sup: '#8A96A3', background: '#E9ECEF' } },
-      { id: 'alloy-teal', label: 'Anodised Teal', pro: true, dark: { swatch: '#19C2C2', sup: '#0E8A8C', background: '#0F1214' } },
+      { id: 'alloy-teal', label: 'Anodised Teal', pro: true, dark: { swatch: '#19C2C2', sup: '#0E8A8C', background: '#15191E' } },
       { id: 'alloy-red', label: 'Anodised Red', pro: true, dark: { swatch: '#FF2D55', sup: '#C21842', background: '#101115' } },
       { id: 'alloy-gold', label: 'Gold Foil', pro: true, dark: { swatch: '#E0A526', sup: '#8A6A1E', background: '#0B0C10' } },
     ],

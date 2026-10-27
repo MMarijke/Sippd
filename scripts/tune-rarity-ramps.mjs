@@ -41,14 +41,13 @@ const AVOID = {
   '[data-theme="aurora"]': '[data-theme="plasma"][data-polarity="dark"]',
   '[data-theme="forest"]': '[data-theme="carbon"]',
   '[data-theme="sapphire"]': '[data-theme="amethyst"]',
+  // Anodised Teal's tint ladder (pale aqua to teal) sits near Emerald's.
+  '[data-theme="emerald"]': '[data-theme="alloy-teal"]',
 };
 const AVOID_GAP = 12;
-// Themes whose bar runs in the Scan colour's own hue at the most colour each
-// step can hold, not from the glow accent (product direction, 2026-10-27):
-// Alloy's accents are dark, low-colour supporting tones, so a gradient from
-// them wandered through grey, peach and pink before reaching Scan.
-const SCAN_HUE = ['[data-theme="alloy-gold"]', '[data-theme="alloy-red"]', '[data-theme="alloy-teal"]'];
-const OWN_HUE_MIN_CHROMA = 25; // CIELAB, every tier
+// Pairs whose pages are near-identical, so the gauge has to carry more of
+// the difference.
+const AVOID_GAPS = { '[data-theme="emerald"]': 16 };
 const DEG = Math.PI / 180;
 const MAX_HUE_OFF = 35;
 
@@ -69,7 +68,7 @@ function tokensFor(name) {
 
 // Theme gauge blocks: the ones that declare a gauge (--breakdown-common:)
 // and a card. (Others only mention the tokens: the shared --rarity-* block
-// reads them, the colour-blind override declares no card.)
+// reads them.)
 const blocks = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-common[^{}]*)\}/g)]
   .filter((m) => /--breakdown-common:/.test(m[2]) && /--card:/.test(m[2]))
   .map((m) => ({
@@ -79,7 +78,7 @@ const blocks = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-common[^{}]*)\}/g)
     card: m[2].match(/--card:\s*([^;]+);/)?.[1],
     steps: STEPS.map((s) => m[2].match(new RegExp(`--breakdown-${s}:\\s*([^;]+);`))[1].trim()),
   }))
-  .filter((b) => b.card); // blocks without a card (the colour-blind override) aren't themes
+  .filter((b) => b.card);
 
 const rgbOf = (hsl) => hslToRgb(parseHsl(hsl));
 const toLch = (rgb) => {
@@ -107,14 +106,9 @@ function tune(block) {
   const accent = rgbOf(get('--accent'));
   const S = toLch(scan), A = toLch(accent);
   const neutral = S.C < 0.02;
-  // SCAN_HUE themes run the whole bar in the Scan colour's own hue, as
-  // colourful as each step allows, instead of starting from the accent.
-  const ownHue = SCAN_HUE.includes(block.name);
-  const arc = ownHue ? 0 : signedDeg(S.h / DEG * DEG, A.h); // accent -> scan, shortest way
-  const targetH = (i) => (ownHue ? S.h : A.h + arc * DEG * (i / 4));
-  const targetC = (i) => (neutral ? 0 : ownHue ? 0.37
-    : Math.min(A.C, 0.6 * S.C) + (0.85 * S.C - Math.min(A.C, 0.6 * S.C)) * (i / 4));
-  const accentPull = ownHue ? 0 : 0.4;
+  const arc = signedDeg(S.h / DEG * DEG, A.h); // accent -> scan, shortest way
+  const targetH = (i) => A.h + arc * DEG * (i / 4);
+  const targetC = (i) => (neutral ? 0 : Math.min(A.C, 0.6 * S.C) + (0.85 * S.C - Math.min(A.C, 0.6 * S.C)) * (i / 4));
   const scanLab = labChroma(scan);
   const avoid = AVOID[block.name] ? blocks.find((b) => b.name === AVOID[block.name]).steps.map(rgbOf) : null;
 
@@ -137,18 +131,7 @@ function tune(block) {
     for (let i = 0; i < 4; i++) v += 0.5 * Math.max(0, C[i] - (neutral ? scanLab + 0.3 : scanLab - 1));
     // A gradient, not a zig-zag: colour climbs tier by tier toward Scan.
     for (let i = 1; i < 5; i++) v += 0.5 * Math.max(0, C[i - 1] - 1 - C[i]);
-    // Every tier carries real colour (no grey Common).
-    if (ownHue) for (let i = 0; i < 4; i++) v += 0.5 * Math.max(0, OWN_HUE_MIN_CHROMA - C[i]);
     if (v > 0) return 1000 + 100 * v;
-    // ...and, strongly preferred, the hue travels one way into Scan's (teal
-    // never swings to blue and back). A cost, not a rule: the steps need
-    // some hue movement where lightness room is short.
-    let zigzag = 0;
-    if (ownHue) {
-      const hs = rgbs.map((c) => toLch(c).h);
-      const turns = hs.slice(1).map((h, i) => signedDeg(h, hs[i])).map((d) => (Math.abs(d) < 6 ? 0 : d));
-      zigzag = Math.min(turns.reduce((a, d) => a + Math.max(0, d), 0), turns.reduce((a, d) => a + Math.max(0, -d), 0));
-    }
     const lch = tiers.map((t) => toLch(fromLch(t)));
     const hueOff = lch.reduce((acc, t, i) => acc + Math.abs(signedDeg(t.h, targetH(i))) * Math.min(1, t.C * 10), 0);
     const chromaOff = lch.reduce((acc, t, i) => acc + Math.abs(t.C - targetC(i)) * 100, 0);
@@ -156,8 +139,8 @@ function tune(block) {
     // room is huge, and spending it all starts Common near black), and keep
     // Common near the glow colour itself.
     const span = Math.abs(L[4] - L[0]) * 100;
-    const apart = avoid ? tiers.reduce((acc, t, i) => acc + Math.max(0, AVOID_GAP - deltaEOk(fromLch(t), avoid[i])), 0) : 0;
-    return 3 * apart + 4 * zigzag + 0.3 * hueOff + 0.5 * chromaOff + accentPull * deltaEOk(fromLch(tiers[0]), accent) + 0.6 * span;
+    const apart = avoid ? tiers.reduce((acc, t, i) => acc + Math.max(0, (AVOID_GAPS[block.name] ?? AVOID_GAP) - deltaEOk(fromLch(t), avoid[i])), 0) : 0;
+    return 3 * apart + 0.3 * hueOff + 0.5 * chromaOff + 0.4 * deltaEOk(fromLch(tiers[0]), accent) + 0.6 * span;
   }
 
   const rand = seeded(0x9e37 ^ block.name.length);
@@ -190,10 +173,10 @@ function tune(block) {
 let out = css;
 const report = [];
 for (const block of [...blocks].reverse()) { // from the end, so offsets stay valid
-  // Spring's gauges are tint ladders of its palette, written by
-  // scripts/generate-spring-ladders.mjs under Spring's own rules.
-  if (block.name.includes('data-theme="spring-')) {
-    report.unshift(`skip    ${block.name}: Spring tint ladder (generate-spring-ladders.mjs)`);
+  // Spring's and Alloy's gauges are tint ladders of their main colour,
+  // written by scripts/generate-tint-ladders.mjs under their own rules.
+  if (/data-theme="(spring|alloy)-/.test(block.name)) {
+    report.unshift(`skip    ${block.name}: tint ladder (generate-tint-ladders.mjs)`);
     continue;
   }
   const tuned = tune(block);

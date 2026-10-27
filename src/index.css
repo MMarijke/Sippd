@@ -364,7 +364,12 @@
      - colour climbs tier by tier, so Legendary is the most colourful.
      Moonlight, Fern and Gold Foil got a brighter Scan (--cta) at the same
      hue: a mid-bright Scan left no room for colour-blind-safe steps on
-     either side. Enforced by breakdownRamps.test.js. */
+     either side. Enforced by breakdownRamps.test.js. 
+     Spring and Alloy follow a different shape (2026-10-27): each bar is a
+     ladder of tints of the theme's main colour, from the palest tint up to
+     the colour itself, like the Spring palette cards (written by
+     scripts/generate-tint-ladders.mjs; outlined with --gauge-edge where the
+     palest tint is faint on its card). */
 
   /* Neon Arcade structure: sharp cabinet corners, CRT scanlines (light
      lines on dark, dark on light), a primary bloom under every card, and
@@ -1346,16 +1351,16 @@
     --ring: 188.0 62.8% 44.3%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 190.8 100.0% 97.4%;
-    --breakdown-uncommon: 190.3 79.2% 79.9%;
-    --breakdown-rare: 167.8 47.0% 67.1%;
-    --breakdown-ultra: 196.6 69.1% 64.3%;
+    --breakdown-common: 184.5 100.0% 83.6%;
+    --breakdown-uncommon: 173.0 45.3% 70.3%;
+    --breakdown-rare: 208.6 62.3% 72.7%;
+    --breakdown-ultra: 165.2 36.0% 57.9%;
     --breakdown-legendary: 188.0 62.8% 44.3%;
     --rarity-legendary-text: 188.3 54.4% 49.6%;
-    --rarity-ultra-text: 196.6 69.1% 64.3%;
-    --rarity-rare-text: 167.8 47.0% 67.1%;
-    --rarity-uncommon-text: 190.3 79.2% 79.9%;
-    --rarity-common-text: 190.8 100.0% 97.4%;
+    --rarity-ultra-text: 165.2 36.0% 57.9%;
+    --rarity-rare-text: 208.6 62.3% 72.7%;
+    --rarity-uncommon-text: 173.0 45.3% 70.3%;
+    --rarity-common-text: 184.5 100.0% 83.6%;
   }
   /* Silver Screen -- a black-and-white movie. Every value the theme owns
      is 0% saturation; can rarity badges, status colors and the medal/
@@ -1721,6 +1726,9 @@
   }
   /* Brushed Aluminium: a light, bare-can silver with a brushed texture; graphite action; holo Legendary. */
   [data-theme="alloy-aluminium"] {
+    /* Its rarity bar is a ladder of tints up to the graphite Scan colour; the palest
+       silver needs this hairline to keep its shape on the light card. */
+    --gauge-edge: hsl(var(--cta) / 0.5);
     /* Scan one shade lighter (+0.06 OKLab L), with the rarity bar, which ends on it (product direction, 2026-10-27). */
     --cta: 211.3 13.7% 34.0%;
     --background: 210.0 15.8% 92.5%;
@@ -1748,30 +1756,30 @@
     --holo-3:221.7 11.6% 34.8%;
     --holo-4:252.1 8.5% 35.3%;
     --holo-gradient: linear-gradient(115deg, hsl(var(--holo-1)), hsl(var(--holo-2)) 35%, hsl(var(--holo-3)) 65%, hsl(var(--holo-4)));
-    --breakdown-common: 216.4 59.0% 2.5%;
-    --breakdown-uncommon: 211.0 28.8% 8.8%;
-    --breakdown-rare: 211.2 17.8% 17.0%;
-    --breakdown-ultra: 211.3 13.9% 25.2%;
+    --breakdown-common: 211.5 7.8% 88.7%;
+    --breakdown-uncommon: 211.5 7.7% 73.5%;
+    --breakdown-rare: 211.5 7.5% 60.2%;
+    --breakdown-ultra: 211.4 8.3% 46.8%;
     --breakdown-legendary: 211.3 13.7% 34.0%;
     --rarity-legendary-text: 211.3 13.7% 34.0%;
-    --rarity-ultra-text: 211.3 13.9% 25.2%;
-    --rarity-rare-text: 211.2 17.8% 17.0%;
-    --rarity-uncommon-text: 211.0 28.8% 8.8%;
-    --rarity-common-text: 216.4 59.0% 2.5%;
+    --rarity-ultra-text: 211.4 10.3% 36.1%;
+    --rarity-rare-text: 211.5 7.3% 37.7%;
+    --rarity-uncommon-text: 211.5 4.6% 39.2%;
+    --rarity-common-text: 211.5 1.9% 40.9%;
   }
   /* Anodised Teal: deep satin teal with a fine anodised speckle; holo Legendary. */
   [data-theme="alloy-teal"] {
-    --background: 204.0 14.3% 6.9%;
+    --background:214.0 18.0% 10.0%;
     --foreground: 180.0 72.4% 94.3%;
-    --card: 205.7 12.7% 10.8%;
+    --card:214.0 17.0% 13.6%;
     --card-foreground: 180.0 72.4% 94.3%;
-    --popover: 205.7 12.7% 10.8%;
+    --popover:214.0 17.0% 13.6%;
     --popover-foreground: 180.0 72.4% 94.3%;
     --primary: 180.0 77.2% 42.9%;
     --primary-foreground: 187.5 66.7% 4.7%;
     --secondary: 200.0 13.0% 18.0%;
     --secondary-foreground: 180.0 72.4% 94.3%;
-    --muted: 200.0 13.0% 9.0%;
+    --muted:212.0 15.0% 12.5%;
     --muted-foreground: 184.4 18.6% 71.6%;
     --accent: 181.0 81.8% 30.2%;
     --accent-foreground: 180.0 72.4% 94.3%;
@@ -1786,16 +1794,16 @@
     --holo-3:187.7 73.1% 48.4%;
     --holo-4:203.0 82.5% 63.8%;
     --holo-gradient: linear-gradient(115deg, hsl(var(--holo-1)), hsl(var(--holo-2)) 35%, hsl(var(--holo-3)) 65%, hsl(var(--holo-4)));
-    --breakdown-common: 178.8 100.0% 25.1%;
-    --breakdown-uncommon: 193.2 100.0% 35.3%;
-    --breakdown-rare: 177.1 100.0% 31.7%;
-    --breakdown-ultra: 191.9 99.9% 41.5%;
+    --breakdown-common: 178.3 49.9% 92.7%;
+    --breakdown-uncommon: 178.8 50.1% 82.3%;
+    --breakdown-rare: 179.2 50.7% 72.4%;
+    --breakdown-ultra: 179.6 52.2% 60.8%;
     --breakdown-legendary: 180.0 77.2% 42.9%;
     --rarity-legendary-text: 180.0 77.2% 42.9%;
-    --rarity-ultra-text: 192.2 93.5% 43.2%;
-    --rarity-rare-text: 176.5 68.1% 40.3%;
-    --rarity-uncommon-text: 195.7 61.2% 49.7%;
-    --rarity-common-text: 178.2 45.4% 44.0%;
+    --rarity-ultra-text: 179.6 52.2% 60.8%;
+    --rarity-rare-text: 179.2 50.7% 72.4%;
+    --rarity-uncommon-text: 178.8 50.1% 82.3%;
+    --rarity-common-text: 178.3 49.9% 92.7%;
   }
   /* Anodised Red: deep satin red with a fine anodised speckle; holo Legendary. */
   [data-theme="alloy-red"] {
@@ -1824,20 +1832,20 @@
     --holo-3:13.8 98.1% 50.3%;
     --holo-4:34.0 95.4% 41.2%;
     --holo-gradient: linear-gradient(115deg, hsl(var(--holo-1)), hsl(var(--holo-2)) 35%, hsl(var(--holo-3)) 65%, hsl(var(--holo-4)));
-    --breakdown-common: 356.2 100.0% 87.2%;
-    --breakdown-uncommon: 350.3 100.0% 78.3%;
-    --breakdown-rare: 12.1 100.0% 68.1%;
-    --breakdown-ultra: 336.0 100.0% 65.6%;
+    --breakdown-common: 0.1 100.0% 94.5%;
+    --breakdown-uncommon: 358.8 100.0% 86.8%;
+    --breakdown-rare: 357.2 100.0% 79.4%;
+    --breakdown-ultra: 354.5 100.0% 70.8%;
     --breakdown-legendary: 348.6 100.0% 58.8%;
     --rarity-legendary-text: 353.7 98.5% 67.4%;
-    --rarity-ultra-text: 337.5 99.5% 69.0%;
-    --rarity-rare-text: 12.1 100.0% 68.1%;
-    --rarity-uncommon-text: 350.3 100.0% 78.3%;
-    --rarity-common-text: 356.2 100.0% 87.2%;
+    --rarity-ultra-text: 354.5 100.0% 70.8%;
+    --rarity-rare-text: 357.2 100.0% 79.4%;
+    --rarity-uncommon-text: 358.8 100.0% 86.8%;
+    --rarity-common-text: 0.1 100.0% 94.5%;
   }
   /* Gold Foil: hot-foil gold on a cool lacquer black, with a foil crinkle texture; holo Legendary. Cool black (not Stellar Gold's warm one) and a deeper foil gold keep it apart from Stellar Gold. */
   [data-theme="alloy-gold"] {
-    /* Scan in a brighter, fully saturated gold (same hue; at its most colourful since 2026-10-27 so the bar can climb through rich ambers and still peak on it): a mid-bright Scan left the rarity gauge, which ends on the Scan colour, no room for colour-blind-safe steps on either side (2026-10-27). */
+    /* Scan in a brighter, fully saturated gold (same hue, 2026-10-27). Its rarity bar is a ladder of tints up to this gold (scripts/generate-tint-ladders.mjs). */
     --cta: 40.3 99.0% 61.6%;
     --background: 228.0 18.5% 5.3%;
     --foreground: 43.6 100.0% 93.5%;
@@ -1864,16 +1872,16 @@
     --holo-3:49.7 78.5% 57.1%;
     --holo-4:79.8 63.2% 62.4%;
     --holo-gradient: linear-gradient(115deg, hsl(var(--holo-1)), hsl(var(--holo-2)) 35%, hsl(var(--holo-3)) 65%, hsl(var(--holo-4)));
-    --breakdown-common: 29.1 35.2% 37.1%;
-    --breakdown-uncommon: 26.4 28.4% 47.3%;
-    --breakdown-rare: 43.4 100.0% 34.8%;
-    --breakdown-ultra: 49.2 99.9% 38.1%;
+    --breakdown-common: 38.2 100.0% 94.8%;
+    --breakdown-uncommon: 38.1 100.0% 87.4%;
+    --breakdown-rare: 38.2 100.0% 80.4%;
+    --breakdown-ultra: 38.6 99.9% 72.4%;
     --breakdown-legendary: 40.3 99.0% 61.6%;
     --rarity-legendary-text: 40.3 99.0% 61.6%;
-    --rarity-ultra-text: 49.2 99.9% 38.1%;
-    --rarity-rare-text: 41.6 74.7% 42.4%;
-    --rarity-uncommon-text: 26.3 31.5% 56.2%;
-    --rarity-common-text: 28.7 29.4% 53.4%;
+    --rarity-ultra-text: 38.6 99.9% 72.4%;
+    --rarity-rare-text: 38.2 100.0% 80.4%;
+    --rarity-uncommon-text: 38.1 100.0% 87.4%;
+    --rarity-common-text: 38.2 100.0% 94.8%;
   }
 
   /* ── Soda Fountain family (2026-10-26) ──────────────────────────────────
@@ -2538,53 +2546,4 @@ body {
 .login-world ::selection {
   background: hsl(var(--primary) / 0.45);
   color: hsl(var(--foreground));
-}
-
-/* ============================================================================
-   COLOUR-BLIND-FRIENDLY RARITY COLOURS -- Settings > Accessibility.
-   One fixed rarity gauge that replaces every theme's own ramp when the user
-   turns it on (src/lib/rarityPalette.js sets [data-rarity] on <html>).
-   Theme ramps are guaranteed >= 8 apart (deltaE-OK) under simulated
-   protanopia and deuteranopia only on dark themes; on light themes the
-   ramp has to darken to gain contrast and the theme's hues can't hold that
-   too. These two can: each tier steps 0.1-0.12 in OKLab lightness, which
-   colour-vision deficiency barely changes, along a blue-yellow hue path
-   (like the viridis scale) that protan and deutan vision keep.
-     dark  (any dark theme):  blue -> teal -> green -> lime -> yellow
-     light (any light theme): gold -> green -> teal -> blue -> indigo
-   Checked against every theme's card in src/lib/breakdownRamps.test.js.
-   Unlayered, so it wins over the @layer base theme blocks. */
-:root[data-rarity="colour-blind"] {
-  --holo-gradient: initial;
-  --holo-badge: initial;
-  --holo-1: initial;
-  --holo-2: initial;
-  --holo-3: initial;
-  --holo-4: initial;
-  --breakdown-common: 210.2 39.0% 44.9%;
-  --breakdown-uncommon: 186.1 32.2% 47.7%;
-  --breakdown-rare: 151.1 47.3% 55.4%;
-  --breakdown-ultra: 78.6 68.9% 58.1%;
-  --breakdown-legendary: 51.4 97.9% 77.1%;
-  /* Filled Legendary badge label: ink on the pale yellow. */
-  --rarity-legendary-on: 240.0 20.0% 4.9%;
-  --rarity-legendary-text: 51.4 97.9% 77.1%;
-  --rarity-ultra-text: 78.6 68.9% 58.1%;
-  --rarity-rare-text: 151.1 47.3% 55.4%;
-  --rarity-uncommon-text: 186.2 34.7% 55.7%;
-  --rarity-common-text: 210.5 48.6% 62.3%;
-}
-:root[data-rarity="colour-blind"][data-tone="light"] {
-  --breakdown-common:60.2 97.0% 27.9%;
-  --breakdown-uncommon:151.2 92.5% 25.6%;
-  --breakdown-rare:181.4 93.4% 18.4%;
-  --breakdown-ultra:201.9 95.3% 17.0%;
-  --breakdown-legendary:259.5 98.7% 16.0%;
-  /* Filled Legendary badge label: white on the deep indigo. */
-  --rarity-legendary-on: 0.0 0.0% 100.0%;
-  --rarity-legendary-text: 259.5 98.7% 16.0%;
-  --rarity-ultra-text: 201.9 95.3% 17.0%;
-  --rarity-rare-text: 181.4 93.4% 18.4%;
-  --rarity-uncommon-text: 150.2 88.9% 20.9%;
-  --rarity-common-text: 60.3 82.5% 20.4%;
 }

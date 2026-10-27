@@ -3,8 +3,7 @@
 // (--breakdown-*, which the rarity fills, borders and glows now use too),
 // same OKLCH hue and chroma, with lightness moved away from the card until
 // it reads at >= MIN_TEXT against the page, the card and a badge's own
-// tinted fill (the tier at 20% over each). Also the colour-blind override's
-// text, checked against every card of its tone.
+// tinted fill (the tier at 20% over each).
 //
 // Re-run after re-tuning any gauge (scripts/tune-rarity-ramps.mjs):
 //   node scripts/generate-rarity-text.mjs --write
@@ -68,16 +67,5 @@ for (const block of [...blocks].reverse()) {
   out = out.slice(0, block.start) + body + out.slice(block.start + block.body.length);
 }
 
-// The colour-blind override: one text shade per tier per tone, legible on
-// every card of that tone.
-for (const [sel, wantDark] of [[':root[data-rarity="colour-blind"] {', true], [':root[data-rarity="colour-blind"][data-tone="light"] {', false]]) {
-  const at = out.indexOf(sel), end = out.indexOf('}', at);
-  const body = out.slice(at, end);
-  const tones = renderings.map((r) => resolveTokens(rules, r)).filter((g) => isDarkCard(rgb(g('--card'))) === wantDark);
-  const surfaces = (t) => tones.flatMap((g) => { const c = rgb(g('--card')), b = rgb(g('--background')); return [c, b, over(t, c, 0.2), over(t, b, 0.2)]; });
-  const texts = STEPS.map((s) => formatHsl(rgbToHsl(textFor(rgb(body.match(new RegExp(`--breakdown-${s}:\s*([^;]+);`))[1]), surfaces, wantDark))));
-  out = out.slice(0, at) + setText(body, texts) + out.slice(end);
-}
-
-console.log(`${blocks.length} theme blocks + 2 colour-blind overrides`);
+console.log(`${blocks.length} theme blocks`);
 if (process.argv.includes('--write')) { writeFileSync(CSS_PATH, out); console.log(`wrote ${CSS_PATH}`); }

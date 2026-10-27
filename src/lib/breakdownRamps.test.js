@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import {
-  STEPS, MIN_STEP, MIN_COMMON, MIN_LIGHT_STEP, MAX_SCAN_MATCH, rampProblems, adjacentSteps, isDarkCard,
+  STEPS, MIN_STEP, MIN_COMMON, MIN_LIGHT_STEP, MAX_SCAN_MATCH, rampProblems, adjacentSteps,
   contrast as contrastRgb, deltaEOk, labChroma, hslToRgb as hslTripleToRgb, parseHsl, srgbToOklab,
 } from './rampColour';
 import { themeRenderings, cssRules, resolveTokens } from './themeTokens';
@@ -24,9 +24,7 @@ const contrast = (a, b) => {
   return (x + 0.05) / (y + 0.05);
 };
 
-// Theme blocks: the ones that declare both a gauge and a card. (The
-// colour-blind override, [data-rarity="colour-blind"], declares only the
-// gauge; it's checked against every theme's card further down.)
+// Theme blocks: the ones that declare both a gauge and a card.
 const themeBlockMatches = [...css.matchAll(/([^{}]+)\{([^{}]*--breakdown-common[^{}]*)\}/g)]
   .filter(([, , body]) => /--card:/.test(body));
 
@@ -46,7 +44,7 @@ describe('rarity breakdown ramps', () => {
   // Since 2026-10-27 the gauge ends on the Scan colour, so a ramp that
   // descends into a mid-tone Scan has its highest contrast at Common. Every
   // tier still reads; the floor is the same for all five.
-  it.each(blocks.filter(b => !b.name.includes('spring-')).map(b => [b.name, b]))('%s: Common and Legendary both read at >= 3:1', (_, b) => {
+  it.each(blocks.filter(b => !/data-theme="(spring|alloy)-/.test(b.name)).map(b => [b.name, b]))('%s: Common and Legendary both read at >= 3:1', (_, b) => {
     expect(contrast(b.common, b.card)).toBeGreaterThanOrEqual(MIN_COMMON);
     expect(contrast(b.legendary, b.card)).toBeGreaterThanOrEqual(MIN_COMMON);
   });
@@ -76,13 +74,9 @@ const renderings = themeRenderings(readFileSync(fileURLToPath(new URL('../hooks/
       edge: get('--gauge-edge'),
     };
   });
-// Every theme but Spring, whose tint ladders follow their own rules below.
-const ruled = renderings.filter((g) => !g.name.startsWith('spring-'));
-// Every theme block's card, for the colour-blind override checks below.
-const gauges = themeBlockMatches.map(([, sel, body]) => ({
-  name: sel.trim().split(/\r?\n/).pop().trim(),
-  card: hslToRgb(...parse(body.match(/--card:\s*([^;]+);/)[1])),
-}));
+// Every theme but Spring and Alloy, whose tint ladders follow their own rules below.
+const isLadder = (g) => /^(spring|alloy)-/.test(g.name);
+const ruled = renderings.filter((g) => !isLadder(g));
 
 describe('gauge rules: clear steps, rising contrast, vivid Legendary', () => {
   it('covers every theme rendering', () => {
@@ -94,31 +88,35 @@ describe('gauge rules: clear steps, rising contrast, vivid Legendary', () => {
   });
 });
 
-// Spring's gauges are tint ladders of its palette (product direction,
-// 2026-10-27; scripts/generate-spring-ladders.mjs), under their own rules:
-// the palette colour (= Scan) is Legendary, except Butter, whose ladder
-// climbs from the palette butter into richer golds; every tier stays in
-// the palette colour's hue; lightness moves one way; neighbours are >= 4
-// apart; and every segment draws its hairline (--gauge-edge).
-describe('Spring: tint ladders of the palette', () => {
-  const spring = renderings.filter((g) => g.name.startsWith('spring-'));
+// Spring's and Alloy's gauges are tint ladders of their main colour
+// (product direction, 2026-10-27; scripts/generate-tint-ladders.mjs), under
+// their own rules: the Scan colour (Spring: the palette colour) is
+// Legendary, except Spring Butter, whose ladder climbs from the palette
+// butter into richer golds; every tier stays in that colour's hue;
+// lightness moves one way; neighbours are >= 4 apart; and where the palest
+// tint is faint on its card (under 2:1), every segment draws its hairline
+// (--gauge-edge).
+describe('Spring and Alloy: tint ladders of the main colour', () => {
+  const ladders = renderings.filter(isLadder);
   const hueOf = (c) => { const [, a, b] = srgbToOklab(c); return (Math.atan2(b, a) * 180) / Math.PI; };
   const hueGap = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
 
-  it('covers all six', () => expect(spring).toHaveLength(6));
+  it('covers all ten', () => expect(ladders).toHaveLength(10));
 
-  it.each(spring.map((g) => [g.name, g]))('%s', (name, g) => {
+  it.each(ladders.map((g) => [g.name, g]))('%s', (name, g) => {
     if (name.startsWith('spring-butter')) {
       expect(deltaEOk(g.steps[0], g.scan), 'Common is the palette butter').toBeLessThanOrEqual(MAX_SCAN_MATCH);
     } else {
-      expect(deltaEOk(g.steps[4], g.scan), 'Legendary is the palette colour').toBeLessThanOrEqual(MAX_SCAN_MATCH);
+      expect(deltaEOk(g.steps[4], g.scan), 'Legendary is the Scan colour').toBeLessThanOrEqual(MAX_SCAN_MATCH);
     }
-    for (const c of g.steps) expect(hueGap(hueOf(c), hueOf(g.scan)), 'hue').toBeLessThanOrEqual(15);
+    // Hue only means something where there's colour (Brushed Aluminium's
+    // graphite is all but neutral).
+    for (const c of g.steps) if (labChroma(c) >= 5) expect(hueGap(hueOf(c), hueOf(g.scan)), 'hue').toBeLessThanOrEqual(15);
     const L = g.steps.map((c) => srgbToOklab(c)[0]);
     const dir = Math.sign(L[4] - L[0]);
     for (let i = 1; i < 5; i++) expect((L[i] - L[i - 1]) * dir, 'lightness').toBeGreaterThan(0.02);
     for (const s of adjacentSteps(g.steps)) expect(s, 'step').toBeGreaterThanOrEqual(4);
-    expect(g.edge, '--gauge-edge').not.toBe('transparent');
+    if (contrastRgb(g.steps[0], g.card) < 2) expect(g.edge, '--gauge-edge').not.toBe('transparent');
   });
 });
 
@@ -134,13 +132,6 @@ describe('rarity text follows the theme', () => {
   // A filled Legendary badge (RarityBadge) labels in --rarity-legendary-on.
   it.each(textRenderings.map((r) => [r.name, r]))('%s: filled Legendary badge label reads', (_, { get }) => {
     expect(contrastRgb(rgbToken(get, '--rarity-legendary-on'), rgbToken(get, '--rarity-legendary'))).toBeGreaterThanOrEqual(4.5);
-  });
-
-  it.each([':root[data-rarity="colour-blind"]', ':root[data-rarity="colour-blind"][data-tone="light"]'])('%s: filled Legendary badge label reads', (sel) => {
-    const at = css.indexOf(`${sel} {`);
-    const body = css.slice(at, css.indexOf('}', at));
-    const tok = (t) => hslTripleToRgb(parseHsl(body.match(new RegExp(`${t}:\\s*([^;]+);`))[1]));
-    expect(contrastRgb(tok('--rarity-legendary-on'), tok('--breakdown-legendary'))).toBeGreaterThanOrEqual(4.5);
   });
 
   it.each(textRenderings.map((r) => [r.name, r]))('%s', (_, { get }) => {
@@ -186,43 +177,6 @@ describe('rarity gauge: a gradient to the Scan colour', () => {
     const C = g.steps.map(labChroma);
     // 0.5 tolerance: neutral ramps (Carbon, Silver Screen) are ~0 throughout.
     expect(C[4]).toBeGreaterThanOrEqual(Math.max(...C) - 0.5);
-  });
-});
-
-// The fixed colour-blind-safe gauge (Settings > Accessibility): dark and
-// light versions, each checked against EVERY theme card of that polarity,
-// with the strict rules in all three vision modes.
-const overrideRamp = selector => {
-  // The block whose selector is exactly `selector` (followed by its "{").
-  const at = css.search(new RegExp(`${selector.replace(/[[\]"().*+?^$|\\]/g, '\\$&')}\\s*\\{`));
-  if (at < 0) return null; // missing: reported by the tests below, not a load-time crash
-  const body = css.slice(css.indexOf('{', at) + 1, css.indexOf('}', at));
-  return STEPS.map(s => hslToRgb(...parse(body.match(new RegExp(`--breakdown-${s}:\\s*([^;]+);`))[1])));
-};
-const cvdRamps = {
-  dark: overrideRamp(':root[data-rarity="colour-blind"]'),
-  light: overrideRamp(':root[data-rarity="colour-blind"][data-tone="light"]'),
-};
-
-describe('colour-blind-friendly rarity colours', () => {
-  it('defines a dark and a light override', () => {
-    expect(cvdRamps.dark, ':root[data-rarity="colour-blind"]').toBeTruthy();
-    expect(cvdRamps.light, ':root[data-rarity="colour-blind"][data-tone="light"]').toBeTruthy();
-  });
-
-  it.each(gauges.map(g => [g.name, g]))('%s: the override reads on this card', (_, g) => {
-    const ramp = isDarkCard(g.card) ? cvdRamps.dark : cvdRamps.light;
-    expect(ramp, 'override block present').toBeTruthy();
-    const K = ramp.map(c => contrastRgb(c, g.card));
-    expect(K[0], 'Common contrast').toBeGreaterThanOrEqual(MIN_COMMON);
-    for (let i = 1; i < 5; i++) expect(K[i], `${STEPS[i]} contrast`).toBeGreaterThan(K[i - 1]);
-  });
-
-  it.each(['dark', 'light'])('%s override: >= 8 apart in normal, protan and deutan vision', tone => {
-    expect(cvdRamps[tone], 'override block present').toBeTruthy();
-    for (const vision of ['normal', 'protan', 'deutan']) {
-      expect(Math.min(...adjacentSteps(cvdRamps[tone], vision)), vision).toBeGreaterThanOrEqual(MIN_STEP);
-    }
   });
 });
 

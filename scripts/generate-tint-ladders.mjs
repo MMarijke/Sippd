@@ -30,6 +30,11 @@
 //   from a deep blue (its accent's hue) up to its Scan violet. Aurora is a
 //   blend instead: from the blue of its glow bubble (--accent) round through
 //   azure and teal to its Scan green. Moonlight keeps its tuned gradient.
+//   Neon (one block per polarity, keyed 'id:polarity'): the dark renderings
+//   blend from a rich colour in the accent's hue (the glow bubble's) to the
+//   Scan colour, the short way round, so none starts grey; Boss Fight dark
+//   from a bright amber into its red. The light renderings are tint ladders
+//   of the Scan colour, like Candy (no brown, near-black or rainbow starts).
 //
 // Tints are the colour mixed toward white in OKLab. These families trade the
 // gauge rules other themes keep (3:1 for every tier, colour-blind-safe steps)
@@ -79,6 +84,16 @@ export const LADDERS = {
   'solar-flare': 'scan',
   nebula: 'scan',
   aurora: 'scan',
+  'power-up:dark': 'scan',
+  'cyberpunk:dark': 'scan',
+  'plasma:dark': 'scan',
+  'boss-fight:dark': 'scan',
+  'synthwave:dark': 'scan',
+  'power-up:light': 'scan',
+  'cyberpunk:light': 'scan',
+  'plasma:light': 'scan',
+  'boss-fight:light': 'scan',
+  'synthwave:light': 'scan',
 };
 // Shade ladders (dark cards): how far below the Scan colour Common starts,
 // in OKLab lightness.
@@ -92,8 +107,19 @@ const SHADE_DEPTH = { crimson: 0.17, amethyst: 0.17, sapphire: 0.17, emerald: 0.
 const SHADE_BOOST = { fern: -0.07, 'solar-flare': 0.01 };
 const SHADE_HUE = { fern: 10, 'stellar-gold': -14, 'deep-space': 8, nebula: -17 };
 // Blends: theme id -> the token Common starts on (the ladder runs from it to
-// the Scan colour in OKLCH, the short way round the hue circle).
-export const BLEND_FROM = { aurora: '--accent' };
+// the Scan colour in OKLCH, the short way round the hue circle), optionally
+// moved to lightness L (same hue and colour, gamut allowing).
+export const BLEND_FROM = {
+  aurora: '--accent',
+  'power-up:dark': { token: '--accent', L: 0.62 },
+  'cyberpunk:dark': { token: '--accent', L: 0.47 },
+  'plasma:dark': { token: '--accent', L: 0.6 },
+  'boss-fight:dark': { token: '--accent', L: 0.79 },
+  'synthwave:dark': { token: '--accent', L: 0.45 },
+  // Boss Fight light from a light orange in its accent's hue into its red, so
+  // it stays orange-and-red rather than a second Bubblegum or Orange Crush.
+  'boss-fight:light': { token: '--accent', L: 0.80 },
+};
 export const isLadderTheme = (id) => Object.hasOwn(LADDERS, id);
 const TINT_SHARES = [0.26, 0.46, 0.64, 0.82, 1];
 // Alloy's Scan colours are lighter than Spring's palette (Gold Foil's gold
@@ -143,19 +169,22 @@ if (process.argv[1]?.endsWith('generate-tint-ladders.mjs')) {
   let css = readFileSync(CSS_PATH, 'utf8');
   const rules = cssRules(css);
   const renderings = themeRenderings(readFileSync('src/hooks/useTheme.js', 'utf8'));
-  for (const [id, source] of Object.entries(LADDERS)) {
-    const r = renderings.find((x) => x.id === id);
+  for (const [key, source] of Object.entries(LADDERS)) {
+    const [id, polarity] = key.split(':');
+    const r = renderings.find((x) => x.id === id && (!polarity || x.polarity === polarity));
     const colour = source === 'scan' ? hslToRgb(parseHsl(resolveTokens(rules, r)('--cta'))) : hex(source);
-    const head = `[data-theme="${id}"] {`;
+    const head = polarity ? `[data-theme="${id}"][data-polarity="${polarity}"] {` : `[data-theme="${id}"] {`;
     let at = css.indexOf(head);
     while (at >= 0 && !css.slice(at, css.indexOf('}', at)).includes('--breakdown-common:')) at = css.indexOf(head, at + 1);
     const end = css.indexOf('}', at);
     let body = css.slice(at, end);
-    const from = BLEND_FROM[id] && hslToRgb(parseHsl(resolveTokens(rules, r)(BLEND_FROM[id])));
+    const blend = typeof BLEND_FROM[key] === 'string' ? { token: BLEND_FROM[key] } : BLEND_FROM[key];
+    let from = blend && hslToRgb(parseHsl(resolveTokens(rules, r)(blend.token)));
+    if (blend?.L) { const [, fa, fb] = srgbToOklab(from); from = fit(blend.L, Math.hypot(fa, fb), Math.atan2(fb, fa)); }
     const ladder = (from ? blendLadder(from, colour) : tintLadder(id, colour)).map((c) => formatHsl(rgbToHsl(c)));
     STEPS.forEach((s, i) => { body = body.replace(new RegExp(`(--breakdown-${s}:\\s*)[^;]+;`), `$1${ladder[i]};`); });
     css = css.slice(0, at) + body + css.slice(end);
-    console.log(id.padEnd(17), ladder.join(' | '));
+    console.log(key.padEnd(17), ladder.join(' | '));
   }
   if (process.argv.includes('--write')) { writeFileSync(CSS_PATH, css); console.log(`wrote ${CSS_PATH}`); }
 }

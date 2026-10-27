@@ -1428,6 +1428,9 @@
   [data-theme="bubblegum"], [data-theme="blue-pop"], [data-theme="grape-candy"],
   [data-theme="orange-crush"], [data-theme="sour-apple"], [data-theme="cherry-pop"] {
     --font-display: 'Fredoka', sans-serif;
+    /* Rarity bars are tint ladders of each theme's Scan colour (2026-10-27);
+       the palest tints need this hairline to hold their shape on the light card. */
+    --gauge-edge: hsl(var(--primary) / 0.5);
     --font-mono: 'Chivo Mono', monospace;
     --font-body: 'Nunito', sans-serif;
     /* Structure: the roundest corners, 1.5px outlines, smooth (no
@@ -1461,16 +1464,16 @@
     --ring: 336.7 100% 56.1%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 335.0 100.0% 20.4%;
-    --breakdown-uncommon: 317.2 100.0% 24.9%;
-    --breakdown-rare: 337.5 100.0% 31.5%;
-    --breakdown-ultra: 338.4 69.9% 45.1%;
+    --breakdown-common: 347.3 100.0% 90.8%;
+    --breakdown-uncommon: 346.2 100.0% 83.4%;
+    --breakdown-rare: 344.7 100.0% 76.4%;
+    --breakdown-ultra: 342.3 100.0% 68.4%;
     --breakdown-legendary: 336.7 100.0% 56.1%;
     --rarity-legendary-text: 335.0 91.2% 37.3%;
-    --rarity-ultra-text: 334.3 93.8% 36.3%;
-    --rarity-rare-text: 337.5 100.0% 31.5%;
-    --rarity-uncommon-text: 317.2 100.0% 24.9%;
-    --rarity-common-text: 335.0 100.0% 20.4%;
+    --rarity-ultra-text: 336.0 80.4% 41.0%;
+    --rarity-rare-text: 341.7 47.6% 46.1%;
+    --rarity-uncommon-text: 344.3 31.7% 46.6%;
+    --rarity-common-text: 346.3 17.4% 45.8%;
   }
   [data-theme="blue-pop"] {
     --background: 200.0 100% 97.1%;
@@ -1492,16 +1495,16 @@
     --ring: 217.1 100% 60.4%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 216.9 81.9% 21.4%;
-    --breakdown-uncommon: 216.8 78.3% 30.1%;
-    --breakdown-rare: 217.2 65.5% 40.6%;
-    --breakdown-ultra: 217.3 61.2% 51.3%;
+    --breakdown-common: 215.4 100.0% 89.8%;
+    --breakdown-uncommon: 215.9 100.0% 82.1%;
+    --breakdown-rare: 216.4 100.0% 75.2%;
+    --breakdown-ultra: 216.9 100.0% 68.1%;
     --breakdown-legendary: 217.1 100.0% 60.4%;
     --rarity-legendary-text: 214.9 97.7% 41.9%;
-    --rarity-ultra-text: 217.1 67.9% 43.2%;
-    --rarity-rare-text: 217.2 65.5% 40.6%;
-    --rarity-uncommon-text: 216.8 78.3% 30.1%;
-    --rarity-common-text: 216.9 81.9% 21.4%;
+    --rarity-ultra-text: 216.6 67.9% 44.8%;
+    --rarity-rare-text: 216.4 50.6% 45.1%;
+    --rarity-uncommon-text: 215.9 35.4% 45.4%;
+    --rarity-common-text: 215.4 19.8% 45.1%;
   }
   /* Grape Candy, moved 2026-10-19 (/impeccable distill): it read as
      Synthwave light (CIEDE2000 6.4). Now a bluer Concord-grape violet --
@@ -1528,16 +1531,16 @@
     --ring: 250.0 100% 70.8%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 238.4 32.7% 21.4%;
-    --breakdown-uncommon: 247.0 51.3% 30.7%;
-    --breakdown-rare: 247.8 46.6% 41.4%;
-    --breakdown-ultra: 248.0 45.7% 52.6%;
+    --breakdown-common: 241.4 100.0% 92.8%;
+    --breakdown-uncommon: 243.0 100.0% 87.2%;
+    --breakdown-rare: 244.8 100.0% 82.0%;
+    --breakdown-ultra: 247.0 100.0% 76.6%;
     --breakdown-legendary: 250.0 100.0% 70.8%;
     --rarity-legendary-text: 253.2 63.6% 54.8%;
-    --rarity-ultra-text: 248.5 43.2% 50.1%;
-    --rarity-rare-text: 247.8 46.6% 41.4%;
-    --rarity-uncommon-text: 247.0 51.3% 30.7%;
-    --rarity-common-text: 238.4 32.7% 21.4%;
+    --rarity-ultra-text: 250.0 48.0% 53.6%;
+    --rarity-rare-text: 247.4 34.1% 51.3%;
+    --rarity-uncommon-text: 244.9 23.2% 49.4%;
+    --rarity-common-text: 242.5 13.5% 46.6%;
   }
   [data-theme="orange-crush"] {
     --background: 26.7 100% 96.5%;
@@ -1559,16 +1562,16 @@
     --ring: 21.3 100% 45.9%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 17.8 100.0% 15.8%;
-    --breakdown-uncommon: 19.6 100.0% 23.5%;
-    --breakdown-rare: 17.2 78.6% 34.3%;
-    --breakdown-ultra: 4.0 51.4% 50.6%;
+    --breakdown-common: 15.9 100.0% 88.9%;
+    --breakdown-uncommon: 15.7 96.2% 80.1%;
+    --breakdown-rare: 15.8 91.1% 71.4%;
+    --breakdown-ultra: 16.3 86.8% 61.8%;
     --breakdown-legendary: 21.3 100.0% 45.9%;
     --rarity-legendary-text: 20.4 99.1% 33.1%;
-    --rarity-ultra-text: 2.8 58.7% 41.9%;
-    --rarity-rare-text: 17.2 78.6% 34.3%;
-    --rarity-uncommon-text: 19.6 100.0% 23.5%;
-    --rarity-common-text: 17.8 100.0% 15.8%;
+    --rarity-ultra-text: 20.4 98.5% 34.5%;
+    --rarity-rare-text: 16.4 59.5% 40.7%;
+    --rarity-uncommon-text: 15.8 39.9% 42.7%;
+    --rarity-common-text: 16.0 22.1% 43.6%;
   }
   [data-theme="sour-apple"] {
     --background: 76.0 100.0% 91.2%;
@@ -1590,16 +1593,16 @@
     --ring: 81.6 100.0% 23.9%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 89.4 100.0% 9.6%;
-    --breakdown-uncommon: 84.2 100.0% 13.9%;
-    --breakdown-rare: 80.5 100.0% 18.4%;
-    --breakdown-ultra: 81.4 55.8% 32.6%;
+    --breakdown-common: 84.5 36.4% 84.1%;
+    --breakdown-uncommon: 83.5 36.3% 71.9%;
+    --breakdown-rare: 82.3 36.4% 60.7%;
+    --breakdown-ultra: 80.4 38.9% 48.9%;
     --breakdown-legendary: 75.4 92.3% 31.6%;
     --rarity-legendary-text: 75.7 95.8% 21.7%;
-    --rarity-ultra-text: 77.8 98.7% 21.2%;
-    --rarity-rare-text: 80.5 100.0% 18.4%;
-    --rarity-uncommon-text: 84.2 100.0% 13.9%;
-    --rarity-common-text: 89.4 100.0% 9.6%;
+    --rarity-ultra-text: 75.4 98.8% 22.0%;
+    --rarity-rare-text: 79.9 46.5% 30.2%;
+    --rarity-uncommon-text: 82.1 26.8% 35.1%;
+    --rarity-common-text: 83.8 13.0% 39.6%;
     --primary-fill: 74.5 100.0% 47.1%;
     --cta: 75.4 92.3% 31.6%;
     --cta-foreground: 240.0 20.0% 4.9%;
@@ -1611,35 +1614,38 @@
      supporting colour; the gauge ends on the cherry. Nearest main colour
      now Spring Brick at 10.9, Boss Fight light at 13.2. */
   [data-theme="cherry-pop"] {
-    --background: 351.4 100% 97.3%;
-    --foreground: 347.8 37% 25.7%;
-    --card: 351.4 97% 98.3%;
-    --card-foreground: 347.8 37% 25.7%;
-    --popover: 351.4 97% 98.3%;
-    --popover-foreground: 347.8 37% 25.7%;
-    --primary: 350.0 85% 41.2%;
+    /* Cherry red, not pink (product direction, 2026-10-27): the surfaces were saturated pink tints
+       (hue 351 at 96-100%), so the whole theme read pink. Now a warm off-white with a whisper of red,
+       a true cherry-red action, a deep cherry accent and a deep cherry-brown ink. */
+    --background: 0.0 40.0% 97.0%;
+    --foreground: 355.0 45.0% 17.0%;
+    --card: 0.0 45.0% 98.6%;
+    --card-foreground: 355.0 45.0% 17.0%;
+    --popover: 0.0 45.0% 98.6%;
+    --popover-foreground: 355.0 45.0% 17.0%;
+    --primary: 354.0 90.0% 40.0%;
     --primary-foreground: 0.0 0% 98.0%;
-    --secondary: 351.4 98% 88.3%;
-    --secondary-foreground: 347.8 37% 25.7%;
-    --muted: 351.4 96% 92.3%;
-    --muted-foreground: 347.1 27% 43.8%;
-    --accent: 342.0 70% 30.0%;
+    --secondary: 358.0 40.0% 90.0%;
+    --secondary-foreground: 355.0 45.0% 17.0%;
+    --muted: 0.0 32.0% 93.0%;
+    --muted-foreground: 356.0 28.0% 36.0%;
+    --accent: 352.0 75.0% 26.0%;
     --accent-foreground: 0.0 0% 98.0%;
-    --border: 351.4 98% 83.3%;
-    --input: 351.4 98% 83.3%;
-    --ring: 350.0 85% 41.2%;
+    --border: 358.0 34.0% 80.0%;
+    --input: 358.0 34.0% 80.0%;
+    --ring: 354.0 90.0% 40.0%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 343.2 100.0% 9.3%;
-    --breakdown-uncommon: 341.3 100.0% 17.9%;
-    --breakdown-rare: 323.4 86.6% 24.2%;
-    --breakdown-ultra: 347.1 87.8% 29.5%;
-    --breakdown-legendary: 350.0 85.0% 41.2%;
-    --rarity-legendary-text: 347.4 98.9% 35.3%;
-    --rarity-ultra-text: 347.1 87.8% 29.5%;
-    --rarity-rare-text: 323.4 86.6% 24.2%;
-    --rarity-uncommon-text: 341.3 100.0% 17.9%;
-    --rarity-common-text: 343.2 100.0% 9.3%;
+    --breakdown-common: 6.2 76.3% 86.7%;
+    --breakdown-uncommon: 5.6 70.3% 76.0%;
+    --breakdown-rare: 4.6 65.3% 66.0%;
+    --breakdown-ultra: 2.5 60.8% 55.5%;
+    --breakdown-legendary: 354.0 90.0% 40.0%;
+    --rarity-legendary-text: 353.1 95.6% 35.5%;
+    --rarity-ultra-text: 0.3 60.2% 43.0%;
+    --rarity-rare-text: 3.2 45.7% 44.5%;
+    --rarity-uncommon-text: 4.7 33.3% 44.9%;
+    --rarity-common-text: 5.8 19.5% 45.1%;
   }
 
   /* ── Spring family (light, built from a palette the user chose) ──────────

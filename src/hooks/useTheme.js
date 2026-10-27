@@ -99,7 +99,7 @@ export const THEME_FAMILIES = [
       { id: 'grape-candy', label: 'Grape Candy', pro: true, light: { swatch: '#836AFF', sup: '#584DD4', background: '#F4F1FF' } },
       { id: 'orange-crush', label: 'Orange Crush', pro: true, light: { swatch: '#EA5300', sup: '#953A11', background: '#FFF5ED' } },
       { id: 'sour-apple', label: 'Sour Apple', pro: true, light: { swatch: '#B6F000', sup: '#3D6B00', background: '#F3FFD2' } },
-      { id: 'cherry-pop', label: 'Cherry Pop', pro: true, light: { swatch: '#C2102E', sup: '#821737', background: '#FFF1F3' } },
+      { id: 'cherry-pop', label: 'Cherry Pop', pro: true, light: { swatch: '#C20A1D', sup: '#74111E', background: '#FAF4F4' } },
     ],
   },
   {

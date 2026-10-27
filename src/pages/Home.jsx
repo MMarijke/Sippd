@@ -170,7 +170,7 @@ export default function Home() {
             // Scan and the selected brand chip wear --cta: the theme's own button
             // fill, so the main action is never quieter than Save.
             action={
-              <Button asChild size="sm" className="h-11 font-mono text-xs gap-1.5 bg-cta text-cta-foreground hover:bg-cta/90">
+              <Button asChild size="sm" className="h-11 rounded-control font-mono text-xs gap-1.5 bg-cta text-cta-foreground hover:bg-cta/90">
                 <Link to="/scan">
                   <ScanLine className="w-4 h-4" aria-hidden="true" /> Scan
                 </Link>
@@ -207,7 +207,7 @@ export default function Home() {
                     <p className="text-xs font-mono text-muted-foreground mt-1.5">
                       Scan your first can to start building your vault.
                     </p>
-                    <Button asChild size="sm" className="h-11 mt-3 font-mono text-xs gap-1.5 bg-cta text-cta-foreground hover:bg-cta/90">
+                    <Button asChild size="sm" className="h-11 mt-3 rounded-control font-mono text-xs gap-1.5 bg-cta text-cta-foreground hover:bg-cta/90">
                       <Link to="/scan">
                         <ScanLine className="w-4 h-4" aria-hidden="true" /> Scan Your First Can
                       </Link>

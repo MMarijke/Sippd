@@ -43,6 +43,9 @@ module.exports = {
   			DEFAULT: 'calc(0.25rem * var(--radius-scale, 1))',
   			sm: 'max(0px, calc(var(--radius) - 4px))',
   			md: 'max(0px, calc(var(--radius) - 2px))',
+  			// The header's action buttons (Scan, notifications): the md step, except
+  			// where a square family (Noir) keeps them softly rounded (--control-radius).
+  			control: 'var(--control-radius, max(0px, calc(var(--radius) - 2px)))',
   			lg: 'var(--radius)',
   			xl: 'calc(0.75rem * var(--radius-scale, 1))',
   			'2xl': 'calc(1rem * var(--radius-scale, 1))',

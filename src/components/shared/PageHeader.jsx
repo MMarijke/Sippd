@@ -54,7 +54,7 @@ export default function PageHeader({ title, subtitle, action, showBell = true, o
           <Link
             to="/notifications"
             aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
-            className="relative h-11 w-11 rounded-md bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            className="relative h-11 w-11 rounded-control bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (

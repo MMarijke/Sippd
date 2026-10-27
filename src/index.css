@@ -1156,16 +1156,16 @@
     --ring: 67.2 48.3% 47.1%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 65.5 99.9% 19.7%;
-    --breakdown-uncommon: 65.4 97.1% 25.4%;
-    --breakdown-rare: 66.4 64.5% 37.1%;
-    --breakdown-ultra: 67.4 45.4% 49.7%;
+    --breakdown-common: 82.6 28.4% 30.8%;
+    --breakdown-uncommon: 78.6 30.5% 38.4%;
+    --breakdown-rare: 74.9 32.5% 46.2%;
+    --breakdown-ultra: 71.3 40.1% 53.8%;
     --breakdown-legendary: 68.0 57.8% 61.5%;
     --rarity-legendary-text: 68.0 57.8% 61.5%;
-    --rarity-ultra-text: 67.4 45.4% 49.7%;
-    --rarity-rare-text: 66.9 53.7% 42.9%;
-    --rarity-uncommon-text: 67.3 48.5% 42.7%;
-    --rarity-common-text: 68.1 37.3% 44.1%;
+    --rarity-ultra-text: 71.3 40.1% 53.8%;
+    --rarity-rare-text: 75.2 30.8% 51.0%;
+    --rarity-uncommon-text: 79.4 24.6% 51.3%;
+    --rarity-common-text: 83.7 19.2% 51.9%;
   }
   [data-theme="meadow"] {
     --background: 54.8 53% 91.6%;

@@ -44,7 +44,7 @@ describe('rarity breakdown ramps', () => {
   // Since 2026-10-27 the gauge ends on the Scan colour, so a ramp that
   // descends into a mid-tone Scan has its highest contrast at Common. Every
   // tier still reads; the floor is the same for all five.
-  it.each(blocks.filter(b => !/data-theme="((spring|alloy)-|bubblegum|blue-pop|grape-candy|orange-crush|sour-apple|cherry-pop|carbon|crimson|amethyst|sapphire|emerald|sage|meadow|fern|forest)/.test(b.name)).map(b => [b.name, b]))('%s: Common and Legendary both read at >= 3:1', (_, b) => {
+  it.each(blocks.filter(b => !/data-theme="((spring|alloy)-|bubblegum|blue-pop|grape-candy|orange-crush|sour-apple|cherry-pop|carbon|crimson|amethyst|sapphire|emerald|sage|meadow|fern|forest|deep-space|stellar-gold|solar-flare|nebula|aurora)/.test(b.name)).map(b => [b.name, b]))('%s: Common and Legendary both read at >= 3:1', (_, b) => {
     expect(contrast(b.common, b.card)).toBeGreaterThanOrEqual(MIN_COMMON);
     expect(contrast(b.legendary, b.card)).toBeGreaterThanOrEqual(MIN_COMMON);
   });
@@ -70,12 +70,13 @@ const renderings = themeRenderings(readFileSync(fileURLToPath(new URL('../hooks/
       name: `${r.id} (${r.polarity})`,
       card: rgbToken(get, '--card'),
       scan: rgbToken(get, '--cta'),
+      accent: rgbToken(get, '--accent'),
       steps: STEPS.map((s) => rgbToken(get, `--breakdown-${s}`)),
       edge: get('--gauge-edge'),
     };
   });
 // Every theme but Spring, Alloy, Candy, Noir (bar Silver Screen) and Botanical, whose ladders follow their own rules below.
-const isLadder = (g) => /^((spring|alloy)-|bubblegum|blue-pop|grape-candy|orange-crush|sour-apple|cherry-pop|carbon|crimson|amethyst|sapphire|emerald|sage|meadow|fern|forest)/.test(g.name);
+const isLadder = (g) => /^((spring|alloy)-|bubblegum|blue-pop|grape-candy|orange-crush|sour-apple|cherry-pop|carbon|crimson|amethyst|sapphire|emerald|sage|meadow|fern|forest|deep-space|stellar-gold|solar-flare|nebula|aurora)/.test(g.name);
 const ruled = renderings.filter((g) => !isLadder(g));
 
 describe('gauge rules: clear steps, rising contrast, vivid Legendary', () => {
@@ -101,7 +102,7 @@ describe('Spring, Alloy, Candy, Noir and Botanical: ladders of the main colour',
   const hueOf = (c) => { const [, a, b] = srgbToOklab(c); return (Math.atan2(b, a) * 180) / Math.PI; };
   const hueGap = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
 
-  it('covers all twenty-five', () => expect(ladders).toHaveLength(25));
+  it('covers all thirty', () => expect(ladders).toHaveLength(30));
 
   it.each(ladders.map((g) => [g.name, g]))('%s', (name, g) => {
     if (name.startsWith('spring-butter')) {
@@ -110,8 +111,17 @@ describe('Spring, Alloy, Candy, Noir and Botanical: ladders of the main colour',
       expect(deltaEOk(g.steps[4], g.scan), 'Legendary is the Scan colour').toBeLessThanOrEqual(MAX_SCAN_MATCH);
     }
     // Hue only means something where there's colour (Brushed Aluminium's
-    // graphite is all but neutral).
-    for (const c of g.steps) if (labChroma(c) >= 5) expect(hueGap(hueOf(c), hueOf(g.scan)), 'hue').toBeLessThanOrEqual(15);
+    // graphite is all but neutral). Aurora and Nebula run from their accent
+    // blue (Aurora's glow bubble) to the Scan colour instead: Aurora starts
+    // ON the accent, and both turn steadily from the accent's hue to the Scan's.
+    if (/^(aurora|nebula) /.test(name)) {
+      if (name.startsWith('aurora')) expect(deltaEOk(g.steps[0], g.accent), 'Common is the bubble blue').toBeLessThanOrEqual(MAX_SCAN_MATCH);
+      expect(hueGap(hueOf(g.steps[0]), hueOf(g.accent)), 'Common in the accent hue').toBeLessThanOrEqual(15);
+      const toScan = g.steps.map((c) => hueGap(hueOf(c), hueOf(g.scan)));
+      for (let i = 1; i < 5; i++) expect(toScan[i], 'hue turns toward the Scan colour').toBeLessThan(toScan[i - 1]);
+    } else {
+      for (const c of g.steps) if (labChroma(c) >= 5) expect(hueGap(hueOf(c), hueOf(g.scan)), 'hue').toBeLessThanOrEqual(15);
+    }
     const L = g.steps.map((c) => srgbToOklab(c)[0]);
     const dir = Math.sign(L[4] - L[0]);
     for (let i = 1; i < 5; i++) expect((L[i] - L[i - 1]) * dir, 'lightness').toBeGreaterThan(0.02);

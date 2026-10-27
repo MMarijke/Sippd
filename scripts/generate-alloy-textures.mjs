@@ -5,7 +5,7 @@
 //
 //   brushed  Brushed Aluminium (light): fine horizontal streaks, dark, <= 6%
 //   anodised Anodised Teal/Red (dark): a fine satin speckle, white, <= 5%
-//   foil     Gold Foil (dark): wavering diagonal folds, white, <= 5%
+//   foil     Gold Foil (dark): wavering diagonal folds, white, <= 3%
 //
 // Alphas stay low so every text contrast in those themes is unaffected in
 // practice (the tests check colours without texture; these only lighten or
@@ -39,10 +39,11 @@ const anodised = (() => {
 // plus a little speckle: the crinkle of hot-foil stamping. Light highlights
 // on a dark card. (It used to be two crossing sine ridges at 8%, whose
 // crossings read as a transparency checkerboard at 1x; /impeccable critique,
-// 2026-10-26.) Whole-number frequencies, so the tile still repeats seamlessly.
+// 2026-10-26; at most 3% since 2026-10-27, as 5% still read too strongly.)
+// Whole-number frequencies, so the tile still repeats seamlessly.
 const foil = (() => {
   const rand = seeded(0xa3);
-  const MAX = Math.floor(0.05 * 255);
+  const MAX = Math.floor(0.03 * 255);
   const tau = Math.PI * 2;
   return png(SIZE, SIZE, (x, y) => {
     const sweep = 1.6 * Math.sin(((x - y) / SIZE) * tau);

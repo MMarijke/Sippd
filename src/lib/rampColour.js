@@ -107,45 +107,48 @@ export const isDarkCard = (cardRgb) => srgbToOklab(cardRgb)[0] < 0.5;
 // The gauge rules for one theme's ramp (sRGB tiers, Common first) on its
 // card. Returns the list of broken rules (empty = passes).
 //
-// Every theme (2026-10-26, /impeccable colorize):
-// - Common reads at >= MIN_COMMON (3:1, the graphics floor) against the
-//   card, and contrast rises at every tier from there;
-// - adjacent tiers are >= MIN_STEP apart in normal vision;
-// - Legendary is the most colourful tier: the peak in colour as well as in
-//   contrast. Neutral ramps (Carbon, Silver Screen) pass as a tie: every
-//   tier there has ~0 colour, by design;
-// - with `scan` (the theme's Scan fill, --cta): every tier is >= MIN_SCAN_GAP
-//   from it, so the app's main action never reads as a rarity colour.
-//
-// Dark themes also: >= MIN_STEP apart under simulated protanopia and
-// deuteranopia, and colourfulness may dip by at most 4 between tiers. On a
-// light card colour-blind users get the fixed ramp from the "colour-blind-
-// friendly rarity colours" setting instead (index.css,
-// [data-rarity="colour-blind"]), which meets the dark-theme rules on every
-// light card.
+// Every theme (2026-10-27, product direction: the bar is a gradient from the
+// Home glow-bubble colour to the Scan colour):
+// - with `scan` (the theme's Scan fill, --cta): Legendary IS the Scan colour
+//   (within MAX_SCAN_MATCH), the far end of the gradient;
+// - every tier reads at >= MIN_COMMON (3:1, the graphics floor) against the
+//   card;
+// - lightness moves one way, by >= MIN_LIGHT_STEP (OKLab) at every tier, so
+//   the tiers stay ordered without colour. Which way depends on where the
+//   Scan colour sits: a bright Scan on a dark card is the light end (the
+//   ramp climbs to it), a mid-tone one is the dark end (the ramp descends
+//   into it from a pale Common), and on a light card Scan is the light end;
+// - adjacent tiers are >= MIN_STEP apart in normal vision AND under
+//   simulated protanopia and deuteranopia, on every theme (light ones used
+//   to be checked in normal vision only, and several collapsed to hue
+//   alone: /impeccable critique, 2026-10-26);
+// - Legendary is the most colourful tier. Neutral ramps (Carbon, Silver
+//   Screen) pass as a tie: their Scan, and so every tier, has ~0 colour.
 export const MIN_COMMON = 3;
-export const MIN_SCAN_GAP = 10;
+export const MIN_LIGHT_STEP = 0.04;
+export const MAX_SCAN_MATCH = 2;
 
 export function rampProblems(stepRgbs, cardRgb, { scan } = {}) {
   const problems = [];
   const K = stepRgbs.map((c) => contrast(c, cardRgb));
   const C = stepRgbs.map(labChroma);
-  if (K[0] < MIN_COMMON) problems.push(`Common only ${K[0].toFixed(2)}:1 against the card`);
-  for (let i = 1; i < 5; i++) if (!(K[i] > K[i - 1])) problems.push(`contrast does not rise at ${STEPS[i]}`);
+  const L = stepRgbs.map((c) => srgbToOklab(c)[0]);
+  K.forEach((k, i) => { if (k < MIN_COMMON) problems.push(`${STEPS[i]} only ${k.toFixed(2)}:1 against the card`); });
+
+  const steps = L.slice(1).map((l, i) => l - L[i]);
+  const dir = Math.sign(L[4] - L[0]) || 1;
+  steps.forEach((d, i) => {
+    if (d * dir < MIN_LIGHT_STEP) problems.push(`lightness step ${Math.abs(d).toFixed(3)} at ${STEPS[i + 1]} (< ${MIN_LIGHT_STEP}, or reverses)`);
+  });
 
   if (C[4] < Math.max(...C) - 0.5) problems.push('Legendary is not the most colourful tier');
-  const dark = isDarkCard(cardRgb);
-  if (dark && Math.max(...C) >= 8) {
-    for (let i = 1; i < 5; i++) if (C[i] < C[i - 1] - 4) problems.push(`colourfulness drops at ${STEPS[i]}`);
-  }
 
   if (scan) {
-    const gaps = stepRgbs.map((c) => deltaEOk(c, scan));
-    const i = gaps.indexOf(Math.min(...gaps));
-    if (gaps[i] < MIN_SCAN_GAP) problems.push(`${STEPS[i]} only ${gaps[i].toFixed(1)} from Scan`);
+    const gap = deltaEOk(stepRgbs[4], scan);
+    if (gap > MAX_SCAN_MATCH) problems.push(`Legendary is ${gap.toFixed(1)} from the Scan colour`);
   }
 
-  for (const vision of dark ? ['normal', 'protan', 'deutan'] : ['normal']) {
+  for (const vision of ['normal', 'protan', 'deutan']) {
     const min = Math.min(...adjacentSteps(stepRgbs, vision));
     if (min < MIN_STEP) problems.push(`${vision} smallest step ${min.toFixed(1)} (< ${MIN_STEP})`);
   }

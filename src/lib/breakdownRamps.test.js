@@ -81,7 +81,7 @@ const gauges = themeBlockMatches.map(([, sel, body]) => ({
 
 describe('gauge rules: clear steps, rising contrast, vivid Legendary', () => {
   it('covers every theme rendering', () => {
-    expect(renderings).toHaveLength(46);
+    expect(renderings).toHaveLength(44);
   });
 
   it.each(renderings.map(g => [g.name, g]))('%s', (_, g) => {

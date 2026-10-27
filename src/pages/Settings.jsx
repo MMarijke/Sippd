@@ -527,13 +527,13 @@ function ThemePalettePicker({ family, theme, polarity, onSelectTheme, isPro, isP
   // announces where you landed.
   const headingRef = useRef(null);
   useFocusRequest(headingRef, focusRequest, 'palette-heading', onFocusHandled);
-  // Botanical, Essentials and Alloy mix fixed polarities (Sage, Meadow,
-  // Ledger and Brushed Aluminium are light pages; the rest dark), so
+  // Botanical and Alloy mix fixed polarities (Sage, Meadow and Brushed
+  // Aluminium are light pages; the rest dark), so
   // tapping between them flips the whole app light/dark. In those families
   // each tile says which it is, in words under its name, and the themes run
   // one kind then the other (in the order each first appears). They sit in
   // the same centred rows as every other family: Light and Dark headings
-  // left a lone tile under a heading of its own (Essentials, Alloy's one
+  // left a lone tile under a heading of its own (Alloy's one
   // light theme), and a 10px corner glyph before that was easy to miss.
   const tone = (t) => (t.light ? 'light' : 'dark');
   const kinds = [...new Set(family.themes.filter(t => !(t.dark && t.light)).map(tone))];

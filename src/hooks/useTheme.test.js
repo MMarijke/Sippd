@@ -76,7 +76,7 @@ describe('isRetryableThemeError', () => {
 // note would print a raw id or name a theme that's gone.
 describe('RETIRED_THEMES', () => {
   it('covers every retired id, each moved to a theme that still exists', () => {
-    const retired = ['mint-fizz', 'strawberry-cream', 'blue-raspberry', 'lemon-pop', 'peach-soda', 'grape-float', 'xp-gold', 'champagne', 'terracotta', 'moss'];
+    const retired = ['mint-fizz', 'strawberry-cream', 'blue-raspberry', 'lemon-pop', 'peach-soda', 'grape-float', 'xp-gold', 'champagne', 'terracotta', 'moss', 'floodlight', 'ledger'];
     expect(Object.keys(RETIRED_THEMES).sort()).toEqual([...retired].sort());
     for (const id of retired) {
       expect(THEMES.some(t => t.id === id), id).toBe(false);
@@ -86,7 +86,7 @@ describe('RETIRED_THEMES', () => {
 
   it("matches the retire migrations' backfill", async () => {
     const { readFileSync } = await import('node:fs');
-    const sql = ['20260929000000_trim_theme_catalogue.sql', '20260929180000_retire_terracotta.sql', '20261019120000_retire_moss.sql']
+    const sql = ['20260929000000_trim_theme_catalogue.sql', '20260929180000_retire_terracotta.sql', '20261019120000_retire_moss.sql', '20261027000000_retire_essentials.sql']
       .map(f => readFileSync(new URL(`../../supabase/migrations/${f}`, import.meta.url), 'utf8')).join('\n');
     for (const [id, { movedTo }] of Object.entries(RETIRED_THEMES)) {
       const pair = new RegExp(`when '${id}'\\s+then '${movedTo}'|retired_theme = '${id}', theme = '${movedTo}'`);

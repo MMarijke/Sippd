@@ -58,7 +58,7 @@ const measured = renderings.map((rendering) => {
 
 describe('bottom nav: the active tab is the most visible item', () => {
   it('covers every theme rendering (41 themes, Neon Arcade in both polarities)', () => {
-    expect(renderings).toHaveLength(46);
+    expect(renderings).toHaveLength(44);
   });
 
   it.each(measured.map((m) => [m.name, m]))('%s', (_, m) => {

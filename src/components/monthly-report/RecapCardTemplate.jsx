@@ -198,7 +198,7 @@ const RecapCardTemplate = forwardRef(function RecapCardTemplate(
               {rarityBreakdown.map(({ rarity, pct }) => (
                 <div
                   key={rarity}
-                  className="h-full"
+                  className="h-full gauge-seg"
                   style={{ width: `${pct}%`, background: breakdownBackground(rarity) }}
                 />
               ))}

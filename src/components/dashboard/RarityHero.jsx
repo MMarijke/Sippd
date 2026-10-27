@@ -177,6 +177,9 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
                   // should track the active theme like the rest of the app's
                   // neutral surfaces.
                   fill={isEmpty ? 'hsl(var(--secondary))' : arcFill(entry.name)}
+                  // Spring's pale tiers keep their shape on the light card
+                  // (--gauge-edge, transparent in every other family).
+                  style={isEmpty ? undefined : { stroke: 'var(--gauge-edge)', strokeWidth: 1 }}
                 />
               ))}
             </Pie>
@@ -208,7 +211,7 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
           {tiers.map(({ name }) => (
             <div key={name} className="flex flex-col items-center gap-1 min-w-0">
               <div
-                className="w-2 h-2 rounded-full flex-shrink-0"
+                className="w-2 h-2 rounded-full flex-shrink-0 gauge-seg"
                 style={{ background: breakdownBackground(name) }}
               />
               <span className="text-2xs font-body font-medium text-muted-foreground text-center leading-tight">{name}</span>

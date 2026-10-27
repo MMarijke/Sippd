@@ -6,12 +6,18 @@ import { cn } from '@/lib/utils';
 // --rarity-*-text, the same colour moved in lightness until it reads at
 // 4.6:1 on that theme's page, card and the badge's tint
 // (scripts/generate-rarity-text.mjs). Glows also scale with --glow-intensity.
+//
+// The top tiers differ in treatment, not only colour (2026-10-27): following
+// the theme's gauge, neighbouring tiers' colours can sit close together, so
+// Legendary is FILLED with its colour (the theme's Scan colour; label
+// --rarity-legendary-on, the Scan label colour), Ultra Rare gets a full-
+// strength outline, and the lower tiers keep a tint and a faint outline.
 const rarityConfig = {
   'Common': { color: 'text-rarity-common-text', bg: 'bg-rarity-common/10', border: 'border-rarity-common/30', glow: '' },
   'Uncommon': { color: 'text-rarity-uncommon-text', bg: 'bg-rarity-uncommon/10', border: 'border-rarity-uncommon/30', glow: '' },
   'Rare': { color: 'text-rarity-rare-text', bg: 'bg-rarity-rare/10', border: 'border-rarity-rare/30', glow: 'rarity-glow-rare' },
-  'Ultra Rare': { color: 'text-rarity-ultra-text', bg: 'bg-rarity-ultra/10', border: 'border-rarity-ultra/30', glow: 'rarity-glow-ultra' },
-  'Legendary': { color: 'text-rarity-legendary-text', bg: 'bg-rarity-legendary/10', border: 'border-rarity-legendary/30', glow: 'rarity-glow-legendary rarity-holo-badge' },
+  'Ultra Rare': { color: 'text-rarity-ultra-text', bg: 'bg-rarity-ultra/10', border: 'border-rarity-ultra', glow: 'rarity-glow-ultra' },
+  'Legendary': { color: 'text-rarity-legendary-on', bg: 'bg-rarity-legendary', border: 'border-rarity-legendary', glow: 'rarity-glow-legendary rarity-holo-badge' },
 };
 
 export default function RarityBadge({ rarity, size = 'sm', className }) {

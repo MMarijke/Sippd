@@ -257,7 +257,10 @@ function ChipToggle({ options, value, onChange, disabled }) {
               'h-10 px-3 flex items-center rounded-full text-xs font-mono border transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
               value === optValue
                 ? 'bg-primary/10 border-primary/40 text-primary'
-                : 'bg-secondary border-border text-muted-foreground hover:border-primary/20'
+                // On the card, not bg-secondary: muted text on --secondary
+                // measured 4.1:1 on Power-Up dark (FilterBar's pills sit on
+                // the background for the same reason).
+                : 'border-border text-muted-foreground hover:border-primary/20'
             )}
           >
             {optLabel}

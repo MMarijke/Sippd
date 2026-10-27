@@ -175,7 +175,7 @@ const report = [];
 for (const block of [...blocks].reverse()) { // from the end, so offsets stay valid
   // Spring's, Alloy's, Candy's, Noir's and Botanical's gauges are ladders of their main colour,
   // written by scripts/generate-tint-ladders.mjs under their own rules.
-  if (/data-theme="((spring|alloy)-|bubblegum|blue-pop|grape-candy|orange-crush|sour-apple|cherry-pop|carbon|crimson|amethyst|sapphire|emerald|sage|meadow|fern|forest|deep-space|stellar-gold|solar-flare|nebula|aurora)/.test(block.name)) {
+  if (/data-theme="((spring|alloy)-|bubblegum|blue-pop|grape-candy|orange-crush|sour-apple|cherry-pop|carbon|crimson|amethyst|sapphire|emerald|sage|meadow|fern|forest|deep-space|stellar-gold|solar-flare|nebula|aurora|power-up|cyberpunk|plasma|boss-fight|synthwave)/.test(block.name)) {
     report.unshift(`skip    ${block.name}: tint ladder (generate-tint-ladders.mjs)`);
     continue;
   }

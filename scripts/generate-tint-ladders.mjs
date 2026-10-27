@@ -73,9 +73,12 @@ export const LADDERS = {
 // Shade ladders (dark cards): how far below the Scan colour Common starts,
 // in OKLab lightness.
 const SHADE_DEPTH = { crimson: 0.17, amethyst: 0.17, sapphire: 0.17, emerald: 0.17, forest: 0.18, fern: 0.36 };
-// ...and how much colour they gain going down (Fern's olive turns brown if
-// pushed, so it keeps the Scan colour's chroma).
-const SHADE_BOOST = { fern: 0 };
+// ...how much colour they gain going down, and how far their hue leans
+// toward green (degrees). Fern gives colour up instead: its lime, darkened at
+// full strength, turns mustard, so its deep tiers are soft olive-greens that
+// lean green, as its gradient was before the ladder.
+const SHADE_BOOST = { fern: -0.07 };
+const SHADE_HUE = { fern: 10 };
 export const isLadderTheme = (id) => Object.hasOwn(LADDERS, id);
 const TINT_SHARES = [0.26, 0.46, 0.64, 0.82, 1];
 // Alloy's Scan colours are lighter than Spring's palette (Gold Foil's gold
@@ -108,7 +111,7 @@ export function tintLadder(id, colourRgb) {
     // Shades: deeper and a little more saturated below the Scan colour,
     // which stays Legendary exactly.
     const C0 = Math.hypot(a, b), h0 = Math.atan2(b, a);
-    return [1, 0.75, 0.5, 0.25, 0].map((t) => (t ? fit(L - SHADE_DEPTH[id] * t, C0 + (SHADE_BOOST[id] ?? 0.04) * t, h0) : colourRgb));
+    return [1, 0.75, 0.5, 0.25, 0].map((t) => (t ? fit(L - SHADE_DEPTH[id] * t, C0 + (SHADE_BOOST[id] ?? 0.04) * t, h0 + ((SHADE_HUE[id] ?? 0) * Math.PI / 180) * t) : colourRgb));
   }
   const shares = id.startsWith('alloy-') ? ALLOY_SHARES : id === 'carbon' ? CARBON_SHARES : id === 'sage' ? SAGE_SHARES : TINT_SHARES;
   return shares.map((t) => clampRgb(oklabToSrgb([1 - (1 - L) * t, a * t, b * t])));

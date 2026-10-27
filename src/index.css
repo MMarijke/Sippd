@@ -812,8 +812,12 @@
        halo in the accent colour, wide Michroma numerals. */
     --radius-scale: 1;
     --card-texture: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAQAAABpN6lAAAABkElEQVR42u3bzXKCMBQGUDYhhSLg+z+sbjtTpg6VmL8zdyULlTPfvRCiw2PIUOHw6JjjuwyPzuvni7l3gAEAAAAAANRdswQAqBvg1hfAtwQAAPCqogQAAFAxwCIBAAAA+FVbhhvuIAGH+xKtnFLsdwYEQxBAyQB7tlNba0zAmvwTlrQA05/HZzOgiLlfLkCUgI/vCx0BrLWt6CWgUYCbBAA4XaMEADi7IpEAAADa3vmRAAA9AkQJAAAAAAAAuQCWdx5Slg6wSEAzWyJlAEQJaBggFtkaoaYEpPo79ZcWAACgMIAp106BBAAAAKCcARYlAACA1A0XW0nA+wulrUaAoAUAAEgEsElAa4/BJi3QNcBoCJ4GmLRAL+sBLQAAwGuANL/uCPUnYNMCAACc3IOXAAAASqi9NoBNAgCkv9LUv9lx1wIAAAAA0CzA2Rk/tZyA8VMJiC2fcC0JGC9liIbgBQD3vgH+d78eXAYBtAFwRZTPvMcuAQAAAPg0wCIBAADkqFkCOgMYs57wJgHZAfayAJ7BgMbPtNZuhAAAAABJRU5ErkJggg==");
-    --card-lift: 0 10px 30px -14px hsl(var(--accent) / calc(0.45 * var(--glow-intensity)));
-    --hero-lift: 0 14px 44px -14px hsl(var(--accent) / calc(0.5 * var(--glow-intensity))), 0 0 36px hsl(var(--primary) / calc(0.12 * var(--glow-intensity)));
+    /* Cards glow in --glow-hue: the accent, or Aurora's Scan green. */
+    --glow-hue: var(--accent);
+    --card-lift: 0 10px 30px -14px hsl(var(--glow-hue) / calc(0.45 * var(--glow-intensity)));
+    /* The Collection Score's glow, a third dimmer than it was (product
+       direction, 2026-10-27): it outshone the score itself. */
+    --hero-lift: 0 14px 44px -14px hsl(var(--glow-hue) / calc(0.34 * var(--glow-intensity))), 0 0 36px hsl(var(--primary) / calc(0.08 * var(--glow-intensity)));
     --element-glow: 0.8;
     --font-num: 'Michroma', sans-serif;
   }
@@ -870,16 +874,25 @@
     --ring: 250.1 100% 68.6%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 222.6 100.0% 88.0%;
-    --breakdown-uncommon: 226.9 100.0% 82.3%;
-    --breakdown-rare: 232.8 100.0% 78.0%;
-    --breakdown-ultra: 238.7 62.9% 69.1%;
+    --breakdown-common: 240.9 76.5% 49.5%;
+    --breakdown-uncommon: 242.1 79.7% 55.3%;
+    --breakdown-rare: 244.3 85.5% 60.2%;
+    --breakdown-ultra: 247.0 92.2% 64.5%;
     --breakdown-legendary: 250.1 100.0% 68.6%;
+    /* Deep shades near the dark card: a hairline in the Scan colour keeps
+       each segment's shape. */
+    --gauge-edge: hsl(var(--cta) / 0.55);
+    /* ...and badge outlines take the lighter text twins, since outlines in
+       the deep shades all but vanish on the card. */
+    --rarity-common-line: var(--rarity-common-text);
+    --rarity-uncommon-line: var(--rarity-uncommon-text);
+    --rarity-rare-line: var(--rarity-rare-text);
+    --rarity-ultra-line: var(--rarity-ultra-text);
     --rarity-legendary-text: 245.7 96.5% 75.3%;
-    --rarity-ultra-text: 238.3 76.4% 74.1%;
-    --rarity-rare-text: 232.8 100.0% 78.0%;
-    --rarity-uncommon-text: 226.9 100.0% 82.3%;
-    --rarity-common-text: 222.6 100.0% 88.0%;
+    --rarity-ultra-text: 240.3 97.4% 75.4%;
+    --rarity-rare-text: 235.4 98.6% 73.1%;
+    --rarity-uncommon-text: 230.5 98.1% 70.5%;
+    --rarity-common-text: 226.1 97.8% 67.3%;
   }
   [data-theme="solar-flare"] {
     --background: 16.7 53% 6.7%;
@@ -901,18 +914,30 @@
     --ring: 14.4 100% 63.1%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 32.4 83.4% 98.2%;
-    --breakdown-uncommon: 27.7 8.5% 87.7%;
-    --breakdown-rare: 15.2 100.0% 81.4%;
-    --breakdown-ultra: 29.0 100.0% 65.9%;
+    --breakdown-common: 17.8 96.9% 35.3%;
+    --breakdown-uncommon: 18.3 98.9% 39.7%;
+    --breakdown-rare: 16.1 80.6% 48.0%;
+    --breakdown-ultra: 14.8 84.9% 56.0%;
     --breakdown-legendary: 14.4 100.0% 63.1%;
+    /* Deep shades near the dark card: a hairline in the Scan colour keeps
+       each segment's shape. */
+    --gauge-edge: hsl(var(--cta) / 0.55);
+    /* ...and badge outlines take the lighter text twins, since outlines in
+       the deep shades all but vanish on the card. */
+    --rarity-common-line: var(--rarity-common-text);
+    --rarity-uncommon-line: var(--rarity-uncommon-text);
+    --rarity-rare-line: var(--rarity-rare-text);
+    --rarity-ultra-line: var(--rarity-ultra-text);
     --rarity-legendary-text: 14.3 98.2% 64.2%;
-    --rarity-ultra-text: 29.0 100.0% 65.9%;
-    --rarity-rare-text: 15.2 100.0% 81.4%;
-    --rarity-uncommon-text: 27.7 8.5% 87.7%;
-    --rarity-common-text: 32.4 83.4% 98.2%;
+    --rarity-ultra-text: 14.5 99.2% 62.3%;
+    --rarity-rare-text: 14.7 94.8% 60.0%;
+    --rarity-uncommon-text: 14.5 89.5% 59.0%;
+    --rarity-common-text: 14.3 79.1% 58.7%;
   }
   [data-theme="aurora"] {
+    /* Cards glow in the Scan green, not the periwinkle accent (which stays
+       in the glow bubble and the gauge's first tier). */
+    --glow-hue: var(--primary);
     --background: 176.0 48% 6.1%;
     --foreground: 158.6 100% 97.3%;
     --card: 176.0 46% 10.1%;
@@ -932,16 +957,16 @@
     --ring: 161.4 71% 57.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 0.0 0.0% 43.0%;
-    --breakdown-uncommon: 209.3 31.6% 49.1%;
-    --breakdown-rare: 176.0 100.0% 31.6%;
-    --breakdown-ultra: 169.0 99.9% 37.2%;
+    --breakdown-common: 234.8 100.0% 70.4%;
+    --breakdown-uncommon: 204.0 99.1% 51.0%;
+    --breakdown-rare: 191.1 96.7% 44.4%;
+    --breakdown-ultra: 179.9 87.9% 42.6%;
     --breakdown-legendary: 161.4 71.0% 57.5%;
     --rarity-legendary-text: 161.4 71.0% 57.5%;
-    --rarity-ultra-text: 169.0 99.9% 37.2%;
-    --rarity-rare-text: 175.0 59.1% 44.4%;
-    --rarity-uncommon-text: 209.5 43.4% 62.9%;
-    --rarity-common-text: 43.8 0.0% 60.5%;
+    --rarity-ultra-text: 179.9 87.9% 42.6%;
+    --rarity-rare-text: 191.1 96.7% 44.4%;
+    --rarity-uncommon-text: 207.7 99.2% 63.2%;
+    --rarity-common-text: 231.5 96.4% 75.7%;
   }
   /* Deep Space, re-coloured 2026-10-19 (/impeccable distill): it had become
      a second Sapphire (CIEDE2000 7.1) between Nebula and Sapphire. Now a
@@ -969,16 +994,19 @@
     --ring: 200.0 100% 61.9%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 239.7 2.1% 39.3%;
-    --breakdown-uncommon: 228.5 24.1% 49.4%;
-    --breakdown-rare: 216.6 35.0% 56.6%;
-    --breakdown-ultra: 195.4 48.6% 56.8%;
+    --breakdown-common: 201.6 94.3% 38.2%;
+    --breakdown-uncommon: 200.0 98.9% 41.1%;
+    --breakdown-rare: 199.1 96.6% 45.3%;
+    --breakdown-ultra: 198.9 91.7% 51.5%;
     --breakdown-legendary: 200.0 100.0% 61.9%;
+    /* Deep shades near the dark card: a hairline in the Scan colour keeps
+       each segment's shape. */
+    --gauge-edge: hsl(var(--cta) / 0.55);
     --rarity-legendary-text: 200.0 100.0% 61.9%;
-    --rarity-ultra-text: 195.4 48.6% 56.8%;
-    --rarity-rare-text: 216.6 39.3% 60.8%;
-    --rarity-uncommon-text: 228.1 32.9% 61.9%;
-    --rarity-common-text: 239.6 1.9% 54.8%;
+    --rarity-ultra-text: 198.9 91.7% 51.5%;
+    --rarity-rare-text: 199.1 96.6% 45.3%;
+    --rarity-uncommon-text: 202.0 76.1% 49.0%;
+    --rarity-common-text: 204.4 68.0% 51.9%;
   }
   [data-theme="stellar-gold"] {
     --background: 45.0 35% 6.7%;
@@ -1000,16 +1028,19 @@
     --ring: 45.7 69% 65.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 44.0 1.6% 42.0%;
-    --breakdown-uncommon: 44.6 36.7% 39.5%;
-    --breakdown-rare: 44.8 32.6% 49.6%;
-    --breakdown-ultra: 45.2 43.2% 58.5%;
+    --breakdown-common: 41.6 95.7% 34.8%;
+    --breakdown-uncommon: 43.3 95.0% 38.4%;
+    --breakdown-rare: 43.1 67.4% 48.0%;
+    --breakdown-ultra: 43.9 64.3% 57.4%;
     --breakdown-legendary: 45.7 69.0% 65.5%;
+    /* Deep shades near the dark card: a hairline in the Scan colour keeps
+       each segment's shape. */
+    --gauge-edge: hsl(var(--cta) / 0.55);
     --rarity-legendary-text: 45.7 69.0% 65.5%;
-    --rarity-ultra-text: 45.2 43.2% 58.5%;
-    --rarity-rare-text: 44.7 36.2% 55.0%;
-    --rarity-uncommon-text: 44.4 31.4% 53.1%;
-    --rarity-common-text: 44.0 1.8% 59.4%;
+    --rarity-ultra-text: 43.9 64.3% 57.4%;
+    --rarity-rare-text: 43.0 66.0% 48.8%;
+    --rarity-uncommon-text: 41.4 69.6% 47.5%;
+    --rarity-common-text: 38.7 60.0% 49.3%;
   }
 
   /* ── Botanical family (natural/earthy, mixed polarity) ───────────────────

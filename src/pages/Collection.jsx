@@ -303,7 +303,7 @@ export default function Collection() {
               // exactly (same destination, same weight as the app's other
               // primary-nav Scan entry point). asChild renders the Link as
               // the element itself rather than a <button> inside an <a>.
-              <Button asChild size="sm" className="h-11 font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button asChild size="sm" className="h-11 rounded-control font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
                 <Link to="/scan">
                   <ScanLine className="w-4 h-4" aria-hidden="true" /> Scan
                 </Link>

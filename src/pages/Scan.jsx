@@ -252,7 +252,7 @@ export default function Scan() {
           <Button
             size="sm"
             variant="outline"
-            className="h-11 font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+            className="h-11 rounded-control font-mono text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
             onClick={() => openAddForm(null)}
           >
             <Plus className="w-3.5 h-3.5" aria-hidden="true" /> Add

@@ -306,6 +306,12 @@
     --rarity-rare: var(--breakdown-rare);
     --rarity-ultra: var(--breakdown-ultra);
     --rarity-legendary: var(--breakdown-legendary);
+    /* A badge's outline (RarityBadge): the tier colour, unless a theme's
+       gauge runs too deep to show on its card (Noir's jewels). */
+    --rarity-common-line: var(--rarity-common);
+    --rarity-uncommon-line: var(--rarity-uncommon);
+    --rarity-rare-line: var(--rarity-rare);
+    --rarity-ultra-line: var(--rarity-ultra);
     /* The label on a filled Legendary badge: Legendary is the Scan colour,
        so it's the Scan label, already checked at 4.5:1 on that fill. */
     --rarity-legendary-on: var(--cta-foreground);
@@ -1269,6 +1275,12 @@
     /* The deep jewel shades sit close to the near-black card: a hairline
        in the Scan colour keeps each segment's shape. */
     --gauge-edge: hsl(var(--cta) / 0.55);
+    /* ...and badge outlines take the lighter text twins, since outlines in
+       the deep shades all but vanish on the card. */
+    --rarity-common-line: var(--rarity-common-text);
+    --rarity-uncommon-line: var(--rarity-uncommon-text);
+    --rarity-rare-line: var(--rarity-rare-text);
+    --rarity-ultra-line: var(--rarity-ultra-text);
     --rarity-legendary-text: 354.3 73.3% 65.2%;
     --rarity-ultra-text: 353.7 75.1% 63.9%;
     --rarity-rare-text: 352.9 76.6% 62.4%;
@@ -1303,6 +1315,12 @@
     /* The deep jewel shades sit close to the near-black card: a hairline
        in the Scan colour keeps each segment's shape. */
     --gauge-edge: hsl(var(--cta) / 0.55);
+    /* ...and badge outlines take the lighter text twins, since outlines in
+       the deep shades all but vanish on the card. */
+    --rarity-common-line: var(--rarity-common-text);
+    --rarity-uncommon-line: var(--rarity-uncommon-text);
+    --rarity-rare-line: var(--rarity-rare-text);
+    --rarity-ultra-line: var(--rarity-ultra-text);
     --rarity-legendary-text: 271.6 36.1% 65.2%;
     --rarity-ultra-text: 271.8 39.6% 65.1%;
     --rarity-rare-text: 272.1 42.3% 64.3%;
@@ -1337,6 +1355,12 @@
     /* The deep jewel shades sit close to the near-black card: a hairline
        in the Scan colour keeps each segment's shape. */
     --gauge-edge: hsl(var(--cta) / 0.55);
+    /* ...and badge outlines take the lighter text twins, since outlines in
+       the deep shades all but vanish on the card. */
+    --rarity-common-line: var(--rarity-common-text);
+    --rarity-uncommon-line: var(--rarity-uncommon-text);
+    --rarity-rare-line: var(--rarity-rare-text);
+    --rarity-ultra-line: var(--rarity-ultra-text);
     --rarity-legendary-text: 216.1 55.3% 62.7%;
     --rarity-ultra-text: 216.1 60.1% 62.4%;
     --rarity-rare-text: 216.1 63.7% 61.5%;
@@ -1371,6 +1395,12 @@
     /* The deep jewel shades sit close to the near-black card: a hairline
        in the Scan colour keeps each segment's shape. */
     --gauge-edge: hsl(var(--cta) / 0.55);
+    /* ...and badge outlines take the lighter text twins, since outlines in
+       the deep shades all but vanish on the card. */
+    --rarity-common-line: var(--rarity-common-text);
+    --rarity-uncommon-line: var(--rarity-uncommon-text);
+    --rarity-rare-line: var(--rarity-rare-text);
+    --rarity-ultra-line: var(--rarity-ultra-text);
     --rarity-legendary-text: 188.3 54.4% 49.6%;
     --rarity-ultra-text: 188.1 59.3% 47.4%;
     --rarity-rare-text: 188.5 51.1% 48.5%;

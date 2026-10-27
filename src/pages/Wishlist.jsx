@@ -128,7 +128,7 @@ export default function Wishlist() {
         showBell={false}
         action={
           <Link to="/scan">
-            <Button size="sm" variant="outline" className="font-mono text-xs gap-1.5">
+            <Button size="sm" variant="outline" className="rounded-control font-mono text-xs gap-1.5">
               <ScanLine className="w-4 h-4" /> Add
             </Button>
           </Link>

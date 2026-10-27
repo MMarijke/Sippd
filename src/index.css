@@ -221,10 +221,10 @@
        2026-10-26 rarity colours were theme-invariant (a fixed pink/purple
        ladder in every theme, product decision 2026-09-29); they now follow
        the theme's gauge, per product direction (/impeccable critique). */
-    --rarity-common-text: 190.7 66.1% 45.3%;
-    --rarity-uncommon-text: 182.6 100.0% 36.4%;
-    --rarity-rare-text: 175.1 100.0% 40.5%;
-    --rarity-ultra-text: 166.2 100.0% 46.0%;
+    --rarity-common-text: 190.8 64.0% 46.0%;
+    --rarity-uncommon-text: 182.8 88.2% 38.0%;
+    --rarity-rare-text: 174.8 86.4% 42.0%;
+    --rarity-ultra-text: 165.5 89.9% 46.7%;
     --rarity-legendary-text: 152.0 100.0% 50.0%;
 
     /* Error TEXT (text-destructive: messages, retry buttons, "Log out").
@@ -385,11 +385,26 @@
      Fonts and full glow come from :root. */
   [data-theme="power-up"], [data-theme="cyberpunk"], [data-theme="plasma"], [data-theme="boss-fight"], [data-theme="synthwave"] {
     --radius-scale: 0.25;
+    /* ...but the header actions (Scan, notifications) stay softly rounded,
+       as in Noir and every other family. */
+    --control-radius: 0.5rem;
     --card-texture: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAADCAQAAAAT4xYKAAAAFElEQVR42mP4z/2fm+E/w38GMAEAMOcGEWRK+/cAAAAASUVORK5CYII=");
     --card-lift: 0 0 0 1px hsl(var(--primary) / 0.05), 0 4px 18px -8px hsl(var(--primary) / calc(0.4 * var(--glow-intensity)));
+    /* The Collection Score's glow, a third dimmer than the default halo
+       (0.15) it used, as in Cosmic: at Neon's saturation it outshone the
+       score. */
+    --hero-lift: 0 0 40px hsl(var(--primary) / calc(0.1 * var(--glow-intensity)));
     --font-num: 'Tektur', 'Orbitron', sans-serif;
   }
   [data-theme="power-up"][data-polarity="light"], [data-theme="cyberpunk"][data-polarity="light"], [data-theme="plasma"][data-polarity="light"], [data-theme="boss-fight"][data-polarity="light"], [data-theme="synthwave"][data-polarity="light"] {
+    /* The light renderings' gauges are tint ladders: a hairline in the Scan
+       colour keeps the palest tints' shape, and badges outline in the
+       readable text twins. */
+    --gauge-edge: hsl(var(--cta) / 0.5);
+    --rarity-common-line: var(--rarity-common-text);
+    --rarity-uncommon-line: var(--rarity-uncommon-text);
+    --rarity-rare-line: var(--rarity-rare-text);
+    --rarity-ultra-line: var(--rarity-ultra-text);
     --card-texture: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAADCAQAAAAT4xYKAAAAD0lEQVR42mNg4GTgZIADAADnABOtIDBfAAAAAElFTkSuQmCC");
   }
   [data-theme="power-up"][data-polarity="dark"] {
@@ -412,16 +427,16 @@
     --ring: 152 100% 50%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 189.2 100.0% 34.5%;
-    --breakdown-uncommon: 182.6 100.0% 36.4%;
-    --breakdown-rare: 175.1 100.0% 40.5%;
-    --breakdown-ultra: 166.2 100.0% 46.0%;
+    --breakdown-common: 189.5 91.7% 36.1%;
+    --breakdown-uncommon: 182.8 88.2% 38.0%;
+    --breakdown-rare: 174.8 86.4% 42.0%;
+    --breakdown-ultra: 165.5 89.9% 46.7%;
     --breakdown-legendary: 152.0 100.0% 50.0%;
     --rarity-legendary-text: 152.0 100.0% 50.0%;
-    --rarity-ultra-text: 166.2 100.0% 46.0%;
-    --rarity-rare-text: 175.1 100.0% 40.5%;
-    --rarity-uncommon-text: 182.6 100.0% 36.4%;
-    --rarity-common-text: 190.7 66.1% 45.3%;
+    --rarity-ultra-text: 165.5 89.9% 46.7%;
+    --rarity-rare-text: 174.8 86.4% 42.0%;
+    --rarity-uncommon-text: 182.8 88.2% 38.0%;
+    --rarity-common-text: 190.8 64.0% 46.0%;
   }
   [data-theme="cyberpunk"][data-polarity="dark"] {
     --background: 278 38% 6%;
@@ -443,16 +458,22 @@
     --ring: 312 100% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 247.8 9.9% 42.2%;
-    --breakdown-uncommon: 266.9 32.7% 51.6%;
-    --breakdown-rare: 256.2 68.4% 62.9%;
-    --breakdown-ultra: 324.8 76.5% 55.5%;
+    --breakdown-common: 261.7 67.6% 48.1%;
+    --breakdown-uncommon: 272.5 70.0% 50.9%;
+    --breakdown-rare: 284.2 73.5% 52.2%;
+    --breakdown-ultra: 298.0 72.3% 51.7%;
     --breakdown-legendary: 312.0 100.0% 58.0%;
+    /* Badge outlines in the text twins: the gauge's deep violet start all
+       but vanishes as an outline on the card. */
+    --rarity-common-line: var(--rarity-common-text);
+    --rarity-uncommon-line: var(--rarity-uncommon-text);
+    --rarity-rare-line: var(--rarity-rare-text);
+    --rarity-ultra-line: var(--rarity-ultra-text);
     --rarity-legendary-text: 312.9 98.9% 61.8%;
-    --rarity-ultra-text: 325.9 92.8% 63.6%;
-    --rarity-rare-text: 254.9 99.3% 74.0%;
-    --rarity-uncommon-text: 266.1 47.9% 65.7%;
-    --rarity-common-text: 247.4 10.7% 58.5%;
+    --rarity-ultra-text: 298.1 86.3% 61.0%;
+    --rarity-rare-text: 282.9 99.2% 67.0%;
+    --rarity-uncommon-text: 268.6 97.9% 70.2%;
+    --rarity-common-text: 254.8 98.7% 71.9%;
   }
   [data-theme="plasma"][data-polarity="dark"] {
     --background: 204 52% 6%;
@@ -474,16 +495,16 @@
     --ring: 186 100% 50%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 222.6 12.6% 46.0%;
-    --breakdown-uncommon: 212.2 41.6% 53.1%;
-    --breakdown-rare: 203.0 59.2% 57.9%;
-    --breakdown-ultra: 195.1 76.7% 61.3%;
+    --breakdown-common: 227.0 99.2% 64.2%;
+    --breakdown-uncommon: 210.1 99.6% 58.0%;
+    --breakdown-rare: 198.4 98.7% 50.5%;
+    --breakdown-ultra: 192.4 97.9% 52.7%;
     --breakdown-legendary: 186.0 100.0% 50.0%;
     --rarity-legendary-text: 186.0 100.0% 50.0%;
-    --rarity-ultra-text: 195.1 76.7% 61.3%;
-    --rarity-rare-text: 203.1 61.1% 59.2%;
-    --rarity-uncommon-text: 212.3 52.9% 62.2%;
-    --rarity-common-text: 222.5 15.6% 60.7%;
+    --rarity-ultra-text: 192.4 97.9% 52.7%;
+    --rarity-rare-text: 198.4 98.7% 50.5%;
+    --rarity-uncommon-text: 211.3 98.4% 63.6%;
+    --rarity-common-text: 224.7 99.4% 70.9%;
   }
   [data-theme="boss-fight"][data-polarity="dark"] {
     --background: 340 33% 5%;
@@ -505,16 +526,16 @@
     --ring: 347 100% 61%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 21.4 100.0% 92.0%;
-    --breakdown-uncommon: 16.7 100.0% 82.9%;
-    --breakdown-rare: 6.8 100.0% 76.2%;
-    --breakdown-ultra: 20.8 100.0% 59.9%;
+    --breakdown-common: 22.7 99.6% 70.0%;
+    --breakdown-uncommon: 17.1 99.5% 68.6%;
+    --breakdown-rare: 10.1 99.4% 67.9%;
+    --breakdown-ultra: 0.1 99.6% 68.2%;
     --breakdown-legendary: 347.0 100.0% 61.0%;
     --rarity-legendary-text: 349.9 99.7% 66.2%;
-    --rarity-ultra-text: 20.8 100.0% 59.9%;
-    --rarity-rare-text: 6.8 100.0% 76.2%;
-    --rarity-uncommon-text: 16.7 100.0% 82.9%;
-    --rarity-common-text: 21.4 100.0% 92.0%;
+    --rarity-ultra-text: 0.4 99.8% 68.8%;
+    --rarity-rare-text: 10.1 99.4% 67.9%;
+    --rarity-uncommon-text: 17.1 99.5% 68.6%;
+    --rarity-common-text: 22.7 99.6% 70.0%;
   }
   [data-theme="synthwave"][data-polarity="dark"] {
     --background: 261 55% 6%;
@@ -540,16 +561,22 @@
     --ring: 283 79% 58%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 236.9 100.0% 90.1%;
-    --breakdown-uncommon: 248.8 100.0% 84.8%;
-    --breakdown-rare: 260.9 100.0% 78.0%;
-    --breakdown-ultra: 295.2 51.8% 59.9%;
+    --breakdown-common: 256.7 77.4% 47.5%;
+    --breakdown-uncommon: 262.1 74.3% 51.1%;
+    --breakdown-rare: 268.1 77.5% 54.0%;
+    --breakdown-ultra: 275.0 79.1% 56.3%;
     --breakdown-legendary: 283.0 79.0% 58.0%;
+    /* Badge outlines in the text twins: the gauge's deep violet start all
+       but vanishes as an outline on the card. */
+    --rarity-common-line: var(--rarity-common-text);
+    --rarity-uncommon-line: var(--rarity-uncommon-text);
+    --rarity-rare-line: var(--rarity-rare-text);
+    --rarity-ultra-line: var(--rarity-ultra-text);
     --rarity-legendary-text: 282.3 98.3% 67.2%;
-    --rarity-ultra-text: 295.2 56.5% 63.1%;
-    --rarity-rare-text: 260.9 100.0% 78.0%;
-    --rarity-uncommon-text: 248.8 100.0% 84.8%;
-    --rarity-common-text: 236.9 100.0% 90.1%;
+    --rarity-ultra-text: 272.7 99.1% 69.4%;
+    --rarity-rare-text: 263.3 97.5% 70.7%;
+    --rarity-uncommon-text: 254.3 99.9% 71.7%;
+    --rarity-common-text: 244.6 99.1% 72.3%;
   }
 
   /* ── Neon Arcade, light-polarity counterparts ("Daylight Neon") ─────────
@@ -587,16 +614,16 @@
     --ring: 152 100% 29.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 190.3 100.0% 11.7%;
-    --breakdown-uncommon: 182.8 100.0% 15.2%;
-    --breakdown-rare: 174.8 100.0% 19.5%;
-    --breakdown-ultra: 165.9 100.0% 24.7%;
+    --breakdown-common: 135.3 33.3% 84.2%;
+    --breakdown-uncommon: 136.7 33.4% 71.9%;
+    --breakdown-rare: 138.5 33.7% 60.6%;
+    --breakdown-ultra: 141.6 37.0% 48.5%;
     --breakdown-legendary: 152.0 100.0% 29.5%;
     --rarity-legendary-text: 151.1 99.9% 21.2%;
-    --rarity-ultra-text: 164.5 82.5% 22.4%;
-    --rarity-rare-text: 174.8 100.0% 19.5%;
-    --rarity-uncommon-text: 182.8 100.0% 15.2%;
-    --rarity-common-text: 190.3 100.0% 11.7%;
+    --rarity-ultra-text: 149.8 87.7% 23.5%;
+    --rarity-rare-text: 142.3 42.7% 31.1%;
+    --rarity-uncommon-text: 138.8 24.6% 35.6%;
+    --rarity-common-text: 136.3 12.0% 39.1%;
   }
   [data-theme="cyberpunk"][data-polarity="light"] {
     --background: 192.0 78.9% 96.3%;
@@ -618,16 +645,16 @@
     --ring: 312 100% 46.7%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 191.0 100.0% 19.4%;
-    --breakdown-uncommon: 205.6 100.0% 29.3%;
-    --breakdown-rare: 242.1 49.7% 55.0%;
-    --breakdown-ultra: 259.9 83.7% 64.7%;
+    --breakdown-common: 319.5 100.0% 90.4%;
+    --breakdown-uncommon: 319.5 100.0% 82.8%;
+    --breakdown-rare: 318.5 96.3% 75.0%;
+    --breakdown-ultra: 316.4 90.3% 65.4%;
     --breakdown-legendary: 312.0 100.0% 46.7%;
     --rarity-legendary-text: 312.4 97.4% 33.5%;
-    --rarity-ultra-text: 261.9 62.9% 53.3%;
-    --rarity-rare-text: 242.7 46.8% 52.5%;
-    --rarity-uncommon-text: 205.6 100.0% 29.3%;
-    --rarity-common-text: 191.0 100.0% 19.4%;
+    --rarity-ultra-text: 312.2 99.6% 35.9%;
+    --rarity-rare-text: 316.2 51.6% 44.4%;
+    --rarity-uncommon-text: 317.7 33.8% 45.9%;
+    --rarity-common-text: 318.3 18.2% 46.0%;
   }
   [data-theme="plasma"][data-polarity="light"] {
     --background: 203 89% 96%;
@@ -649,16 +676,16 @@
     --ring: 186 100% 31.9%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 222.9 8.0% 18.5%;
-    --breakdown-uncommon: 212.3 48.4% 25.6%;
-    --breakdown-rare: 202.7 53.0% 30.8%;
-    --breakdown-ultra: 194.8 55.5% 35.5%;
+    --breakdown-common: 188.5 37.4% 84.7%;
+    --breakdown-uncommon: 188.4 37.7% 73.0%;
+    --breakdown-rare: 188.3 38.3% 62.2%;
+    --breakdown-ultra: 187.9 39.8% 50.5%;
     --breakdown-legendary: 186.0 100.0% 31.9%;
     --rarity-legendary-text: 186.6 84.1% 25.0%;
-    --rarity-ultra-text: 193.9 72.0% 28.6%;
-    --rarity-rare-text: 202.7 53.0% 30.8%;
-    --rarity-uncommon-text: 212.3 48.4% 25.6%;
-    --rarity-common-text: 222.9 8.0% 18.5%;
+    --rarity-ultra-text: 186.6 81.2% 26.2%;
+    --rarity-rare-text: 187.8 44.4% 32.6%;
+    --rarity-uncommon-text: 188.2 26.1% 36.6%;
+    --rarity-common-text: 188.5 12.8% 40.1%;
   }
   [data-theme="boss-fight"][data-polarity="light"] {
     /* main/supporting hue shifted -13/-13deg from the dark original (347,
@@ -683,16 +710,16 @@
     --ring: 347 100% 53.6%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 24.7 100.0% 17.9%;
-    --breakdown-uncommon: 24.0 100.0% 26.0%;
-    --breakdown-rare: 336.0 75.4% 38.2%;
-    --breakdown-ultra: 1.1 73.6% 44.2%;
+    --breakdown-common: 22.9 99.5% 71.5%;
+    --breakdown-uncommon: 18.4 99.2% 68.0%;
+    --breakdown-rare: 12.6 99.1% 65.4%;
+    --breakdown-ultra: 3.9 99.5% 63.8%;
     --breakdown-legendary: 347.0 100.0% 53.6%;
     --rarity-legendary-text: 345.6 97.3% 35.6%;
-    --rarity-ultra-text: 357.3 94.4% 35.6%;
-    --rarity-rare-text: 335.2 80.1% 36.4%;
-    --rarity-uncommon-text: 24.0 100.0% 26.0%;
-    --rarity-common-text: 24.7 100.0% 17.9%;
+    --rarity-ultra-text: 357.7 91.5% 38.5%;
+    --rarity-rare-text: 15.6 97.1% 35.5%;
+    --rarity-uncommon-text: 22.4 92.0% 34.4%;
+    --rarity-common-text: 26.8 85.4% 33.6%;
   }
   [data-theme="synthwave"][data-polarity="light"] {
     /* shifted -9/-9deg (283, 250 -> 274, 241) to clear Grape Float's dark
@@ -716,16 +743,16 @@
     --ring: 283 100% 60.4%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 17.5 100.0% 25.0%;
-    --breakdown-uncommon: 348.5 70.9% 41.2%;
-    --breakdown-rare: 329.8 68.5% 46.1%;
-    --breakdown-ultra: 309.3 57.1% 50.0%;
+    --breakdown-common: 282.2 100.0% 91.2%;
+    --breakdown-uncommon: 281.8 100.0% 84.3%;
+    --breakdown-rare: 281.7 100.0% 77.7%;
+    --breakdown-ultra: 281.9 100.0% 70.3%;
     --breakdown-legendary: 283.0 100.0% 60.4%;
     --rarity-legendary-text: 285.0 93.9% 40.0%;
-    --rarity-ultra-text: 307.3 96.7% 33.4%;
-    --rarity-rare-text: 326.3 94.5% 35.4%;
-    --rarity-uncommon-text: 346.8 79.0% 37.8%;
-    --rarity-common-text: 17.5 100.0% 25.0%;
+    --rarity-ultra-text: 283.6 66.7% 45.5%;
+    --rarity-rare-text: 282.6 45.0% 47.3%;
+    --rarity-uncommon-text: 282.4 30.5% 47.1%;
+    --rarity-common-text: 282.5 17.0% 45.7%;
   }
 
   /* ============================================================================

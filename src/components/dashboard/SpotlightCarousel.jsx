@@ -83,7 +83,11 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
                 className="flex-shrink-0 snap-start block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 style={{ width: CARD_WIDTH }}
               >
-                <div className="rounded-2xl overflow-hidden border border-border">
+                {/* bg-card on the rounded card itself, as Haul's CanCard does,
+                    so the theme's card lift (Soda Fountain's inner rule, Candy's
+                    lip) follows its corners. On the info panel it drew a
+                    square-cornered box inside the rounded card. */}
+                <div className="rounded-2xl overflow-hidden border border-border bg-card">
                   <CanImageBox
                     imageUrl={item.can_image_url}
                     rarity={rarity}
@@ -92,7 +96,7 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
                     className="w-full h-[140px]"
                     iconSize="w-10 h-10"
                   />
-                  <div className="bg-card px-3 py-2.5 space-y-1.5">
+                  <div className="px-3 py-2.5 space-y-1.5">
                     <p className="text-sm font-semibold text-foreground truncate">{item.can_name}</p>
                     <div className="flex items-center justify-between gap-2">
                       <RarityBadge rarity={rarity} />

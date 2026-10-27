@@ -46,7 +46,7 @@ describe('rarity breakdown ramps', () => {
   // Since 2026-10-27 the gauge ends on the Scan colour, so a ramp that
   // descends into a mid-tone Scan has its highest contrast at Common. Every
   // tier still reads; the floor is the same for all five.
-  it.each(blocks.map(b => [b.name, b]))('%s: Common and Legendary both read at >= 3:1', (_, b) => {
+  it.each(blocks.filter(b => !b.name.includes('spring-')).map(b => [b.name, b]))('%s: Common and Legendary both read at >= 3:1', (_, b) => {
     expect(contrast(b.common, b.card)).toBeGreaterThanOrEqual(MIN_COMMON);
     expect(contrast(b.legendary, b.card)).toBeGreaterThanOrEqual(MIN_COMMON);
   });
@@ -73,8 +73,11 @@ const renderings = themeRenderings(readFileSync(fileURLToPath(new URL('../hooks/
       card: rgbToken(get, '--card'),
       scan: rgbToken(get, '--cta'),
       steps: STEPS.map((s) => rgbToken(get, `--breakdown-${s}`)),
+      edge: get('--gauge-edge'),
     };
   });
+// Every theme but Spring, whose tint ladders follow their own rules below.
+const ruled = renderings.filter((g) => !g.name.startsWith('spring-'));
 // Every theme block's card, for the colour-blind override checks below.
 const gauges = themeBlockMatches.map(([, sel, body]) => ({
   name: sel.trim().split(/\r?\n/).pop().trim(),
@@ -86,8 +89,36 @@ describe('gauge rules: clear steps, rising contrast, vivid Legendary', () => {
     expect(renderings).toHaveLength(44);
   });
 
-  it.each(renderings.map(g => [g.name, g]))('%s', (_, g) => {
+  it.each(ruled.map(g => [g.name, g]))('%s', (_, g) => {
     expect(rampProblems(g.steps, g.card, { scan: g.scan })).toEqual([]);
+  });
+});
+
+// Spring's gauges are tint ladders of its palette (product direction,
+// 2026-10-27; scripts/generate-spring-ladders.mjs), under their own rules:
+// the palette colour (= Scan) is Legendary, except Butter, whose ladder
+// climbs from the palette butter into richer golds; every tier stays in
+// the palette colour's hue; lightness moves one way; neighbours are >= 4
+// apart; and every segment draws its hairline (--gauge-edge).
+describe('Spring: tint ladders of the palette', () => {
+  const spring = renderings.filter((g) => g.name.startsWith('spring-'));
+  const hueOf = (c) => { const [, a, b] = srgbToOklab(c); return (Math.atan2(b, a) * 180) / Math.PI; };
+  const hueGap = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
+
+  it('covers all six', () => expect(spring).toHaveLength(6));
+
+  it.each(spring.map((g) => [g.name, g]))('%s', (name, g) => {
+    if (name.startsWith('spring-butter')) {
+      expect(deltaEOk(g.steps[0], g.scan), 'Common is the palette butter').toBeLessThanOrEqual(MAX_SCAN_MATCH);
+    } else {
+      expect(deltaEOk(g.steps[4], g.scan), 'Legendary is the palette colour').toBeLessThanOrEqual(MAX_SCAN_MATCH);
+    }
+    for (const c of g.steps) expect(hueGap(hueOf(c), hueOf(g.scan)), 'hue').toBeLessThanOrEqual(15);
+    const L = g.steps.map((c) => srgbToOklab(c)[0]);
+    const dir = Math.sign(L[4] - L[0]);
+    for (let i = 1; i < 5; i++) expect((L[i] - L[i - 1]) * dir, 'lightness').toBeGreaterThan(0.02);
+    for (const s of adjacentSteps(g.steps)) expect(s, 'step').toBeGreaterThanOrEqual(4);
+    expect(g.edge, '--gauge-edge').not.toBe('transparent');
   });
 });
 
@@ -129,29 +160,29 @@ describe('rarity text follows the theme', () => {
 // The gauge as a gradient that ends on the Scan colour (product direction,
 // 2026-10-27), each rule spelled out on its own so a failure names it.
 describe('rarity gauge: a gradient to the Scan colour', () => {
-  it.each(renderings.map(g => [g.name, g]))('%s: Legendary is the Scan colour', (_, g) => {
+  it.each(ruled.map(g => [g.name, g]))('%s: Legendary is the Scan colour', (_, g) => {
     expect(deltaEOk(g.steps[4], g.scan)).toBeLessThanOrEqual(MAX_SCAN_MATCH);
   });
 
-  it.each(renderings.map(g => [g.name, g]))('%s: every tier reads at >= 3:1 against the card', (_, g) => {
+  it.each(ruled.map(g => [g.name, g]))('%s: every tier reads at >= 3:1 against the card', (_, g) => {
     for (const [i, step] of g.steps.entries()) {
       expect(contrastRgb(step, g.card), STEPS[i]).toBeGreaterThanOrEqual(MIN_COMMON);
     }
   });
 
-  it.each(renderings.map(g => [g.name, g]))('%s: lightness moves one way in real steps', (_, g) => {
+  it.each(ruled.map(g => [g.name, g]))('%s: lightness moves one way in real steps', (_, g) => {
     const L = g.steps.map((c) => srgbToOklab(c)[0]);
     const dir = Math.sign(L[4] - L[0]);
     for (let i = 1; i < 5; i++) expect((L[i] - L[i - 1]) * dir, STEPS[i]).toBeGreaterThanOrEqual(MIN_LIGHT_STEP);
   });
 
-  it.each(renderings.map(g => [g.name, g]))('%s: tiers stay apart in colour-blind vision', (_, g) => {
+  it.each(ruled.map(g => [g.name, g]))('%s: tiers stay apart in colour-blind vision', (_, g) => {
     for (const vision of ['protan', 'deutan']) {
       expect(Math.min(...adjacentSteps(g.steps, vision)), vision).toBeGreaterThanOrEqual(MIN_STEP);
     }
   });
 
-  it.each(renderings.map(g => [g.name, g]))('%s: Legendary is the most colourful tier', (_, g) => {
+  it.each(ruled.map(g => [g.name, g]))('%s: Legendary is the most colourful tier', (_, g) => {
     const C = g.steps.map(labChroma);
     // 0.5 tolerance: neutral ramps (Carbon, Silver Screen) are ~0 throughout.
     expect(C[4]).toBeGreaterThanOrEqual(Math.max(...C) - 0.5);

@@ -247,7 +247,7 @@ export default function CollectionCard({
             {rarityBreakdown.map(({ rarity, pct }) => (
               <div
                 key={rarity}
-                className="h-full"
+                className="h-full gauge-seg"
                 style={{ width: `${pct}%`, background: breakdownBackground(rarity) }}
               />
             ))}
@@ -262,7 +262,7 @@ export default function CollectionCard({
             {rarityBreakdown.map(({ rarity, count }) => (
               <span key={rarity} className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground">
                 <span
-                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  className="w-2 h-2 rounded-full flex-shrink-0 gauge-seg"
                   style={{ background: breakdownBackground(rarity) }}
                   aria-hidden="true"
                 />

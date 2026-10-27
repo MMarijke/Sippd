@@ -190,6 +190,12 @@ function tune(block) {
 let out = css;
 const report = [];
 for (const block of [...blocks].reverse()) { // from the end, so offsets stay valid
+  // Spring's gauges are tint ladders of its palette, written by
+  // scripts/generate-spring-ladders.mjs under Spring's own rules.
+  if (block.name.includes('data-theme="spring-')) {
+    report.unshift(`skip    ${block.name}: Spring tint ladder (generate-spring-ladders.mjs)`);
+    continue;
+  }
   const tuned = tune(block);
   if (!tuned) {
     report.unshift(`KEPT    ${block.name}: no gradient meets every rule`);

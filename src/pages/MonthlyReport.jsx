@@ -264,7 +264,7 @@ export default function MonthlyReport() {
                       <PieChart>
                         <Pie data={rarityChartData} cx="50%" cy="50%" innerRadius={22} outerRadius={40} paddingAngle={3} dataKey="value" stroke="none">
                           {rarityChartData.map(entry => (
-                            <Cell key={entry.name} fill={breakdownColor(entry.name)} />
+                            <Cell key={entry.name} fill={breakdownColor(entry.name)} style={{ stroke: 'var(--gauge-edge)', strokeWidth: 1 }} />
                           ))}
                         </Pie>
                       </PieChart>
@@ -274,7 +274,7 @@ export default function MonthlyReport() {
                     {rarityChartData.map(({ name, value }) => (
                       <div key={name} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: breakdownColor(name) }} />
+                          <div className="w-2 h-2 rounded-full gauge-seg" style={{ backgroundColor: breakdownColor(name) }} />
                           <span className="text-xs font-mono text-muted-foreground">{name}</span>
                         </div>
                         <span className="text-xs font-mono font-semibold text-foreground">{value}</span>

@@ -309,6 +309,10 @@
     /* The label on a filled Legendary badge: Legendary is the Scan colour,
        so it's the Scan label, already checked at 4.5:1 on that fill. */
     --rarity-legendary-on: var(--cta-foreground);
+    /* A hairline around each rarity segment (.gauge-seg, and the donut
+       charts' arcs). Transparent except in Spring, whose tint ladders run
+       pale enough to need it on a light card. */
+    --gauge-edge: transparent;
   }
 
   /* ── Neon Arcade family (dark, gamer/cyber/neon) ─────────────────────────
@@ -1666,6 +1670,10 @@
     --font-display: 'Poppins', sans-serif;
     --font-mono: 'DM Mono', monospace;
     --font-body: 'DM Sans', sans-serif;
+    /* Rarity bars are tint ladders of each palette colour (2026-10-27);
+       the lightest tints need this hairline in the theme's own colour to
+       hold their shape on the light card, like the palette cards' edges. */
+    --gauge-edge: hsl(var(--primary) / 0.5);
     /* Structure: rounded, 1.5px outlines, risograph speckle, and a
        print-offset shadow (the second ink layer, slightly off register)
        instead of glow. Poppins numerals. */
@@ -1951,6 +1959,9 @@
     --rarity-common-text: 10.0 11.3% 59.8%;
   }
   [data-theme="spring-plum"] {
+    /* Scan in the palette colour itself (#665075, 2026-10-27); its rarity bar is a tint ladder of it. */
+    --cta: 275.7 18.8% 38.6%;
+    --cta-foreground: 0.0 0.0% 100.0%;
     --background: 275.7 12% 92.6%;
     --foreground: 275.7 19% 15.5%;
     --card: 275.7 12% 95.1%;
@@ -1971,18 +1982,21 @@
     --ring: 275.7 19% 38.6%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 275.6 63.5% 4.9%;
-    --breakdown-uncommon: 276.3 33.4% 12.2%;
-    --breakdown-rare: 275.9 23.5% 20.3%;
-    --breakdown-ultra: 275.6 19.0% 29.0%;
-    --breakdown-legendary: 275.7 19.0% 38.6%;
-    --rarity-legendary-text: 275.7 19.5% 37.5%;
-    --rarity-ultra-text: 275.6 19.0% 29.0%;
-    --rarity-rare-text: 275.9 23.5% 20.3%;
-    --rarity-uncommon-text: 276.3 33.4% 12.2%;
-    --rarity-common-text: 275.6 63.5% 4.9%;
+    --breakdown-common: 274.3 13.0% 83.2%;
+    --breakdown-uncommon: 274.5 12.8% 70.7%;
+    --breakdown-rare: 274.8 12.5% 59.7%;
+    --breakdown-ultra: 275.2 12.7% 49.0%;
+    --breakdown-legendary: 275.7 18.8% 38.6%;
+    --rarity-legendary-text: 275.7 19.3% 37.5%;
+    --rarity-ultra-text: 275.4 15.6% 38.2%;
+    --rarity-rare-text: 275.1 11.8% 39.4%;
+    --rarity-uncommon-text: 274.8 8.4% 40.0%;
+    --rarity-common-text: 274.5 4.7% 40.6%;
   }
   [data-theme="spring-brick"] {
+    /* Scan in the palette colour itself (#C75554, 2026-10-27); its rarity bar is a tint ladder of it. */
+    --cta: 0.5 50.7% 55.5%;
+    --cta-foreground: 240.0 20.0% 4.9%;
     --background: 32.3 35.1% 92.7%;
     --foreground: 11.0 49.5% 19.4%;
     --card: 33.3 42.9% 95.9%;
@@ -2003,18 +2017,21 @@
     --ring: 12.7 48.4% 36.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 5.9 100.0% 6.9%;
-    --breakdown-uncommon: 13.0 75.2% 13.6%;
-    --breakdown-rare: 12.9 53.3% 22.2%;
-    --breakdown-ultra: 340.3 37.7% 32.1%;
-    --breakdown-legendary: 12.7 48.4% 36.5%;
-    --rarity-legendary-text: 12.7 49.1% 35.9%;
-    --rarity-ultra-text: 340.3 37.7% 32.1%;
-    --rarity-rare-text: 12.9 53.3% 22.2%;
-    --rarity-uncommon-text: 13.0 75.2% 13.6%;
-    --rarity-common-text: 5.9 100.0% 6.9%;
+    --breakdown-common: 4.3 64.1% 88.9%;
+    --breakdown-uncommon: 3.8 60.2% 80.1%;
+    --breakdown-rare: 3.2 56.9% 72.1%;
+    --breakdown-ultra: 2.2 53.7% 63.9%;
+    --breakdown-legendary: 0.5 50.7% 55.5%;
+    --rarity-legendary-text: 358.4 52.4% 41.6%;
+    --rarity-ultra-text: 0.6 41.3% 42.7%;
+    --rarity-rare-text: 2.1 32.6% 43.0%;
+    --rarity-uncommon-text: 3.1 23.8% 43.7%;
+    --rarity-common-text: 4.0 14.1% 43.2%;
   }
   [data-theme="spring-coral"] {
+    /* Scan in the palette colour itself (#EF8F6E, 2026-10-27); its rarity bar is a tint ladder of it. */
+    --cta: 15.3 80.1% 68.4%;
+    --cta-foreground: 240.0 20.0% 4.9%;
     --background: 22.8 100.0% 94.3%;
     --foreground: 15.3 37% 27.2%;
     --card: 24.7 100.0% 96.7%;
@@ -2023,8 +2040,6 @@
     --popover-foreground: 15.3 37% 27.2%;
     --primary: 18.9 58.6% 44.5%;
     --primary-fill: 19.5 100.0% 77.1%;
-    --cta: 20.0 50.9% 53.1%;
-    --cta-foreground: 240.0 20.0% 4.9%;
     --fill-edge: hsl(18.6 53.4% 53.7%);
     --primary-foreground: 240.0 20.0% 4.9%;
     --secondary: 15.3 80% 90.5%;
@@ -2038,18 +2053,21 @@
     --ring: 18.9 58.6% 44.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 20.2 100.0% 10.6%;
-    --breakdown-uncommon: 21.9 77.1% 18.2%;
-    --breakdown-rare: 20.7 57.6% 27.3%;
-    --breakdown-ultra: 20.2 48.3% 36.6%;
-    --breakdown-legendary: 20.0 50.9% 53.1%;
-    --rarity-legendary-text: 21.3 66.4% 35.1%;
-    --rarity-ultra-text: 20.3 51.2% 34.3%;
-    --rarity-rare-text: 20.7 57.6% 27.3%;
-    --rarity-uncommon-text: 21.9 77.1% 18.2%;
-    --rarity-common-text: 20.2 100.0% 10.6%;
+    --breakdown-common: 15.2 92.7% 92.3%;
+    --breakdown-uncommon: 15.2 88.9% 86.1%;
+    --breakdown-rare: 15.3 85.8% 80.4%;
+    --breakdown-ultra: 15.3 82.8% 74.5%;
+    --breakdown-legendary: 15.3 80.1% 68.4%;
+    --rarity-legendary-text: 15.8 60.1% 39.1%;
+    --rarity-ultra-text: 15.5 46.6% 40.8%;
+    --rarity-rare-text: 15.4 35.3% 42.0%;
+    --rarity-uncommon-text: 15.2 25.4% 42.2%;
+    --rarity-common-text: 15.2 14.3% 42.8%;
   }
   [data-theme="spring-butter"] {
+    /* Scan in the palette colour itself (#FFED9C, 2026-10-27); its rarity bar is a tint ladder of it. */
+    --cta: 49.1 100.0% 80.6%;
+    --cta-foreground: 240.0 20.0% 4.9%;
     --background: 47.4 100.0% 92.5%;
     --foreground: 45.8 62.1% 18.6%;
     --card: 48.0 100.0% 96.1%;
@@ -2058,8 +2076,6 @@
     --popover-foreground: 49.1 24% 24.3%;
     --primary: 46.1 100.0% 27.1%;
     --primary-fill: 46.9 100.0% 65.1%;
-    --cta: 43.3 97.3% 36.2%;
-    --cta-foreground: 240.0 20.0% 4.9%;
     --fill-edge: hsl(46.4 100.0% 32.9%);
     --primary-foreground: 240.0 20.0% 4.9%;
     --secondary: 49.1 100% 94.2%;
@@ -2073,18 +2089,21 @@
     --ring: 46.1 100.0% 27.1%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 44.4 78.9% 14.9%;
-    --breakdown-uncommon: 42.2 48.5% 24.2%;
-    --breakdown-rare: 40.5 35.7% 33.5%;
-    --breakdown-ultra: 39.4 28.2% 43.1%;
-    --breakdown-legendary: 43.3 97.3% 36.2%;
-    --rarity-legendary-text: 42.3 89.0% 26.6%;
-    --rarity-ultra-text: 39.7 36.1% 32.9%;
-    --rarity-rare-text: 40.6 38.1% 31.3%;
-    --rarity-uncommon-text: 42.2 48.5% 24.2%;
-    --rarity-common-text: 44.4 78.9% 14.9%;
+    --breakdown-common: 49.1 100.0% 80.6%;
+    --breakdown-uncommon: 46.9 91.7% 73.1%;
+    --breakdown-rare: 45.4 88.3% 64.8%;
+    --breakdown-ultra: 45.4 87.8% 53.1%;
+    --breakdown-legendary: 44.7 89.5% 47.6%;
+    --rarity-legendary-text: 43.9 84.6% 27.8%;
+    --rarity-ultra-text: 46.2 98.6% 25.9%;
+    --rarity-rare-text: 47.6 94.2% 26.3%;
+    --rarity-uncommon-text: 48.9 86.1% 27.1%;
+    --rarity-common-text: 50.1 69.1% 29.4%;
   }
   [data-theme="spring-pistachio"] {
+    /* Scan in the palette colour itself (#B2BC76, 2026-10-27); its rarity bar is a tint ladder of it. */
+    --cta: 68.6 34.3% 60.0%;
+    --cta-foreground: 240.0 20.0% 4.9%;
     --background: 90.0 47.1% 93.3%;
     --foreground: 97.8 24.3% 21.8%;
     --card: 90.0 55.6% 96.5%;
@@ -2093,8 +2112,6 @@
     --popover-foreground: 68.6 23% 22.4%;
     --primary: 90.4 37.3% 36.3%;
     --primary-fill: 86.2 48.0% 61.6%;
-    --cta: 83.1 56.5% 37.7%;
-    --cta-foreground: 240.0 20.0% 4.9%;
     --fill-edge: hsl(89.2 35.8% 42.7%);
     --primary-foreground: 240.0 20.0% 4.9%;
     --secondary: 68.6 34% 88.0%;
@@ -2108,18 +2125,21 @@
     --ring: 90.4 37.3% 36.3%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 88.5 100.0% 8.5%;
-    --breakdown-uncommon: 84.7 100.0% 12.8%;
-    --breakdown-rare: 84.9 70.1% 20.3%;
-    --breakdown-ultra: 85.0 54.1% 28.5%;
-    --breakdown-legendary: 83.1 56.5% 37.7%;
-    --rarity-legendary-text: 80.4 86.2% 22.4%;
-    --rarity-ultra-text: 83.5 68.6% 23.3%;
-    --rarity-rare-text: 84.9 70.1% 20.3%;
-    --rarity-uncommon-text: 84.7 100.0% 12.8%;
-    --rarity-common-text: 88.5 100.0% 8.5%;
+    --breakdown-common: 70.9 34.2% 89.6%;
+    --breakdown-uncommon: 70.4 34.1% 81.7%;
+    --breakdown-rare: 69.9 34.0% 74.5%;
+    --breakdown-ultra: 69.3 34.1% 67.3%;
+    --breakdown-legendary: 68.6 34.3% 60.0%;
+    --rarity-legendary-text: 66.8 48.1% 28.3%;
+    --rarity-ultra-text: 67.9 33.0% 31.8%;
+    --rarity-rare-text: 68.8 22.7% 34.8%;
+    --rarity-uncommon-text: 69.6 14.9% 37.4%;
+    --rarity-common-text: 70.4 7.8% 40.0%;
   }
   [data-theme="spring-olive"] {
+    /* Scan in the palette colour itself (#778C62, 2026-10-27); its rarity bar is a tint ladder of it. */
+    --cta: 90.0 17.6% 46.7%;
+    --cta-foreground: 240.0 20.0% 4.9%;
     --background: 55.0 31.6% 92.5%;
     --foreground: 57.6 32.5% 15.1%;
     --card: 53.3 39.1% 95.5%;
@@ -2140,16 +2160,16 @@
     --ring: 59.2 55.1% 27.1%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 50.2 100.0% 4.6%;
-    --breakdown-uncommon: 53.5 100.0% 8.6%;
-    --breakdown-rare: 55.5 80.4% 14.0%;
-    --breakdown-ultra: 57.3 50.9% 22.2%;
-    --breakdown-legendary: 59.2 55.1% 27.1%;
-    --rarity-legendary-text: 59.0 76.1% 21.0%;
-    --rarity-ultra-text: 57.3 50.9% 22.2%;
-    --rarity-rare-text: 55.5 80.4% 14.0%;
-    --rarity-uncommon-text: 53.5 100.0% 8.6%;
-    --rarity-common-text: 50.2 100.0% 4.6%;
+    --breakdown-common: 91.6 15.9% 85.6%;
+    --breakdown-uncommon: 91.4 15.8% 74.8%;
+    --breakdown-rare: 91.0 15.6% 65.2%;
+    --breakdown-ultra: 90.6 15.5% 55.9%;
+    --breakdown-legendary: 90.0 17.6% 46.7%;
+    --rarity-legendary-text: 89.3 25.0% 31.5%;
+    --rarity-ultra-text: 89.9 19.0% 33.6%;
+    --rarity-rare-text: 90.5 13.9% 35.6%;
+    --rarity-uncommon-text: 91.0 9.4% 37.6%;
+    --rarity-common-text: 91.4 5.0% 39.9%;
   }
 }
 
@@ -2267,6 +2287,12 @@
 .rarity-glow-ultra {
   box-shadow: 0 0 8px hsl(var(--rarity-ultra) / calc(0.3 * var(--glow-intensity) * var(--element-glow)));
 }
+/* Rarity segments (bars, legend dots, picker strips) draw --gauge-edge as
+   an inset hairline: transparent everywhere except Spring. */
+.gauge-seg {
+  box-shadow: inset 0 0 0 1px var(--gauge-edge, transparent);
+}
+
 /* Holo Legendary badge (Alloy family sets --holo-badge; elsewhere it's
    unset and this adds nothing). */
 .rarity-holo-badge {

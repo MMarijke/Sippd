@@ -491,7 +491,7 @@ function RarityStrip({ themeId, polarity }) {
     >
       <div className="flex h-1.5 gap-px rounded-full overflow-hidden">
         {RARITY_TIERS.map(tier => (
-          <div key={tier} className="flex-1" style={{ background: tier === 'legendary' ? 'var(--holo-gradient, hsl(var(--breakdown-legendary)))' : `hsl(var(--breakdown-${tier}))` }} />
+          <div key={tier} className="flex-1 gauge-seg" style={{ background: tier === 'legendary' ? 'var(--holo-gradient, hsl(var(--breakdown-legendary)))' : `hsl(var(--breakdown-${tier}))` }} />
         ))}
       </div>
     </div>

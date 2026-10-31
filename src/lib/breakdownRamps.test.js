@@ -105,8 +105,10 @@ describe('Spring, Alloy, Candy, Noir and Botanical: ladders of the main colour',
   it('covers all forty-two', () => expect(ladders).toHaveLength(42));
 
   it.each(ladders.map((g) => [g.name, g]))('%s', (name, g) => {
-    if (name.startsWith('spring-butter')) {
-      expect(deltaEOk(g.steps[0], g.scan), 'Common is the palette butter').toBeLessThanOrEqual(MAX_SCAN_MATCH);
+    // Butter, Coral and Pistachio (owner-approved, 2026-10-31) are too pale
+    // to end a ladder on: theirs START at the palette colour and deepen.
+    if (/^spring-(butter|coral|pistachio) /.test(name)) {
+      expect(deltaEOk(g.steps[0], g.scan), 'Common is the palette colour').toBeLessThanOrEqual(MAX_SCAN_MATCH);
     } else {
       expect(deltaEOk(g.steps[4], g.scan), 'Legendary is the Scan colour').toBeLessThanOrEqual(MAX_SCAN_MATCH);
     }

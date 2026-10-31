@@ -21,16 +21,19 @@
 //   the jewel (garnet, royal purple, deep sapphire, deep teal) up to the
 //   Scan colour, so every tier shows the theme's colour instead of starting
 //   pale; Silver Screen keeps its tuned gradient.
-//   Botanical: the dark pair climb from deep shades too (Forest from a deep,
-//   dark green; Fern from a deep olive, a little darker than its old
-//   gradient); the light pair (Sage, Meadow) are tint ladders, from a pale
-//   tint of their green up to the Scan green.
+//   Botanical: the dark three climb from deep shades too (Forest from a deep,
+//   dark green; Fern from a deep olive; Sage, dark since 2026-10-31, from a
+//   deep sage); Meadow (light) is a tint ladder, from a pale tint of its
+//   green up to the Scan green.
 //   Cosmic (dark): Deep Space, Stellar Gold and Solar Flare climb from a deep
 //   shade of the Scan colour (deep blue, amber-gold, ember) up to it; Nebula
 //   from a deep blue (its accent's hue) up to its Scan violet. Aurora is a
 //   blend instead: from the blue of its glow bubble (--accent) round through
 //   azure and teal to its Scan green. Moonlight keeps its tuned gradient.
-//   Neon (one block per polarity, keyed 'id:polarity'): the dark renderings
+//   Neon (one block per polarity, keyed 'id:polarity'): Power-Up dark is a
+//   shade ladder, deep green up to its neon green (its coin-yellow accent
+//   stays in the glow bubble: a yellow-to-green bar collapses for red-green
+//   colour-blind collectors). The other dark renderings
 //   blend from a rich colour in the accent's hue (the glow bubble's) to the
 //   Scan colour, the short way round, so none starts grey; Boss Fight dark
 //   from a bright amber into its red. The light renderings are tint ladders
@@ -103,7 +106,7 @@ export const LADDERS = {
 };
 // Shade ladders (dark cards): how far below the Scan colour Common starts,
 // in OKLab lightness.
-const SHADE_DEPTH = { crimson: 0.165, amethyst: 0.17, sapphire: 0.17, emerald: 0.17, forest: 0.18, fern: 0.36, 'deep-space': 0.2, 'stellar-gold': 0.22, 'solar-flare': 0.2, nebula: 0.145, 'boss-fight:dark': 0.2 };
+const SHADE_DEPTH = { crimson: 0.165, amethyst: 0.17, sapphire: 0.17, emerald: 0.17, forest: 0.18, fern: 0.36, sage: 0.22, 'deep-space': 0.2, 'stellar-gold': 0.22, 'solar-flare': 0.2, nebula: 0.145, 'boss-fight:dark': 0.2, 'power-up:dark': 0.26 };
 // ...how much colour they gain going down, and how far their hue leans
 // toward green (degrees). Fern gives colour up instead: its lime, darkened at
 // full strength, turns mustard, so its deep tiers are soft olive-greens that
@@ -114,18 +117,18 @@ const SHADE_DEPTH = { crimson: 0.165, amethyst: 0.17, sapphire: 0.17, emerald: 0
 // first tier shows (Forest 2.2:1, Crimson 1.9:1 on the card); both lose a
 // little colour going down, so Legendary is their most colourful tier.
 const SHADE_BOOST = { fern: -0.07, 'solar-flare': 0.01, forest: -0.03, crimson: -0.03, 'boss-fight:dark': 0 };
-const SHADE_HUE = { fern: 10, 'stellar-gold': -14, 'deep-space': 8, nebula: -17, 'boss-fight:dark': 15 };
+const SHADE_HUE = { fern: 10, 'stellar-gold': -14, 'deep-space': 8, nebula: -17, 'boss-fight:dark': 0 };
 // Blends: theme id -> the token Common starts on (the ladder runs from it to
 // the Scan colour in OKLCH, the short way round the hue circle), optionally
 // moved to lightness L (same hue and colour, gamut allowing).
 export const BLEND_FROM = {
   aurora: '--accent',
-  'power-up:dark': { token: '--accent', L: 0.62 },
   'cyberpunk:dark': { token: '--accent', L: 0.47 },
   'plasma:dark': { token: '--accent', L: 0.6 },
   'synthwave:dark': { token: '--accent', L: 0.45 },
-  // Boss Fight light from a light orange in its accent's hue into its red, so
-  // it stays orange-and-red rather than a second Bubblegum or Orange Crush.
+  // Boss Fight light: from a light amber in its accent's hue through orange
+  // into its lava red, a fire, apart from Orange Crush's orange and
+  // Bubblegum's pink.
   'boss-fight:light': { token: '--accent', L: 0.80 },
   cola: { token: '--accent', L: 0.42 },
   // Root Beer's cream Scan colour has almost no colour of its own, so its
@@ -140,9 +143,6 @@ const TINT_SHARES = [0.26, 0.46, 0.64, 0.82, 1];
 const ALLOY_SHARES = [0.16, 0.38, 0.58, 0.79, 1];
 // Carbon's graphite on its dark card: a short ladder from a mid silver.
 const CARBON_SHARES = [0.42, 0.56, 0.71, 0.85, 1];
-// Sage starts from a fuller tint, which also keeps it apart from Spring
-// Olive's pale greens.
-const SAGE_SHARES = [0.36, 0.52, 0.68, 0.84, 1];
 
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
 const clampRgb = (c) => c.map((v) => Math.min(1, Math.max(0, v)));
@@ -187,7 +187,7 @@ export function tintLadder(id, colourRgb) {
     const C0 = Math.hypot(a, b), h0 = Math.atan2(b, a);
     return [1, 0.75, 0.5, 0.25, 0].map((t) => (t ? fit(L - SHADE_DEPTH[id] * t, C0 + (SHADE_BOOST[id] ?? 0.04) * t, h0 + ((SHADE_HUE[id] ?? 0) * Math.PI / 180) * t) : colourRgb));
   }
-  const shares = id.startsWith('alloy-') ? ALLOY_SHARES : id === 'carbon' ? CARBON_SHARES : id === 'sage' ? SAGE_SHARES : TINT_SHARES;
+  const shares = id.startsWith('alloy-') ? ALLOY_SHARES : id === 'carbon' ? CARBON_SHARES : TINT_SHARES;
   return shares.map((t) => clampRgb(oklabToSrgb([1 - (1 - L) * t, a * t, b * t])));
 }
 

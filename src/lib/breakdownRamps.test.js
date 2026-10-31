@@ -118,7 +118,7 @@ describe('Spring, Alloy, Candy, Noir and Botanical: ladders of the main colour',
     // accent (their glow bubble's colour), and Cola from its cola-red accent,
     // to the Scan colour instead: Aurora starts
     // ON the accent, and both turn steadily from the accent's hue to the Scan's.
-    if (/^(aurora|nebula|cola) |^(power-up|cyberpunk|plasma|synthwave) \(dark\)|^boss-fight \(light\)/.test(name)) {
+    if (/^(aurora|nebula|cola) |^(cyberpunk|plasma|synthwave) \(dark\)|^boss-fight \(light\)/.test(name)) {
       if (name.startsWith('aurora')) expect(deltaEOk(g.steps[0], g.accent), 'Common is the bubble blue').toBeLessThanOrEqual(MAX_SCAN_MATCH);
       expect(hueGap(hueOf(g.steps[0]), hueOf(g.accent)), 'Common in the accent hue').toBeLessThanOrEqual(15);
       const toScan = g.steps.map((c) => hueGap(hueOf(c), hueOf(g.scan)));

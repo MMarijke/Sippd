@@ -103,17 +103,17 @@ export const LADDERS = {
 };
 // Shade ladders (dark cards): how far below the Scan colour Common starts,
 // in OKLab lightness.
-const SHADE_DEPTH = { crimson: 0.16, amethyst: 0.17, sapphire: 0.17, emerald: 0.17, forest: 0.16, fern: 0.36, 'deep-space': 0.2, 'stellar-gold': 0.22, 'solar-flare': 0.2, nebula: 0.145, 'boss-fight:dark': 0.2 };
+const SHADE_DEPTH = { crimson: 0.165, amethyst: 0.17, sapphire: 0.17, emerald: 0.17, forest: 0.18, fern: 0.36, 'deep-space': 0.2, 'stellar-gold': 0.22, 'solar-flare': 0.2, nebula: 0.145, 'boss-fight:dark': 0.2 };
 // ...how much colour they gain going down, and how far their hue leans
 // toward green (degrees). Fern gives colour up instead: its lime, darkened at
 // full strength, turns mustard, so its deep tiers are soft olive-greens that
 // lean green, as its gradient was before the ladder.
 // Stellar Gold leans toward amber going down (deep yellows turn olive), Deep
 // Space toward a truer blue, Nebula all the way round to its accent blue.
-// Forest and Crimson start a little less deep (their first tier all but
-// vanished on the card); their dark Scan colours cap how far (about 1.55-1.65:1
-// while every step stays >= 4 apart).
-const SHADE_BOOST = { fern: -0.07, 'solar-flare': 0.01, forest: 0.1, crimson: 0.03, 'boss-fight:dark': 0 };
+// Forest and Crimson's Scan colours were lightened (2026-10-31) so their
+// first tier shows (Forest 2.2:1, Crimson 1.9:1 on the card); both lose a
+// little colour going down, so Legendary is their most colourful tier.
+const SHADE_BOOST = { fern: -0.07, 'solar-flare': 0.01, forest: -0.03, crimson: -0.03, 'boss-fight:dark': 0 };
 const SHADE_HUE = { fern: 10, 'stellar-gold': -14, 'deep-space': 8, nebula: -17, 'boss-fight:dark': 15 };
 // Blends: theme id -> the token Common starts on (the ladder runs from it to
 // the Scan colour in OKLCH, the short way round the hue circle), optionally

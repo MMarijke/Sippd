@@ -7,15 +7,14 @@ import { readThemeCache, writeThemeCache, cachedThemeFor } from '@/lib/themeCach
 
 // Keep in sync with index.css's [data-theme] blocks and the
 // profiles_theme_valid / profiles_theme_polarity_valid check constraints.
-// Each theme's `dark`/`light` sub-objects carry the exact hex this app
-// actually renders for that combination (main color as `swatch`, supporting
-// color as `sup`, --background as `background`) -- no separate "true"
-// swatch color that differs from what ships. `sup` is Phase 2 only so far
-// (an /impeccable critique found the picker's flat single-color swatches
-// read as generic, especially with hue reuse across families — Phase 1's
-// swatches stay flat pending the same treatment); Settings renders a
-// two-tone gradient wherever `sup` exists and falls back to a flat fill
-// otherwise.
+// Each theme's `dark`/`light` sub-objects mark which polarities it renders
+// and carry its --background (`background`), which the theme cache paints
+// before the stylesheet loads. The picker's swatches are NOT stored here:
+// Settings paints each one from the theme's own --cta and --accent inside a
+// [data-theme] wrapper, so a swatch is always the colours the theme ships
+// (2026-10-28: the hand-copied swatch/sup hexes had drifted on ~12 themes).
+// A family's `preview` names the theme its picker tile shows: its most
+// characteristic one, not necessarily its free one.
 //
 // Neon Arcade (Phase 1; Vintage Pastel, XP Gold and Champagne were retired
 // in 20260929000000_trim_theme_catalogue.sql) themes have BOTH `dark` and
@@ -27,8 +26,8 @@ import { readThemeCache, writeThemeCache, cachedThemeFor } from '@/lib/themeCach
 // not a preference), index.css keys their CSS on plain [data-theme="x"]
 // with no [data-polarity] dependency at all, and the toggle simply doesn't
 // render for these families (see familyHasPolarityToggle below) -- use
-// getThemeSwatch()/getThemeBackground() rather than indexing `theme[polarity]`
-// directly, since that key may not exist for a Phase 2 theme.
+// getThemeRendering() rather than indexing `theme[polarity]` directly,
+// since that key may not exist for a Phase 2 theme.
 export const THEME_FAMILIES = [
   {
     id: 'neon-arcade',
@@ -37,55 +36,58 @@ export const THEME_FAMILIES = [
     labelSize: '0.6875rem',
     themes: [
       { id: 'power-up', label: 'Power-Up', pro: false,
-        dark: { swatch: '#00FF87', background: '#0B1018' }, light: { swatch: '#009650', background: '#ECF2FE' } },
+        dark: { background: '#0B1018' }, light: { background: '#ECF2FE' } },
       { id: 'cyberpunk', label: 'Cyberpunk', pro: true,
-        dark: { swatch: '#FF2BD6', background: '#100914' }, light: { swatch: '#EE00BF', background: '#EEFAFD' } },
+        dark: { background: '#100914' }, light: { background: '#EEFAFD' } },
       { id: 'plasma', label: 'Plasma', pro: true,
-        dark: { swatch: '#00E5FF', background: '#071016' }, light: { swatch: '#0092A3', background: '#ECF7FE' } },
+        dark: { background: '#071016' }, light: { background: '#ECF7FE' } },
       { id: 'boss-fight', label: 'Boss Fight', pro: true,
-        dark: { swatch: '#FF3864', background: '#12090C' }, light: { swatch: '#FF1246', background: '#FEECF1' } },
+        dark: { background: '#12090C' }, light: { background: '#FEECF1' } },
       { id: 'synthwave', label: 'Synthwave', pro: true,
-        dark: { swatch: '#B93FE8', background: '#0D0718' }, light: { swatch: '#C635FF', background: '#FDF0F6' } },
+        dark: { background: '#0D0718' }, light: { background: '#FDF0F6' } },
     ],
   },
   {
     id: 'cosmic',
+    preview: 'nebula',
     label: 'Cosmic',
     displayFont: "'Michroma', sans-serif",
     labelSize: '0.6875rem',
     themes: [
-      { id: 'moonlight', label: 'Moonlight', pro: false, dark: { swatch: '#B3BCCD', sup: '#7183AA', background: '#101522' } },
-      { id: 'nebula', label: 'Nebula', pro: true, dark: { swatch: '#7A5FFF', sup: '#5579E8', background: '#130B20' } },
-      { id: 'solar-flare', label: 'Solar Flare', pro: true, dark: { swatch: '#FF7043', sup: '#FFB347', background: '#1A0D08' } },
-      { id: 'aurora', label: 'Aurora', pro: true, dark: { swatch: '#45E0B0', sup: '#6875FF', background: '#081716' } },
-      { id: 'deep-space', label: 'Deep Space', pro: true, dark: { swatch: '#3DBEFF', sup: '#7A62F2', background: '#070912' } },
-      { id: 'stellar-gold', label: 'Stellar Gold', pro: true, dark: { swatch: '#E4C76A', sup: '#A98F45', background: '#17140B' } },
+      { id: 'moonlight', label: 'Moonlight', pro: false, dark: { background: '#101522' } },
+      { id: 'nebula', label: 'Nebula', pro: true, dark: { background: '#130B20' } },
+      { id: 'solar-flare', label: 'Solar Flare', pro: true, dark: { background: '#1A0D08' } },
+      { id: 'aurora', label: 'Aurora', pro: true, dark: { background: '#081716' } },
+      { id: 'deep-space', label: 'Deep Space', pro: true, dark: { background: '#070912' } },
+      { id: 'stellar-gold', label: 'Stellar Gold', pro: true, dark: { background: '#17140B' } },
     ],
   },
   {
     id: 'botanical',
+    preview: 'meadow',
     label: 'Botanical',
     displayFont: "'Fraunces', serif",
     labelSize: '0.8125rem',
     themes: [
-      { id: 'sage', label: 'Sage', pro: false, light: { swatch: '#528C77', sup: '#3E514A', background: '#F4F0E5' } },
-      { id: 'forest', label: 'Forest', pro: true, dark: { swatch: '#3E765B', sup: '#107848', background: '#0D1712' } },
-      { id: 'fern', label: 'Fern', pro: true, dark: { swatch: '#A4B23E', sup: '#6F7A2C', background: '#13160C' } },
-      { id: 'meadow', label: 'Meadow', pro: true, light: { swatch: '#549135', sup: '#2C491F', background: '#F5F3DE' } },
+      { id: 'sage', label: 'Sage', pro: false, light: { background: '#F4F0E5' } },
+      { id: 'forest', label: 'Forest', pro: true, dark: { background: '#0D1712' } },
+      { id: 'fern', label: 'Fern', pro: true, dark: { background: '#13160C' } },
+      { id: 'meadow', label: 'Meadow', pro: true, light: { background: '#F5F3DE' } },
     ],
   },
   {
     id: 'noir',
+    preview: 'crimson',
     label: 'Noir',
     displayFont: "'Bodoni Moda', serif",
     labelSize: '0.875rem',
     themes: [
-      { id: 'carbon', label: 'Carbon', pro: false, dark: { swatch: '#6F7378', sup: '#4D698B', background: '#111214' } },
-      { id: 'crimson', label: 'Crimson', pro: true, dark: { swatch: '#B83A4B', sup: '#8A5760', background: '#160B0E' } },
-      { id: 'amethyst', label: 'Amethyst', pro: true, dark: { swatch: '#8E6DAB', sup: '#8B3DCB', background: '#120D16' } },
-      { id: 'sapphire', label: 'Sapphire', pro: true, dark: { swatch: '#527BB9', sup: '#1961CC', background: '#080F19' } },
-      { id: 'emerald', label: 'Emerald', pro: true, dark: { swatch: '#2AA5B8', sup: '#1F7A8A', background: '#071417' } },
-      { id: 'silver-screen', label: 'Silver Screen', pro: true, dark: { swatch: '#F2F2F2', sup: '#B8B8B8', background: '#0A0A0A' } },
+      { id: 'carbon', label: 'Carbon', pro: false, dark: { background: '#111214' } },
+      { id: 'crimson', label: 'Crimson', pro: true, dark: { background: '#160B0E' } },
+      { id: 'amethyst', label: 'Amethyst', pro: true, dark: { background: '#120D16' } },
+      { id: 'sapphire', label: 'Sapphire', pro: true, dark: { background: '#080F19' } },
+      { id: 'emerald', label: 'Emerald', pro: true, dark: { background: '#071417' } },
+      { id: 'silver-screen', label: 'Silver Screen', pro: true, dark: { background: '#0A0A0A' } },
     ],
   },
   {
@@ -94,31 +96,31 @@ export const THEME_FAMILIES = [
     displayFont: "'Fredoka', sans-serif",
     labelSize: '0.75rem',
     themes: [
-      { id: 'bubblegum', label: 'Bubblegum', pro: false, light: { swatch: '#FF1F76', sup: '#B91D59', background: '#FFF3F8' } },
-      { id: 'blue-pop', label: 'Blue Pop', pro: true, light: { swatch: '#3582FF', sup: '#255FBD', background: '#F0FAFF' } },
-      { id: 'grape-candy', label: 'Grape Candy', pro: true, light: { swatch: '#836AFF', sup: '#584DD4', background: '#F4F1FF' } },
-      { id: 'orange-crush', label: 'Orange Crush', pro: true, light: { swatch: '#EA5300', sup: '#953A11', background: '#FFF5ED' } },
-      { id: 'sour-apple', label: 'Sour Apple', pro: true, light: { swatch: '#B6F000', sup: '#3D6B00', background: '#F3FFD2' } },
-      { id: 'cherry-pop', label: 'Cherry Pop', pro: true, light: { swatch: '#C20A1D', sup: '#74111E', background: '#FAF4F4' } },
+      { id: 'bubblegum', label: 'Bubblegum', pro: false, light: { background: '#FFF3F8' } },
+      { id: 'blue-pop', label: 'Blue Pop', pro: true, light: { background: '#F0FAFF' } },
+      { id: 'grape-candy', label: 'Grape Candy', pro: true, light: { background: '#F4F1FF' } },
+      { id: 'orange-crush', label: 'Orange Crush', pro: true, light: { background: '#FFF5ED' } },
+      { id: 'sour-apple', label: 'Sour Apple', pro: true, light: { background: '#F3FFD2' } },
+      { id: 'cherry-pop', label: 'Cherry Pop', pro: true, light: { background: '#FAF4F4' } },
     ],
   },
   {
     // Built from a palette the user chose: six themes, each made entirely
-    // from ONE of its colours (swatch = the exact hex its buttons wear; sup =
-    // the other end of that colour's gauge column). Ids are spring-* because
+    // from ONE of its colours. Ids are spring-* because
     // Botanical already owns 'sage' and 'moss'. See index.css.
     id: 'spring',
+    preview: 'spring-coral',
     label: 'Spring',
     displayFont: "'Poppins', sans-serif",
     labelSize: '0.7125rem',
     isNew: true,
     themes: [
-      { id: 'spring-plum', label: 'Plum', pro: false, light: { swatch: '#665075', sup: '#B3A8BB', background: '#EDEAEE' } },
-      { id: 'spring-brick', label: 'Brick', pro: true, light: { swatch: '#8A4330', sup: '#C49483', background: '#F3EDE6' } },
-      { id: 'spring-coral', label: 'Coral', pro: true, light: { swatch: '#FFB08A', sup: '#B4592F', background: '#FFEDE2' } },
-      { id: 'spring-butter', label: 'Butter', pro: true, light: { swatch: '#FFD84D', sup: '#8A6A00', background: '#FFF7D9' } },
-      { id: 'spring-pistachio', label: 'Pistachio', pro: true, light: { swatch: '#A3CC6E', sup: '#4E6E30', background: '#EEF6E6' } },
-      { id: 'spring-olive', label: 'Olive', pro: true, light: { swatch: '#6B6A1F', sup: '#A39C5C', background: '#F2F1E6' } },
+      { id: 'spring-plum', label: 'Plum', pro: false, light: { background: '#EDEAEE' } },
+      { id: 'spring-brick', label: 'Brick', pro: true, light: { background: '#F3EDE6' } },
+      { id: 'spring-coral', label: 'Coral', pro: true, light: { background: '#FFEDE2' } },
+      { id: 'spring-butter', label: 'Butter', pro: true, light: { background: '#FFF7D9' } },
+      { id: 'spring-pistachio', label: 'Pistachio', pro: true, light: { background: '#EEF6E6' } },
+      { id: 'spring-olive', label: 'Olive', pro: true, light: { background: '#F2F1E6' } },
     ],
   },
   // 2026-10-26: new families from the theme catalogue critique's gaps (the
@@ -127,15 +129,16 @@ export const THEME_FAMILIES = [
   // 2026-10-27; see RETIRED_THEMES.
   {
     id: 'alloy',
+    preview: 'alloy-gold',
     label: 'Alloy',
     displayFont: "'Archivo', sans-serif",
     labelSize: '0.875rem',
     isNew: true,
     themes: [
-      { id: 'alloy-aluminium', label: 'Brushed Aluminium', pro: true, light: { swatch: '#3B4652', sup: '#8A96A3', background: '#E9ECEF' } },
-      { id: 'alloy-teal', label: 'Anodised Teal', pro: true, dark: { swatch: '#19C2C2', sup: '#0E8A8C', background: '#15191E' } },
-      { id: 'alloy-red', label: 'Anodised Red', pro: true, dark: { swatch: '#FF2D55', sup: '#C21842', background: '#101115' } },
-      { id: 'alloy-gold', label: 'Gold Foil', pro: true, dark: { swatch: '#E0A526', sup: '#8A6A1E', background: '#0B0C10' } },
+      { id: 'alloy-aluminium', label: 'Brushed Aluminium', pro: true, light: { background: '#E9ECEF' } },
+      { id: 'alloy-teal', label: 'Anodised Teal', pro: true, dark: { background: '#15191E' } },
+      { id: 'alloy-red', label: 'Anodised Red', pro: true, dark: { background: '#101115' } },
+      { id: 'alloy-gold', label: 'Gold Foil', pro: true, dark: { background: '#0B0C10' } },
     ],
   },
   {
@@ -145,8 +148,8 @@ export const THEME_FAMILIES = [
     labelSize: '0.8125rem',
     isNew: true,
     themes: [
-      { id: 'cola', label: 'Cola', pro: true, dark: { swatch: '#D98A3D', sup: '#B5402A', background: '#140A06' } },
-      { id: 'root-beer', label: 'Root Beer', pro: true, dark: { swatch: '#F1E3C8', sup: '#8C3B2E', background: '#1A0B0B' } },
+      { id: 'cola', label: 'Cola', pro: true, dark: { background: '#140A06' } },
+      { id: 'root-beer', label: 'Root Beer', pro: true, dark: { background: '#1A0B0B' } },
     ],
   },
 ];

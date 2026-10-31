@@ -4,11 +4,12 @@ import { fileURLToPath } from 'node:url';
 import { themeRenderings, cssRules, resolveTokens } from './themeTokens';
 import { deltaEOk, hslToRgb, parseHsl } from './rampColour';
 
-// The theme picker previews each theme with hand-copied hex values in
-// useTheme.js (THEME_FAMILIES: <polarity>: { swatch, sup, background }).
-// Their background must be the background the theme actually renders, or
-// the picker shows a different theme than you get. (2026-10-26: a scripted
-// re-tune wrote Synthwave light's colours onto Sage's swatch.)
+// THEME_FAMILIES (useTheme.js) carries each theme's --background as a
+// hand-copied hex for the theme cache, which paints it before the
+// stylesheet loads: it must be the background the theme actually renders.
+// (2026-10-26: a scripted re-tune wrote Synthwave light's colours onto
+// Sage's entry.) The picker's swatch colours are read live from the
+// theme's tokens instead (Settings.jsx), so none may be hand-copied here.
 
 const read = (rel) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)), 'utf8');
 const source = read('../hooks/useTheme.js');
@@ -35,5 +36,22 @@ describe('theme picker swatches match the CSS', () => {
     expect(c.swatchBackground, 'swatch entry has a background').toBeTruthy();
     // Hex <-> HSL-triple rounding stays well under 1; a wrong theme is 10+.
     expect(deltaEOk(hex(c.swatchBackground), c.cssBackground)).toBeLessThan(2);
+  });
+});
+
+describe('theme picker reads live colours', () => {
+  it('stores no hand-copied swatch colours', () => {
+    // Hand-copied swatch/sup hexes drifted on ~12 themes before 2026-10-28.
+    expect(source).not.toMatch(/\b(swatch|sup):\s*'#/);
+  });
+
+  it("each family's preview tile names one of its own themes", () => {
+    const families = source.slice(source.indexOf('export const THEME_FAMILIES'), source.indexOf('export const THEMES'))
+      .split(/\r?\n  \{\r?\n/).slice(1);
+    expect(families.length).toBeGreaterThanOrEqual(8);
+    for (const family of families) {
+      const preview = family.match(/preview: '([a-z0-9-]+)'/)?.[1];
+      if (preview) expect(family, preview).toContain(`{ id: '${preview}'`);
+    }
   });
 });

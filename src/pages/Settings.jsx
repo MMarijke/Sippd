@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useTheme, THEME_FAMILIES, THEMES, getThemeRendering, getRenderedTone, familyHasPolarityToggle, PICKER_LABEL_FONTS_URL, RETIRED_THEMES } from '@/hooks/useTheme';
+import { useTheme, THEME_FAMILIES, THEMES, getRenderedTone, familyHasPolarityToggle, PICKER_LABEL_FONTS_URL, RETIRED_THEMES } from '@/hooks/useTheme';
 import { ArrowLeft, ChevronRight, ChevronLeft, Lock, Loader2, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -271,17 +271,12 @@ function ChipToggle({ options, value, onChange, disabled }) {
 }
 
 // ─── Swatch styling ──────────────────────────────────────────────────────────
-// A flat single-color circle reads as a generic color picker once several
-// families' swatches sit side by side with reused hues (flagged in an
-// /impeccable critique). A two-tone gradient from a theme's own main to its
-// own supporting color gives every swatch real depth for free — no new
-// design decision, just rendering data (`sup`) the app already needed for
-// --accent. Falls back to a flat fill for any theme that doesn't carry
-// `sup` yet (Phase 1's 12 shipped themes, pending the same treatment).
-function swatchBackground(rendering) {
-  if (!rendering) return undefined;
-  return rendering.sup ? `linear-gradient(135deg, ${rendering.swatch} 0%, ${rendering.sup} 100%)` : rendering.swatch;
-}
+// A two-tone gradient from the theme's own Scan colour to its own accent,
+// read live from its tokens inside the swatch's [data-theme] wrapper: the
+// swatch is always exactly what the theme ships. (Until 2026-10-28 it was
+// hand-copied hexes in useTheme.js, which drifted on ~12 themes, e.g. Sour
+// Apple promised neon lime and shipped olive-lime.)
+const SWATCH_FILL = 'linear-gradient(135deg, hsl(var(--cta)) 0%, hsl(var(--accent)) 100%)';
 
 // A theme's swatch, drawn in its family's structure as well as its colours:
 // the wrapper carries the theme's data-theme/data-polarity (as RarityStrip
@@ -290,9 +285,6 @@ function swatchBackground(rendering) {
 // Soda Fountain's halftone). Families differ by more than colour since the
 // 2026-10-26 bolder pass; a plain circle hid that until you'd applied one.
 function ThemeSwatch({ theme, polarity, familyId }) {
-  const rendering = getThemeRendering(theme, polarity);
-  const fill = swatchBackground(rendering);
-  const fillImage = rendering?.sup ? fill : `linear-gradient(${fill}, ${fill})`;
   return (
     <div
       data-theme={theme.id}
@@ -302,7 +294,7 @@ function ThemeSwatch({ theme, polarity, familyId }) {
     >
       <div
         className="w-9 h-9 rounded-xl border border-foreground/10"
-        style={{ backgroundImage: `var(--card-texture), ${fillImage}` }}
+        style={{ backgroundImage: `var(--card-texture), ${SWATCH_FILL}` }}
       />
       {familyId === 'cosmic' && <StarDots />}
     </div>
@@ -420,10 +412,11 @@ function useFocusRequest(ref, request, key, onHandled) {
 function FamilyTile({ family, polarity, isCurrent, showNewBadge, onSelect, focusRequest, onFocusHandled }) {
   const ref = useRef(null);
   useFocusRequest(ref, focusRequest, `family:${family.id}`, onFocusHandled);
-  // The tile previews the family's free theme, or its first theme when the
-  // whole family is Pro (Alloy, Soda Fountain): without the fallback the
-  // tile showed an empty circle.
-  const previewTheme = family.themes.find(t => !t.pro) ?? family.themes[0];
+  // The tile previews the family's most characteristic theme (its
+  // `preview`, e.g. Noir's Crimson rather than grey Carbon), else its free
+  // theme, else its first: a family tile sells the family.
+  const previewTheme = family.themes.find(t => t.id === family.preview)
+    ?? family.themes.find(t => !t.pro) ?? family.themes[0];
   // This tile opens a family; it doesn't toggle anything, so no
   // aria-pressed (it always read "not pressed"). Where the user's own
   // theme lives is said in words instead.

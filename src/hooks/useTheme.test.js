@@ -106,7 +106,7 @@ describe('getRenderedTone', () => {
   });
 
   it('ignores the stored polarity for a fixed-light Phase 2 theme', () => {
-    expect(getRenderedTone(byId('sage'), 'dark')).toBe('light');
+    expect(getRenderedTone(byId('meadow'), 'dark')).toBe('light');
   });
 
   it('ignores the stored polarity for a fixed-dark Phase 2 theme', () => {

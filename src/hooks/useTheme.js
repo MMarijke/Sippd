@@ -22,7 +22,7 @@ import { readThemeCache, writeThemeCache, cachedThemeFor } from '@/lib/themeCach
 // and profiles.theme_polarity is a real, user-toggleable second axis for
 // them. Phase 2 (Cosmic, Botanical, Noir, Candy) themes have only ONE of
 // `dark`/`light` -- confirmed explicitly: each is a single fixed-polarity
-// identity (Botanical's Sage is light, Forest is dark, etc., by design,
+// identity (Botanical's Meadow is light, Forest is dark, etc., by design,
 // not a preference), index.css keys their CSS on plain [data-theme="x"]
 // with no [data-polarity] dependency at all, and the toggle simply doesn't
 // render for these families (see familyHasPolarityToggle below) -- use
@@ -42,7 +42,7 @@ export const THEME_FAMILIES = [
       { id: 'plasma', label: 'Plasma', pro: true,
         dark: { background: '#071016' }, light: { background: '#ECF7FE' } },
       { id: 'boss-fight', label: 'Boss Fight', pro: true,
-        dark: { background: '#12090C' }, light: { background: '#FEECF1' } },
+        dark: { background: '#110A09' }, light: { background: '#F8F1F2' } },
       { id: 'synthwave', label: 'Synthwave', pro: true,
         dark: { background: '#0D0718' }, light: { background: '#FDF0F6' } },
     ],
@@ -59,7 +59,7 @@ export const THEME_FAMILIES = [
       { id: 'solar-flare', label: 'Solar Flare', pro: true, dark: { background: '#1A0D08' } },
       { id: 'aurora', label: 'Aurora', pro: true, dark: { background: '#081716' } },
       { id: 'deep-space', label: 'Deep Space', pro: true, dark: { background: '#070912' } },
-      { id: 'stellar-gold', label: 'Stellar Gold', pro: true, dark: { background: '#17140B' } },
+      { id: 'stellar-gold', label: 'Stellar Gold', pro: true, dark: { background: '#0B0A1A' } },
     ],
   },
   {
@@ -69,7 +69,7 @@ export const THEME_FAMILIES = [
     displayFont: "'Fraunces', serif",
     labelSize: '0.8125rem',
     themes: [
-      { id: 'sage', label: 'Sage', pro: false, light: { background: '#F4F0E5' } },
+      { id: 'sage', label: 'Sage', pro: false, dark: { background: '#151918' } },
       { id: 'forest', label: 'Forest', pro: true, dark: { background: '#0D1712' } },
       { id: 'fern', label: 'Fern', pro: true, dark: { background: '#13160C' } },
       { id: 'meadow', label: 'Meadow', pro: true, light: { background: '#F5F3DE' } },
@@ -166,7 +166,7 @@ export function getThemeRendering(theme, polarity) {
 }
 
 // The tone that actually renders, which is what [data-tone] carries -- not
-// always the stored polarity: a fixed-polarity Phase 2 theme (Sage is
+// always the stored polarity: a fixed-polarity Phase 2 theme (Meadow is
 // light, Forest is dark) ignores the stored value entirely. Falls back to
 // 'dark' for an unknown id, matching :root's dark default.
 export function getRenderedTone(theme, polarity) {

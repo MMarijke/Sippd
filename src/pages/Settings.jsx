@@ -522,7 +522,7 @@ function ThemePalettePicker({ family, theme, polarity, onSelectTheme, isPro, isP
   // announces where you landed.
   const headingRef = useRef(null);
   useFocusRequest(headingRef, focusRequest, 'palette-heading', onFocusHandled);
-  // Botanical and Alloy mix fixed polarities (Sage, Meadow and Brushed
+  // Botanical and Alloy mix fixed polarities (Meadow and Brushed
   // Aluminium are light pages; the rest dark), so
   // tapping between them flips the whole app light/dark. In those families
   // each tile says which it is, in words under its name, and the themes run

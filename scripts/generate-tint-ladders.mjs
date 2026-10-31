@@ -35,6 +35,10 @@
 //   Scan colour, the short way round, so none starts grey; Boss Fight dark
 //   from a bright amber into its red. The light renderings are tint ladders
 //   of the Scan colour, like Candy (no brown, near-black or rainbow starts).
+//   Boss Fight dark is a shade ladder instead: a deep ember (its red leaning
+//   toward orange) up to the Scan red.
+//   Soda Fountain: Cola blends from a deep cola-red (its accent's hue) up to
+//   its caramel Scan colour; Root Beer from a rich amber up to its cream.
 //
 // Tints are the colour mixed toward white in OKLab. These families trade the
 // gauge rules other themes keep (3:1 for every tier, colour-blind-safe steps)
@@ -94,18 +98,23 @@ export const LADDERS = {
   'plasma:light': 'scan',
   'boss-fight:light': 'scan',
   'synthwave:light': 'scan',
+  cola: 'scan',
+  'root-beer': 'scan',
 };
 // Shade ladders (dark cards): how far below the Scan colour Common starts,
 // in OKLab lightness.
-const SHADE_DEPTH = { crimson: 0.17, amethyst: 0.17, sapphire: 0.17, emerald: 0.17, forest: 0.18, fern: 0.36, 'deep-space': 0.2, 'stellar-gold': 0.22, 'solar-flare': 0.2, nebula: 0.17 };
+const SHADE_DEPTH = { crimson: 0.16, amethyst: 0.17, sapphire: 0.17, emerald: 0.17, forest: 0.16, fern: 0.36, 'deep-space': 0.2, 'stellar-gold': 0.22, 'solar-flare': 0.2, nebula: 0.145, 'boss-fight:dark': 0.2 };
 // ...how much colour they gain going down, and how far their hue leans
 // toward green (degrees). Fern gives colour up instead: its lime, darkened at
 // full strength, turns mustard, so its deep tiers are soft olive-greens that
 // lean green, as its gradient was before the ladder.
 // Stellar Gold leans toward amber going down (deep yellows turn olive), Deep
 // Space toward a truer blue, Nebula all the way round to its accent blue.
-const SHADE_BOOST = { fern: -0.07, 'solar-flare': 0.01 };
-const SHADE_HUE = { fern: 10, 'stellar-gold': -14, 'deep-space': 8, nebula: -17 };
+// Forest and Crimson start a little less deep (their first tier all but
+// vanished on the card); their dark Scan colours cap how far (about 1.55-1.65:1
+// while every step stays >= 4 apart).
+const SHADE_BOOST = { fern: -0.07, 'solar-flare': 0.01, forest: 0.1, crimson: 0.03, 'boss-fight:dark': 0 };
+const SHADE_HUE = { fern: 10, 'stellar-gold': -14, 'deep-space': 8, nebula: -17, 'boss-fight:dark': 15 };
 // Blends: theme id -> the token Common starts on (the ladder runs from it to
 // the Scan colour in OKLCH, the short way round the hue circle), optionally
 // moved to lightness L (same hue and colour, gamut allowing).
@@ -114,11 +123,14 @@ export const BLEND_FROM = {
   'power-up:dark': { token: '--accent', L: 0.62 },
   'cyberpunk:dark': { token: '--accent', L: 0.47 },
   'plasma:dark': { token: '--accent', L: 0.6 },
-  'boss-fight:dark': { token: '--accent', L: 0.79 },
   'synthwave:dark': { token: '--accent', L: 0.45 },
   // Boss Fight light from a light orange in its accent's hue into its red, so
   // it stays orange-and-red rather than a second Bubblegum or Orange Crush.
   'boss-fight:light': { token: '--accent', L: 0.80 },
+  cola: { token: '--accent', L: 0.42 },
+  // Root Beer's cream Scan colour has almost no colour of its own, so its
+  // ladder starts from a rich amber (OKLCH) close to the cream's hue.
+  'root-beer': { lch: [0.6, 0.13, 72], chromaEase: 2 },
 };
 export const isLadderTheme = (id) => Object.hasOwn(LADDERS, id);
 const TINT_SHARES = [0.26, 0.46, 0.64, 0.82, 1];
@@ -140,11 +152,13 @@ function fit(L, C, h) {
   return clampRgb(x);
 }
 
-export function blendLadder(fromRgb, colourRgb) {
+// chromaEase > 1 holds the colour longer before it fades toward a
+// low-colour Scan (Root Beer's cream), so the middle tiers don't go tan.
+export function blendLadder(fromRgb, colourRgb, chromaEase = 1) {
   const lch = (c) => { const [L, a, b] = srgbToOklab(c); return [L, Math.hypot(a, b), Math.atan2(b, a)]; };
   const [L0, C0, h0] = lch(fromRgb), [L1, C1, h1] = lch(colourRgb);
   const dh = ((h1 - h0 + 3 * Math.PI) % (2 * Math.PI)) - Math.PI;
-  return [0, 0.25, 0.5, 0.75, 1].map((t) => (t === 1 ? colourRgb : fit(L0 + (L1 - L0) * t, C0 + (C1 - C0) * t, h0 + dh * t)));
+  return [0, 0.25, 0.5, 0.75, 1].map((t) => (t === 1 ? colourRgb : fit(L0 + (L1 - L0) * t, C0 + (C1 - C0) * t ** chromaEase, h0 + dh * t)));
 }
 
 export function tintLadder(id, colourRgb) {
@@ -179,9 +193,9 @@ if (process.argv[1]?.endsWith('generate-tint-ladders.mjs')) {
     const end = css.indexOf('}', at);
     let body = css.slice(at, end);
     const blend = typeof BLEND_FROM[key] === 'string' ? { token: BLEND_FROM[key] } : BLEND_FROM[key];
-    let from = blend && hslToRgb(parseHsl(resolveTokens(rules, r)(blend.token)));
+    let from = blend && (blend.lch ? fit(blend.lch[0], blend.lch[1], (blend.lch[2] * Math.PI) / 180) : hslToRgb(parseHsl(resolveTokens(rules, r)(blend.token))));
     if (blend?.L) { const [, fa, fb] = srgbToOklab(from); from = fit(blend.L, Math.hypot(fa, fb), Math.atan2(fb, fa)); }
-    const ladder = (from ? blendLadder(from, colour) : tintLadder(id, colour)).map((c) => formatHsl(rgbToHsl(c)));
+    const ladder = (from ? blendLadder(from, colour, blend.chromaEase) : tintLadder(key, colour)).map((c) => formatHsl(rgbToHsl(c)));
     STEPS.forEach((s, i) => { body = body.replace(new RegExp(`(--breakdown-${s}:\\s*)[^;]+;`), `$1${ladder[i]};`); });
     css = css.slice(0, at) + body + css.slice(end);
     console.log(key.padEnd(17), ladder.join(' | '));

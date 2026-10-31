@@ -526,16 +526,23 @@
     --ring: 347 100% 61%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 22.7 99.6% 70.0%;
-    --breakdown-uncommon: 17.1 99.5% 68.6%;
-    --breakdown-rare: 10.1 99.4% 67.9%;
-    --breakdown-ultra: 0.1 99.6% 68.2%;
+    --breakdown-common: 2.7 99.8% 32.7%;
+    --breakdown-uncommon: 352.3 99.9% 37.7%;
+    --breakdown-rare: 347.2 98.8% 42.8%;
+    --breakdown-ultra: 347.8 85.3% 52.7%;
     --breakdown-legendary: 347.0 100.0% 61.0%;
+    /* The gauge starts from a deep shade: a hairline in the Scan colour keeps
+       each segment's shape, and badges outline in the readable text twins. */
+    --gauge-edge: hsl(var(--cta) / 0.55);
+    --rarity-common-line: var(--rarity-common-text);
+    --rarity-uncommon-line: var(--rarity-uncommon-text);
+    --rarity-rare-line: var(--rarity-rare-text);
+    --rarity-ultra-line: var(--rarity-ultra-text);
     --rarity-legendary-text: 349.9 99.7% 66.2%;
-    --rarity-ultra-text: 0.4 99.8% 68.8%;
-    --rarity-rare-text: 10.1 99.4% 67.9%;
-    --rarity-uncommon-text: 17.1 99.5% 68.6%;
-    --rarity-common-text: 22.7 99.6% 70.0%;
+    --rarity-ultra-text: 353.0 98.3% 64.9%;
+    --rarity-rare-text: 356.1 99.2% 63.2%;
+    --rarity-uncommon-text: 1.4 89.5% 62.0%;
+    --rarity-common-text: 6.4 78.2% 58.8%;
   }
   [data-theme="synthwave"][data-polarity="dark"] {
     --background: 261 55% 6%;
@@ -901,10 +908,10 @@
     --ring: 250.1 100% 68.6%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 240.9 76.5% 49.5%;
-    --breakdown-uncommon: 242.1 79.7% 55.3%;
-    --breakdown-rare: 244.3 85.5% 60.2%;
-    --breakdown-ultra: 247.0 92.2% 64.5%;
+    --breakdown-common: 237.6 80.7% 52.4%;
+    --breakdown-uncommon: 240.7 84.6% 58.2%;
+    --breakdown-rare: 243.6 89.4% 62.0%;
+    --breakdown-ultra: 246.8 94.6% 65.4%;
     --breakdown-legendary: 250.1 100.0% 68.6%;
     /* Deep shades near the dark card: a hairline in the Scan colour keeps
        each segment's shape. */
@@ -916,10 +923,10 @@
     --rarity-rare-line: var(--rarity-rare-text);
     --rarity-ultra-line: var(--rarity-ultra-text);
     --rarity-legendary-text: 245.7 96.5% 75.3%;
-    --rarity-ultra-text: 240.3 97.4% 75.4%;
-    --rarity-rare-text: 235.4 98.6% 73.1%;
-    --rarity-uncommon-text: 230.5 98.1% 70.5%;
-    --rarity-common-text: 226.1 97.8% 67.3%;
+    --rarity-ultra-text: 240.4 98.2% 75.6%;
+    --rarity-rare-text: 235.3 99.8% 73.4%;
+    --rarity-uncommon-text: 230.5 97.5% 70.4%;
+    --rarity-common-text: 226.0 99.7% 67.9%;
   }
   [data-theme="solar-flare"] {
     --background: 16.7 53% 6.7%;
@@ -1181,16 +1188,16 @@
     --ring: 151.1 31% 35.3%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 157.9 93.8% 13.6%;
-    --breakdown-uncommon: 158.5 93.6% 16.4%;
-    --breakdown-rare: 158.9 93.4% 19.2%;
-    --breakdown-ultra: 153.4 46.0% 28.6%;
+    --breakdown-common: 158.0 91.7% 14.9%;
+    --breakdown-uncommon: 158.5 91.9% 17.4%;
+    --breakdown-rare: 158.9 92.2% 20.0%;
+    --breakdown-ultra: 156.6 68.7% 25.6%;
     --breakdown-legendary: 151.1 31.0% 35.3%;
     --rarity-legendary-text: 149.4 23.9% 53.6%;
-    --rarity-ultra-text: 150.3 26.1% 50.7%;
-    --rarity-rare-text: 151.2 30.6% 48.2%;
-    --rarity-uncommon-text: 150.5 26.3% 48.9%;
-    --rarity-common-text: 149.7 22.7% 48.8%;
+    --rarity-ultra-text: 151.5 32.3% 48.8%;
+    --rarity-rare-text: 151.4 31.2% 48.6%;
+    --rarity-uncommon-text: 150.7 27.6% 48.5%;
+    --rarity-common-text: 150.0 24.0% 48.9%;
   }
   [data-theme="fern"] {
     /* Scan in a brighter chartreuse-olive (same hue): a mid-bright Scan left the rarity gauge, which ends on the Scan colour, no room for colour-blind-safe steps on either side (2026-10-27). */
@@ -1342,10 +1349,10 @@
     --ring: 351.9 52% 47.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 343.9 97.3% 24.0%;
-    --breakdown-uncommon: 343.0 99.3% 27.8%;
-    --breakdown-rare: 342.9 96.9% 32.1%;
-    --breakdown-ultra: 349.2 65.2% 41.1%;
+    --breakdown-common: 343.7 97.2% 25.0%;
+    --breakdown-uncommon: 343.0 98.2% 28.6%;
+    --breakdown-rare: 344.9 85.9% 34.2%;
+    --breakdown-ultra: 349.6 62.9% 41.7%;
     --breakdown-legendary: 351.9 52.0% 47.5%;
     /* The deep jewel shades sit close to the near-black card: a hairline
        in the Scan colour keeps each segment's shape. */
@@ -1357,10 +1364,10 @@
     --rarity-rare-line: var(--rarity-rare-text);
     --rarity-ultra-line: var(--rarity-ultra-text);
     --rarity-legendary-text: 354.3 73.3% 65.2%;
-    --rarity-ultra-text: 353.7 74.3% 63.6%;
-    --rarity-rare-text: 353.1 75.7% 62.4%;
-    --rarity-uncommon-text: 353.9 66.9% 61.7%;
-    --rarity-common-text: 354.7 57.2% 60.6%;
+    --rarity-ultra-text: 353.8 74.0% 63.9%;
+    --rarity-rare-text: 353.2 74.6% 62.6%;
+    --rarity-uncommon-text: 353.7 68.4% 61.9%;
+    --rarity-common-text: 354.5 59.2% 60.7%;
   }
   [data-theme="amethyst"] {
     --background: 273.3 26% 6.9%;
@@ -2067,16 +2074,23 @@
     --ring: 29.6 67.2% 54.5%;
     --glow-intensity: 0.6;
     --wash-intensity: 0;
-    --breakdown-common: 11.1 100.0% 98.6%;
-    --breakdown-uncommon: 15.4 100.0% 89.3%;
-    --breakdown-rare: 19.6 56.1% 77.9%;
-    --breakdown-ultra: 22.5 37.9% 66.9%;
+    --breakdown-common: 10.3 100.0% 28.0%;
+    --breakdown-uncommon: 19.2 92.2% 33.3%;
+    --breakdown-rare: 23.2 78.0% 40.1%;
+    --breakdown-ultra: 26.5 66.2% 47.2%;
     --breakdown-legendary: 29.6 67.2% 54.5%;
+    /* The gauge starts from a deep shade: a hairline in the Scan colour keeps
+       each segment's shape, and badges outline in the readable text twins. */
+    --gauge-edge: hsl(var(--cta) / 0.55);
+    --rarity-common-line: var(--rarity-common-text);
+    --rarity-uncommon-line: var(--rarity-uncommon-text);
+    --rarity-rare-line: var(--rarity-rare-text);
+    --rarity-ultra-line: var(--rarity-ultra-text);
     --rarity-legendary-text: 29.6 67.2% 54.5%;
-    --rarity-ultra-text: 22.5 37.9% 66.9%;
-    --rarity-rare-text: 19.6 56.1% 77.9%;
-    --rarity-uncommon-text: 15.4 100.0% 89.3%;
-    --rarity-common-text: 11.1 100.0% 98.6%;
+    --rarity-ultra-text: 25.8 66.6% 53.4%;
+    --rarity-rare-text: 21.2 66.7% 54.0%;
+    --rarity-uncommon-text: 16.0 67.1% 55.7%;
+    --rarity-common-text: 9.8 66.1% 57.4%;
   }
   /* Root Beer: deeper red-brown with a frothy cream Scan and a vanilla-bean accent. */
   [data-theme="root-beer"] {
@@ -2099,16 +2113,16 @@
     --ring: 39.5 59.4% 86.5%;
     --glow-intensity: 0.6;
     --wash-intensity: 0;
-    --breakdown-common: 10.0 8.8% 50.3%;
-    --breakdown-uncommon: 16.3 12.9% 59.4%;
-    --breakdown-rare: 24.8 19.4% 68.3%;
-    --breakdown-ultra: 31.8 29.7% 77.5%;
+    --breakdown-common: 38.8 97.9% 34.6%;
+    --breakdown-uncommon: 36.7 58.2% 48.6%;
+    --breakdown-rare: 37.0 59.2% 60.7%;
+    --breakdown-ultra: 37.9 61.8% 73.2%;
     --breakdown-legendary: 39.5 59.4% 86.5%;
     --rarity-legendary-text: 39.5 59.4% 86.5%;
-    --rarity-ultra-text: 31.8 29.7% 77.5%;
-    --rarity-rare-text: 24.8 19.4% 68.3%;
-    --rarity-uncommon-text: 16.3 13.6% 61.2%;
-    --rarity-common-text: 10.0 11.3% 59.8%;
+    --rarity-ultra-text: 37.9 61.8% 73.2%;
+    --rarity-rare-text: 37.0 59.2% 60.7%;
+    --rarity-uncommon-text: 36.5 57.1% 50.6%;
+    --rarity-common-text: 35.7 63.5% 47.7%;
   }
   [data-theme="spring-plum"] {
     /* Scan in the palette colour itself (#665075, 2026-10-27); its rarity bar is a tint ladder of it. */

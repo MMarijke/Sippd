@@ -130,7 +130,7 @@ export default function CompareCollection() {
     <div className="min-h-screen bg-background pb-10">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 pt-6 pb-4 border-b border-border">
-        <button onClick={() => navigate(-1)} aria-label="Back" className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground flex-shrink-0">
+        <button onClick={() => navigate(-1)} aria-label="Back" className="w-11 h-11 rounded-control bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground flex-shrink-0">
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div className="flex items-center gap-2 flex-1 min-w-0">

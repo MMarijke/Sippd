@@ -97,7 +97,7 @@ export default function Notifications() {
     <div className="min-h-screen bg-background pb-8">
       <div className="flex items-center justify-between px-4 pt-5 pb-3 border-b border-border">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} aria-label="Back" className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center border border-border">
+          <button onClick={() => navigate(-1)} aria-label="Back" className="w-11 h-11 rounded-control bg-secondary flex items-center justify-center border border-border">
             <ArrowLeft className="w-4 h-4 text-foreground" />
           </button>
           <h1 className="text-base font-display font-bold text-foreground tracking-wide">Notifications</h1>

@@ -4,8 +4,9 @@ import { getDisplayRarity, RARITY_ORDER, BREAKDOWN_VAR, breakdownBackground } fr
 
 // This gauge shows a PROPORTION across tiers (like CollectionCard's
 // breakdown bar), not any single can's own badge color, so it reads the
-// theme-aware --breakdown-* ramp via BREAKDOWN_VAR rather than RARITY_HEX/
-// --rarity-*, which stay fixed on purpose for an individual can's rarity.
+// --breakdown-* ramp via BREAKDOWN_VAR directly. (Badges read --rarity-*,
+// which mirror the same ramp; RARITY_HEX is a fixed fallback for contexts
+// that can't read CSS custom properties.)
 // CSS custom properties resolve fine as literal SVG fill/style values in
 // every browser this app targets (this file's own empty-state ring already
 // relied on that via hsl(var(--secondary)) before this change).
@@ -177,8 +178,8 @@ export default function RarityHero({ collected, sharedCansMap = {}, isLoading = 
                   // should track the active theme like the rest of the app's
                   // neutral surfaces.
                   fill={isEmpty ? 'hsl(var(--secondary))' : arcFill(entry.name)}
-                  // Spring's pale tiers keep their shape on the light card
-                  // (--gauge-edge, transparent in every other family).
+                  // Pale or deep tiers keep their shape on their card
+                  // (--gauge-edge; transparent where the tiers already read).
                   style={isEmpty ? undefined : { stroke: 'var(--gauge-edge)', strokeWidth: 1 }}
                 />
               ))}

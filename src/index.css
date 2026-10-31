@@ -375,7 +375,20 @@
      ladder of tints of the theme's main colour, from the palest tint up to
      the colour itself, like the Spring palette cards (written by
      scripts/generate-tint-ladders.mjs; outlined with --gauge-edge where the
-     palest tint is faint on its card). */
+     palest tint is faint on its card).
+
+     GAUGE RULE (2026-10-28, product direction; supersedes the notes above
+     and every per-family note below where they disagree): every gauge
+     except Moonlight's and Silver Screen's is a LADDER of the Scan colour,
+     written by scripts/generate-tint-ladders.mjs. Legendary IS the Scan
+     colour and every tier stays in its hue: no greys, browns or detours.
+     Light themes climb from a pale tint of it; dark themes from a rich,
+     deeper shade (not pale, not vanishing). Named exceptions blend instead,
+     from the glow-bubble accent to the Scan colour: Aurora, Nebula, the
+     Neon dark renderings, Boss Fight light and Cola. Ladders keep tiers
+     >= 4 apart (deltaE-OK) and draw --gauge-edge where Common is under 2:1;
+     Moonlight and Silver Screen still meet the 2026-10-27 rule above. Both
+     enforced by breakdownRamps.test.js. */
 
   /* Neon Arcade structure: sharp cabinet corners, CRT scanlines (light
      lines on dark, dark on light), a primary bloom under every card, and
@@ -825,6 +838,8 @@
      (see the .home-gradient-bg-layer comment -- light and dark no longer
      get different ambient treatments).
 
+     (Superseded 2026-10-28 for every Cosmic gauge but Moonlight's: see
+     the GAUGE RULE notes above Neon Arcade. Kept as history.)
      --breakdown-* is HAND-AUTHORED for Moonlight, Solar Flare, Aurora,
      Deep Space and Stellar Gold (2026-09-29), per product direction, and
      interpolated evenly in CIELAB rather than by contrast alone -- two of
@@ -846,8 +861,10 @@
        halo in the accent colour, wide Michroma numerals. */
     --radius-scale: 1;
     --card-texture: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAQAAABpN6lAAAABkElEQVR42u3bzXKCMBQGUDYhhSLg+z+sbjtTpg6VmL8zdyULlTPfvRCiw2PIUOHw6JjjuwyPzuvni7l3gAEAAAAAANRdswQAqBvg1hfAtwQAAPCqogQAAFAxwCIBAAAA+FVbhhvuIAGH+xKtnFLsdwYEQxBAyQB7tlNba0zAmvwTlrQA05/HZzOgiLlfLkCUgI/vCx0BrLWt6CWgUYCbBAA4XaMEADi7IpEAAADa3vmRAAA9AkQJAAAAAAAAuQCWdx5Slg6wSEAzWyJlAEQJaBggFtkaoaYEpPo79ZcWAACgMIAp106BBAAAAKCcARYlAACA1A0XW0nA+wulrUaAoAUAAEgEsElAa4/BJi3QNcBoCJ4GmLRAL+sBLQAAwGuANL/uCPUnYNMCAACc3IOXAAAASqi9NoBNAgCkv9LUv9lx1wIAAAAA0CzA2Rk/tZyA8VMJiC2fcC0JGC9liIbgBQD3vgH+d78eXAYBtAFwRZTPvMcuAQAAAPg0wCIBAADkqFkCOgMYs57wJgHZAfayAJ7BgMbPtNZuhAAAAABJRU5ErkJggg==");
-    /* Cards glow in --glow-hue: the accent, or Aurora's Scan green. */
-    --glow-hue: var(--accent);
+    /* Cards and the Score card glow in the Scan colour (2026-10-28; they
+       glowed in the accent: khaki under Stellar Gold, violet under Deep
+       Space's blue). */
+    --glow-hue: var(--cta);
     --card-lift: 0 10px 30px -14px hsl(var(--glow-hue) / calc(0.45 * var(--glow-intensity)));
     /* The Collection Score's glow, a third dimmer than it was (product
        direction, 2026-10-27): it outshone the score itself. */
@@ -969,9 +986,6 @@
     --rarity-common-text: 14.3 79.1% 58.7%;
   }
   [data-theme="aurora"] {
-    /* Cards glow in the Scan green, not the periwinkle accent (which stays
-       in the glow bubble and the gauge's first tier). */
-    --glow-hue: var(--primary);
     --background: 176.0 48% 6.1%;
     --foreground: 158.6 100% 97.3%;
     --card: 176.0 46% 10.1%;
@@ -1573,7 +1587,9 @@
     --border-width: 1.5px;
     --shadow-ink: var(--foreground);
     --card-lift: 0 3px 0 hsl(var(--primary) / 0.3), 0 10px 18px -10px hsl(var(--shadow-ink) / 0.3);
-    --hero-lift: 0 5px 0 hsl(var(--primary) / 0.45), 0 18px 30px -14px hsl(var(--primary) / 0.4);
+    /* The Score card's bloom, a third dimmer than it was (0.4; product
+       direction, 2026-10-28): it was the loudest hero glow in the app. */
+    --hero-lift: 0 5px 0 hsl(var(--primary) / 0.45), 0 18px 30px -14px hsl(var(--primary) / 0.27);
     --element-glow: 0;
     --font-num: 'Fredoka', sans-serif;
   }
@@ -1830,8 +1846,14 @@
     --radius-scale: 1.35;
     --border-width: 1.5px;
     --card-texture: url("data:image/png;base64,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");
-    --card-lift: 3px 3px 0 hsl(var(--primary) / 0.25);
-    --hero-lift: 5px 5px 0 hsl(var(--primary) / 0.4);
+    /* The offset ink layer is in the Scan colour (--lip), not --primary, the
+       deep text shade, which is brown in Brick and Butter and muddy olive in
+       Olive (2026-10-28). Coral, Butter and Pistachio's Scan colours are too
+       pale to show as a lip, so theirs is the shade that outlines their
+       buttons (--fill-edge). */
+    --lip: var(--cta);
+    --card-lift: 3px 3px 0 hsl(var(--lip) / 0.25);
+    --hero-lift: 5px 5px 0 hsl(var(--lip) / 0.4);
     --element-glow: 0;
     --font-num: 'Poppins', sans-serif;
   }
@@ -1859,6 +1881,9 @@
        block), a specular bevel (a light top edge, a dark bottom edge), and
        Archivo Expanded numerals, like the codes stamped into a can's base. */
     --radius-scale: 0.5;
+    /* ...but the header actions (Scan, notifications) stay softly rounded,
+       as in Noir and Neon (rounded-control was ~4px here). */
+    --control-radius: 0.5rem;
     --spec: 0.14;
     --card-lift: inset 0 1px 0 hsl(0 0% 100% / var(--spec)), inset 0 -1px 0 hsl(0 0% 0% / 0.25), 0 2px 6px -2px hsl(0 0% 0% / 0.35);
     --hero-lift: inset 0 1px 0 hsl(0 0% 100% / var(--spec)), 0 0 32px hsl(var(--primary) / calc(0.15 * var(--glow-intensity)));
@@ -2049,7 +2074,10 @@
     --border-width: 1.5px;
     --card-texture: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAQAAABuBnYAAAAAKUlEQVR42mP4z/+f5T8DFLL852dA4oKFEHJQCbhSmFYcAihaMAxFsxYAQOtAeTq5NQEAAAAASUVORK5CYII=");
     --card-lift: inset 0 0 0 3px hsl(var(--card)), inset 0 0 0 4px hsl(var(--primary) / 0.35);
-    --hero-lift: 0 4px 0 hsl(var(--accent) / 0.55), 0 14px 28px -14px hsl(0 0% 0% / 0.7);
+    /* The Score card's enamel lip is in the Scan colour (caramel, cream),
+       not the accent, which is red-brown in Cola and brown in Root Beer
+       (2026-10-28). */
+    --hero-lift: 0 4px 0 hsl(var(--cta) / 0.55), 0 14px 28px -14px hsl(0 0% 0% / 0.7);
     --element-glow: 0.7;
     --font-num: 'Shrikhand', serif;
   }
@@ -2207,6 +2235,7 @@
     --primary: 18.9 58.6% 44.5%;
     --primary-fill: 19.5 100.0% 77.1%;
     --fill-edge: hsl(18.6 53.4% 53.7%);
+    --lip: 18.6 53.4% 53.7%;
     --primary-foreground: 240.0 20.0% 4.9%;
     --secondary: 15.3 80% 90.5%;
     --secondary-foreground: 15.3 37% 27.2%;
@@ -2243,6 +2272,7 @@
     --primary: 46.1 100.0% 27.1%;
     --primary-fill: 46.9 100.0% 65.1%;
     --fill-edge: hsl(46.4 100.0% 32.9%);
+    --lip: 46.4 100.0% 32.9%;
     --primary-foreground: 240.0 20.0% 4.9%;
     --secondary: 49.1 100% 94.2%;
     --secondary-foreground: 49.1 24% 24.3%;
@@ -2279,6 +2309,7 @@
     --primary: 90.4 37.3% 36.3%;
     --primary-fill: 86.2 48.0% 61.6%;
     --fill-edge: hsl(89.2 35.8% 42.7%);
+    --lip: 89.2 35.8% 42.7%;
     --primary-foreground: 240.0 20.0% 4.9%;
     --secondary: 68.6 34% 88.0%;
     --secondary-foreground: 68.6 23% 22.4%;

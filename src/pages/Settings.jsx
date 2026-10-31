@@ -372,7 +372,7 @@ function PolarityToggle({ theme, polarity, onSelectPolarity, isPending }) {
 }
 
 // ─── Theme Picker ────────────────────────────────────────────────────────────
-// Two-step now that there are 5 families (28 palettes, 5-6 each): Step 1
+// Two-step now that there are 8 families (39 palettes, 2-6 each): Step 1
 // picks a family, Step 2 picks a palette within it. `viewedFamilyId` is
 // which family the picker is currently *browsing* — independent of `theme`
 // (the actually *applied* palette) — so tapping around families to look at
@@ -380,12 +380,12 @@ function PolarityToggle({ theme, polarity, onSelectPolarity, isPending }) {
 // Polarity (light/dark) is a separate control (PolarityToggle above) rather
 // than folded into either step — but it only applies to Neon Arcade, the
 // one family where every palette genuinely has both a dark and light
-// rendering. The 4 Phase 2 families are each a single fixed
+// rendering. Every other family is a single fixed
 // polarity per theme (Botanical mixes light/dark PALETTES within itself,
 // but no individual palette toggles), so the toggle only renders when the
 // viewed family actually supports it — see familyHasPolarityToggle.
 // Both picker steps lay out 3 per row with any short final row centered,
-// not a CSS grid: 5 families (and Neon Arcade/Noir's 5 palettes) would
+// not a CSS grid: 8 families (and Neon Arcade's 5 palettes) would
 // leave a grid's last row as 2 tiles plus an empty slot that reads like
 // something failed to load. Centered 3-over-2 reads as deliberate.
 // A single row of 5 was ruled out -- at 375px each tile gets ~54px and
@@ -547,7 +547,7 @@ function ThemePalettePicker({ family, theme, polarity, onSelectTheme, isPro, isP
       >
         <ChevronLeft className="w-4 h-4" aria-hidden="true" /> All families
       </button>
-      {/* The whole point of a two-step picker is orientation at 18 options
+      {/* The whole point of a two-step picker is orientation at 39 options
           — landing on 6 swatches with nothing naming which family they
           belong to defeated that, especially since this step is usually
           reached by the picker's own default (viewedFamilyId starts on the

@@ -383,7 +383,9 @@
      written by scripts/generate-tint-ladders.mjs. Legendary IS the Scan
      colour and every tier stays in its hue: no greys, browns or detours.
      Light themes climb from a pale tint of it; dark themes from a rich,
-     deeper shade (not pale, not vanishing). Named exceptions blend instead,
+     deeper shade (not pale, not vanishing). Approved exceptions: Spring
+     Butter, Coral and Pistachio are too pale to end on, so their ladders
+     START at the palette colour and deepen from it. Named exceptions blend instead,
      from the glow-bubble accent to the Scan colour: Aurora, Nebula, the
      Neon dark renderings, Boss Fight light and Cola. Ladders keep tiers
      >= 4 apart (deltaE-OK) and draw --gauge-edge where Common is under 2:1;
@@ -2248,16 +2250,19 @@
     --ring: 18.9 58.6% 44.5%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 15.2 92.7% 92.3%;
-    --breakdown-uncommon: 15.2 88.9% 86.1%;
-    --breakdown-rare: 15.3 85.8% 80.4%;
-    --breakdown-ultra: 15.3 82.8% 74.5%;
-    --breakdown-legendary: 15.3 80.1% 68.4%;
-    --rarity-legendary-text: 15.8 60.1% 39.1%;
-    --rarity-ultra-text: 15.5 46.6% 40.8%;
-    --rarity-rare-text: 15.4 35.3% 42.0%;
-    --rarity-uncommon-text: 15.2 25.4% 42.2%;
-    --rarity-common-text: 15.2 14.3% 42.8%;
+    --breakdown-common: 15.3 80.1% 68.4%;
+    --breakdown-uncommon: 14.0 71.7% 62.5%;
+    --breakdown-rare: 12.4 65.3% 56.7%;
+    --breakdown-ultra: 10.5 60.0% 50.8%;
+    --breakdown-legendary: 8.1 68.5% 44.8%;
+    /* Its gauge deepens past the Scan colour, so the filled Legendary badge
+       is a deep shade: white reads on it, the Scan label doesn't. */
+    --rarity-legendary-on: 0 0% 100%;
+    --rarity-legendary-text: 8.3 86.5% 36.1%;
+    --rarity-ultra-text: 11.0 80.2% 36.7%;
+    --rarity-rare-text: 12.9 72.3% 38.0%;
+    --rarity-uncommon-text: 14.5 66.3% 38.5%;
+    --rarity-common-text: 15.8 60.1% 39.1%;
   }
   [data-theme="spring-butter"] {
     /* Scan in the palette colour itself (#FFED9C, 2026-10-27); its rarity bar is a tint ladder of it. */
@@ -2322,16 +2327,19 @@
     --ring: 90.4 37.3% 36.3%;
     --glow-intensity: 1;
     --wash-intensity: 0;
-    --breakdown-common: 70.9 34.2% 89.6%;
-    --breakdown-uncommon: 70.4 34.1% 81.7%;
-    --breakdown-rare: 69.9 34.0% 74.5%;
-    --breakdown-ultra: 69.3 34.1% 67.3%;
-    --breakdown-legendary: 68.6 34.3% 60.0%;
-    --rarity-legendary-text: 66.8 48.1% 28.3%;
-    --rarity-ultra-text: 67.9 33.0% 31.8%;
-    --rarity-rare-text: 68.8 22.7% 34.8%;
-    --rarity-uncommon-text: 69.6 14.9% 37.4%;
-    --rarity-common-text: 70.4 7.8% 40.0%;
+    --breakdown-common: 68.6 34.3% 60.0%;
+    --breakdown-uncommon: 72.5 33.3% 51.0%;
+    --breakdown-rare: 76.1 45.9% 41.8%;
+    --breakdown-ultra: 78.2 77.7% 30.9%;
+    --breakdown-legendary: 81.8 98.5% 24.4%;
+    /* Its gauge deepens past the Scan colour, so the filled Legendary badge
+       is a deep shade: white reads on it, the Scan label doesn't. */
+    --rarity-legendary-on: 0 0% 100%;
+    --rarity-legendary-text: 82.9 89.8% 21.2%;
+    --rarity-ultra-text: 77.1 98.5% 20.5%;
+    --rarity-rare-text: 73.1 88.2% 21.9%;
+    --rarity-uncommon-text: 69.6 75.8% 23.7%;
+    --rarity-common-text: 66.8 48.1% 28.3%;
   }
   [data-theme="spring-olive"] {
     /* Scan in the palette colour itself (#778C62, 2026-10-27); its rarity bar is a tint ladder of it. */

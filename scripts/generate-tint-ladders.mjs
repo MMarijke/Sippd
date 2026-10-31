@@ -161,13 +161,25 @@ export function blendLadder(fromRgb, colourRgb, chromaEase = 1) {
   return [0, 0.25, 0.5, 0.75, 1].map((t) => (t === 1 ? colourRgb : fit(L0 + (L1 - L0) * t, C0 + (C1 - C0) * t ** chromaEase, h0 + dh * t)));
 }
 
+// Deepening ladders (owner-approved exceptions): Spring's palest palette
+// colours vanish as tints on their own cream cards (Butter 1.13:1, Coral and
+// Pistachio's whole bars were 1.1-2.2:1), so these START at the palette
+// colour (Common) and climb into deeper, richer shades of it: OKLab
+// lightness drop, chroma gain and hue drift (degrees) at Legendary.
+// Butter eases toward gold; Coral toward red, Pistachio toward green, so
+// neither deepens into brown or olive. Legendary is not the Scan colour.
+export const DEEPEN = {
+  'spring-butter': { depth: 0.16, boost: 0.08, hue: -12 },
+  'spring-coral': { depth: 0.2, boost: 0.05, hue: -8 },
+  'spring-pistachio': { depth: 0.24, boost: 0.07, hue: 15 },
+};
+
 export function tintLadder(id, colourRgb) {
   const [L, a, b] = srgbToOklab(colourRgb);
-  if (id === 'spring-butter') {
-    // From the palette butter into richer butter-golds: darker, more colour,
-    // hue easing a little toward gold.
+  if (Object.hasOwn(DEEPEN, id)) {
+    const { depth, boost, hue } = DEEPEN[id];
     const C0 = Math.hypot(a, b), h0 = Math.atan2(b, a);
-    return [0, 0.25, 0.5, 0.75, 1].map((t) => fit(L - 0.16 * t, C0 + 0.08 * t, h0 - (12 * Math.PI / 180) * t));
+    return [0, 0.25, 0.5, 0.75, 1].map((t) => fit(L - depth * t, C0 + boost * t, h0 + (hue * Math.PI / 180) * t));
   }
   if (Object.hasOwn(SHADE_DEPTH, id)) {
     // Shades: deeper and a little more saturated below the Scan colour,

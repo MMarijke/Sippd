@@ -861,7 +861,7 @@ export default function Settings() {
         <button
           onClick={() => navigate(-1)}
           aria-label="Back"
-          className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center border border-border"
+          className="w-11 h-11 rounded-control bg-secondary flex items-center justify-center border border-border"
         >
           <ArrowLeft className="w-4 h-4 text-foreground" />
         </button>

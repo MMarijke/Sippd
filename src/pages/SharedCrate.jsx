@@ -104,7 +104,7 @@ export default function SharedCrate() {
         <button
           onClick={() => navigate(-1)}
           aria-label="Back"
-          className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+          className="w-11 h-11 rounded-control bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>

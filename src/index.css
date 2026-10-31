@@ -375,7 +375,20 @@
      ladder of tints of the theme's main colour, from the palest tint up to
      the colour itself, like the Spring palette cards (written by
      scripts/generate-tint-ladders.mjs; outlined with --gauge-edge where the
-     palest tint is faint on its card). */
+     palest tint is faint on its card).
+
+     GAUGE RULE (2026-10-28, product direction; supersedes the notes above
+     and every per-family note below where they disagree): every gauge
+     except Moonlight's and Silver Screen's is a LADDER of the Scan colour,
+     written by scripts/generate-tint-ladders.mjs. Legendary IS the Scan
+     colour and every tier stays in its hue: no greys, browns or detours.
+     Light themes climb from a pale tint of it; dark themes from a rich,
+     deeper shade (not pale, not vanishing). Named exceptions blend instead,
+     from the glow-bubble accent to the Scan colour: Aurora, Nebula, the
+     Neon dark renderings, Boss Fight light and Cola. Ladders keep tiers
+     >= 4 apart (deltaE-OK) and draw --gauge-edge where Common is under 2:1;
+     Moonlight and Silver Screen still meet the 2026-10-27 rule above. Both
+     enforced by breakdownRamps.test.js. */
 
   /* Neon Arcade structure: sharp cabinet corners, CRT scanlines (light
      lines on dark, dark on light), a primary bloom under every card, and
@@ -825,6 +838,8 @@
      (see the .home-gradient-bg-layer comment -- light and dark no longer
      get different ambient treatments).
 
+     (Superseded 2026-10-28 for every Cosmic gauge but Moonlight's: see
+     the GAUGE RULE notes above Neon Arcade. Kept as history.)
      --breakdown-* is HAND-AUTHORED for Moonlight, Solar Flare, Aurora,
      Deep Space and Stellar Gold (2026-09-29), per product direction, and
      interpolated evenly in CIELAB rather than by contrast alone -- two of

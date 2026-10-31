@@ -29,7 +29,7 @@ export default function PageHeader({ title, subtitle, action, showBell = true, o
           <button
             onClick={onBack}
             aria-label="Back"
-            className="w-11 h-11 -ml-2 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            className="w-11 h-11 -ml-2 rounded-control flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -58,7 +58,7 @@ export default function PageHeader({ title, subtitle, action, showBell = true, o
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[1.125rem] h-[1.125rem] px-1 bg-destructive rounded-full flex items-center justify-center text-2xs leading-none font-mono font-bold text-white">
+              <span className="absolute -top-1 -right-1 min-w-[1.125rem] h-[1.125rem] px-1 bg-destructive rounded-full flex items-center justify-center text-2xs leading-none font-mono font-bold text-destructive-foreground">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}

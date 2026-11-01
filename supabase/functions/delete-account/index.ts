@@ -42,10 +42,10 @@ const corsHeaders = {
 
 const PADDLE_API_KEY = Deno.env.get('PADDLE_API_KEY')!;
 const PADDLE_API_ENVIRONMENT = Deno.env.get('PADDLE_API_ENVIRONMENT');
-if (!PADDLE_API_ENVIRONMENT) {
+if (PADDLE_API_ENVIRONMENT !== 'sandbox' && PADDLE_API_ENVIRONMENT !== 'production') {
   // Fail loudly rather than silently guessing sandbox/live — matches
   // get-subscription-status's own guard for the same env var.
-  throw new Error('PADDLE_API_ENVIRONMENT is not set. Set it to "sandbox" or "production".');
+  throw new Error(`PADDLE_API_ENVIRONMENT must be "sandbox" or "production" (got ${JSON.stringify(PADDLE_API_ENVIRONMENT ?? null)}).`);
 }
 const PADDLE_API_BASE = PADDLE_API_ENVIRONMENT === 'production'
   ? 'https://api.paddle.com'

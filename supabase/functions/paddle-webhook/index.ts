@@ -154,10 +154,36 @@ function scheduledCancelEffectiveAt(data: Record<string, unknown>): string | nul
   return (scheduled.effective_at as string | undefined) ?? null;
 }
 
+// A problem retrying can't fix (the same payload would fail the same way):
+// reported to Sentry, left unprocessed in paddle_events for a manual look,
+// and acknowledged with 200 so Paddle stops redelivering it. Anything else
+// thrown while processing is treated as transient and answered with a 500,
+// so Paddle redelivers it later.
+class PermanentEventError extends Error {}
+
+// Paddle doesn't guarantee delivery order, and a canceled subscription never
+// becomes active again (resubscribing creates a new subscription id). So an
+// activated/updated event for the very subscription this profile already
+// has as cancelled is a late delivery, and must not grant Pro back.
+function isStaleForCancelled(profile: { paddle_subscription_id: unknown; subscription_status: unknown }, subscriptionId: unknown) {
+  return profile.paddle_subscription_id === subscriptionId && profile.subscription_status === "cancelled";
+}
+
 async function applySubscriptionActivated(data: Record<string, unknown>) {
   const userId = resolveUserIdFromCheckout(data);
   if (!userId) {
-    console.error(`paddle-webhook: no custom_data.user_id on subscription.activated (${data.id})`);
+    // A paying customer we can't match to an account: never only a log line.
+    throw new PermanentEventError(`no custom_data.user_id on subscription.activated (${data.id})`);
+  }
+
+  const { data: current, error: readError } = await supabase
+    .from("profiles")
+    .select("paddle_subscription_id, subscription_status")
+    .eq("id", userId)
+    .single();
+  if (readError) throw readError;
+  if (isStaleForCancelled(current, data.id)) {
+    console.warn(`paddle-webhook: ignoring late subscription.activated for already-cancelled ${data.id}`);
     return;
   }
 
@@ -196,16 +222,27 @@ async function applySubscriptionUpdated(data: Record<string, unknown>) {
     patch.pro_expires_at = scheduledCancelEffectiveAt(data);
   }
 
-  const { data: matched, error } = await supabase
+  const { data: owners, error: readError } = await supabase
+    .from("profiles")
+    .select("id, paddle_subscription_id, subscription_status")
+    .eq("paddle_subscription_id", subscriptionId);
+  if (readError) throw readError;
+  if (!owners || owners.length === 0) {
+    // Most likely delivered before its subscription.activated: thrown as
+    // transient, so Paddle redelivers it once activated has stored the id.
+    throw new Error(`no profile with paddle_subscription_id on subscription.updated (${subscriptionId})`);
+  }
+  if (owners.every((p: { paddle_subscription_id: unknown; subscription_status: unknown }) => isStaleForCancelled(p, subscriptionId))) {
+    console.warn(`paddle-webhook: ignoring late subscription.updated for already-cancelled ${subscriptionId}`);
+    return;
+  }
+
+  const { error } = await supabase
     .from("profiles")
     .update(patch)
-    .eq("paddle_subscription_id", subscriptionId)
-    .select("id");
+    .eq("paddle_subscription_id", subscriptionId);
 
   if (error) throw error;
-  if (!matched || matched.length === 0) {
-    console.error(`paddle-webhook: no profile with paddle_subscription_id on subscription.updated (${subscriptionId})`);
-  }
 }
 
 async function applySubscriptionCanceled(data: Record<string, unknown>) {
@@ -222,7 +259,8 @@ async function applySubscriptionCanceled(data: Record<string, unknown>) {
 
   if (error) throw error;
   if (!matched || matched.length === 0) {
-    console.error(`paddle-webhook: no profile with paddle_subscription_id on subscription.canceled (${subscriptionId})`);
+    // Same as subscription.updated: most likely ahead of its activated.
+    throw new Error(`no profile with paddle_subscription_id on subscription.canceled (${subscriptionId})`);
   }
 }
 
@@ -261,47 +299,57 @@ Deno.serve(async (req) => {
 
     const event = JSON.parse(rawBody);
 
-    // Write first, ack fast, process after — Paddle expects a response
-    // within 5 seconds and retries on timeout/non-2xx. Idempotency is
-    // enforced by the unique constraint on event_id.
+    // Log first (the audit trail and the idempotency key: event_id is
+    // unique), then process. Processing is one or two single-row queries,
+    // well inside Paddle's 5-second limit, and is done before answering so
+    // a failure can answer non-2xx: Paddle then redelivers the event, and
+    // the redelivery picks up an event that was logged but never processed.
     const { error: insertError } = await supabase
       .from("paddle_events")
       .insert({ event_id: event.event_id, event_type: event.event_type, payload: event });
 
     if (insertError) {
-      if (insertError.code === "23505") {
-        return new Response("OK (duplicate)", { status: 200 });
-      }
-      console.error("paddle-webhook: failed to log event", insertError);
-      const logFailureCaptured = captureException(new Error(`paddle-webhook: failed to log event: ${insertError.message}`), {
-        eventType: event.event_type,
-        eventId: event.event_id,
-      });
-      // @ts-ignore -- EdgeRuntime is a platform global, not in the standard lib types.
-      if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(logFailureCaptured);
-      return new Response("OK (log failed, not retrying)", { status: 200 });
-    }
-
-    const processed = processEvent(event)
-      .then(() =>
-        supabase
-          .from("paddle_events")
-          .update({ processed: true, processed_at: new Date().toISOString() })
-          .eq("event_id", event.event_id)
-      )
-      .catch(async (err) => {
-        console.error("paddle-webhook: failed to process event", event.event_id, err);
-        await captureException(err, {
+      if (insertError.code !== "23505") {
+        // Not stored, so not processed either: ask Paddle to try again
+        // rather than acknowledge an event we've lost.
+        console.error("paddle-webhook: failed to log event", insertError);
+        await captureException(new Error(`paddle-webhook: failed to log event: ${insertError.message}`), {
           eventType: event.event_type,
           eventId: event.event_id,
-          objectId: (event.data as Record<string, unknown> | undefined)?.id,
         });
-      });
+        return new Response("Could not store event", { status: 500 });
+      }
+      const { data: seen, error: seenError } = await supabase
+        .from("paddle_events")
+        .select("processed")
+        .eq("event_id", event.event_id)
+        .single();
+      if (seenError) throw seenError;
+      if (seen.processed) return new Response("OK (duplicate)", { status: 200 });
+      // Logged by an earlier delivery whose processing failed: retry it now.
+    }
 
-    // Supabase/Deno Deploy's background-task hook: lets us respond
-    // immediately (Paddle's 5-second rule) while finishing the DB update after.
-    // @ts-ignore -- EdgeRuntime is a platform global, not in the standard lib types.
-    if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(processed);
+    try {
+      await processEvent(event);
+    } catch (err) {
+      console.error("paddle-webhook: failed to process event", event.event_id, err);
+      await captureException(err, {
+        eventType: event.event_type,
+        eventId: event.event_id,
+        objectId: (event.data as Record<string, unknown> | undefined)?.id,
+      });
+      return err instanceof PermanentEventError
+        ? new Response("OK (unprocessable, not retrying)", { status: 200 })
+        : new Response("Processing failed", { status: 500 });
+    }
+
+    const { error: markError } = await supabase
+      .from("paddle_events")
+      .update({ processed: true, processed_at: new Date().toISOString() })
+      .eq("event_id", event.event_id);
+    // The profile is already updated; a redelivery would just reapply the
+    // same change. Worth knowing about, not worth a retry.
+    if (markError) await captureException(new Error(`paddle-webhook: failed to mark processed: ${markError.message}`), { eventId: event.event_id });
 
     return new Response("OK", { status: 200 });
   } catch (err) {

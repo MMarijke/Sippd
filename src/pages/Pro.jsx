@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Check, Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
-import { openCheckout, PADDLE_MONTHLY_PRICE_ID, PADDLE_ANNUAL_PRICE_ID } from '@/lib/paddle';
+import { onPaddleEvent, openCheckout, previewPrices, PADDLE_MONTHLY_PRICE_ID, PADDLE_ANNUAL_PRICE_ID } from '@/lib/paddle';
 import { toast } from 'sonner';
 import { THEMES, THEME_FAMILIES } from '@/hooks/useTheme';
 import LegalFooter from '@/components/legal/LegalFooter';
@@ -25,11 +25,48 @@ const FEATURES = [
   'Support indie development',
 ];
 
+// Shown until Paddle answers with the customer's local price (or if it
+// can't, e.g. offline): the US list prices.
+const FALLBACK_PRICES = { monthly: '$2.99', annual: '$19.99' };
+
+// After payment, Pro arrives through Paddle's webhook, usually within
+// seconds. Re-check this often, for this long, before saying it's slow.
+const ACTIVATION_POLL_MS = 2000;
+const ACTIVATION_PATIENCE_MS = 60_000;
+
 export default function Pro() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isPro, paddleCustomerId } = useSubscription();
+  const { isPro, isLoading, paddleCustomerId, refetch } = useSubscription();
   const [loadingPriceId, setLoadingPriceId] = useState(null);
+  // 'waiting' once Paddle reports the payment went through, until the
+  // webhook has made the account Pro; 'slow' if that takes unusually long.
+  const [activation, setActivation] = useState(null);
+  const [prices, setPrices] = useState({});
+
+  useEffect(() => {
+    if (isLoading || isPro || !PADDLE_MONTHLY_PRICE_ID || !PADDLE_ANNUAL_PRICE_ID) return undefined;
+    let current = true;
+    previewPrices([PADDLE_MONTHLY_PRICE_ID, PADDLE_ANNUAL_PRICE_ID], paddleCustomerId)
+      .then((found) => { if (current) setPrices(found); })
+      .catch(() => { /* display only: the fallback prices stay */ });
+    return () => { current = false; };
+  }, [isLoading, isPro, paddleCustomerId]);
+
+  useEffect(() => onPaddleEvent((event) => {
+    if (event?.name === 'checkout.completed') setActivation('waiting');
+  }), []);
+
+  useEffect(() => {
+    if (!activation || isPro) return undefined;
+    const poll = setInterval(() => refetch(), ACTIVATION_POLL_MS);
+    const slow = setTimeout(() => setActivation('slow'), ACTIVATION_PATIENCE_MS);
+    return () => { clearInterval(poll); clearTimeout(slow); };
+  }, [activation, isPro, refetch]);
+
+  useEffect(() => {
+    if (activation && isPro) toast.success('Welcome to Pro!');
+  }, [activation, isPro]);
 
   const handleCheckout = async (priceId) => {
     if (!priceId) {
@@ -60,11 +97,31 @@ export default function Pro() {
       </div>
 
       <div className="px-5 pt-6 space-y-6">
-        {isPro ? (
+        {isLoading ? (
+          // Not the plans until we know: a Pro user shouldn't be offered a
+          // second subscription, and a returning customer's checkout needs
+          // their Paddle customer id (paddleCustomerId) from this same query.
+          <div className="flex justify-center py-16" role="status" aria-label="Loading your plan">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : isPro ? (
           <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 text-center space-y-2">
             <Zap className="w-6 h-6 text-primary mx-auto" />
             <p className="text-sm font-display font-semibold text-foreground">You're already on Pro</p>
             <p className="text-xs font-mono text-muted-foreground">Thanks for supporting Sippd.</p>
+          </div>
+        ) : activation ? (
+          // Paid, and Pro is on its way: no plans, so nobody pays twice.
+          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 text-center space-y-2" role="status">
+            {activation === 'waiting'
+              ? <Loader2 className="w-6 h-6 text-primary mx-auto animate-spin" />
+              : <Zap className="w-6 h-6 text-primary mx-auto" />}
+            <p className="text-sm font-display font-semibold text-foreground">Payment received</p>
+            <p className="text-xs font-mono text-muted-foreground">
+              {activation === 'waiting'
+                ? 'Switching on Pro…'
+                : "Pro is taking longer than usual to switch on. It'll appear here by itself; if it hasn't within a few minutes, contact support."}
+            </p>
           </div>
         ) : (
           <>
@@ -85,7 +142,7 @@ export default function Pro() {
               >
                 {loadingPriceId === PADDLE_MONTHLY_PRICE_ID
                   ? <Loader2 className="w-4 h-4 animate-spin" />
-                  : 'Monthly — $2.99/mo'}
+                  : `Monthly — ${prices[PADDLE_MONTHLY_PRICE_ID] ?? FALLBACK_PRICES.monthly}/mo`}
               </Button>
               <Button
                 variant="outline"
@@ -95,7 +152,7 @@ export default function Pro() {
               >
                 {loadingPriceId === PADDLE_ANNUAL_PRICE_ID
                   ? <Loader2 className="w-4 h-4 animate-spin" />
-                  : 'Annual — $19.99/yr'}
+                  : `Annual — ${prices[PADDLE_ANNUAL_PRICE_ID] ?? FALLBACK_PRICES.annual}/yr`}
               </Button>
             </div>
 

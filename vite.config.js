@@ -34,6 +34,7 @@ export default defineConfig({
   // intentionally out of scope per this project's own testing convention.
   test: {
     environment: 'node',
-    include: ['src/**/*.test.js'],
+    // Edge functions run under Node via supabase/functions/_test/harness.js.
+    include: ['src/**/*.test.js', 'supabase/functions/**/*.test.js'],
   },
 });

@@ -14,10 +14,11 @@ initSentry("get-subscription-status");
 const PADDLE_API_KEY = Deno.env.get("PADDLE_API_KEY")!;
 
 const PADDLE_API_ENVIRONMENT = Deno.env.get("PADDLE_API_ENVIRONMENT");
-if (!PADDLE_API_ENVIRONMENT) {
+if (PADDLE_API_ENVIRONMENT !== "sandbox" && PADDLE_API_ENVIRONMENT !== "production") {
   // Fail loudly rather than silently guessing sandbox/live — a wrong guess
-  // here doesn't error obviously, it just quietly hits the wrong Paddle account.
-  throw new Error('PADDLE_API_ENVIRONMENT is not set. Set it to "sandbox" or "production".');
+  // here doesn't error obviously, it just quietly hits the wrong Paddle
+  // account. Any other value (unset, "live", "prod") is a typo, not sandbox.
+  throw new Error(`PADDLE_API_ENVIRONMENT must be "sandbox" or "production" (got ${JSON.stringify(PADDLE_API_ENVIRONMENT ?? null)}).`);
 }
 const PADDLE_API_BASE = PADDLE_API_ENVIRONMENT === "production"
   ? "https://api.paddle.com"
@@ -105,6 +106,9 @@ Deno.serve(async (req) => {
       next_billing_date: subscription.next_billed_at,
       cancel_at: subscription.scheduled_change?.action === "cancel" ? subscription.scheduled_change.effective_at : null,
       manage_url: subscription.management_urls?.update_payment_method ?? null,
+      // Paddle's own cancellation page for this subscription, so a user can
+      // cancel from Settings (manage_url only updates the card).
+      cancel_url: subscription.management_urls?.cancel ?? null,
     });
   } catch (err) {
     console.error("get-subscription-status: unexpected error", err);

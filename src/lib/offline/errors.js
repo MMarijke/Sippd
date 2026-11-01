@@ -12,6 +12,9 @@ const LIMITS = {
   daily_scan_limit_reached:
     "You've scanned 10 barcodes in the last 24 hours, the free daily limit. This can will sync once the oldest scan is a day old, or with Pro.",
   rate_limit_exceeded: "You've added 30 cans in the last hour. This can will sync after a short break.",
+  // Pinned offline on a stale Pro status (enforce_pin_limit). Unpin one,
+  // then Retry.
+  pin_limit_reached: "You've reached your pin limit (6, or 10 with Pro). Unpin a can, then retry.",
 };
 
 const NETWORK_PATTERNS = /failed to fetch|networkerror|network request failed|load failed|fetch failed|timed? ?out|offline/i;

@@ -13,6 +13,15 @@ let paddleInstance = null;
 // check is needed for the one place that calls it today.
 let paddleInstanceCustomerId;
 
+// Checkout events (checkout.completed, checkout.closed, ...) for whoever is
+// listening, e.g. Pro.jsx waiting for a payment to turn into Pro. Paddle
+// takes one eventCallback per initialization, so it fans out from here.
+const listeners = new Set();
+export function onPaddleEvent(listener) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
 export async function getPaddle(paddleCustomerId) {
   if (paddleInstance && paddleInstanceCustomerId === paddleCustomerId) return paddleInstance;
 
@@ -29,6 +38,7 @@ export async function getPaddle(paddleCustomerId) {
   paddleInstance = await initializePaddle({
     environment,
     token: import.meta.env.VITE_PADDLE_CLIENT_TOKEN,
+    eventCallback: (event) => listeners.forEach((listener) => listener(event)),
     // Paddle Retain: identifies a returning customer by their real Paddle
     // customer ID (profiles.paddle_customer_id, set by paddle-webhook on
     // subscription.activated) — never Sippd's own user id or email, which
@@ -49,6 +59,21 @@ export async function openCheckout(priceId, user, paddleCustomerId) {
     // subscription.activated — see supabase/functions/paddle-webhook/index.ts.
     customData: { user_id: user.id },
   });
+}
+
+// The customer's own price for each plan, as Paddle will charge it: their
+// currency, and tax included where it must be (Paddle picks the location
+// from their IP). Returns { [priceId]: '€2.79' }; callers keep a fallback,
+// since this is display only and checkout shows the real total either way.
+export async function previewPrices(priceIds, paddleCustomerId) {
+  const paddle = await getPaddle(paddleCustomerId);
+  const result = await paddle.PricePreview({ items: priceIds.map((priceId) => ({ priceId, quantity: 1 })) });
+  const prices = {};
+  for (const item of result?.data?.details?.lineItems ?? []) {
+    const total = item?.formattedTotals?.total;
+    if (item?.price?.id && total) prices[item.price.id] = total;
+  }
+  return prices;
 }
 
 export const PADDLE_MONTHLY_PRICE_ID = import.meta.env.VITE_PADDLE_MONTHLY_PRICE_ID;

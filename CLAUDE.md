@@ -22,6 +22,17 @@ Edge function deploys are manual — they do NOT happen on `git push`. After
 merging code that adds or changes a function, deploy it explicitly:
 `supabase functions deploy <name> --project-ref aejgztuwixlqexmkbznz --use-api`
 
+Before deploying, run the function's tests: `npx vitest run supabase/functions`
+(part of `npm test`). They run the real `index.ts` in Node against in-memory
+fakes (`supabase/functions/_test/`); a new remote import needs a fake there.
+
+`paddle-webhook` deliberately differs from `../PADDLE_BILLING.md`'s "log, ack,
+process after" pattern: it logs, processes (one or two single-row queries),
+then answers, so a failure can answer 500 and Paddle redelivers. A
+redelivered event that was logged but never processed is processed then.
+`PADDLE_API_ENVIRONMENT` must be exactly `sandbox` or `production`, or
+`get-subscription-status` and `delete-account` refuse to start.
+
 Deployed functions:
   - image-proxy
   - delete-account

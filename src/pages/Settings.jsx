@@ -791,6 +791,13 @@ export default function Settings() {
     window.open(subscriptionDetails.manage_url, '_blank', 'noopener,noreferrer');
   };
 
+  // Paddle's own cancellation page (it confirms there, and Pro lasts to the
+  // end of the paid period). Hidden once a cancellation is scheduled.
+  const canCancel = Boolean(subscriptionDetails?.cancel_url) && !subscriptionDetails?.cancel_at;
+  const handleCancelSubscription = () => {
+    window.open(subscriptionDetails.cancel_url, '_blank', 'noopener,noreferrer');
+  };
+
   const updatePref = (key, val) => {
     const next = { ...prefs, [key]: val };
     setPrefs(next);
@@ -951,6 +958,13 @@ export default function Settings() {
                 label="Manage Subscription"
                 onClick={handleManageSubscription}
               />
+              {canCancel && (
+                <SettingsRow
+                  label="Cancel Subscription"
+                  sub="You keep Pro until the end of the period you've paid for"
+                  onClick={handleCancelSubscription}
+                />
+              )}
             </>
           ) : (
             <SettingsRow

@@ -13,6 +13,15 @@ let paddleInstance = null;
 // check is needed for the one place that calls it today.
 let paddleInstanceCustomerId;
 
+// Checkout events (checkout.completed, checkout.closed, ...) for whoever is
+// listening, e.g. Pro.jsx waiting for a payment to turn into Pro. Paddle
+// takes one eventCallback per initialization, so it fans out from here.
+const listeners = new Set();
+export function onPaddleEvent(listener) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
 export async function getPaddle(paddleCustomerId) {
   if (paddleInstance && paddleInstanceCustomerId === paddleCustomerId) return paddleInstance;
 
@@ -29,6 +38,7 @@ export async function getPaddle(paddleCustomerId) {
   paddleInstance = await initializePaddle({
     environment,
     token: import.meta.env.VITE_PADDLE_CLIENT_TOKEN,
+    eventCallback: (event) => listeners.forEach((listener) => listener(event)),
     // Paddle Retain: identifies a returning customer by their real Paddle
     // customer ID (profiles.paddle_customer_id, set by paddle-webhook on
     // subscription.activated) — never Sippd's own user id or email, which

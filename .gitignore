@@ -43,3 +43,4 @@ ios/
 /playwright-report/
 /blob-report/
 
+supabase/functions/_test/.gen/

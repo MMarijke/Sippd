@@ -22,6 +22,10 @@ Edge function deploys are manual — they do NOT happen on `git push`. After
 merging code that adds or changes a function, deploy it explicitly:
 `supabase functions deploy <name> --project-ref aejgztuwixlqexmkbznz --use-api`
 
+Before deploying, run the function's tests: `npx vitest run supabase/functions`
+(part of `npm test`). They run the real `index.ts` in Node against in-memory
+fakes (`supabase/functions/_test/`); a new remote import needs a fake there.
+
 Deployed functions:
   - image-proxy
   - delete-account

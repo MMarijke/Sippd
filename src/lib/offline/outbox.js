@@ -131,10 +131,13 @@ export async function updateProfile(db, { userId, patch, now = Date.now }) {
   });
 }
 
+// What the sync indicator shows. A pending photo upload isn't a change of
+// its own (its row's entry always follows it), so one can added with a
+// photo reads "1 to sync", not 2; a failed upload still counts as failed.
 export async function outboxCounts(db) {
   const all = await db.outbox.toArray();
   return {
-    pending: all.filter((e) => e.status === 'pending').length,
+    pending: all.filter((e) => e.status === 'pending' && e.kind !== 'blob.upload').length,
     failed: all.filter((e) => e.status === 'failed').length,
   };
 }

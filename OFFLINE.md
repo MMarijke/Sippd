@@ -199,8 +199,13 @@ The client detects the new columns and RPCs and switches over automatically.
 - **iOS Safari** may evict IndexedDB and caches after about 7 days without
   use, unless the PWA is installed to the home screen. Unsynced changes
   could then be lost. Installing is prompted (`InstallPrompt`).
-- **Catalog browsing** beyond your own cans and pages you've opened is not
-  cached. Search and discovery need a connection.
+- **Catalog search offline** only searches cans saved on this device (your
+  own and any you've opened), and says so; it never claims a can is missing
+  from the catalog. Full search and discovery need a connection.
+- **Server-only extras** on offline screens (your rarity-vote history on
+  Home / Achievements / Profile, follower counts) aren't mirrored: after an
+  offline reload they show as empty or zero until you reconnect. Crates
+  say "You're offline. Crates need a connection." in the add-to-crate sheet.
 - **Capacitor:** the images-only worker on `https://localhost` still needs
   checking on a real device.
 - **Conflict resolution** is last-write-wins per row, not per field. If two
@@ -211,6 +216,21 @@ The client detects the new columns and RPCs and switches over automatically.
   outbox as **Couldn't sync** with the reason; tap Retry once the limit
   resets. The can stays in your local collection meanwhile.
 - **Signing out** discards unsynced changes (with a warning).
+
+## Automated test
+
+`e2e/offline.spec.js` runs in CI's e2e job against the production build
+(service worker active) with a faked backend. It covers:
+
+- the shell reloading offline, still signed in;
+- adding a can with a photo offline, with the outbox order
+  `blob.upload` → `collection.add`;
+- the online-only notice;
+- on reconnect: upload → `vote_on_can` → upsert, with the uploaded URL on
+  both;
+- offline search of saved cans.
+
+Unit tests: `src/lib/offline/*.test.js`.
 
 ## Manual test checklist
 

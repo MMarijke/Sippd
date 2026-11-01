@@ -12,6 +12,9 @@ import { getConfidence, getDisplayRarity } from '@/lib/rarityConsensus';
 import AddCanForm from '@/components/scan/AddCanForm';
 import BarcodeScanner from '@/components/scan/BarcodeScanner';
 import { toast } from 'sonner';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { useOffline } from '@/lib/offline/OfflineProvider';
+import { useOnline } from '@/hooks/useOnline';
 
 // Heuristic only, not authoritative -- this just pre-selects
 // AddCanForm.jsx's beverage type toggle, which stays fully editable either
@@ -45,6 +48,8 @@ async function lookupOpenFoodFacts(barcode, signal) {
 
 export default function Scan() {
   const navigate = useNavigate();
+  const online = useOnline();
+  const { db } = useOffline();
   const [mode, setMode] = useState('search');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCan, setSelectedCan] = useState(null);
@@ -106,6 +111,18 @@ export default function Scan() {
     enabled: debouncedQuery.length >= 2,
     placeholderData: keepPreviousData,
   });
+
+  // Offline the server search is paused (no results, not fetching), which
+  // would read as "No cans found" and invite adding a duplicate of a can
+  // that exists. Search the cans saved on this device instead, and say so.
+  const localResults = useLiveQuery(async () => {
+    if (online || !db || debouncedQuery.length < 2) return [];
+    const q = debouncedQuery.toLowerCase();
+    return db.catalog
+      .filter((c) => [c.name, c.brand, c.flavour, c.barcode].some((v) => v && String(v).toLowerCase().includes(q)))
+      .limit(10)
+      .toArray();
+  }, [online, db, debouncedQuery]) ?? [];
 
   useEffect(() => {
     if (isSharedCansError) toast.error('Could not load the can database');
@@ -175,11 +192,11 @@ export default function Scan() {
     openAddForm({ barcode: pendingBarcode, _offMiss: true });
   };
 
-  const filtered = debouncedQuery.length >= 2 ? searchResults : [];
+  const filtered = debouncedQuery.length < 2 ? [] : online ? searchResults : localResults;
   // Results belong to what's in the box: typing has paused and the server
   // has answered. Until then "No cans found" would be a lie, and Enter
   // could open a can from the previous search.
-  const searchSettled = debouncedQuery === searchQuery.trim() && !isSearchFetching;
+  const searchSettled = debouncedQuery === searchQuery.trim() && (!online || !isSearchFetching);
 
   // Say how many results a search found once typing pauses, instead of on
   // every keystroke.
@@ -297,7 +314,12 @@ export default function Scan() {
 
         {!offLookup && searchQuery.length >= 2 && (
           <div className="space-y-2">
-            {isSharedCansError ? (
+            {!online && (
+              <p className="text-xs font-mono text-muted-foreground">
+                You're offline, so only cans saved on this device are searched.
+              </p>
+            )}
+            {online && isSharedCansError ? (
               <div className="text-center py-6 space-y-3">
                 <p className="text-sm text-muted-foreground font-mono">Couldn't load the can database</p>
                 <Button
@@ -349,7 +371,9 @@ export default function Scan() {
               </p>
             ) : (
               <div className="text-center py-6 space-y-3">
-                <p className="text-sm text-muted-foreground font-mono">No cans found for "{searchQuery}"</p>
+                <p className="text-sm text-muted-foreground font-mono">
+                  {online ? `No cans found for "${searchQuery}"` : `No saved cans match "${searchQuery}". It may still be in the catalog: search again once you're online before adding it.`}
+                </p>
                 {/^\d{6,}$/.test(searchQuery) ? (
                   <Button
                     variant="outline"

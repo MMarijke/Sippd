@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
-import { X, Plus, Minus, PackageOpen, AlertCircle, RefreshCw } from 'lucide-react';
+import { useOnline } from '@/hooks/useOnline';
+import { X, Plus, Minus, PackageOpen, AlertCircle, RefreshCw, CloudOff } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -16,6 +17,7 @@ export default function AddToCrateSheet({ can, cans, onClose }) {
   const navigate = useNavigate();
   const { isPro } = useSubscription();
   const queryClient = useQueryClient();
+  const online = useOnline();
   const [showCreateCrate, setShowCreateCrate] = useState(false);
 
   // Bulk mode (multiple cans selected via Collection's selection mode) adds
@@ -160,7 +162,15 @@ export default function AddToCrateSheet({ can, cans, onClose }) {
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-5 pb-6 space-y-2">
-          {isLoading ? (
+          {!online ? (
+            // Crates live on the server only. Offline the crates query is
+            // paused (not loading, no data), which would otherwise read as
+            // "No crates yet" and offer to create one.
+            <div className="flex flex-col items-center gap-3 py-12 text-center">
+              <CloudOff className="w-12 h-12 text-muted-foreground/30" aria-hidden="true" />
+              <p className="text-sm font-mono text-muted-foreground">You're offline. Crates need a connection.</p>
+            </div>
+          ) : isLoading ? (
             <div className="flex justify-center py-16">
               <div className="w-7 h-7 border-4 border-border border-t-primary rounded-full animate-spin" />
             </div>

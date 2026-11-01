@@ -181,6 +181,7 @@ describe('photo before row', () => {
   it('uploads the photo, then adds the can with the uploaded URL', async () => {
     let id;
     await write(async (now) => { ({ id } = await addCan(db, { userId, row: rowFor('Ultra Fiesta'), catalog: catalogFor('Ultra Fiesta'), photo: photo(), now })); });
+    expect(await outboxCounts(db)).toEqual({ pending: 1, failed: 0 }); // one can, not can + photo
     await engine().sync();
     expect(fake.state.calls.slice(0, 3)).toEqual(['uploadImage', 'voteOnCan', 'upsertCollection']);
     const url = `https://example.supabase.co/storage/v1/object/public/can-images/${userId}/${id}.webp`;

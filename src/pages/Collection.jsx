@@ -8,6 +8,7 @@ import { Search, ScanLine, PackageOpen, X, AlertCircle, RefreshCw, CheckSquare, 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/shared/PageHeader';
+import { useOnline } from '@/hooks/useOnline';
 import FilterBar from '@/components/collection/FilterBar';
 import CanCard from '@/components/shared/CanCard';
 import CanListItem from '@/components/collection/CanListItem';
@@ -83,6 +84,7 @@ export default function Collection() {
     setVisibleCount(PAGE_SIZE);
   }, [filters, searchQuery]);
 
+  const online = useOnline();
   // AddCanForm can hand off the can it just created via navigation state so
   // the "add to a crate?" offer survives the redirect to this page. Carries
   // the current search string forward so this doesn't clear an in-progress
@@ -90,7 +92,8 @@ export default function Collection() {
   // one, but there's no reason for it to silently drop one if it ever does).
   useEffect(() => {
     if (location.state?.addedCan) {
-      setCrateTarget(location.state.addedCan);
+      // Offline there's nothing to offer: crates need a connection.
+      if (online) setCrateTarget(location.state.addedCan);
       navigate({ pathname: location.pathname, search: location.search }, { replace: true, state: {} });
     }
   }, [location.state]);

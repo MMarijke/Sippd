@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { X, ArrowRightLeft, Send } from 'lucide-react';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { tileBackground } from '@/lib/canBgColors';
+import { useUserCollection } from '@/hooks/useUserCollection';
 
 export default function TradeRequestDialog({ targetUser, currentUser, onClose }) {
   const [offerCanId, setOfferCanId] = useState('');
@@ -14,19 +15,7 @@ export default function TradeRequestDialog({ targetUser, currentUser, onClose })
   const [message, setMessage] = useState('');
   const [offerSearch, setOfferSearch] = useState('');
 
-  const { data: myCollection = [] } = useQuery({
-    queryKey: ['user-collection', currentUser?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_collection')
-        .select('*')
-        .eq('owner_id', currentUser.id)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!currentUser?.id,
-  });
+  const { data: myCollection = [] } = useUserCollection();
 
   const myCollected = useMemo(
     () => myCollection.filter(c => c.status === 'collected'),

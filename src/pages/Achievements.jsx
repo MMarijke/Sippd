@@ -13,6 +13,7 @@ import AchievementUnlockAnimation from '@/components/achievements/AchievementUnl
 import { ACHIEVEMENT_DEFINITIONS, computeAchievements, sortAchievementsForGallery } from '@/lib/achievements';
 import { useStreak } from '@/lib/useStreak';
 import { useAchievementUnlock } from '@/hooks/useAchievementUnlock';
+import { useUserCollection } from '@/hooks/useUserCollection';
 
 export default function Achievements() {
   const navigate = useNavigate();
@@ -24,19 +25,7 @@ export default function Achievements() {
     isLoading: isLoadingCollection,
     isError: isCollectionError,
     refetch: refetchCollection,
-  } = useQuery({
-    queryKey: ['user-collection', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_collection')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  } = useUserCollection();
 
   const {
     data: votes = [],

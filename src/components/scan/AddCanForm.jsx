@@ -17,6 +17,9 @@ import AddedConfirmation from './AddedConfirmation';
 import { cn } from '@/lib/utils';
 import { RARITY_ORDER, getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
+import { useOffline } from '@/lib/offline/OfflineProvider';
+import { addCan } from '@/lib/offline/outbox';
+import { compressImage } from '@/lib/offline/images';
 import CanImageBox from '@/components/shared/CanImageBox';
 import TasteRatingStars from '@/components/shared/TasteRatingStars';
 import CanTileColorPicker from '@/components/shared/CanTileColorPicker';
@@ -52,6 +55,11 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
   const [revealRarity, setRevealRarity] = useState('');
   const [pendingCan, setPendingCan] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const { write } = useOffline();
+  // A picked photo is compressed and kept on the device; it uploads when the
+  // can syncs, before the can is added (lib/offline). form.image_url holds
+  // its local preview meanwhile, never sent to the server.
+  const [photo, setPhoto] = useState(null);
   const [imageMode, setImageMode] = useState('upload');
   const [errors, setErrors] = useState({});
   // Collapsed by default so Submit is reachable right after Status without
@@ -174,59 +182,58 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
     return e;
   };
 
+  // Offline-capable: the can is in the vault the moment this resolves, and
+  // sync does the server side in order: photo upload, vote_on_can (catalog
+  // dedupe, rarity vote, scan cap, follower notifications), then the row.
+  // A server-side rejection (e.g. the free daily scan cap) shows in the sync
+  // indicator with a retry, instead of here (lib/offline/sync.js).
   const createMutation = useMutation({
     mutationFn: async () => {
-      let sharedCan;
-
-      if (prefillData?.id && alreadyVoted) {
-        // Already voted on this can — don't vote again, just use its current data
-        sharedCan = prefillData;
-      } else {
-        // Either a brand-new can (first vote) or an existing can this user hasn't voted on yet.
-        // vote_on_can() handles can creation, vote recording, and aggregate updates atomically.
-        const { data, error } = await supabase.rpc('vote_on_can', {
-          p_caller_id: currentUser.id,
-          p_can_id: prefillData?.id ?? null,
-          p_rarity: form.rarity,
-          p_name: form.name || null,
-          p_brand: form.brand || null,
-          p_flavour: form.flavour || null,
-          p_edition: form.edition || null,
-          p_image_url: form.image_url || null,
-          p_barcode: form.barcode || null,
-          p_beverage_type: form.beverage_type,
-        });
-        if (error) throw error;
-        sharedCan = data;
-      }
-
+      const known = prefillData?.id ? prefillData : null;
       const myVote = alreadyVoted ? existingVote?.voted_rarity : form.rarity;
-      const displayRarity = sharedCan.consensus_rarity || myVote;
+      // Offline there's no fresh consensus yet: the catalog's last known one
+      // if this can is already in it, else the user's own vote.
+      const displayRarity = known?.consensus_rarity || myVote;
+      const remoteImage = photo ? null : (form.image_url || null);
 
-      const { data: insertedRow, error: insertError } = await supabase.from('user_collection').insert({
-        owner_id:         currentUser.id,
-        can_id:            sharedCan.id,
-        status:            form.status,
-        notes:             form.notes,
-        can_name:          form.name      || sharedCan.name,
-        can_brand:         form.brand     || sharedCan.brand,
-        can_image_url:     form.image_url || sharedCan.image_url,
-        can_rarity:        displayRarity,
-        can_flavour:       form.flavour   || sharedCan.flavour,
-        can_edition:       form.edition   || sharedCan.edition,
-        can_beverage_type: form.beverage_type || sharedCan.beverage_type,
-        can_bg_color:      form.bg_color  || DEFAULT_CAN_BG,
-        user_rarity_vote:  myVote,
-        taste_rating:      form.taste_rating,
-        // The "Date Added" field below; it was never saved before.
-        acquired_on:       form.date_added || null,
-      }).select().single();
-      if (insertError) throw insertError;
+      const insertedRow = await write((db, userId) => addCan(db, {
+        userId,
+        row: {
+          can_id:            known?.id ?? null,
+          status:            form.status,
+          notes:             form.notes,
+          can_name:          form.name      || known?.name,
+          can_brand:         form.brand     || known?.brand,
+          can_image_url:     remoteImage    || known?.image_url || null,
+          can_rarity:        displayRarity,
+          can_flavour:       form.flavour   || known?.flavour,
+          can_edition:       form.edition   || known?.edition,
+          can_beverage_type: form.beverage_type || known?.beverage_type,
+          can_bg_color:      form.bg_color  || DEFAULT_CAN_BG,
+          user_rarity_vote:  myVote,
+          taste_rating:      form.taste_rating,
+          // The "Date Added" field.
+          acquired_on:       form.date_added || null,
+        },
+        catalog: {
+          canId: known?.id ?? null,
+          alreadyVoted: Boolean(known && alreadyVoted),
+          rarity: form.rarity,
+          name: form.name || null,
+          brand: form.brand || null,
+          flavour: form.flavour || null,
+          edition: form.edition || null,
+          barcode: form.barcode || null,
+          beverageType: form.beverage_type,
+          imageUrl: remoteImage,
+        },
+        photo,
+      }));
 
-      return { displayRarity, insertedRow };
+      // The reveal shows the photo just taken (its local preview).
+      return { displayRarity, insertedRow: { ...insertedRow, can_image_url: form.image_url || insertedRow.can_image_url } };
     },
     onSuccess: ({ displayRarity, insertedRow }) => {
-      queryClient.invalidateQueries({ queryKey: ['user-collection'] });
       queryClient.invalidateQueries({ queryKey: ['shared-cans'] });
       if (['Rare', 'Ultra Rare', 'Legendary'].includes(displayRarity)) {
         setRevealRarity(displayRarity);
@@ -305,18 +312,11 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
     if (!file) return;
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
-      const { error } = await supabase.storage
-        .from('can-images')
-        .upload(fileName, file, { upsert: false });
-      if (error) throw error;
-      const { data: { publicUrl } } = supabase.storage
-        .from('can-images')
-        .getPublicUrl(fileName);
-      update('image_url', publicUrl);
+      const compressed = await compressImage(file);
+      setPhoto(compressed);
+      update('image_url', URL.createObjectURL(compressed));
     } catch {
-      toast.error('Failed to upload image');
+      toast.error("Couldn't read that photo");
     }
     setUploading(false);
   };
@@ -707,7 +707,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
                     loading="eager"
                   />
                   <button
-                    onClick={() => update('image_url', '')}
+                    onClick={() => { setPhoto(null); update('image_url', ''); }}
                     aria-label="Remove image"
                     className="group absolute top-0 right-0 w-11 h-11 flex items-center justify-center"
                   >
@@ -756,7 +756,7 @@ export default function AddCanForm({ prefillData, onSuccess, onScanNext, onCance
                     <Input
                       aria-label="Image URL"
                       value={form.image_url}
-                      onChange={e => update('image_url', e.target.value)}
+                      onChange={e => { setPhoto(null); update('image_url', e.target.value); }}
                       placeholder="https://example.com/can.jpg"
                       className="h-11 bg-secondary border-border font-mono text-sm"
                     />

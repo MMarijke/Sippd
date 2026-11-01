@@ -26,7 +26,7 @@ export default function CanListItem({ item, sharedCan, onAddToCrate, selectable,
     >
       {!selectable && (
         <Link
-          to={`/can/${item.can_id}`}
+          to={`/can/${item.can_id ?? item.id}`}
           aria-label={item.can_name}
           className="absolute inset-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />

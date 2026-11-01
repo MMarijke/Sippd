@@ -18,6 +18,8 @@ import { format } from 'date-fns';
 import { computeAchievements } from '@/lib/achievements';
 import { useAchievementUnlock } from '@/hooks/useAchievementUnlock';
 import AchievementUnlockAnimation from '@/components/achievements/AchievementUnlockAnimation';
+import { useUserCollection } from '@/hooks/useUserCollection';
+import { useMyProfile } from '@/hooks/useMyProfile';
 
 // Loaded on demand: it carries the charting library (recharts), the
 // biggest dependency in the first download. Home and Login load eagerly,
@@ -37,38 +39,14 @@ export default function Home() {
   const { user } = useAuth();
   const [selectedBrand, setSelectedBrand] = useState('All');
 
-  const { data: profile } = useQuery({
-    queryKey: ['my-profile', user?.id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user.id)
-        .single();
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  const { data: profile } = useMyProfile();
 
   const {
     data: collection = [],
     isLoading: loadingCollection,
     isError: isCollectionError,
     refetch: refetchCollection,
-  } = useQuery({
-    queryKey: ['user-collection', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_collection')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-    refetchOnMount: true,
-  });
+  } = useUserCollection();
 
   const {
     data: sharedCans = [],

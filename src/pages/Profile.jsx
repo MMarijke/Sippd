@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useSharedCansByIds } from '@/hooks/useSharedCansByIds';
 import { useAuth } from '@/lib/AuthContext';
@@ -19,10 +19,16 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { computeAchievements } from '@/lib/achievements';
 import { useTrades } from '@/hooks/useTrades';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import { useUserCollection } from '@/hooks/useUserCollection';
+import { useMyProfile } from '@/hooks/useMyProfile';
+import { useOffline } from '@/lib/offline/OfflineProvider';
+import { updateProfile } from '@/lib/offline/outbox';
 
 export default function Profile() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { write, status: syncStatus } = useOffline();
+  // Logging out deletes this device's offline copy, queued changes included.
+  const unsynced = (syncStatus?.pending ?? 0) + (syncStatus?.failed ?? 0);
   const { user, signOut } = useAuth();
   const streak = useStreak();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -31,15 +37,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const inputRef = useRef(null);
 
-  const { data: profile, isLoading, isError: profileError } = useQuery({
-    queryKey: ['my-profile', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  const { data: profile, isLoading, isError: profileError } = useMyProfile();
 
   useEffect(() => {
     if (profileError) toast.error('Could not load your profile');
@@ -68,10 +66,11 @@ export default function Profile() {
     setEditing(false);
   };
 
+  // Offline-capable: saved locally at once, synced later if offline.
   const saveEdit = async () => {
     if (!nameInput.trim()) return;
     setSaving(true);
-    const { error } = await supabase.from('profiles').update({ full_name: nameInput.trim() }).eq('id', user.id);
+    const error = await write((db, userId) => updateProfile(db, { userId, patch: { full_name: nameInput.trim() } })).then(() => null, (e) => e);
     setSaving(false);
     if (error) {
       // Leave editing open with the typed value intact — closing the field
@@ -81,8 +80,6 @@ export default function Profile() {
       toast.error('Failed to update name — try again');
       return;
     }
-    queryClient.invalidateQueries({ queryKey: ['my-profile', user.id] });
-    queryClient.invalidateQueries({ queryKey: ['user-collection'] });
     toast.success('Display name updated!');
     returnFocusToPencil.current = true;
     setEditing(false);
@@ -93,19 +90,7 @@ export default function Profile() {
     isLoading: isLoadingCollection,
     isError: isCollectionError,
     refetch: refetchCollection,
-  } = useQuery({
-    queryKey: ['user-collection', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_collection')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  } = useUserCollection();
 
   const {
     data: sharedCans = [],
@@ -485,7 +470,9 @@ export default function Profile() {
         onCancel={() => setShowLogoutConfirm(false)}
         onConfirm={() => signOut()}
         title="Log Out?"
-        description="You'll need to sign back in to view your collection and stats."
+        description={unsynced > 0
+          ? `You have ${unsynced} change${unsynced === 1 ? '' : 's'} that ${unsynced === 1 ? "hasn't" : "haven't"} synced yet. Logging out now discards ${unsynced === 1 ? 'it' : 'them'}. Reconnect first to keep ${unsynced === 1 ? 'it' : 'them'}.`
+          : "You'll need to sign back in to view your collection and stats."}
         confirmLabel="Log Out"
       />
 

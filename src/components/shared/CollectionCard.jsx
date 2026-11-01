@@ -351,7 +351,7 @@ export default function CollectionCard({
                 // One explicit name: the name and rarity badge ran together
                 // as "Ice PopCOMMON", and the Auto chip is visual-only.
                 <Link
-                  to={`/can/${item.can_id}`}
+                  to={`/can/${item.can_id ?? item.id}`}
                   aria-label={[item.can_name, getEffectiveRarity(item), isAuto && 'auto-filled'].filter(Boolean).join(', ')}
                   className="block"
                 >

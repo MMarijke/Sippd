@@ -7,6 +7,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import RarityBadge from '@/components/shared/RarityBadge';
 import { getStreakIcon } from '@/lib/streakIcon';
+import { useOnline } from '@/hooks/useOnline';
 
 function renderAction(item) {
   switch (item.type) {
@@ -47,6 +48,7 @@ export default function FeedPreview() {
   // activity-feed query: activity_items' RLS visibility varies per
   // viewer, so an unscoped cache key risks showing a stale previous
   // account's feed preview on a fast account swap on the same device.
+  const online = useOnline();
   const { data: items = [], isLoading, refetch } = useQuery({
     queryKey: ['feed-preview', user?.id],
     queryFn: async () => {
@@ -115,7 +117,11 @@ export default function FeedPreview() {
         </button>
       </div>
 
-      {isLoading ? (
+      {!online && items.length === 0 ? (
+        <div className="py-4 text-center pointer-events-none">
+          <p className="text-xs font-mono text-muted-foreground">You're offline. The feed needs a connection.</p>
+        </div>
+      ) : isLoading ? (
         <div className="space-y-2 pointer-events-none">
           {[0, 1, 2].map(i => (
             <div key={i} className="h-11 rounded-xl bg-secondary/60 animate-pulse" />

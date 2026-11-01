@@ -16,6 +16,9 @@ import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import LegalFooter from '@/components/legal/LegalFooter';
 import { exportUserData, downloadJson } from '@/lib/exportUserData';
 import { MIN_PASSWORD } from '@/lib/authErrors';
+import { useMyProfile } from '@/hooks/useMyProfile';
+import { useOffline } from '@/lib/offline/OfflineProvider';
+import { updateProfile } from '@/lib/offline/outbox';
 
 const STATUSES = ['collected', 'wishlist'];
 const PREFS_KEY = 'canvolt_prefs';
@@ -78,10 +81,11 @@ function EditNamePanel({ userId, initialName, onDone }) {
   const [value, setValue] = useState(initialName || '');
   const [saving, setSaving] = useState(false);
 
+  const { write } = useOffline();
   const save = async () => {
     if (!value.trim()) return;
     setSaving(true);
-    const { error } = await supabase.from('profiles').update({ full_name: value.trim() }).eq('id', userId);
+    const error = await write((db) => updateProfile(db, { userId, patch: { full_name: value.trim() } })).then(() => null, (e) => e);
     if (error) {
       toast.error('Failed to update name');
       setSaving(false);
@@ -117,9 +121,10 @@ function EditRegionPanel({ userId, initialRegion, onDone }) {
   const [value, setValue] = useState(initialRegion || '');
   const [saving, setSaving] = useState(false);
 
+  const { write } = useOffline();
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase.from('profiles').update({ region: value.trim() || null }).eq('id', userId);
+    const error = await write((db) => updateProfile(db, { userId, patch: { region: value.trim() || null } })).then(() => null, (e) => e);
     if (error) {
       toast.error('Failed to update region');
       setSaving(false);
@@ -748,21 +753,16 @@ export default function Settings() {
     data: profile,
     isLoading: profileLoading,
     isError: profileError,
-  } = useQuery({
-    queryKey: ['my-profile', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  } = useMyProfile();
 
   useEffect(() => {
     if (profileError) toast.error('Could not load your profile');
   }, [profileError]);
 
   const refetchProfile = () => queryClient.invalidateQueries({ queryKey: ['my-profile', user?.id] });
+  const { write } = useOffline();
+  // Offline-capable profile edits: local at once, synced later if offline.
+  const writeProfile = (patch) => write((db, userId) => updateProfile(db, { userId, patch })).then(() => null, (e) => e);
 
   const {
     data: subscriptionDetails,
@@ -800,7 +800,7 @@ export default function Settings() {
   const updateFollowNotifyPref = async (next) => {
     if (next === profile?.notify_follows_pref) return;
     setNotifyPending(true);
-    const { error } = await supabase.from('profiles').update({ notify_follows_pref: next }).eq('id', user.id);
+    const error = await writeProfile({ notify_follows_pref: next });
     setNotifyPending(false);
     if (error) {
       toast.error('Failed to update pull alerts: ' + (error.message || 'Unknown error'));
@@ -813,7 +813,7 @@ export default function Settings() {
   const togglePrivate = async () => {
     setPrivatePending(true);
     const next = !profile?.is_private;
-    const { error } = await supabase.from('profiles').update({ is_private: next }).eq('id', user.id);
+    const error = await writeProfile({ is_private: next });
     setPrivatePending(false);
     if (error) {
       toast.error('Failed to update privacy setting: ' + (error.message || 'Unknown error'));

@@ -1,6 +1,4 @@
 import { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabaseClient';
 import { useSharedCansByIds } from '@/hooks/useSharedCansByIds';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +18,7 @@ import RarityBadge from '@/components/shared/RarityBadge';
 import CanImageBox from '@/components/shared/CanImageBox';
 import RecapShareModal from '@/components/monthly-report/RecapShareModal';
 import RecapCardTemplate from '@/components/monthly-report/RecapCardTemplate';
+import { useUserCollection } from '@/hooks/useUserCollection';
 
 const RARITY_RANK = { Common: 1, Uncommon: 2, Rare: 3, 'Ultra Rare': 4, Legendary: 5 };
 
@@ -30,19 +29,7 @@ export default function MonthlyReport() {
   const [monthDate, setMonthDate] = useState(() => startOfMonth(new Date()));
   const [showShareCard, setShowShareCard] = useState(false);
 
-  const { data: collection = [], isLoading: loadingCollection } = useQuery({
-    queryKey: ['user-collection', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_collection')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  const { data: collection = [], isLoading: loadingCollection } = useUserCollection();
 
   const { data: sharedCans = [], isLoading: loadingShared } = useSharedCansByIds(collection.map(i => i.can_id));
 

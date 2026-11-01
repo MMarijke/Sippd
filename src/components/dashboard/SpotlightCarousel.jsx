@@ -79,7 +79,7 @@ export default function SpotlightCarousel({ collected, sharedCansMap, selectedBr
             return (
               <Link
                 key={item.id}
-                to={`/can/${item.can_id}`}
+                to={`/can/${item.can_id ?? item.id}`}
                 className="flex-shrink-0 snap-start block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 style={{ width: CARD_WIDTH }}
               >

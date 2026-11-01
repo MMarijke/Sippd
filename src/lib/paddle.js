@@ -61,5 +61,20 @@ export async function openCheckout(priceId, user, paddleCustomerId) {
   });
 }
 
+// The customer's own price for each plan, as Paddle will charge it: their
+// currency, and tax included where it must be (Paddle picks the location
+// from their IP). Returns { [priceId]: '€2.79' }; callers keep a fallback,
+// since this is display only and checkout shows the real total either way.
+export async function previewPrices(priceIds, paddleCustomerId) {
+  const paddle = await getPaddle(paddleCustomerId);
+  const result = await paddle.PricePreview({ items: priceIds.map((priceId) => ({ priceId, quantity: 1 })) });
+  const prices = {};
+  for (const item of result?.data?.details?.lineItems ?? []) {
+    const total = item?.formattedTotals?.total;
+    if (item?.price?.id && total) prices[item.price.id] = total;
+  }
+  return prices;
+}
+
 export const PADDLE_MONTHLY_PRICE_ID = import.meta.env.VITE_PADDLE_MONTHLY_PRICE_ID;
 export const PADDLE_ANNUAL_PRICE_ID = import.meta.env.VITE_PADDLE_ANNUAL_PRICE_ID;

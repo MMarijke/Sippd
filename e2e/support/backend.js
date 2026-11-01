@@ -43,6 +43,13 @@ export const FAKE_PADDLE_JS = `
       open(options) { window.__paddle.checkouts.push(options); },
       close() {},
     },
+    // Local prices, as Paddle would quote a visitor in South Africa.
+    // window.__paddleQuote = 'fail' makes the preview reject.
+    async PricePreview({ items }) {
+      if (window.__paddleQuote === 'fail') throw new Error('preview unavailable');
+      const quotes = { pri_e2e_monthly: 'R54.99', pri_e2e_annual: 'R369.99' };
+      return { data: { details: { lineItems: items.map(({ priceId }) => ({ price: { id: priceId }, formattedTotals: { total: quotes[priceId] } })) } } };
+    },
   };
   window.__paddle.emit = (event) => window.__paddle.init?.eventCallback?.(event);
 `;

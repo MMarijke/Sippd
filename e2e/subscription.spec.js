@@ -86,6 +86,21 @@ test.describe('Pro page and checkout', () => {
     });
   });
 
+  test("plans show the customer's local price from Paddle", async ({ context, page }) => {
+    await backend(context);
+    await page.goto('/pro');
+    await expect(page.getByRole('button', { name: 'Monthly — R54.99/mo' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Annual — R369.99/yr' })).toBeVisible();
+  });
+
+  test("if Paddle can't quote a local price, the list price is shown", async ({ context, page }) => {
+    await backend(context);
+    await context.addInitScript(() => { window.__paddleQuote = 'fail'; });
+    await openLoaded(page, '/pro');
+    await expect(page.getByRole('button', { name: 'Monthly — $2.99/mo' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Annual — $19.99/yr' })).toBeVisible();
+  });
+
   test('Annual opens checkout for the annual price', async ({ context, page }) => {
     await backend(context);
     await page.goto('/pro');

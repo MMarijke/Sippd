@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -18,6 +18,10 @@ import CanTileColorPicker from '@/components/shared/CanTileColorPicker';
 import { DEFAULT_CAN_BG } from '@/lib/canBgColors';
 import TasteRatingStars from '@/components/shared/TasteRatingStars';
 import BeverageTypeToggle from '@/components/shared/BeverageTypeToggle';
+import { useOffline } from '@/lib/offline/OfflineProvider';
+import { updateCollection } from '@/lib/offline/outbox';
+import { compressImage } from '@/lib/offline/images';
+import { useOnline } from '@/hooks/useOnline';
 
 const STATUS_OPTIONS = [
   { value: 'collected', label: 'Collected' },
@@ -26,29 +30,26 @@ const STATUS_OPTIONS = [
 ];
 
 export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan, onBarcodeAdded }) {
-  const queryClient = useQueryClient();
   const { user } = useAuth();
 
   const [imageMode, setImageMode] = useState('upload');
   const [uploading, setUploading] = useState(false);
+  const { write } = useOffline();
+  const online = useOnline();
+  // A picked photo is compressed and kept on the device; it uploads when the
+  // edit syncs (before the edit itself), online or later (lib/offline).
+  const [photo, setPhoto] = useState(null);
 
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-      const { error } = await supabase.storage
-        .from('can-images')
-        .upload(fileName, file, { upsert: false });
-      if (error) throw error;
-      const { data: { publicUrl } } = supabase.storage
-        .from('can-images')
-        .getPublicUrl(fileName);
-      update('can_image_url', publicUrl);
+      const compressed = await compressImage(file);
+      setPhoto(compressed);
+      update('can_image_url', URL.createObjectURL(compressed));
     } catch {
-      toast.error('Failed to upload image');
+      toast.error("Couldn't read that photo");
     }
     setUploading(false);
   };
@@ -107,16 +108,17 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
     },
   });
 
+  // Offline-capable: saved locally at once, synced in order (photo first).
   const saveMutation = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from('user_collection')
-        .update({ ...form, acquired_on: form.acquired_on || null })
-        .eq('id', item.id);
-      if (error) throw error;
-    },
+    mutationFn: () => write((db, userId) => updateCollection(db, {
+      userId,
+      id: item.id,
+      // The preview's blob: URL never goes into the row: the upload swaps in
+      // the real URL before the edit is pushed.
+      patch: { ...form, acquired_on: form.acquired_on || null, can_image_url: photo ? item.can_image_url ?? null : form.can_image_url },
+      photo,
+    })),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['user-collection'] });
       toast.success('Entry updated');
       onClose();
     },
@@ -215,6 +217,12 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
               <p className="h-11 flex items-center px-3 rounded-lg bg-secondary border border-border font-mono text-sm text-foreground">
                 {sharedCan.barcode}
               </p>
+            ) : !online || !item?.can_id ? (
+              // The barcode lives in the shared catalog, so adding one needs a
+              // connection (and a can that has synced into the catalog).
+              <p className="text-xs text-muted-foreground">
+                {online ? 'You can add a barcode once this can has synced.' : "You're offline. Adding a barcode needs a connection."}
+              </p>
             ) : (
               <div className="flex gap-2">
                 <Input
@@ -254,7 +262,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
                   loading="eager"
                 />
                 <button
-                  onClick={() => update('can_image_url', '')}
+                  onClick={() => { setPhoto(null); update('can_image_url', ''); }}
                   aria-label="Remove image"
                   className="group absolute top-0 right-0 w-11 h-11 flex items-center justify-center"
                 >
@@ -301,7 +309,7 @@ export default function EditEntrySheet({ open, onClose, item, myVote, sharedCan,
                   <Input
                     aria-label="Image URL"
                     value={form.can_image_url}
-                    onChange={e => update('can_image_url', e.target.value)}
+                    onChange={e => { setPhoto(null); update('can_image_url', e.target.value); }}
                     placeholder="https://example.com/can.jpg"
                     className="bg-secondary border-border font-mono text-sm"
                   />

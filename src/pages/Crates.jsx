@@ -12,6 +12,7 @@ import CrateDetailSheet from '@/components/crates/CrateDetailSheet';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import ProGate from '@/components/shared/ProGate';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useUserCollection } from '@/hooks/useUserCollection';
 
 const FREE_CRATE_LIMIT = 5;
 
@@ -39,19 +40,7 @@ export default function Crates() {
     enabled: !!user?.id,
   });
 
-  const { data: collection = [] } = useQuery({
-    queryKey: ['user-collection', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_collection')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  const { data: collection = [] } = useUserCollection();
 
   const atCrateLimit = crates.length >= FREE_CRATE_LIMIT && !isPro;
 

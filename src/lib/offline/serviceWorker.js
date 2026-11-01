@@ -1,13 +1,18 @@
 import { Capacitor } from '@capacitor/core';
 import { toast } from 'sonner';
 
-// Registers the Serwist service worker (src/sw.js -> /sw.js) on the web
-// build only. Not in development (it would cache stale modules under Vite's
-// dev server) and not in the Capacitor Android app: there the shell already
-// ships inside the APK, and a service worker could keep serving an old
-// precache after the app itself updated. See OFFLINE.md.
-export function shouldRegisterServiceWorker({ isProd, isNative, hasServiceWorker }) {
-  return Boolean(isProd && !isNative && hasServiceWorker);
+// Registers the Serwist service worker (src/sw.js) on production builds.
+// Not in development (it would cache stale modules under Vite's dev server).
+// In the Capacitor Android app it registers in images-only mode
+// (/sw.js?mode=images): the shell already ships inside the APK, and a full
+// precache could keep serving an old shell after the app itself updated, so
+// there it only keeps can photos available offline. See OFFLINE.md.
+export function shouldRegisterServiceWorker({ isProd, hasServiceWorker }) {
+  return Boolean(isProd && hasServiceWorker);
+}
+
+export function serviceWorkerUrl({ isNative }) {
+  return isNative ? '/sw.js?mode=images' : '/sw.js';
 }
 
 // A new version installs in the background and waits (sw.js has
@@ -23,24 +28,30 @@ function offerUpdate(worker) {
 export function registerServiceWorker() {
   const ok = shouldRegisterServiceWorker({
     isProd: import.meta.env.PROD,
-    isNative: Capacitor.isNativePlatform(),
     hasServiceWorker: typeof navigator !== 'undefined' && 'serviceWorker' in navigator,
   });
   if (!ok) return;
+  const isNative = Capacitor.isNativePlatform();
 
-  // Reload once the waiting worker takes over, but only after the user
-  // asked for it (the first install claims the page without a reload).
-  let reloading = false;
-  const hadController = Boolean(navigator.serviceWorker.controller);
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!hadController || reloading) return;
-    reloading = true;
-    window.location.reload();
-  });
+  // Web only: reload once the waiting worker takes over, but only after the
+  // user asked for it (the first install claims the page without a reload).
+  // The images-only worker in the app takes over by itself, and must never
+  // reload the app out from under the user.
+  if (!isNative) {
+    let reloading = false;
+    const hadController = Boolean(navigator.serviceWorker.controller);
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || reloading) return;
+      reloading = true;
+      window.location.reload();
+    });
+  }
 
   window.addEventListener('load', async () => {
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      const registration = await navigator.serviceWorker.register(serviceWorkerUrl({ isNative }), { scope: '/' });
+      // The app updates through its store; only the web shell offers Reload.
+      if (isNative) return;
       if (registration.waiting && navigator.serviceWorker.controller) offerUpdate(registration.waiting);
       registration.addEventListener('updatefound', () => {
         const installing = registration.installing;

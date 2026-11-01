@@ -55,9 +55,10 @@ export function createSyncEngine({ db, remote, isOnline = () => true, now = Date
       let row = await db.collection.get(e.payload.id);
       if (!row || row._deleted) return;
       const { catalog } = e.payload;
-      // Already resolved on an earlier attempt, or the user had voted on
-      // this existing can before: no vote to cast.
-      const known = e.payload.canId ?? (catalog.alreadyVoted ? catalog.canId : null);
+      // Already resolved on an earlier attempt, or an existing catalog can
+      // that needs no vote: the user voted on it before (alreadyVoted), or
+      // it's a plain wishlist add from Most Wanted (skipVote).
+      const known = e.payload.canId ?? (catalog.alreadyVoted || catalog.skipVote ? catalog.canId : null);
       if (known) {
         if (row.can_id !== known) {
           row = { ...row, can_id: known };

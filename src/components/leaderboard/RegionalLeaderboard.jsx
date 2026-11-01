@@ -14,6 +14,7 @@ import { useProStatus } from '@/hooks/useProStatus';
 import ProBadge from '@/components/shared/ProBadge';
 import YourRankBar from '@/components/leaderboard/YourRankBar';
 import { withCompetitionRank, rankLabel, medalIndex, shortName } from '@/lib/ranking';
+import { useMyProfile } from '@/hooks/useMyProfile';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 
@@ -26,15 +27,7 @@ export default function RegionalLeaderboard() {
     isLoading: isLoadingProfile,
     isError: isProfileError,
     refetch: refetchProfile,
-  } = useQuery({
-    queryKey: ['my-profile', currentUser?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!currentUser?.id,
-  });
+  } = useMyProfile();
 
   const {
     data: scores = [],

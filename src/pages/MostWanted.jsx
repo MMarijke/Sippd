@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
-import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Star, Plus, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -11,6 +10,9 @@ import CanImageBox from '@/components/shared/CanImageBox';
 import { getDisplayRarity, getConfidence } from '@/lib/rarityConsensus';
 import { useFavourite } from '@/hooks/useFavourite';
 import { toast } from 'sonner';
+import { useUserCollection } from '@/hooks/useUserCollection';
+import { useOffline } from '@/lib/offline/OfflineProvider';
+import { addCan } from '@/lib/offline/outbox';
 
 const MEDAL_COLORS = [
   'text-medal-gold border-medal-gold/40 bg-medal-gold/5',
@@ -25,8 +27,7 @@ const PAGE_SIZE = 30;
 
 export default function MostWanted() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { write } = useOffline();
   const { toggleFavourite } = useFavourite();
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -57,18 +58,7 @@ export default function MostWanted() {
     data: myCollection = [],
     isLoading: isLoadingMyCollection,
     isError: isMyCollectionError,
-  } = useQuery({
-    queryKey: ['user-collection', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_collection')
-        .select('*')
-        .eq('owner_id', user.id);
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  } = useUserCollection();
 
   useEffect(() => {
     if (isSharedCansError) toast.error('Could not load Most Wanted');
@@ -88,9 +78,10 @@ export default function MostWanted() {
   );
 
   const addToWishlist = useMutation({
-    mutationFn: async (can) => {
-      const { error } = await supabase.from('user_collection').insert({
-        owner_id: user.id,
+    // Offline-capable; no rarity vote for a plain wishlist add (skipVote).
+    mutationFn: (can) => write((db, userId) => addCan(db, {
+      userId,
+      row: {
         can_id: can.id,
         status: 'wishlist',
         can_name: can.name,
@@ -99,11 +90,10 @@ export default function MostWanted() {
         can_rarity: can.consensus_rarity || can.rarity || 'Common',
         can_flavour: can.flavour,
         can_edition: can.edition,
-      });
-      if (error) throw error;
-    },
+      },
+      catalog: { canId: can.id, skipVote: true },
+    })),
     onSuccess: (_, can) => {
-      queryClient.invalidateQueries({ queryKey: ['user-collection'] });
       toast.success(`Added ${can.name} to wishlist!`);
     },
     onError: (error, can) => {

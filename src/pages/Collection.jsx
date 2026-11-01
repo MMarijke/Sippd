@@ -21,6 +21,9 @@ import AchievementUnlockAnimation from '@/components/achievements/AchievementUnl
 import { useStreak } from '@/lib/useStreak';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useUserCollection } from '@/hooks/useUserCollection';
+import { useOffline } from '@/lib/offline/OfflineProvider';
+import { setFavourite } from '@/lib/offline/outbox';
 
 const PAGE_SIZE = 60;
 
@@ -53,6 +56,7 @@ export default function Collection() {
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { write } = useOffline();
 
   // Keep the URL in sync with search/filter/sort/view so back-navigation
   // (e.g. from a can's detail page) and bookmarked/shared links land back
@@ -96,19 +100,7 @@ export default function Collection() {
     isLoading: isLoadingCollection,
     isError: isCollectionError,
     refetch: refetchCollection,
-  } = useQuery({
-    queryKey: ['user-collection', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_collection')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  } = useUserCollection();
 
   const {
     data: sharedCans = [],
@@ -256,16 +248,15 @@ export default function Collection() {
     // can back off, which reads as a bug ("I selected 5, favourited them,
     // and one got un-favourited") rather than the "favourite all of these"
     // action the button says it does.
+    // Offline-capable: local at once, replayed by sync (lib/offline/outbox.js).
     mutationFn: async (items) => {
       const targets = items.filter(item => !item.is_favourite);
-      await Promise.all(targets.map(item =>
-        supabase.rpc('toggle_favourite', { p_caller_id: user.id, p_collection_id: item.id })
-          .then(({ error }) => { if (error) throw error; })
-      ));
+      await write(async (db) => {
+        for (const item of targets) await setFavourite(db, { id: item.id, value: true });
+      });
       return targets.length;
     },
     onSuccess: (count) => {
-      queryClient.invalidateQueries({ queryKey: ['user-collection'] });
       queryClient.invalidateQueries({ queryKey: ['shared-cans'] });
       // Selection stays intact rather than auto-clearing — favouriting and
       // adding-to-crate are both real, plausible actions on the exact same
@@ -458,7 +449,7 @@ export default function Collection() {
                   <CanCard
                     key={item.id}
                     can={item}
-                    to={`/can/${item.can_id}`}
+                    to={`/can/${item.can_id ?? item.id}`}
                     showStatus
                     sharedCan={sharedCansMap[item.can_id]}
                     onAddToCrate={() => setCrateTarget(item)}

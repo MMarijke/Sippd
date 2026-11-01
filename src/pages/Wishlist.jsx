@@ -1,8 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabaseClient';
 import { useSharedCansByIds } from '@/hooks/useSharedCansByIds';
-import { useAuth } from '@/lib/AuthContext';
 import { Search, ScanLine, CheckCircle2, Trash2, ChevronDown, ChevronRight, Bookmark } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -15,30 +12,20 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import RecommendedCans from '@/components/wishlist/RecommendedCans';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import { useUserCollection } from '@/hooks/useUserCollection';
+import { useOffline } from '@/lib/offline/OfflineProvider';
+import { deleteCollection, updateCollection } from '@/lib/offline/outbox';
 
 export default function Wishlist() {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [collectedIds, setCollectedIds] = useState(new Set());
   const [collapsedBrands, setCollapsedBrands] = useState(new Set());
   const [itemToRemove, setItemToRemove] = useState(null);
   const [isRemoving, setIsRemoving] = useState(false);
-  const queryClient = useQueryClient();
+  const { write } = useOffline();
 
-  const { data: collection = [], isLoading } = useQuery({
-    queryKey: ['user-collection', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_collection')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  const { data: collection = [], isLoading } = useUserCollection();
 
   const { data: sharedCans = [] } = useSharedCansByIds(collection.map(i => i.can_id));
 
@@ -85,36 +72,28 @@ export default function Wishlist() {
     });
   };
 
+  // Both offline-capable: local at once, replayed by sync.
   const moveToCollection = async (item) => {
     setCollectedIds(prev => new Set(prev).add(item.id));
-    const { error } = await supabase
-      .from('user_collection')
-      .update({ status: 'collected' })
-      .eq('id', item.id)
-      .eq('owner_id', user.id);
+    const error = await write((db, userId) => updateCollection(db, { userId, id: item.id, patch: { status: 'collected' } }))
+      .then(() => null, (e) => e);
     if (error) {
       toast.error('Failed to move to collection');
       setCollectedIds(prev => { const next = new Set(prev); next.delete(item.id); return next; });
       return;
     }
-    queryClient.invalidateQueries({ queryKey: ['user-collection', user?.id] });
     toast.success(`${item.can_name} added to your collection!`);
   };
 
   const confirmRemoveFromWishlist = async () => {
     if (!itemToRemove) return;
     setIsRemoving(true);
-    const { error } = await supabase
-      .from('user_collection')
-      .delete()
-      .eq('id', itemToRemove.id)
-      .eq('owner_id', user.id);
+    const error = await write((db) => deleteCollection(db, { id: itemToRemove.id })).then(() => null, (e) => e);
     setIsRemoving(false);
     if (error) {
       toast.error('Failed to remove from wishlist');
       return;
     }
-    queryClient.invalidateQueries({ queryKey: ['user-collection', user?.id] });
     toast.success('Removed from wishlist');
     setItemToRemove(null);
   };

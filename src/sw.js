@@ -12,6 +12,12 @@ import {
   StaleWhileRevalidate,
 } from 'serwist';
 
+// In the Capacitor app the worker runs as /sw.js?mode=images: the shell
+// already ships inside the APK, so it precaches nothing and takes over no
+// navigation (an old precache could otherwise outlive an app update), and
+// only keeps can photos available offline.
+const imagesOnly = new URL(self.location.href).searchParams.get('mode') === 'images';
+
 const isSupabaseImage = ({ url, request }) =>
   request.destination === 'image' &&
   url.hostname.endsWith('.supabase.co') &&
@@ -19,8 +25,8 @@ const isSupabaseImage = ({ url, request }) =>
 
 const serwist = new Serwist({
   // The whole build (every lazy route chunk included), injected at build time.
-  precacheEntries: self.__SW_MANIFEST,
-  precacheOptions: {
+  precacheEntries: imagesOnly ? [] : self.__SW_MANIFEST,
+  precacheOptions: imagesOnly ? undefined : {
     cleanupOutdatedCaches: true,
     // A single-page app: every navigation is served the precached shell, and
     // React Router takes it from there, online or off.
@@ -29,8 +35,9 @@ const serwist = new Serwist({
     navigateFallbackDenylist: [/^\/api\//, /\/[^/?]+\.[^/?]+$/],
   },
   // A new version waits until the user taps "Reload" (serviceWorker.js), so
-  // an open session never mixes old and new route chunks.
-  skipWaiting: false,
+  // an open session never mixes old and new route chunks. Images-only has
+  // no chunks to mix, so it takes over straight away.
+  skipWaiting: imagesOnly,
   clientsClaim: true,
   navigationPreload: false,
   runtimeCaching: [
@@ -69,7 +76,7 @@ const serwist = new Serwist({
   ],
   // If even the shell can't be served (a navigation before the first full
   // install finished), show a plain offline page instead of the browser's.
-  fallbacks: {
+  fallbacks: imagesOnly ? undefined : {
     entries: [{ url: '/offline.html', matcher: ({ request }) => request.destination === 'document' }],
   },
 });

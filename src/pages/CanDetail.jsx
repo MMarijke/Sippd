@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +20,10 @@ import EditEntrySheet from '@/components/candetail/EditEntrySheet';
 import CanImageBox from '@/components/shared/CanImageBox';
 import TasteRatingStars from '@/components/shared/TasteRatingStars';
 import { toast } from 'sonner';
+import { useUserCollection } from '@/hooks/useUserCollection';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { useOffline } from '@/lib/offline/OfflineProvider';
+import { deleteCollection } from '@/lib/offline/outbox';
 
 // Invert VOTE_FIELDS: field name → tier label
 const VOTE_LABELS = Object.fromEntries(
@@ -35,34 +39,23 @@ const STATUS_CONFIG = {
 
 export default function CanDetail() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { user } = useAuth();
   const canId = window.location.pathname.split('/can/')[1];
   const [showDelete, setShowDelete] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const { toggleFavourite } = useFavourite();
+  const { db, write } = useOffline();
 
   const {
     data: collectionItems = [],
     isLoading: isLoadingCollectionItems,
     isError: isCollectionItemsError,
     refetch: refetchCollectionItems,
-  } = useQuery({
-    queryKey: ['user-collection', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('user_collection')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
-  });
+  } = useUserCollection();
 
+  const localCan = useLiveQuery(() => (db && canId ? db.catalog.get(canId) : undefined), [db, canId]);
   const {
-    data: can,
+    data: remoteCan,
     isLoading: isLoadingCan,
     isError: isCanError,
     refetch: refetchCan,
@@ -96,14 +89,17 @@ export default function CanDetail() {
     enabled: !!canId && !!user?.id,
   });
 
-  const isLoading = isLoadingCan || isLoadingCollectionItems || isLoadingMyVote;
+  const can = remoteCan ?? localCan ?? null;
+  const isLoading = (isLoadingCan && !localCan) || isLoadingCollectionItems || isLoadingMyVote;
   const isError = isCanError || isCollectionItemsError || isMyVoteError;
 
   useEffect(() => {
     if (isError) toast.error("Couldn't load this can");
   }, [isError]);
 
-  const item = collectionItems.find(c => c.can_id === canId);
+  // By catalog can id, or by the entry's own id: a can added offline has no
+  // catalog id until it syncs, so its links use the entry id.
+  const item = collectionItems.find(c => c.can_id === canId || c.id === canId);
 
   // delete_collection_entry(), not a plain table delete — a plain delete
   // only ever unlinked the caller's own row, leaving no way to actually
@@ -113,23 +109,14 @@ export default function CanDetail() {
   // unreferenced shared_cans row (and its votes) only when this caller
   // was its last owner — a can six other people also collect is
   // untouched beyond this caller's own copy.
+  // Through the offline outbox: the can leaves the vault at once, online or
+  // not, and sync replays delete_collection_entry(), which also removes the
+  // shared catalog row when this was its last owner.
   const deleteMutation = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.rpc('delete_collection_entry', {
-        p_caller_id: user.id,
-        p_entry_id: item.id,
-      });
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['user-collection'] });
+    mutationFn: () => write((localDb) => deleteCollection(localDb, { id: item.id })),
+    onSuccess: () => {
       setShowDelete(false);
-      toast.success(
-        data?.catalog_deleted
-          ? 'Removed — no one else had this can, so it was also deleted from the shared catalog'
-          : 'Removed from your vault'
-      );
+      toast.success('Removed from your vault');
       navigate('/collection');
     },
     onError: (error) => {

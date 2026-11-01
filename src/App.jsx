@@ -6,6 +6,8 @@ import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { OfflineProvider } from '@/lib/offline/OfflineProvider';
+import OnlineOnly from '@/components/offline/OnlineOnly';
 import { useTheme } from '@/hooks/useTheme';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
@@ -84,6 +86,8 @@ function App() {
     <MotionConfig reducedMotion="user">
     <QueryClientProvider client={queryClientInstance}>
       <AuthProvider>
+        {/* The signed-in user's local-first data and sync (OFFLINE.md). */}
+        <OfflineProvider>
         <ThemeEffect />
         <PrefetchTabRoutes />
         <Router>
@@ -106,14 +110,14 @@ function App() {
                 gate (private/owner/accepted-follower) still applies —
                 this only controls whether the page mounts, not what it
                 shows. See the 2026-09-12 public-profile migration. */}
-            <Route path="/u/:userId" element={<PublicProfile />} />
+            <Route path="/u/:userId" element={<OnlineOnly feature="This collector's profile"><PublicProfile /></OnlineOnly>} />
 
             {/* Public on purpose — a "capability link" (see get_public_crate's
                 migration comment): sharing one crate is a scoped, active
                 choice its owner makes, independent of the account's
                 is_private setting, so this must work for a visitor with no
                 Sippd account at all. */}
-            <Route path="/crate/:crateId" element={<SharedCrate />} />
+            <Route path="/crate/:crateId" element={<OnlineOnly feature="This shared crate"><SharedCrate /></OnlineOnly>} />
 
             {/* Public on purpose — required to be live and reachable without
                 an account for Paddle's business verification and for any
@@ -135,20 +139,20 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/scan" element={<Scan />} />
                 <Route path="/collection" element={<Collection />} />
-                <Route path="/leaderboard" element={<Leaderboard />} />
+                <Route path="/leaderboard" element={<OnlineOnly feature="The leaderboard"><Leaderboard /></OnlineOnly>} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
               <Route path="/can/*" element={<CanDetail />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/monthly-report" element={<MonthlyReport />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/crates" element={<Crates />} />
-              <Route path="/trades" element={<Trades />} />
+              <Route path="/notifications" element={<OnlineOnly feature="Notifications and trade requests"><Notifications /></OnlineOnly>} />
+              <Route path="/crates" element={<OnlineOnly feature="Crates"><Crates /></OnlineOnly>} />
+              <Route path="/trades" element={<OnlineOnly feature="Your trade log"><Trades /></OnlineOnly>} />
               <Route path="/achievements" element={<Achievements />} />
-              <Route path="/feed" element={<Feed />} />
+              <Route path="/feed" element={<OnlineOnly feature="The feed"><Feed /></OnlineOnly>} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/pro" element={<Pro />} />
-              <Route path="/compare" element={<CompareCollection />} />
+              <Route path="/compare" element={<OnlineOnly feature="Comparing collections"><CompareCollection /></OnlineOnly>} />
             </Route>
 
             <Route path="*" element={<PageNotFound />} />
@@ -156,6 +160,7 @@ function App() {
           </Suspense>
         </Router>
         <Toaster />
+        </OfflineProvider>
       </AuthProvider>
     </QueryClientProvider>
     </MotionConfig>

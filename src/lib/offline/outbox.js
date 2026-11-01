@@ -31,7 +31,8 @@ async function pendingFor(db, key) {
 
 // Adds a can (collection or wishlist, by row.status). `catalog` is what
 // vote_on_can needs: { canId?, alreadyVoted?, rarity, name, brand, flavour,
-// edition, barcode, beverageType, imageUrl }. `photo` is an already
+// edition, barcode, beverageType, imageUrl }, or { canId, skipVote: true }
+// to add an existing catalog can with no rarity vote (a wishlist add). `photo` is an already
 // compressed Blob taken offline; it uploads first, then the can is added
 // with the uploaded URL (blob before row).
 export async function addCan(db, { userId, row, catalog, photo = null, now = Date.now }) {

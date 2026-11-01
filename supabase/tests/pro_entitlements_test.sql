@@ -6,6 +6,8 @@
 --                          caller guard in 20260914000001_guard_is_pro_caller.sql
 --   get_pro_status(uuid[]) 20260917000000_add_get_pro_status.sql
 --   crate limits           enforce_crate_limits / enforce_crate_can_limit
+--                          (insert + growth-only: 20261101120000_pro_limit_fixes.sql)
+--   pin limit (6 / 10)     enforce_pin_limit (20261101120000_pro_limit_fixes.sql)
 --   Pro themes             profiles_lock_columns (20261027000000_retire_essentials.sql)
 --
 -- The rule everywhere: Pro = subscription_status 'pro' AND (pro_expires_at
@@ -203,6 +205,98 @@ select throws_like(
   $$update crates set can_ids = can_ids || gen_random_uuid() where owner_id = '22222222-2222-2222-2222-222222222222' and name = 'Renamed'$$,
   '%crate_can_limit_reached%',
   'but cannot add to it while over the free limit'
+);
+reset role;
+
+-- ── Pins: 6 free, 10 Pro (enforce_pin_limit) ─────────────────────────────
+-- Fixtures as postgres: 12 catalog cans, each in the free account's and the
+-- ending-Pro account's collection, none pinned yet.
+insert into shared_cans (id, name, brand)
+select format('c0000000-0000-0000-0000-%s', lpad(g::text, 12, '0'))::uuid, 'Pin Can ' || g, 'TestBrand'
+from generate_series(1, 13) g;
+insert into user_collection (id, owner_id, can_id)
+select format('d1000000-0000-0000-0000-%s', lpad(g::text, 12, '0'))::uuid, '11111111-1111-1111-1111-111111111111',
+       format('c0000000-0000-0000-0000-%s', lpad(g::text, 12, '0'))::uuid
+from generate_series(1, 12) g;
+insert into user_collection (id, owner_id, can_id)
+select format('d3000000-0000-0000-0000-%s', lpad(g::text, 12, '0'))::uuid, '33333333-3333-3333-3333-333333333333',
+       format('c0000000-0000-0000-0000-%s', lpad(g::text, 12, '0'))::uuid
+from generate_series(1, 12) g;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', true);
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', true);
+
+select lives_ok(
+  $$update user_collection set pinned_at = now()
+    where owner_id = '11111111-1111-1111-1111-111111111111' and id <= 'd1000000-0000-0000-0000-000000000006'$$,
+  'free account can pin 6 cans'
+);
+select throws_like(
+  $$update user_collection set pinned_at = now() where id = 'd1000000-0000-0000-0000-000000000007'$$,
+  '%pin_limit_reached%',
+  'free account cannot pin a 7th can'
+);
+select throws_like(
+  $$insert into user_collection (owner_id, can_id, pinned_at)
+    values ('11111111-1111-1111-1111-111111111111', 'c0000000-0000-0000-0000-000000000013', now())$$,
+  '%pin_limit_reached%',
+  'free account cannot add a can that arrives already pinned past the cap'
+);
+select lives_ok(
+  $$update user_collection set pinned_at = pinned_at, notes = 'still pinned' where id = 'd1000000-0000-0000-0000-000000000001'$$,
+  'editing a pinned can (the sync re-sends pinned_at) is not a new pin'
+);
+select lives_ok(
+  $$update user_collection set pinned_at = null where id = 'd1000000-0000-0000-0000-000000000006'$$,
+  'free account can unpin'
+);
+select lives_ok(
+  $$update user_collection set pinned_at = now() where id = 'd1000000-0000-0000-0000-000000000007'$$,
+  'and pin another in its place'
+);
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '33333333-3333-3333-3333-333333333333', true);
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', true);
+
+select lives_ok(
+  $$update user_collection set pinned_at = now()
+    where owner_id = '33333333-3333-3333-3333-333333333333' and id <= 'd3000000-0000-0000-0000-000000000010'$$,
+  'Pro account can pin 10 cans'
+);
+select throws_like(
+  $$update user_collection set pinned_at = now() where id = 'd3000000-0000-0000-0000-000000000011'$$,
+  '%pin_limit_reached%',
+  'Pro account cannot pin an 11th can'
+);
+reset role;
+
+-- The same account once its paid period has ended: keeps its 10 pins.
+update profiles set pro_expires_at = now() - interval '1 second'
+  where id = '33333333-3333-3333-3333-333333333333';
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '33333333-3333-3333-3333-333333333333', true);
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', true);
+
+select is(
+  (select count(*)::int from user_collection where owner_id = '33333333-3333-3333-3333-333333333333' and pinned_at is not null),
+  10,
+  'a lapsed subscriber keeps all 10 pins'
+);
+select lives_ok(
+  $$update user_collection set pinned_at = pinned_at, notes = 'kept' where id = 'd3000000-0000-0000-0000-000000000010'$$,
+  'and can still edit a pinned can'
+);
+select lives_ok(
+  $$update user_collection set pinned_at = null where id = 'd3000000-0000-0000-0000-000000000010'$$,
+  'and unpin one'
+);
+select throws_like(
+  $$update user_collection set pinned_at = now() where id = 'd3000000-0000-0000-0000-000000000011'$$,
+  '%pin_limit_reached%',
+  'but cannot pin more while over the free 6'
 );
 reset role;
 

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import * as Sentry from '@sentry/react'
 import App from '@/App.jsx'
 import '@/index.css'
+import { registerServiceWorker } from '@/lib/offline/serviceWorker'
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
@@ -44,3 +45,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </Sentry.ErrorBoundary>
 )
+
+// Offline app shell (web build only; see OFFLINE.md).
+registerServiceWorker()

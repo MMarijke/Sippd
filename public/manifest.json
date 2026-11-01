@@ -2,8 +2,12 @@
   "name": "Sippd: Can Collection Tracker",
   "short_name": "Sippd",
   "description": "Track, showcase, and compete over your can collection.",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
+  "categories": ["lifestyle", "entertainment"],
   "background_color": "#08080c",
   "theme_color": "#08080c",
   "icons": [

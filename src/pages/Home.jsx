@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { ScanLine, BarChart2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import InstallPrompt from '@/components/pwa/InstallPrompt';
 import PageHeader from '@/components/shared/PageHeader';
 import StatsRow from '@/components/dashboard/StatsRow';
 import FeedPreview from '@/components/dashboard/FeedPreview';
@@ -275,6 +276,8 @@ export default function Home() {
           )}
         </div>
       </div>
+
+      <InstallPrompt />
 
       <div className="px-5 mt-5">
         {isNewUser && (

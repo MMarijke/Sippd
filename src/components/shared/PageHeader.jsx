@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { Bell, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useNotifications } from '@/hooks/useNotifications';
-import SyncStatus from '@/components/offline/SyncStatus';
 
 // onBack is optional — the five primary tab-bar destinations (Home, Scan,
 // Collection, Leaderboard, Profile) never pass it, since they have nowhere
@@ -59,7 +58,6 @@ export default function PageHeader({
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         {/* Offline / syncing / pending / error, quiet when synced (OFFLINE.md). */}
-        {showSyncStatus && <SyncStatus />}
         {action}
         {showBell && (
           <Link

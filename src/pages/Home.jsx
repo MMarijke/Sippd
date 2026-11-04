@@ -148,7 +148,6 @@ export default function Home() {
             subtitle={profile?.full_name ? `${profile.full_name}'s vault` : 'Your Vault'}
             // Scan and the selected brand chip wear --cta: the theme's own button
             // fill, so the main action is never quieter than Save.
-            showSyncStatus={false}
             action={
               <Button asChild size="sm" className="h-11 rounded-control font-mono text-xs gap-1.5 bg-cta text-cta-foreground hover:bg-cta/90">
                 <Link to="/scan">

@@ -94,7 +94,7 @@ test('works offline: shell, add a can with a photo, online-only notices, sync on
 
   await expect(page).toHaveURL(/\/collection/);
   await expect(page.getByText('Offline Test Can').first()).toBeVisible();
-  await expect(page.getByRole('button', { name: /Sync status: Offline · 1 to sync/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Sync status:/ })).toHaveCount(0);
   expect(calls).toEqual([]); // nothing left the device
 
   // Queued in order: the photo upload before the row that references it.
@@ -121,7 +121,10 @@ test('works offline: shell, add a can with a photo, online-only notices, sync on
   // safe, since uploads are idempotent, but would make the call list racy.)
   await page.goto('/collection');
   await context.setOffline(false);
-  await expect(page.getByRole('button', { name: 'Sync status: Synced' })).toBeVisible({ timeout: 30_000 });
+  await expect.poll(
+  () => calls.map((c) => c.kind),
+  { timeout: 30_000 }
+  ).toEqual(['upload', 'vote', 'upsert']);
 
   expect(calls.map((c) => c.kind)).toEqual(['upload', 'vote', 'upsert']);
   expect(calls[0].path).toContain(`/can-images/${FAKE_USER_ID}/`);

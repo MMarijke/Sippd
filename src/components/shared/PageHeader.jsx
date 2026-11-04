@@ -59,7 +59,7 @@ export default function PageHeader({
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         {/* Offline / syncing / pending / error, quiet when synced (OFFLINE.md). */}
-        {<showSyncStatus && SyncStatus />}
+        {showSyncStatus && <SyncStatus />}
         {action}
         {showBell && (
           <Link

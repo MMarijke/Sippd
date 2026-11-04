@@ -15,7 +15,15 @@ import SyncStatus from '@/components/offline/SyncStatus';
 // focusTitle: move focus to the title when this header mounts, for a view
 // that swaps in place (Scan's scanner <-> add form), so focus doesn't fall
 // back to <body> when the element that had it disappears.
-export default function PageHeader({ title, subtitle, action, showBell = true, onBack, focusTitle = false }) {
+export default function PageHeader({
+  title,
+  subtitle,
+  action,
+  showBell = true,
+  showSyncStatus = true,
+  onBack,
+  focusTitle = false
+}) {
   const { user } = useAuth();
   const { unreadCount } = useNotifications(user);
   const titleRef = useRef(null);
@@ -51,7 +59,7 @@ export default function PageHeader({ title, subtitle, action, showBell = true, o
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         {/* Offline / syncing / pending / error, quiet when synced (OFFLINE.md). */}
-        <SyncStatus />
+        {showSyncStatus && <SyncStatus />}
         {action}
         {showBell && (
           <Link
